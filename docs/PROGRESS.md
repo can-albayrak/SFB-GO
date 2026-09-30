@@ -95,7 +95,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 ## Aşama 5 – Sınıflar
 
 - [x] Tuning: AR/Burst/LMG recoil x1,6; slide daha uzun ve hızlı (boost 1,35, sürtünme 0,35, 1,1 sn, tavan base x1,55)
-- [x] Dürbün sistemi (WeaponDef `scope_*`): sağ tık zoom, sens zoom'a bölünür, sallanma (eğilince yarı), dürbünde yavaşlama + sprint yok, dürbünsüz atışta yayılma konisi, dürbün HUD'u (`ScopeOverlay`)
+- [x] Slide sadece düz ileri (W) giderken başlar. Dürbün HUD: gerçek keskin nişancı dürbünü (siyah maske, daire lens, duplex nişangah). Dürbün sistemi (WeaponDef `scope_*`): sağ tık zoom, sens zoom'a bölünür, sallanma (eğilince yarı), dürbünde yavaşlama + sprint yok, dürbünsüz atışta yayılma konisi, dürbün HUD'u (`ScopeOverlay`)
 - [x] Hawk (80 can): Heavy Rifle (250 hasar = her yerden tek atış, 1,5 sn kurma, 5 mermi), Marksman Rifle (50 hasar: kafa 1 / gövde 2 / bacak 3 atış); yedek tabanca
 - [x] Grapple (15 sn, 40 m, 12 m/s çekme; ıska cooldown yemez; zıplayınca bırakır; herkes ipi görür) ve Decoy (15 sn, 8 sn hologram, sadece görsel)
 - [x] Headless test: sınıf/silah/güç yükleniyor, zoom/FOV, grapple yukarı çekiyor, decoy + ip düğümleri oluşuyor

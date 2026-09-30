@@ -11,6 +11,8 @@ const STAND_EYE: float = 1.6
 const CROUCH_EYE: float = 0.95
 const EYE_LERP_SPEED: float = 14.0
 const MIN_SPEED: float = 0.05
+const SLIDE_FORWARD_INPUT: float = 0.5
+const SLIDE_STRAFE_LIMIT: float = 0.3
 const GRAPPLE_ARRIVE_DISTANCE: float = 0.8
 const GRAPPLE_CHEST: float = 1.0 ## Height above the feet that is pulled to the anchor.
 const GRAPPLE_STUCK_SPEED: float = 2.0 ## Pull ends when a wall stops us below this speed.
@@ -134,7 +136,9 @@ func _update_slide(delta: float, cmd: PlayerCommand, on_floor: bool, hvel: Vecto
 			is_sliding = false
 		return hvel
 
-	var can_slide: bool = on_floor and cmd.crouch_pressed \
+	# Slides start only while running straight forward (W, no strafe keys).
+	var moving_forward: bool = cmd.move.y < -SLIDE_FORWARD_INPUT and absf(cmd.move.x) < SLIDE_STRAFE_LIMIT
+	var can_slide: bool = on_floor and cmd.crouch_pressed and moving_forward \
 		and _slide_cooldown_left <= 0.0 and speed >= base_speed * def.slide_min_speed_mult
 	if not can_slide:
 		return hvel

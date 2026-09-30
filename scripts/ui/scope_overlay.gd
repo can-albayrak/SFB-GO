@@ -1,11 +1,21 @@
 class_name ScopeOverlay
 extends Control
-## Sniper scope: black mask with a circular view and a thin reticle. Drawn only while `active`.
+## Sniper scope: black mask around a circular lens with a duplex reticle
+## (thick outer posts, thin centre, range ticks). Drawn only while `active`.
 
-const VIEW_RADIUS_SHARE: float = 0.42 ## Of the shorter screen side.
+const VIEW_RADIUS_SHARE: float = 0.46 ## Of the shorter screen side.
+const RING_SEGMENTS: int = 96
 const MASK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
-const RETICLE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.85)
-const RETICLE_DOT_COLOR: Color = Color(1.0, 0.15, 0.1, 0.9)
+const RIM_COLOR: Color = Color(0.0, 0.0, 0.0, 0.9)
+const VIGNETTE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.35)
+const RETICLE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.95)
+const THICK_WIDTH: float = 5.0
+const THIN_WIDTH: float = 1.5
+const THIN_LENGTH_SHARE: float = 0.22 ## Thin centre lines, of the lens radius.
+const TICK_COUNT: int = 4
+const TICK_SPACING_SHARE: float = 0.055
+const TICK_HALF_LENGTH: float = 7.0
+const CENTER_DOT_COLOR: Color = Color(1.0, 0.1, 0.05, 0.9)
 
 var active: bool = false: set = _set_active
 
@@ -13,6 +23,7 @@ var active: bool = false: set = _set_active
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	resized.connect(queue_redraw)
 	visible = false
 
 
@@ -29,10 +40,36 @@ func _draw() -> void:
 		return
 	var center: Vector2 = size * 0.5
 	var radius: float = minf(size.x, size.y) * VIEW_RADIUS_SHARE
-	var mask_width: float = size.length()
-	# A very wide arc starting at the view radius covers everything outside the circle.
-	draw_arc(center, radius + mask_width * 0.5, 0.0, TAU, 160, MASK_COLOR, mask_width)
-	draw_arc(center, radius, 0.0, TAU, 128, MASK_COLOR, 3.0, true)
-	draw_line(center - Vector2(radius, 0.0), center + Vector2(radius, 0.0), RETICLE_COLOR, 1.0)
-	draw_line(center - Vector2(0.0, radius), center + Vector2(0.0, radius), RETICLE_COLOR, 1.0)
-	draw_circle(center, 2.0, RETICLE_DOT_COLOR)
+	_draw_mask(center, radius)
+	_draw_reticle(center, radius)
+
+
+## Black everywhere outside the lens: one quad per ring segment, reaching past the screen corners.
+func _draw_mask(center: Vector2, radius: float) -> void:
+	var outer: float = size.length()
+	var previous: Vector2 = Vector2.RIGHT
+	for i: int in range(1, RING_SEGMENTS + 1):
+		var current: Vector2 = Vector2.RIGHT.rotated(TAU * float(i) / RING_SEGMENTS)
+		draw_colored_polygon(PackedVector2Array([
+			center + previous * radius, center + current * radius,
+			center + current * outer, center + previous * outer]), MASK_COLOR)
+		previous = current
+	draw_arc(center, radius, 0.0, TAU, RING_SEGMENTS, RIM_COLOR, 4.0, true)
+	# Soft darkening toward the lens edge.
+	draw_arc(center, radius * 0.96, 0.0, TAU, RING_SEGMENTS, VIGNETTE_COLOR, radius * 0.08, true)
+
+
+func _draw_reticle(center: Vector2, radius: float) -> void:
+	var thin: float = radius * THIN_LENGTH_SHARE
+	# Thick outer posts (left, right, bottom, top) reaching the rim, thin lines near the centre.
+	draw_line(center + Vector2(-radius, 0.0), center + Vector2(-thin, 0.0), RETICLE_COLOR, THICK_WIDTH)
+	draw_line(center + Vector2(thin, 0.0), center + Vector2(radius, 0.0), RETICLE_COLOR, THICK_WIDTH)
+	draw_line(center + Vector2(0.0, thin), center + Vector2(0.0, radius), RETICLE_COLOR, THICK_WIDTH)
+	draw_line(center + Vector2(0.0, -radius), center + Vector2(0.0, -thin), RETICLE_COLOR, THICK_WIDTH)
+	draw_line(center + Vector2(-thin, 0.0), center + Vector2(thin, 0.0), RETICLE_COLOR, THIN_WIDTH)
+	draw_line(center + Vector2(0.0, -thin), center + Vector2(0.0, thin), RETICLE_COLOR, THIN_WIDTH)
+	# Range ticks on the lower post (holdover marks).
+	for i: int in range(1, TICK_COUNT + 1):
+		var y: float = radius * TICK_SPACING_SHARE * i + thin
+		draw_line(center + Vector2(-TICK_HALF_LENGTH, y), center + Vector2(TICK_HALF_LENGTH, y), RETICLE_COLOR, THIN_WIDTH + 0.5)
+	draw_circle(center, 2.0, CENTER_DOT_COLOR)
