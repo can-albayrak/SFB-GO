@@ -7,7 +7,7 @@ var move: Vector2 = Vector2.ZERO ## x = right, y = back (Input.get_vector order)
 var jump: bool = false ## Pressed this tick.
 var crouch: bool = false ## Held.
 var crouch_pressed: bool = false ## Pressed this tick.
-var walk: bool = false ## Held.
+var sprint: bool = false ## Held.
 var fire: bool = false ## Held.
 var fire_pressed: bool = false ## Pressed this tick.
 var reload: bool = false ## Pressed this tick.

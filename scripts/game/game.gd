@@ -157,6 +157,14 @@ func _respawn(player: Player, life: int) -> void:
 	player.server_respawn(spawn.global_position, spawn.global_rotation.y)
 
 
+## Offline test range only: respawn right now (the host is us, so no request is needed).
+func test_respawn(player: Player) -> void:
+	if not multiplayer.is_server() or not multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+		return
+	var spawn: Marker3D = _pick_spawn_point(player.get_multiplayer_authority())
+	player.server_respawn(spawn.global_position, spawn.global_rotation.y)
+
+
 ## Every peer; only the host acts: everyone respawns fresh for the new match.
 func _on_match_started() -> void:
 	if not multiplayer.is_server():

@@ -253,7 +253,7 @@ Hitscan raycast maskesi: `world | hitbox`. Oyuncu kapsülü maskesi: `world | pl
 
 ## Input Map
 
-Aksiyon isimleri (`project.godot` içinde, fiziksel tuş kodu ile): `move_forward`, `move_back`, `move_left`, `move_right`, `jump`, `crouch`, `walk`, `fire`, `secondary`, `ability`, `reload`, `interact`, `melee`, `weapon_primary`, `weapon_secondary`, `class_menu`, `scoreboard`, `pause_menu` (Esc).
+Aksiyon isimleri (`project.godot` içinde, fiziksel tuş kodu ile): `move_forward`, `move_back`, `move_left`, `move_right`, `jump`, `crouch` (Ctrl: eğil; koşarken basınca slide), `sprint` (Shift), `respawn` (T, sadece test range), `fire`, `secondary`, `ability`, `reload`, `interact`, `melee`, `weapon_primary`, `weapon_secondary`, `class_menu`, `scoreboard`, `pause_menu` (Esc).
 
 ## Kodlama kuralları
 

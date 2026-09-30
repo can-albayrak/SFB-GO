@@ -93,7 +93,7 @@ func _update_slide(delta: float, cmd: PlayerCommand, on_floor: bool, hvel: Vecto
 			is_sliding = false
 		return hvel
 
-	var can_slide: bool = on_floor and cmd.crouch_pressed and not cmd.walk \
+	var can_slide: bool = on_floor and cmd.crouch_pressed \
 		and _slide_cooldown_left <= 0.0 and speed >= base_speed * def.slide_min_speed_mult
 	if not can_slide:
 		return hvel
@@ -141,8 +141,8 @@ func _get_wish_dir(move: Vector2) -> Vector3:
 func _get_wish_speed(cmd: PlayerCommand) -> float:
 	if is_crouched:
 		return base_speed * def.crouch_mult
-	if cmd.walk:
-		return base_speed * def.walk_mult
+	if cmd.sprint:
+		return base_speed * def.sprint_mult
 	return base_speed
 
 
