@@ -1,21 +1,36 @@
+class_name Game
 extends Node3D
 ## Match scene root (/root/Game on every peer). Loads the map, spawns players
-## (host decides who and where), registers kills with Match, handles respawns,
-## match restarts and disconnects.
+## (host decides who, where and with which validated loadout), registers kills with
+## Match, handles respawns, match restarts, grenades/explosions and disconnects.
 ## A client asks for its player once its own copy of this scene is ready, so
 ## the host never replicates nodes to a peer that is still loading.
 
+const GROUP: StringName = &"game"
 const PLAYER_SCENE: PackedScene = preload("res://scenes/player/player.tscn")
 ## Movement relays start this long after a peer joins, so its spawn packets arrive first.
 const STATE_RELAY_DELAY: float = 0.5
+const EXPLOSION_CENTER_OFFSET: float = 0.15 ## LOS rays start slightly above the floor contact.
+const TARGET_CENTER_HEIGHT: float = 1.0 ## Body centre used for explosion distance and LOS.
+const WORLD_MASK: int = 1
+## Flash: blind strength by how directly the victim looks at it (dot of view and direction).
+const FLASH_MIN_FACING_FACTOR: float = 0.25
+const FLASH_DISTANCE_FALLOFF: float = 0.6 ## At max radius the flash keeps (1 - this) strength.
 
 var _spawn_points: Array[Marker3D] = []
 
 @onready var players_root: Node3D = $Players
 @onready var spawner: MultiplayerSpawner = $PlayerSpawner
+@onready var projectiles_root: Node3D = $Projectiles
+@onready var projectile_spawner: MultiplayerSpawner = $ProjectileSpawner
+
+
+static func find(tree: SceneTree) -> Game:
+	return tree.get_first_node_in_group(GROUP) as Game
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	var map: Node3D = load(Net.map_path).instantiate()
 	map.name = "Map" # Same path on every peer; map nodes (dummies) send RPCs.
 	add_child(map)
@@ -27,15 +42,16 @@ func _ready() -> void:
 
 	spawner.spawn_function = _create_player
 	spawner.spawned.connect(_on_player_node_added.unbind(1))
+	projectile_spawner.spawn_function = _create_grenade
 	Events.scores_changed.connect(_update_leader)
 	Events.match_started.connect(_on_match_started)
 
 	if multiplayer.is_server():
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 		Match.server_begin()
-		_add_ingame_peer(1)
+		_add_ingame_peer(1, Loadout.from_settings())
 	else:
-		_request_spawn.rpc_id(1)
+		_request_spawn.rpc_id(1, Loadout.from_settings())
 
 
 func _exit_tree() -> void:
@@ -48,20 +64,24 @@ func _create_player(data: Variant) -> Node:
 	var player: Player = PLAYER_SCENE.instantiate()
 	player.name = str(peer_id)
 	player.setup_authority(peer_id)
+	player.loadout = info["loadout"]
 	player.position = info["position"]
 	player.rotation.y = info["yaw"]
 	return player
 
 
-func _add_ingame_peer(peer_id: int) -> void:
+func _add_ingame_peer(peer_id: int, loadout: PackedInt32Array) -> void:
 	Net.ingame_peers.append(peer_id)
 	Match.server_add_player(peer_id)
-	# Existing players become visible (and are spawned) on the new peer.
+	# Existing players and grenades become visible (and are spawned) on the new peer.
 	for player: Player in _get_players():
 		player.get_node("StateSync").set_visibility_for(peer_id, true)
+	for grenade: Node in projectiles_root.get_children():
+		grenade.get_node("Sync").set_visibility_for(peer_id, true)
 	var spawn: Marker3D = _pick_spawn_point(peer_id)
 	var new_player: Player = spawner.spawn({
 		"id": peer_id,
+		"loadout": loadout if Loadout.is_valid(loadout) else Loadout.default_code(),
 		"position": spawn.global_position,
 		"yaw": spawn.global_rotation.y,
 	})
@@ -153,11 +173,94 @@ func _on_peer_disconnected(peer_id: int) -> void:
 		player.queue_free()
 
 
+# --- Grenades --------------------------------------------------------------
+
+func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, position: Vector3, velocity: Vector3) -> void:
+	assert(multiplayer.is_server(), "server_spawn_grenade is host-only")
+	var grenade: Node = projectile_spawner.spawn({
+		"def": grenade_def.resource_path,
+		"thrower": thrower_id,
+		"position": position,
+		"velocity": velocity,
+	})
+	for id: int in Net.ingame_peers:
+		grenade.get_node("Sync").set_visibility_for(id, true)
+
+
+func _create_grenade(data: Variant) -> Node:
+	var info: Dictionary = data
+	var grenade_def: GrenadeDef = load(info["def"])
+	var grenade: Grenade = grenade_def.projectile.instantiate()
+	grenade.position = info["position"]
+	grenade.setup(grenade_def, info["thrower"], info["velocity"])
+	return grenade
+
+
+## Host: applies a grenade's effect, then every peer draws the explosion.
+func server_explode(grenade_def: GrenadeDef, thrower_id: int, position: Vector3) -> void:
+	assert(multiplayer.is_server(), "server_explode is host-only")
+	match grenade_def.kind:
+		GrenadeDef.Kind.FRAG:
+			_apply_frag(grenade_def, thrower_id, position)
+		GrenadeDef.Kind.FLASH:
+			_apply_flash(grenade_def, position)
+	Net.broadcast(self, &"_explosion_fx", [grenade_def.kind, position])
+
+
+func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, position: Vector3) -> void:
+	var origin: Vector3 = position + Vector3.UP * EXPLOSION_CENTER_OFFSET
+	var thrower := players_root.get_node_or_null(str(thrower_id)) as Player
+	var receivers: Array[Node3D] = []
+	for player: Player in _get_players():
+		receivers.append(player)
+	for dummy: Node in get_tree().get_nodes_in_group(TargetDummy.GROUP):
+		receivers.append(dummy as Node3D)
+
+	for receiver: Node3D in receivers:
+		var center: Vector3 = receiver.global_position + Vector3.UP * TARGET_CENTER_HEIGHT
+		var distance: float = origin.distance_to(center)
+		if distance > grenade_def.radius or not _has_line_of_sight(origin, center):
+			continue
+		if receiver.has_method(&"can_take_damage") and not receiver.call(&"can_take_damage"):
+			continue
+		var amount: float = grenade_def.damage * (1.0 - distance / grenade_def.radius)
+		var killed: bool = receiver.call(&"take_hit", amount, Hitbox.Zone.BODY, thrower_id, grenade_def.display_name, false)
+		if thrower != null and receiver != thrower:
+			thrower.confirm_hit.rpc_id(thrower_id, Hitbox.Zone.BODY, killed)
+
+
+func _apply_flash(grenade_def: GrenadeDef, position: Vector3) -> void:
+	var origin: Vector3 = position + Vector3.UP * EXPLOSION_CENTER_OFFSET
+	for player: Player in _get_players():
+		if not player.is_alive:
+			continue
+		var eye: Vector3 = player.get_aim_origin()
+		var distance: float = origin.distance_to(eye)
+		if distance > grenade_def.radius or not _has_line_of_sight(origin, eye):
+			continue
+		var facing: float = player.get_look_forward().dot((origin - eye).normalized())
+		var facing_factor: float = remap(clampf(facing, -1.0, 1.0), -1.0, 1.0, FLASH_MIN_FACING_FACTOR, 1.0)
+		var distance_factor: float = 1.0 - FLASH_DISTANCE_FALLOFF * (distance / grenade_def.radius)
+		player.flash.rpc_id(player.get_multiplayer_authority(), grenade_def.flash_duration * facing_factor * distance_factor)
+
+
+func _has_line_of_sight(from: Vector3, to: Vector3) -> bool:
+	var query := PhysicsRayQueryParameters3D.create(from, to, WORLD_MASK)
+	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _explosion_fx(kind: GrenadeDef.Kind, position: Vector3) -> void:
+	if multiplayer.get_remote_sender_id() > 1:
+		return
+	ShotEffects.spawn_explosion(self, position, kind == GrenadeDef.Kind.FLASH)
+
+
 @rpc("any_peer", "call_remote", "reliable")
-func _request_spawn() -> void:
+func _request_spawn(loadout: PackedInt32Array) -> void:
 	if not multiplayer.is_server():
 		return
 	var peer_id: int = multiplayer.get_remote_sender_id()
 	if peer_id in Net.ingame_peers:
 		return
-	_add_ingame_peer(peer_id)
+	_add_ingame_peer(peer_id, loadout)

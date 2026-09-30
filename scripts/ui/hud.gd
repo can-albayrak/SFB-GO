@@ -1,11 +1,19 @@
 extends CanvasLayer
 ## In-game HUD for the local player: health, ammo, weapon, crosshair, hit marker,
 ## match timer, kill feed, Tab scoreboard, spawn protection, death and end-of-match
-## screens, and the Esc panel (resume / leave).
+## screens, loadout menu (B / on death), ability cooldown, flashbang white-out,
+## and the Esc panel (resume / leave).
 ## The speed readout is a tuning aid for bunny hop / slide.
+
+## Flash white-out stays solid for this share of its duration, then fades.
+const FLASH_HOLD_SHARE: float = 0.4
 
 var _player: Player
 var _weapon: Weapon
+## The loadout menu was opened by dying (closes itself on respawn).
+var _menu_opened_by_death: bool = false
+var _flash_left: float = 0.0
+var _flash_total: float = 0.0
 
 @onready var crosshair: Crosshair = $Crosshair
 @onready var health_label: Label = $HealthLabel
@@ -23,6 +31,10 @@ var _weapon: Weapon
 @onready var pause_panel: Control = $PausePanel
 @onready var resume_button: Button = %ResumeButton
 @onready var leave_button: Button = %LeaveButton
+@onready var loadout_menu: LoadoutMenu = $LoadoutMenu
+@onready var ability_label: Label = $AbilityLabel
+@onready var next_spawn_label: Label = $NextSpawnLabel
+@onready var flash_overlay: ColorRect = $FlashOverlay
 
 
 func _ready() -> void:
@@ -31,25 +43,100 @@ func _ready() -> void:
 	Events.player_died.connect(_on_player_died)
 	Events.match_ended.connect(_on_match_ended)
 	Events.match_started.connect(_on_match_started)
+	Events.local_flashed.connect(_on_local_flashed)
 	resume_button.pressed.connect(_on_resume_pressed)
 	leave_button.pressed.connect(_on_leave_pressed)
+	loadout_menu.confirmed.connect(_on_loadout_confirmed)
 	death_label.visible = false
 	protected_label.visible = false
 	end_panel.visible = false
 	scoreboard.visible = false
 	pause_panel.visible = false
+	next_spawn_label.visible = false
 
 
-func _process(_delta: float) -> void:
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_instance_valid(_player):
+		return
+	if event.is_action_pressed(&"class_menu"):
+		if loadout_menu.visible:
+			_close_loadout_menu()
+		else:
+			_open_loadout_menu(false)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"pause_menu") and loadout_menu.visible:
+		_close_loadout_menu()
+		get_viewport().set_input_as_handled()
+
+
+func _process(delta: float) -> void:
 	_update_top_bar()
+	_update_flash(delta)
 	var ended: bool = Match.state == Match.State.ENDED
-	scoreboard.visible = ended or Input.is_action_pressed(&"scoreboard")
+	scoreboard.visible = (ended or Input.is_action_pressed(&"scoreboard")) and not loadout_menu.visible
 	if ended:
 		next_label.text = "Next match in %d" % ceili(Match.end_screen_left)
 	if not is_instance_valid(_player):
 		return
+	var captured: bool = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	if loadout_menu.visible and captured:
+		loadout_menu.visible = false # Mouse was recaptured by clicking the game.
+	pause_panel.visible = not captured and not loadout_menu.visible
 	speed_label.text = "%.1f m/s" % _player.movement.get_horizontal_speed()
-	pause_panel.visible = Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
+	_update_ability_label()
+	_update_next_spawn_label()
+
+
+func _update_ability_label() -> void:
+	var ability: Ability = _player.ability
+	if ability == null:
+		ability_label.text = ""
+	elif ability.is_ready():
+		ability_label.text = "Q  %s  READY" % ability.def.display_name
+	else:
+		ability_label.text = "Q  %s  %d" % [ability.def.display_name, ceili(ability.cooldown_left)]
+
+
+func _update_next_spawn_label() -> void:
+	var requested: PackedInt32Array = _player.requested_loadout
+	next_spawn_label.visible = not requested.is_empty() and requested != _player.loadout
+	if next_spawn_label.visible:
+		next_spawn_label.text = "Next spawn: %s" % Loadout.describe(requested)
+
+
+func _update_flash(delta: float) -> void:
+	if _flash_left <= 0.0:
+		flash_overlay.color.a = 0.0
+		return
+	_flash_left = maxf(_flash_left - delta, 0.0)
+	var fade_time: float = _flash_total * (1.0 - FLASH_HOLD_SHARE)
+	flash_overlay.color.a = 1.0 if _flash_left > fade_time else _flash_left / maxf(fade_time, 0.001)
+
+
+func _on_local_flashed(seconds: float) -> void:
+	# A stronger flash replaces a weaker one; a weaker one never shortens the current one.
+	if seconds > _flash_left:
+		_flash_left = seconds
+		_flash_total = seconds
+
+
+func _open_loadout_menu(by_death: bool) -> void:
+	_menu_opened_by_death = by_death
+	var current: PackedInt32Array = _player.requested_loadout if not _player.requested_loadout.is_empty() else _player.loadout
+	loadout_menu.open(current)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _close_loadout_menu() -> void:
+	loadout_menu.visible = false
+	_menu_opened_by_death = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _on_loadout_confirmed(code: PackedInt32Array) -> void:
+	if is_instance_valid(_player):
+		_player.request_loadout(code)
+	_close_loadout_menu()
 
 
 func _update_top_bar() -> void:
@@ -92,6 +179,8 @@ func _on_alive_changed(is_alive: bool) -> void:
 	crosshair.visible = is_alive
 	if is_alive:
 		death_label.visible = false
+		if loadout_menu.visible and _menu_opened_by_death:
+			_close_loadout_menu()
 
 
 func _on_protection_changed(is_protected: bool) -> void:
@@ -107,6 +196,8 @@ func _on_player_died(victim: Player, killer_id: int, weapon_name: String, killer
 		death_label.text = "KILLED BY %s\n%s  ·  %d HP left" % [
 			Net.get_player_name(killer_id), weapon_name, killer_health]
 	death_label.visible = true
+	if not loadout_menu.visible:
+		_open_loadout_menu(true) # GDD: the class menu opens on the death screen.
 
 
 func _on_match_ended(winner_id: int, awards: Array) -> void:

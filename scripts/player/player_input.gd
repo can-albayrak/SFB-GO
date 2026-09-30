@@ -44,6 +44,8 @@ func gather() -> PlayerCommand:
 	cmd.crouch_pressed = Input.is_action_just_pressed(&"crouch")
 	cmd.walk = Input.is_action_pressed(&"walk")
 	cmd.reload = Input.is_action_just_pressed(&"reload")
+	cmd.melee = Input.is_action_just_pressed(&"melee")
+	cmd.ability = Input.is_action_just_pressed(&"ability")
 
 	if _suppress_fire and not Input.is_action_pressed(&"fire"):
 		_suppress_fire = false

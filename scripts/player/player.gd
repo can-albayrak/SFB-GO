@@ -9,6 +9,7 @@ signal health_changed(health: int, max_health: int)
 signal weapon_changed(weapon: Weapon)
 signal alive_changed(is_alive: bool)
 signal protection_changed(is_protected: bool)
+signal loadout_changed
 ## Host only. Game registers the kill and schedules the respawn.
 signal died(killer_id: int, weapon_name: String, headshot: bool, is_melee: bool)
 
@@ -44,8 +45,9 @@ class Snapshot:
 	var crouched: bool
 
 
-@export var class_def: ClassDef
-
+## Replicated by StateSync (host-owned). Changing it rebuilds class, weapons, knife and ability.
+var loadout: PackedInt32Array = Loadout.default_code(): set = _set_loadout
+var class_def: ClassDef
 var health: int = 0: set = _set_health
 var is_alive: bool = true: set = _set_alive
 ## Spawn protection (host-owned, replicated): no damage taken; firing ends it.
@@ -54,7 +56,11 @@ var is_protected: bool = false: set = _set_protected
 var look_pitch: float = 0.0
 var weapons: Array[Weapon] = []
 var current_weapon: Weapon = null
+var melee_weapon: MeleeWeapon = null
+var ability: Ability = null
 var is_local: bool = false
+## Owner: the loadout last sent to the host (drives "Next spawn" on the HUD).
+var requested_loadout: PackedInt32Array = PackedInt32Array()
 
 ## Increments on every respawn; stale state packets from a previous life are dropped.
 var _life: int = 0
@@ -74,6 +80,9 @@ var _protected_until: float = 0.0
 var _last_hit_weapon: String = ""
 var _last_hit_melee: bool = false
 var _last_hit_zone: Hitbox.Zone = Hitbox.Zone.BODY
+var _next_melee_time: float = -INF
+var _pending_loadout: PackedInt32Array = PackedInt32Array()
+var _spawned_at: float = 0.0
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -96,15 +105,13 @@ func setup_authority(peer_id: int) -> void:
 
 
 func _ready() -> void:
-	assert(class_def != null, "Player needs a ClassDef")
 	is_local = is_multiplayer_authority()
-	movement.def = class_def.movement
+	crown.visible = false
+	_apply_loadout()
 	if multiplayer.is_server():
 		health = class_def.max_health # Clients already got the real value from StateSync's spawn state.
+		_spawned_at = _now()
 		_grant_protection()
-	crown.visible = false
-	_create_weapons()
-	equip(0)
 
 	if is_local:
 		# Camera is top-level and placed every frame, so mouse look never waits for a physics tick.
@@ -130,7 +137,20 @@ func _physics_process(delta: float) -> void:
 
 	movement.base_speed = class_def.move_speed * current_weapon.def.move_speed_mult
 	movement.physics_step(delta, cmd)
-	current_weapon.tick(delta, cmd)
+
+	if melee_weapon != null:
+		melee_weapon.tick_melee(delta)
+		if cmd.melee and not current_weapon.is_busy() and melee_weapon.swing():
+			_request_melee.rpc_id(1, get_aim_origin(), -get_aim_basis().z)
+	var swinging: bool = melee_weapon != null and melee_weapon.is_swinging()
+	current_weapon.visible = not swinging
+	# While the knife is out the gun keeps its timers but cannot fire.
+	current_weapon.tick(delta, PlayerCommand.new() if swinging else cmd)
+
+	if ability != null:
+		ability.tick(delta)
+		if cmd.ability and ability.try_use(get_aim_origin(), -get_aim_basis().z):
+			_request_ability.rpc_id(1, get_aim_origin(), -get_aim_basis().z)
 	_apply_pose(movement.is_crouched)
 
 	_send_tick += 1
@@ -211,6 +231,10 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
 	if compensator != null:
 		compensator.forget(self) # No rewinding into the previous life.
+	if not _pending_loadout.is_empty():
+		loadout = _pending_loadout
+		_pending_loadout = PackedInt32Array()
+	_spawned_at = _now()
 	health = class_def.max_health
 	is_alive = true
 	_grant_protection()
@@ -267,17 +291,68 @@ func _look_basis(recoil: Vector2) -> Basis:
 	return Basis.from_euler(Vector3(pitch, rotation.y - deg_to_rad(recoil.x), 0.0))
 
 
-func _create_weapons() -> void:
-	# Stage 4 adds loadout choice; for now the class's first primary + its secondary.
-	assert(not class_def.primary_weapons.is_empty(), "ClassDef has no primary weapon")
-	assert(class_def.secondary_weapon != null, "ClassDef has no secondary weapon")
-	var defs: Array[WeaponDef] = [class_def.primary_weapons[0], class_def.secondary_weapon]
-	for def: WeaponDef in defs:
-		var weapon: Weapon = def.scene.instantiate()
-		weapon.setup(def, self)
-		weapon.visible = false
-		weapon_holder.add_child(weapon)
-		weapons.append(weapon)
+## Owner: choose a loadout. The host applies it now (first seconds after spawning)
+## or at the next spawn (GDD). Also remembered for the next session.
+func request_loadout(code: PackedInt32Array) -> void:
+	if not Loadout.is_valid(code):
+		return
+	requested_loadout = code
+	Loadout.save_to_settings(code)
+	_request_loadout.rpc_id(1, code)
+
+
+## View direction without recoil (host uses it for flashbangs).
+func get_look_forward() -> Vector3:
+	return -_look_basis(Vector2.ZERO).z
+
+
+## Rebuilds class stats, weapons, knife and ability from `loadout`. Every peer runs this,
+## so the host (damage), the owner (handling) and viewers agree.
+func _apply_loadout() -> void:
+	class_def = Loadout.get_class_def(loadout)
+	movement.def = class_def.movement
+
+	for weapon: Weapon in weapons:
+		weapon_holder.remove_child(weapon)
+		weapon.queue_free()
+	weapons.clear()
+	current_weapon = null
+	for def: WeaponDef in [Loadout.get_primary(loadout), class_def.secondary_weapon]:
+		weapons.append(_add_weapon(def))
+
+	if melee_weapon != null:
+		melee_weapon.queue_free()
+		melee_weapon = null
+	if class_def.quick_melee != null:
+		melee_weapon = _add_weapon(class_def.quick_melee) as MeleeWeapon
+
+	if ability != null:
+		ability.queue_free()
+		ability = null
+	var ability_def: AbilityDef = Loadout.get_ability(loadout)
+	if ability_def != null:
+		ability = ability_def.scene.instantiate()
+		ability.setup(ability_def, self)
+		add_child(ability)
+
+	equip(0)
+	loadout_changed.emit()
+
+
+func _add_weapon(def: WeaponDef) -> Weapon:
+	var weapon: Weapon = def.scene.instantiate()
+	weapon.setup(def, self)
+	weapon.visible = false
+	weapon_holder.add_child(weapon)
+	return weapon
+
+
+func _set_loadout(value: PackedInt32Array) -> void:
+	if not Loadout.is_valid(value) or value == loadout and class_def != null:
+		return
+	loadout = value
+	if is_node_ready():
+		_apply_loadout()
 
 
 func _apply_pose(crouched: bool) -> void:
@@ -303,7 +378,8 @@ func _apply_alive_state() -> void:
 
 func _set_health(value: int) -> void:
 	health = value
-	health_changed.emit(health, class_def.max_health)
+	# StateSync can deliver health before _ready has built the class.
+	health_changed.emit(health, class_def.max_health if class_def != null else health)
 
 
 func _set_alive(value: bool) -> void:
@@ -455,6 +531,62 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 	else:
 		end_point = weapon.server_fire(origin, dir.normalized())
 	Net.broadcast(self, &"_show_shot", [origin, end_point])
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _request_melee(origin: Vector3, dir: Vector3) -> void:
+	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
+		return
+	if not is_alive or melee_weapon == null:
+		return
+	var now: float = Time.get_ticks_msec() / 1000.0
+	if now < _next_melee_time - FIRE_BURST_SLACK:
+		return
+	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
+		return
+	_next_melee_time = maxf(_next_melee_time, now - FIRE_BURST_SLACK) + melee_weapon.def.fire_interval * FIRE_RATE_TOLERANCE
+	if Match.state == Match.State.PLAYING:
+		is_protected = false
+	var compensator: LagCompensator = LagCompensator.find(get_tree())
+	if compensator != null:
+		compensator.fire_rewound(self, melee_weapon, origin, dir.normalized())
+	else:
+		melee_weapon.server_fire(origin, dir.normalized())
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _request_ability(origin: Vector3, dir: Vector3) -> void:
+	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
+		return
+	if not is_alive or ability == null:
+		return
+	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
+		return
+	if ability.server_try_use(origin, dir.normalized()) and Match.state == Match.State.PLAYING:
+		is_protected = false
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _request_loadout(code: PackedInt32Array) -> void:
+	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
+		return
+	if not Loadout.is_valid(code):
+		return
+	# GDD: choosing within the first seconds after spawning switches at once.
+	if is_alive and _now() - _spawned_at <= Match.rules.loadout_swap_window:
+		_pending_loadout = PackedInt32Array()
+		loadout = code
+		health = class_def.max_health
+	else:
+		_pending_loadout = code
+
+
+## Host -> victim: blind for `seconds` (flashbang).
+@rpc("any_peer", "call_local", "reliable")
+func flash(seconds: float) -> void:
+	if not _sender_is_host() or not is_local:
+		return
+	Events.local_flashed.emit(seconds)
 
 
 @rpc("any_peer", "call_local", "unreliable")

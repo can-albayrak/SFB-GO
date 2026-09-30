@@ -20,6 +20,8 @@ MUZZLES = {
     "pistol": (0.0, 0.15, 0.045),
     "heavy_rifle": (0.0, 0.84, 0.035),
     "shotgun": (0.0, 0.58, 0.055),
+    "burst_rifle": (0.0, 0.60, 0.04),
+    "lmg": (0.0, 0.70, 0.04),
 }
 
 _materials: dict = {}
@@ -190,9 +192,73 @@ def build_shotgun() -> None:
     export("Shotgun", os.path.join(OUT, "assets/models/weapons/shotgun.glb"))
 
 
+def build_burst_rifle() -> None:
+    """Bullpup-ish burst rifle: short body, carry handle optic, tan furniture."""
+    metal, poly = gun_materials()
+    tan = mat("Tan", (0.55, 0.47, 0.33), 0.85)
+    box((0.055, 0.46, 0.09), (0.0, 0.0, 0.03), tan)                          # body shell
+    box((0.03, 0.26, 0.03), (0.0, 0.05, 0.095), metal)                       # carry rail
+    along_y(0.02, 0.10, (0.0, 0.10, 0.125), metal, verts=12)                 # optic
+    along_y(0.013, 0.22, (0.0, 0.43, 0.04), metal)                           # barrel
+    box((0.03, 0.04, 0.03), (0.0, 0.56, 0.04), metal)                        # flash hider
+    box((0.035, 0.065, 0.14), (0.0, -0.12, -0.07), poly, rot=(8, 0, 0))      # magazine (behind grip)
+    box((0.035, 0.045, 0.11), (0.0, 0.08, -0.05), poly, rot=(-15, 0, 0))     # grip
+    box((0.05, 0.03, 0.10), (0.0, -0.235, 0.0), poly)                        # butt pad
+    export("BurstRifle", os.path.join(OUT, "assets/models/weapons/burst_rifle.glb"))
+
+
+def build_lmg() -> None:
+    """Belt-fed look: long heavy body, box magazine, bipod folded under the barrel."""
+    metal, poly = gun_materials()
+    olive = mat("Olive", (0.25, 0.27, 0.18), 0.85)
+    box((0.07, 0.42, 0.10), (0.0, 0.05, 0.03), metal)                        # receiver
+    box((0.075, 0.18, 0.02), (0.0, 0.08, 0.09), metal)                       # feed cover
+    along_y(0.018, 0.42, (0.0, 0.47, 0.04), metal)                           # barrel
+    along_y(0.028, 0.16, (0.0, 0.36, 0.04), metal, verts=10)                 # barrel jacket
+    box((0.02, 0.03, 0.06), (0.0, 0.66, 0.04), metal)                        # front sight / muzzle
+    box((0.10, 0.12, 0.12), (-0.07, 0.10, -0.06), olive)                     # box magazine
+    box((0.035, 0.045, 0.11), (0.0, -0.06, -0.06), poly, rot=(-20, 0, 0))    # grip
+    box((0.05, 0.24, 0.09), (0.0, -0.27, 0.0), poly)                         # stock
+    for side in (-1, 1):
+        box((0.012, 0.22, 0.012), (0.025 * side, 0.46, 0.005), metal)        # folded bipod legs
+    box((0.04, 0.10, 0.02), (0.0, 0.24, -0.015), metal)                      # carry grip mount
+    export("LMG", os.path.join(OUT, "assets/models/weapons/lmg.glb"))
+
+
+def build_knife() -> None:
+    """Combat knife, blade forward (+Y), origin at the grip."""
+    metal = mat("Blade", (0.55, 0.56, 0.58), 0.3, 0.9)
+    black = mat("Black", (0.05, 0.05, 0.05), 0.6)
+    box((0.028, 0.11, 0.03), (0.0, -0.02, 0.0), black)                       # handle
+    box((0.07, 0.012, 0.035), (0.0, 0.04, 0.0), black)                       # guard
+    box((0.006, 0.16, 0.03), (0.0, 0.125, 0.004), metal)                     # blade
+    box((0.006, 0.03, 0.018), (0.0, 0.215, 0.008), metal, rot=(-35, 0, 0))   # tip
+    export("Knife", os.path.join(OUT, "assets/models/weapons/knife.glb"))
+
+
+def build_frag() -> None:
+    olive = mat("Olive", (0.25, 0.27, 0.18), 0.85)
+    metal, _ = gun_materials()
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, radius=0.045, location=(0.0, 0.0, 0.0))
+    _finish_part(bpy.context.active_object, olive)                           # body
+    cyl(0.018, 0.03, (0.0, 0.0, 0.05), metal)                                # fuse
+    box((0.012, 0.06, 0.012), (0.0, 0.025, 0.045), metal, rot=(20, 0, 0))    # spoon
+    export("FragGrenade", os.path.join(OUT, "assets/models/weapons/frag_grenade.glb"))
+
+
+def build_flashbang() -> None:
+    grey = mat("FlashGrey", (0.55, 0.57, 0.6), 0.6, 0.3)
+    metal, _ = gun_materials()
+    cyl(0.03, 0.11, (0.0, 0.0, 0.0), grey)                                   # canister
+    cyl(0.018, 0.025, (0.0, 0.0, 0.065), metal)                              # fuse
+    box((0.012, 0.06, 0.012), (0.0, 0.025, 0.06), metal, rot=(20, 0, 0))     # spoon
+    export("Flashbang", os.path.join(OUT, "assets/models/weapons/flashbang.glb"))
+
+
 if __name__ == "__main__":
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     OUT = os.path.abspath(argv[0]) if argv else os.getcwd()
-    for build in (build_soldier, build_assault_rifle, build_pistol, build_heavy_rifle, build_shotgun):
+    for build in (build_soldier, build_assault_rifle, build_pistol, build_heavy_rifle, build_shotgun,
+                  build_burst_rifle, build_lmg, build_knife, build_frag, build_flashbang):
         reset_scene()
         build()

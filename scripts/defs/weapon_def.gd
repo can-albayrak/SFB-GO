@@ -17,6 +17,8 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export_group("Handling")
 @export var fire_interval: float = 0.1 ## Seconds between shots.
 @export var automatic: bool = true ## Hold to fire; false = one shot per click.
+@export var burst_count: int = 1 ## Shots per trigger pull (>1 = burst weapon, fired per click).
+@export var burst_interval: float = 0.07 ## Seconds between shots inside a burst.
 @export var magazine_size: int = 30
 @export var reload_time: float = 2.0
 @export var equip_time: float = 0.4
@@ -32,6 +34,11 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 
 @export_group("Scene")
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).
+
+
+## Shortest legal gap between two shots (host rate check).
+func get_min_shot_interval() -> float:
+	return burst_interval if burst_count > 1 else fire_interval
 
 
 func zone_multiplier(zone: Hitbox.Zone) -> float:

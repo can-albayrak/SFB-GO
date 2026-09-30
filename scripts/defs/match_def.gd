@@ -8,3 +8,4 @@ extends Resource
 @export var respawn_delay: float = 3.0 ## Seconds between death and respawn.
 @export var spawn_protection: float = 2.0 ## Seconds of no damage after spawning; firing ends it.
 @export var end_screen_time: float = 10.0 ## Seconds the results stay up before the next match.
+@export var loadout_swap_window: float = 3.0 ## A loadout picked this soon after spawning applies at once.

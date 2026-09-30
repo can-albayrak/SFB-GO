@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="GrenadeDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/grenade_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/grenade_ability.tscn" id="2_ability"]
+[ext_resource type="PackedScene" path="res://scenes/projectiles/frag_grenade.tscn" id="3_projectile"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"frag_grenade"
+display_name = "Frag Grenade"
+cooldown = 15.0
+scene = ExtResource("2_ability")
+kind = 0
+projectile = ExtResource("3_projectile")
+throw_speed = 16.0
+throw_lift = 3.0
+fuse_time = 2.5
+radius = 5.0
+damage = 110.0

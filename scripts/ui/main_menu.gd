@@ -58,6 +58,7 @@ func _handle_command_line() -> void:
 
 func _save_name() -> void:
 	Settings.player_name = name_edit.text.strip_edges()
+	Settings.save_settings()
 
 
 func _on_host_pressed() -> void:

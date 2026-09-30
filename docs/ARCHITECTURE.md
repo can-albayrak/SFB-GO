@@ -34,12 +34,12 @@ sfb-go/
 │   ├── weapons/             # WeaponDef .tres
 │   └── abilities/           # AbilityDef .tres
 ├── scripts/
-│   ├── defs/                # class_def.gd, weapon_def.gd, ability_def.gd, movement_def.gd
+│   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd
 │   ├── game/                # game.gd (maç sahnesi: harita, spawn, respawn), lag_compensator.gd
 │   ├── player/              # player.gd, movement.gd, player_input.gd, player_command.gd, hitbox.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, projectile_weapon.gd, melee_weapon.gd, thrown_weapon.gd
-│   ├── abilities/           # ability.gd (taban), grapple.gd, dash.gd, shield.gd ...
+│   ├── abilities/           # ability.gd (taban), grenade_ability.gd, grenade.gd (mermi); aşama 5: grapple, dash, shield ...
 │   ├── pickups/             # pickup.gd, airdrop.gd
 │   └── ui/                  # hud.gd, crosshair.gd, scoreboard.gd, kill_feed.gd, main_menu.gd (loadout_menu.gd aşama 4)
 ├── scenes/
@@ -175,7 +175,22 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var scene: PackedScene          # görsel + davranış
 ```
 
-`AbilityDef` benzer: `id`, `display_name`, `cooldown`, `duration`, `scene`.
+`AbilityDef` benzer: `id`, `display_name`, `cooldown`, `duration`, `scene` (Ability node'u). `GrenadeDef extends AbilityDef`: `kind` (FRAG/FLASH), `projectile`, `throw_speed`, `throw_lift`, `fuse_time`, `radius`, `damage`, `flash_duration`.
+
+`WeaponDef` ayrıca: `burst_count` / `burst_interval` (seri atış, tık başına), `get_min_shot_interval()` (host hız kontrolü). Yakın dövüş de bir `WeaponDef` (`fire_type = MELEE`, `max_range` = erişim, `fire_interval` = bekleme).
+
+### Loadout (aşama 4)
+
+- `data/classes/roster.tres` (`ClassRoster`): oynanabilir sınıfların sırası. Loadout = `PackedInt32Array [sınıf, birincil silah, güç]` roster indeksleri (`scripts/player/loadout.gd`: doğrulama, Settings'e kayıt, açıklama).
+- `Player.loadout` StateSync ile host'tan herkese yayılır (spawn'da da). Setter `_apply_loadout()` çağırır: `class_def`, hareket, silahlar (birincil + ikincil), bıçak (`MeleeWeapon`), `Ability` node'u yeniden kurulur. Her peer aynısını kurar: host hasar için, sahibi kullanım için, diğerleri görüntü için.
+- Seçim akışı: sahibi `request_loadout(code)` → host `_request_loadout` doğrular → doğuştan sonraki `rules.loadout_swap_window` (3 sn) içindeyse anında uygular + can doldurur, değilse `_pending_loadout` olarak saklar ve `server_respawn`'da uygular. İlk doğuşta client kendi kayıtlı seçimini `_request_spawn(loadout)` ile gönderir.
+- Son seçim `Settings` üzerinden `user://settings.cfg`'e kaydedilir (isim, loadout, FOV, hassasiyet, crosshair).
+
+### Yakın dövüş ve güçler
+
+- `V`: `MeleeWeapon.swing()` (sahibi: bekleme + animasyon, silah bu sürede ateş edemez) → `_request_melee` → host bütçe kontrolü + lag compensation ile `server_fire`: 5 ışınlık yelpaze, en yakın hitbox; `take_hit(..., is_melee=true)` (knife ödülü).
+- `Q`: `Ability.try_use` (sahibi: yerel bekleme, HUD) → `_request_ability` → host kendi saatinde `server_try_use` (bekleme × 0,9 tolerans) → `server_use`. Hareket güçleri (aşama 5) `_use_local` ile sahibinde çalışır.
+- Bombalar: `GrenadeAbility.server_use` → `Game.server_spawn_grenade` → `ProjectileSpawner` (spawn_function, `Sync` görünürlüğü oyuncularla aynı desen). Fizik sadece host'ta; client kopyası donuk, `Sync` ile pozisyon/rotasyon alır. Zeminde sürtünme (`GROUND_DRAG`) kaymayı keser. Fitil bitince `Game.server_explode`: frag = yarıçap içinde görüş hattı olanlara doğrusal azalan hasar (kendine de, mankenlere de); flash = görüş hattı olan oyunculara bakış açısı ve mesafeye göre `Player.flash(sn)` → HUD beyaz ekran. Efekt `Game._explosion_fx` ile herkeste.
 
 Sabit kurallar (kafa çarpanı istisnası gibi) `WeaponDef` alanlarıyla ifade edilir; örn. Heavy Rifle'da `headshot_mult = 1.0, leg_mult = 1.0, damage = 999`.
 

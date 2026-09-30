@@ -5,6 +5,12 @@
 [ext_resource type="Resource" path="res://data/weapons/assault_rifle.tres" id="3_ar"]
 [ext_resource type="Resource" path="res://data/weapons/pistol.tres" id="4_pistol"]
 [ext_resource type="Resource" path="res://data/movement/standard.tres" id="5_move"]
+[ext_resource type="Resource" path="res://data/weapons/burst_rifle.tres" id="6_burst"]
+[ext_resource type="Resource" path="res://data/weapons/lmg.tres" id="7_lmg"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="8_knife"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="9_adef"]
+[ext_resource type="Resource" path="res://data/abilities/frag_grenade.tres" id="10_frag"]
+[ext_resource type="Resource" path="res://data/abilities/flashbang.tres" id="11_flash"]
 
 [resource]
 script = ExtResource("1_class")
@@ -13,5 +19,7 @@ display_name = "Wolf"
 max_health = 100
 move_speed = 6.6
 movement = ExtResource("5_move")
-primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_ar")])
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_ar"), ExtResource("6_burst"), ExtResource("7_lmg")])
 secondary_weapon = ExtResource("4_pistol")
+abilities = Array[ExtResource("9_adef")]([ExtResource("10_frag"), ExtResource("11_flash")])
+quick_melee = ExtResource("8_knife")

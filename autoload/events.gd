@@ -26,3 +26,7 @@ signal match_started
 ## Every peer. awards: Array of [title: String, peer_id: int, detail: String].
 @warning_ignore("unused_signal")
 signal match_ended(winner_id: int, awards: Array)
+
+## Local player hit by a flashbang: white-out for `seconds`.
+@warning_ignore("unused_signal")
+signal local_flashed(seconds: float)

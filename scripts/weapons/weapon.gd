@@ -19,6 +19,8 @@ var _cooldown: float = 0.0
 var _reload_left: float = 0.0
 var _since_shot: float = INF
 var _shot_index: int = 0
+var _burst_left: int = 0
+var _burst_timer: float = 0.0
 
 @onready var muzzle: Marker3D = $Muzzle
 
@@ -36,11 +38,13 @@ func draw() -> void:
 
 func holster() -> void:
 	visible = false
+	_burst_left = 0
 	_set_reloading(false)
 	_reset_recoil()
 
 
 func refill() -> void:
+	_burst_left = 0
 	_set_reloading(false)
 	_reset_recoil()
 	_cooldown = 0.0
@@ -68,6 +72,12 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 			ammo_changed.emit(ammo, def.magazine_size)
 		return
 
+	if _burst_left > 0:
+		_burst_timer -= delta
+		if _burst_timer <= 0.0:
+			_shoot_once()
+		return
+
 	if cmd.reload and ammo < def.magazine_size:
 		_start_reload()
 		return
@@ -80,8 +90,23 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 		_start_reload()
 		return
 
+	_cooldown = def.fire_interval # Burst weapons: time between burst starts.
+	_burst_left = maxi(def.burst_count, 1)
+	_shoot_once()
+
+
+## Blocks firing without touching ammo (quick melee swing).
+func is_busy() -> bool:
+	return _burst_left > 0
+
+
+func _shoot_once() -> void:
+	if ammo <= 0:
+		_burst_left = 0
+		return
 	ammo -= 1
-	_cooldown = def.fire_interval
+	_burst_left -= 1
+	_burst_timer = def.burst_interval
 	_since_shot = 0.0
 	_fire() # Aim is read before the kick, so the first shot is always accurate.
 	_apply_recoil_kick()

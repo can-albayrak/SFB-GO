@@ -9,3 +9,4 @@ time_limit = 900.0
 respawn_delay = 3.0
 spawn_protection = 2.0
 end_screen_time = 10.0
+loadout_swap_window = 3.0
