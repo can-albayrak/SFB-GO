@@ -17,6 +17,8 @@ const GRAPPLE_ARRIVE_DISTANCE: float = 0.8
 const GRAPPLE_CHEST: float = 1.0 ## Height above the feet that is pulled to the anchor.
 const GRAPPLE_STUCK_SPEED: float = 2.0 ## Pull ends when a wall stops us below this speed.
 const GRAPPLE_STUCK_GRACE: float = 0.25
+const CHARGE_STUCK_SPEED: float = 2.0 ## Charge ends early when a wall stops us below this speed.
+const CHARGE_STUCK_GRACE: float = 0.15
 const GRAPPLE_ACCEL: float = 40.0 ## m/s^2 toward the pull speed, so the start is not a hard snap.
 
 @export var collision: CollisionShape3D
@@ -37,6 +39,10 @@ var _grapple_target: Vector3 = Vector3.ZERO
 var _grapple_speed: float = 0.0
 var _grapple_time: float = 0.0
 var _grappling: bool = false
+var _charge_dir: Vector3 = Vector3.ZERO
+var _charge_speed: float = 0.0
+var _charge_left: float = 0.0
+var _charge_time: float = 0.0
 
 @onready var body: CharacterBody3D = get_parent()
 @onready var _capsule: CapsuleShape3D = collision.shape
@@ -48,6 +54,9 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	_slide_cooldown_left = maxf(_slide_cooldown_left - delta, 0.0)
 
 	if _grappling and _step_grapple(delta, cmd):
+		return
+	if _charge_left > 0.0:
+		_step_charge(delta)
 		return
 
 	var vel: Vector3 = body.velocity
@@ -88,6 +97,18 @@ func start_grapple(target: Vector3, speed: float) -> void:
 	is_sliding = false
 
 
+## Owner: Bear's Charge. Runs at `speed` along `dir` (flattened) for `seconds`, no steering.
+func start_charge(dir: Vector3, speed: float, seconds: float) -> void:
+	var flat := Vector3(dir.x, 0.0, dir.z)
+	if flat.length_squared() < 0.0001:
+		return
+	_charge_dir = flat.normalized()
+	_charge_speed = speed
+	_charge_left = seconds
+	_charge_time = 0.0
+	is_sliding = false
+
+
 func is_grappling() -> bool:
 	return _grappling
 
@@ -98,6 +119,7 @@ func get_horizontal_speed() -> float:
 
 func reset() -> void:
 	_grappling = false
+	_charge_left = 0.0
 	is_sliding = false
 	_jump_buffer = 0.0
 	_slide_left = 0.0
@@ -111,6 +133,23 @@ func set_crouch_shape(crouched: bool) -> void:
 	is_crouched = crouched
 	_capsule.height = CROUCH_HEIGHT if crouched else STAND_HEIGHT
 	collision.position.y = _capsule.height * 0.5
+
+
+func _step_charge(delta: float) -> void:
+	_charge_left -= delta
+	_charge_time += delta
+	var vel: Vector3 = body.velocity
+	vel.x = _charge_dir.x * _charge_speed
+	vel.z = _charge_dir.z * _charge_speed
+	if body.is_on_floor():
+		vel.y = maxf(vel.y, 0.0)
+	else:
+		vel.y -= def.gravity * delta
+	body.velocity = vel
+	body.move_and_slide()
+	if _charge_time > CHARGE_STUCK_GRACE and Vector2(body.get_real_velocity().x, body.get_real_velocity().z).length() < CHARGE_STUCK_SPEED:
+		_charge_left = 0.0 # Ran into a wall.
+	_update_eye(delta)
 
 
 ## Returns true while the pull owns this tick (normal movement is skipped).

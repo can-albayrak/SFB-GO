@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ClassDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
+[ext_resource type="Resource" path="res://data/weapons/sledgehammer.tres" id="3_hammer"]
+[ext_resource type="Resource" path="res://data/weapons/claws.tres" id="4_claws"]
+[ext_resource type="Resource" path="res://data/weapons/chainsaw.tres" id="5_saw"]
+[ext_resource type="Resource" path="res://data/weapons/throwing_knives.tres" id="6_throw"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="7_move"]
+[ext_resource type="Resource" path="res://data/weapons/kick.tres" id="8_kick"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="9_adef"]
+[ext_resource type="Resource" path="res://data/abilities/shield.tres" id="10_shield"]
+[ext_resource type="Resource" path="res://data/abilities/charge.tres" id="11_charge"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"bear"
+display_name = "Bear"
+max_health = 175
+move_speed = 6.0
+movement = ExtResource("7_move")
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_hammer"), ExtResource("4_claws"), ExtResource("5_saw")])
+secondary_weapon = ExtResource("6_throw")
+abilities = Array[ExtResource("9_adef")]([ExtResource("10_shield"), ExtResource("11_charge")])
+quick_melee = ExtResource("8_kick")

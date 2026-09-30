@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/throwing_knife.tscn" id="2_scene"]
+[ext_resource type="PackedScene" path="res://scenes/projectiles/thrown_knife.tscn" id="3_proj"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"throwing_knives"
+display_name = "Throwing Knives"
+fire_type = 3
+damage = 35.0
+headshot_mult = 2.0
+leg_mult = 0.75
+max_range = 60.0
+fire_interval = 0.5
+automatic = false
+magazine_size = 3
+reload_time = 0.0
+equip_time = 0.35
+throw_speed = 24.0
+throw_lift = 2.0
+return_time = 8.0
+projectile = ExtResource("3_proj")
+scene = ExtResource("2_scene")

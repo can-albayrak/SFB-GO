@@ -179,7 +179,8 @@ func _on_match_started() -> void:
 func _on_peer_disconnected(peer_id: int) -> void:
 	Match.server_remove_player(peer_id)
 	for grenade: Node in projectiles_root.get_children():
-		if grenade is Grenade and (grenade as Grenade).thrower_id == peer_id:
+		if (grenade is Grenade and (grenade as Grenade).thrower_id == peer_id) \
+				or (grenade is ThrownKnife and (grenade as ThrownKnife).thrower_id == peer_id):
 			grenade.queue_free()
 	var player: Node = players_root.get_node_or_null(str(peer_id))
 	if player != null:
@@ -200,8 +201,33 @@ func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, point: Vecto
 		grenade.get_node("Sync").set_visibility_for(id, true)
 
 
+func server_spawn_knife(knife_def: WeaponDef, thrower_id: int, point: Vector3, velocity: Vector3) -> void:
+	assert(multiplayer.is_server(), "server_spawn_knife is host-only")
+	var knife: Node = projectile_spawner.spawn({
+		"knife_def": knife_def.resource_path,
+		"thrower": thrower_id,
+		"position": point,
+		"velocity": velocity,
+	})
+	for id: int in Net.ingame_peers:
+		knife.get_node("Sync").set_visibility_for(id, true)
+
+
+## Host: a thrown knife that hit a player comes back after its timer.
+func server_return_knife(thrower_id: int) -> void:
+	var thrower := players_root.get_node_or_null(str(thrower_id)) as Player
+	if thrower != null:
+		thrower.server_return_throwable()
+
+
 func _create_grenade(data: Variant) -> Node:
 	var info: Dictionary = data
+	if info.has("knife_def"):
+		var knife_def: WeaponDef = load(info["knife_def"])
+		var knife: ThrownKnife = knife_def.projectile.instantiate()
+		knife.position = info["position"]
+		knife.setup(knife_def, info["thrower"], info["velocity"])
+		return knife
 	var grenade_def: GrenadeDef = load(info["def"])
 	var grenade: Grenade = grenade_def.projectile.instantiate()
 	grenade.position = info["position"]

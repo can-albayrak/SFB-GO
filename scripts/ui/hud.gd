@@ -15,6 +15,8 @@ var _menu_opened_by_death: bool = false
 var _flash_left: float = 0.0
 var _flash_total: float = 0.0
 var _scope_overlay: ScopeOverlay
+var _stun_label: Label
+var _stun_left: float = 0.0
 
 @onready var crosshair: Crosshair = $Crosshair
 @onready var health_label: Label = $HealthLabel
@@ -42,6 +44,16 @@ func _ready() -> void:
 	_scope_overlay = ScopeOverlay.new()
 	add_child(_scope_overlay)
 	move_child(_scope_overlay, 0) # Under every label, so health/ammo stay readable while scoped.
+	_stun_label = Label.new()
+	_stun_label.text = "STUNNED"
+	_stun_label.add_theme_font_size_override(&"font_size", 40)
+	_stun_label.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.2))
+	_stun_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_stun_label.position.y = 140.0
+	_stun_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_stun_label.visible = false
+	add_child(_stun_label)
+	Events.local_stunned.connect(_on_local_stunned)
 	Events.local_player_spawned.connect(_on_local_player_spawned)
 	Events.hit_confirmed.connect(crosshair.show_hit)
 	Events.player_died.connect(_on_player_died)
@@ -110,7 +122,15 @@ func _update_next_spawn_label() -> void:
 		next_spawn_label.text = "Next spawn: %s" % Loadout.describe(requested)
 
 
+func _on_local_stunned(seconds: float) -> void:
+	_stun_left = seconds
+	_stun_label.visible = true
+
+
 func _update_flash(delta: float) -> void:
+	if _stun_left > 0.0:
+		_stun_left -= delta
+		_stun_label.visible = _stun_left > 0.0
 	if _flash_left <= 0.0:
 		flash_overlay.color.a = 0.0
 		return
@@ -239,7 +259,9 @@ func _on_reload_changed(_is_reloading: bool) -> void:
 
 
 func _refresh_ammo() -> void:
-	if _weapon.is_reloading:
+	if not _weapon.def.uses_ammo:
+		ammo_label.text = ""
+	elif _weapon.is_reloading:
 		ammo_label.text = "RELOADING"
 	else:
 		ammo_label.text = "%d / %d" % [_weapon.ammo, _weapon.def.magazine_size]

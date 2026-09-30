@@ -30,3 +30,7 @@ signal match_ended(winner_id: int, awards: Array)
 ## Local player hit by a flashbang: white-out for `seconds`.
 @warning_ignore("unused_signal")
 signal local_flashed(seconds: float)
+
+## Local player stunned (Bear's Charge) for `seconds`.
+@warning_ignore("unused_signal")
+signal local_stunned(seconds: float)

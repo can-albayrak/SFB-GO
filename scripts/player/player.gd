@@ -28,6 +28,10 @@ const MOVE_SPEED_TOLERANCE: float = 1.5 ## Host allows horizontal speed up to bh
 const MOVE_BUDGET_SECONDS: float = 1.0 ## Movement budget window, absorbs packet bunching.
 const PROTECTION_BLINK_PERIOD: float = 0.25
 const FALL_WEAPON_NAME: String = "Fall"
+const SHIELD_BLOCK_COS: float = 0.26 ## Hits from within ~75 degrees of the facing are blocked.
+const SHIELD_SIZE: Vector3 = Vector3(1.3, 1.7, 0.06)
+const SHIELD_OFFSET: Vector3 = Vector3(0.0, 1.0, -0.8)
+const SHIELD_COLOR: Color = Color(0.35, 0.8, 1.0, 0.4)
 
 # Hitbox poses: x = centre height above feet, y = box height (0 = keep shape).
 const HEAD_POSE_STAND: Vector2 = Vector2(1.62, 0.0)
@@ -86,6 +90,10 @@ var _last_hit_zone: Hitbox.Zone = Hitbox.Zone.BODY
 var _next_melee_time: float = -INF
 var _pending_loadout: PackedInt32Array = PackedInt32Array()
 var _spawned_at: float = 0.0
+var _shield_until: float = 0.0 ## Host clock.
+var _stun_until: float = 0.0 ## Host clock.
+var _stun_left: float = 0.0 ## Owner: input is ignored while > 0.
+var _shield_visual: MeshInstance3D
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -126,16 +134,23 @@ func _ready() -> void:
 	else:
 		# Remote players are placed in _process from snapshots.
 		physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	_build_shield_visual()
 	_apply_alive_state()
 
 
 func _physics_process(delta: float) -> void:
-	if multiplayer.is_server() and is_protected and _now() >= _protected_until:
-		is_protected = false
+	if multiplayer.is_server():
+		if is_protected and _now() >= _protected_until:
+			is_protected = false
+		if _shield_until > 0.0 and _now() >= _shield_until:
+			_clear_shield()
 	if not is_local or not is_alive:
 		is_scoped = false
 		return
 	var cmd: PlayerCommand = player_input.gather()
+	if _stun_left > 0.0:
+		_stun_left -= delta
+		cmd = PlayerCommand.new() # Stunned: no moving, firing or abilities.
 	if cmd.weapon_slot >= 0:
 		equip(cmd.weapon_slot)
 
@@ -243,6 +258,8 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 	assert(multiplayer.is_server(), "take_hit is host-only")
 	if not can_take_damage():
 		return false
+	if _shield_blocks(attacker_id):
+		return false
 	_last_hit_weapon = weapon_name
 	_last_hit_melee = is_melee
 	_last_hit_zone = zone
@@ -265,6 +282,8 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 		loadout = _pending_loadout
 		_pending_loadout = PackedInt32Array()
 	_spawned_at = _now()
+	_clear_shield()
+	_stun_until = 0.0
 	health = class_def.max_health
 	is_alive = true
 	_grant_protection()
@@ -303,6 +322,7 @@ func _grant_protection() -> void:
 func _die(killer_id: int) -> void:
 	is_alive = false
 	is_protected = false
+	_clear_shield()
 	var killer_health: int = 0
 	var killer := get_parent().get_node_or_null(str(killer_id)) as Player
 	if killer != null:
@@ -549,7 +569,7 @@ func _interpolate_remote(delta: float) -> void:
 func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringName) -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
 		return
-	if not is_alive or slot < 0 or slot >= weapons.size():
+	if not is_alive or slot < 0 or slot >= weapons.size() or _now() < _stun_until:
 		return
 	var weapon: Weapon = weapons[slot]
 	if weapon.def.id != weapon_id:
@@ -569,14 +589,15 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 		end_point = compensator.fire_rewound(self, weapon, origin, dir.normalized())
 	else:
 		end_point = weapon.server_fire(origin, dir.normalized())
-	Net.broadcast(self, &"_show_shot", [origin, end_point])
+	if weapon.def.fire_type == WeaponDef.FireType.HITSCAN:
+		Net.broadcast(self, &"_show_shot", [origin, end_point])
 
 
 @rpc("any_peer", "call_local", "reliable")
 func _request_melee(origin: Vector3, dir: Vector3) -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
 		return
-	if not is_alive or melee_weapon == null:
+	if not is_alive or melee_weapon == null or _now() < _stun_until:
 		return
 	var now: float = Time.get_ticks_msec() / 1000.0
 	if now < _next_melee_time - FIRE_BURST_SLACK:
@@ -597,7 +618,7 @@ func _request_melee(origin: Vector3, dir: Vector3) -> void:
 func _request_ability(origin: Vector3, dir: Vector3) -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
 		return
-	if not is_alive or ability == null or Match.state != Match.State.PLAYING:
+	if not is_alive or ability == null or Match.state != Match.State.PLAYING or _now() < _stun_until:
 		return
 	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
 		return
@@ -629,6 +650,103 @@ func flash(seconds: float) -> void:
 	if not _sender_is_host() or not is_local:
 		return
 	Events.local_flashed.emit(seconds)
+
+
+## Host: Shield ability. Frontal hits are blocked for `seconds`; everyone sees the panel.
+func server_activate_shield(seconds: float) -> void:
+	assert(multiplayer.is_server(), "server_activate_shield is host-only")
+	_shield_until = _now() + seconds
+	Net.broadcast(self, &"_set_shield", [true])
+
+
+## Host: Charge hit. Blocks the victim's actions and tells its owner to freeze the input.
+func server_stun(seconds: float) -> void:
+	assert(multiplayer.is_server(), "server_stun is host-only")
+	_stun_until = _now() + seconds
+	_receive_stun.rpc_id(get_multiplayer_authority(), seconds)
+
+
+## Host: pushes this player (kick). Movement belongs to the owner, so the owner applies it.
+func server_knockback(impulse: Vector3) -> void:
+	assert(multiplayer.is_server(), "server_knockback is host-only")
+	_receive_knockback.rpc_id(get_multiplayer_authority(), impulse)
+
+
+## Host: a thrown knife is back (picked up or timed out). Refills the owner's knife ammo.
+func server_return_throwable() -> void:
+	assert(multiplayer.is_server(), "server_return_throwable is host-only")
+	_return_throwable.rpc_id(get_multiplayer_authority())
+
+
+## Host: is a hit from `attacker_id` stopped by the raised shield?
+func _shield_blocks(attacker_id: int) -> bool:
+	if _shield_until <= 0.0 or _now() >= _shield_until or attacker_id == get_multiplayer_authority():
+		return false
+	var attacker := get_parent().get_node_or_null(str(attacker_id)) as Player
+	if attacker == null:
+		return false
+	var to_attacker: Vector3 = attacker.global_position - global_position
+	to_attacker.y = 0.0
+	var forward: Vector3 = -global_basis.z
+	forward.y = 0.0
+	if to_attacker.length_squared() < 0.0001 or forward.length_squared() < 0.0001:
+		return true # Standing inside each other counts as in front.
+	return forward.normalized().dot(to_attacker.normalized()) > SHIELD_BLOCK_COS
+
+
+func _clear_shield() -> void:
+	if _shield_until <= 0.0:
+		return
+	_shield_until = 0.0
+	if multiplayer.is_server():
+		Net.broadcast(self, &"_set_shield", [false])
+
+
+func _build_shield_visual() -> void:
+	_shield_visual = MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = SHIELD_SIZE
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = SHIELD_COLOR
+	box.material = material
+	_shield_visual.mesh = box
+	_shield_visual.position = SHIELD_OFFSET
+	_shield_visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_shield_visual.visible = false
+	add_child(_shield_visual)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _set_shield(active: bool) -> void:
+	if not _sender_is_host():
+		return
+	_shield_visual.visible = active and not is_local # The owner looks through their own shield.
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _receive_stun(seconds: float) -> void:
+	if not _sender_is_host() or not is_local:
+		return
+	_stun_left = seconds
+	Events.local_stunned.emit(seconds)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _receive_knockback(impulse: Vector3) -> void:
+	if not _sender_is_host() or not is_local or not is_alive:
+		return
+	velocity += impulse
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _return_throwable() -> void:
+	if not _sender_is_host() or not is_local:
+		return
+	for weapon: Weapon in weapons:
+		if weapon.def.fire_type == WeaponDef.FireType.THROWN:
+			weapon.add_ammo(1)
 
 
 ## Host: everyone sees the rope of a Hawk grapple.
@@ -706,6 +824,7 @@ func _respawn_at(spawn_position: Vector3, yaw: float, life: int) -> void:
 		look_pitch = 0.0
 		movement.reset()
 		_fall_reported = false
+		_stun_left = 0.0
 		for weapon: Weapon in weapons:
 			weapon.refill()
 	_apply_pose(false)

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/claws.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"claws"
+display_name = "Claws"
+fire_type = 2
+damage = 28.0
+max_range = 1.7
+fire_interval = 0.25
+equip_time = 0.3
+move_speed_mult = 1.05
+melee_spread_scale = 1.3
+melee_swing_angle = 50.0
+headshot_mult = 1.0
+leg_mult = 1.0
+automatic = true
+magazine_size = 1
+reload_time = 0.0
+uses_ammo = false
+scene = ExtResource("2_scene")

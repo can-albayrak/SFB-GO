@@ -23,6 +23,7 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var reload_time: float = 2.0
 @export var equip_time: float = 0.4
 @export var move_speed_mult: float = 1.0
+@export var uses_ammo: bool = true ## False = never runs dry (melee weapons).
 
 @export_group("Recoil")
 ## Per-shot view kick in degrees: x = right, y = up. Shots past the end reuse the last entry.
@@ -31,6 +32,17 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var recoil_recovery: float = 12.0
 ## Recovery starts this long after the next shot would have been ready.
 @export var recoil_recovery_delay: float = 0.08
+
+@export_group("Melee")
+@export var melee_spread_scale: float = 1.0 ## Widens the fan of hit rays (Sledgehammer).
+@export var melee_swing_angle: float = 70.0 ## View sweep per swing in degrees; 0 = no sweep (Chainsaw).
+@export var knockback: float = 0.0 ## Metres/second pushed onto a player hit (Kick).
+
+@export_group("Thrown")
+@export var throw_speed: float = 22.0
+@export var throw_lift: float = 2.0 ## Extra upward speed, so throws arc.
+@export var return_time: float = 8.0 ## Seconds until a thrown item is back in the inventory.
+@export var projectile: PackedScene
 
 @export_group("Scope")
 @export var scope_zoom: float = 0.0 ## 0 = no scope; otherwise right mouse zooms by this factor.

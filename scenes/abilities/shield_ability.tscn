@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/shield_ability.gd" id="1_script"]
+
+[node name="ShieldAbility" type="Node"]
+script = ExtResource("1_script")

@@ -2,7 +2,7 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 5 – Sınıflar (Hawk bitti; aşama 2 iki bilgisayar testi ve aşama 3/4 oynama testleri hâlâ bekliyor)
+**Şu anki aşama:** 5 – Sınıflar (Hawk ve Bear bitti; aşama 2 iki bilgisayar testi ve aşama 3/4 oynama testleri hâlâ bekliyor)
 **Son güncelleme:** 2026-09-30
 
 ## Aşamalar
@@ -16,7 +16,7 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | Opus | ⏳ Devam ediyor |
 | 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | Opus → Sonnet | ✅ Bitti (oynama testi bekliyor) |
 | 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | Opus | ⏳ Devam ediyor |
-| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | Sonnet | ⏳ Hawk yapıldı (test bekliyor), sırada Bear |
+| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | Sonnet | ⏳ Hawk ve Bear yapıldı (test bekliyor), sırada Cheetah |
 | 6 | Pickup'lar ve airdrop | Sonnet | Bekliyor |
 | 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Sonnet | Bekliyor |
 | 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | Sonnet | Bekliyor |
@@ -100,12 +100,20 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Grapple (15 sn, 40 m, 12 m/s çekme; ıska cooldown yemez; zıplayınca bırakır; herkes ipi görür) ve Decoy (15 sn, 8 sn hologram, sadece görsel)
 - [x] Headless test: sınıf/silah/güç yükleniyor, zoom/FOV, grapple yukarı çekiyor, decoy + ip düğümleri oluşuyor
 - [ ] **Can'ın Hawk oynama testi**
-- [ ] Bear, Cheetah, Volcano
+- [x] Bear (175 can, hız 6,0): Sledgehammer (72 hasar, 1,1 sn, geniş alan), Claws (28 hasar, 0,25 sn), Chainsaw (sürekli 7 hasar/0,1 sn, %75 hız); ana silah olarak yakın dövüş (`MeleeWeapon._fire`, `uses_ammo=false`)
+- [x] Bear güçleri: Shield (12 sn, 3 sn, önden ~75° içinden gelen hasarı host engeller, herkes paneli görür), Charge (12 sn, 13 m/s x 0,55 sn, çarptığı rakibi 2 sn stunlar: host eylemleri reddeder, client girdiyi kilitler)
+- [x] Yedek: 3 Throwing Knife (35 hasar, kafa 70, kavisli host-simüle `ThrownKnife`, duvara saplanır, üstünden geçince toplanır, isabet/ıska 8 sn sonra envantere döner); V = Tekme (8 hasar, 9 m/s geri itme)
+- [x] Headless test: sınıf yükleniyor, bıçak fırlat/saplan/topla, charge hareketi, shield/stun RPC, üç silahın mankene hasarı
+- [ ] **Can'ın Bear oynama testi**
+- [ ] Cheetah, Volcano
 
 ## Bilinen sorunlar
 
 - Decoy sadece görsel: vurulamaz, kurşun içinden geçer (GDD "hologram" diyor; istenirse hitbox eklenir).
 - Marksman Rifle şimdilik Burst Rifle modelini kullanıyor (yer tutucu, aşama 8).
+- Bear'ın Sledgehammer/Claws/Chainsaw modelleri bıçak modelinin büyütülmüş hali; tekme görünmez (aşama 8).
+- Stun ve knockback client tarafında uygulanıyor; host sadece stunlu oyuncunun ateş/güç isteklerini reddediyor (hareketi değil).
+- Shield hasar yönünü saldıranın konumundan hesaplıyor (bomba dahil), bu yüzden arkadan patlayan bomba önden sayılabilir.
 
 - Silah modeli duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
 - Uzak oyuncunun elindeki silah hep AR (silah değişimi senkronlanmıyor); tracer gözden çıkar. Model animasyonsuz, eğilince y'de basılır (aşama 8).
@@ -141,3 +149,4 @@ _Henüz yok._
 | 2026-09-30 | 3→4 | Aşama 3 incelemesi + düzeltmeler. Hareket hızlandı/sürtünme arttı, yeni mermi izi + namlu alevi. Aşama 4 ilk sürüm: loadout sistemi ve menüsü, bıçak, Q güç altyapısı, Wolf tam kit (Burst Rifle, LMG, frag, flash), host-simüle bombalar. Headless testlerde doğrulandı. |
 | 2026-09-30 | 4 | CS tarzı zıplama, Shift sprint / Ctrl slide, test range'de T ile respawn. Godot'ta hatasız açıldı; Can'ın his testi bekliyor. |
 | 2026-09-30 | 5 | Recoil/slide tuning, dürbün sistemi, Hawk (Heavy/Marksman Rifle, Grapple, Decoy). Headless testte doğrulandı; Can'ın testi bekliyor. |
+| 2026-09-30 | 5 | Bear: yakın dövüş ana silahlar, Shield, Charge, fırlatma bıçakları, tekme. Headless testte doğrulandı; Can'ın testi bekliyor. |

@@ -86,7 +86,7 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 	var wants_fire: bool = cmd.fire_pressed or (def.automatic and cmd.fire)
 	if not wants_fire or _cooldown > 0.0:
 		return
-	if ammo <= 0:
+	if def.uses_ammo and ammo <= 0:
 		_start_reload()
 		return
 
@@ -95,16 +95,23 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 	_shoot_once()
 
 
+## Owner: one more round in the magazine (a thrown knife came back).
+func add_ammo(count: int) -> void:
+	ammo = mini(ammo + count, def.magazine_size)
+	ammo_changed.emit(ammo, def.magazine_size)
+
+
 ## Blocks firing without touching ammo (quick melee swing).
 func is_busy() -> bool:
 	return _burst_left > 0
 
 
 func _shoot_once() -> void:
-	if ammo <= 0:
+	if def.uses_ammo and ammo <= 0:
 		_burst_left = 0
 		return
-	ammo -= 1
+	if def.uses_ammo:
+		ammo -= 1
 	_burst_left -= 1
 	_burst_timer = def.burst_interval
 	_since_shot = 0.0

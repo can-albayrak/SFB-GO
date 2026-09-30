@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/sledgehammer.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"sledgehammer"
+display_name = "Sledgehammer"
+fire_type = 2
+damage = 72.0
+max_range = 2.3
+fire_interval = 1.1
+equip_time = 0.6
+move_speed_mult = 0.95
+melee_spread_scale = 2.8
+melee_swing_angle = 100.0
+headshot_mult = 1.0
+leg_mult = 1.0
+automatic = false
+magazine_size = 1
+reload_time = 0.0
+uses_ammo = false
+scene = ExtResource("2_scene")
