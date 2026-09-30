@@ -11,14 +11,36 @@ resource_local_to_scene = true
 radius = 0.35
 height = 1.8
 
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.3
+height = 1.45
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.16
+height = 0.32
+
+[sub_resource type="StandardMaterial3D" id="Mat_model"]
+albedo_color = Color(0.3, 0.36, 0.42, 1)
+roughness = 0.8
+
 [sub_resource type="SphereShape3D" id="Sphere_head"]
 radius = 0.16
 
 [sub_resource type="BoxShape3D" id="Box_body"]
+resource_local_to_scene = true
 size = Vector3(0.5, 0.75, 0.32)
 
 [sub_resource type="BoxShape3D" id="Box_legs"]
-size = Vector3(0.45, 0.75, 0.3)
+resource_local_to_scene = true
+size = Vector3(0.45, 0.74, 0.3)
+
+[sub_resource type="SceneReplicationConfig" id="Repl_state"]
+properties/0/path = NodePath(".:health")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:is_alive")
+properties/1/spawn = true
+properties/1/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -38,6 +60,18 @@ position = Vector3(0, 1.6, 0)
 near = 0.03
 
 [node name="WeaponHolder" type="Node3D" parent="Camera3D"]
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Model"]
+position = Vector3(0, 0.75, 0)
+mesh = SubResource("CapsuleMesh_body")
+surface_material_override/0 = SubResource("Mat_model")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="Model"]
+position = Vector3(0, 1.62, 0)
+mesh = SubResource("SphereMesh_head")
+surface_material_override/0 = SubResource("Mat_model")
 
 [node name="Hitboxes" type="Node3D" parent="."]
 
@@ -81,3 +115,8 @@ head = NodePath("../Head")
 
 [node name="PlayerInput" type="Node" parent="."]
 script = ExtResource("5_input")
+
+[node name="StateSync" type="MultiplayerSynchronizer" parent="."]
+root_path = NodePath("..")
+public_visibility = false
+replication_config = SubResource("Repl_state")

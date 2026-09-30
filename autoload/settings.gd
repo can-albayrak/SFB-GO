@@ -4,6 +4,8 @@ extends Node
 
 const CS_DEG_PER_COUNT: float = 0.022
 
+var player_name: String = "Player"
+
 ## Horizontal FOV measured at 4:3, same convention as CS (80–110).
 var fov: float = 90.0
 ## CS-compatible: a CS sensitivity value feels the same here.

@@ -7,7 +7,7 @@
 script = ExtResource("1_def")
 id = &"pistol"
 display_name = "Pistol"
-damage = 26.0
+damage = 22.0
 headshot_mult = 2.0
 leg_mult = 0.75
 max_range = 150.0
@@ -19,4 +19,5 @@ equip_time = 0.3
 move_speed_mult = 1.0
 recoil_pattern = PackedVector2Array(0, 0.9)
 recoil_recovery = 8.0
+recoil_recovery_delay = 0.08
 scene = ExtResource("2_scene")

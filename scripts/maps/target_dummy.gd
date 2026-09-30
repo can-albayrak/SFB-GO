@@ -1,6 +1,6 @@
 class_name TargetDummy
 extends Node3D
-## Test range target. Shows floating damage numbers, "dies" at zero health and resets.
+## Test range target. Health lives on the host; every peer sees the damage numbers.
 
 const RESET_DELAY: float = 2.0
 const NUMBER_RISE: float = 0.7
@@ -24,24 +24,43 @@ var _material := StandardMaterial3D.new()
 func _ready() -> void:
 	for mesh: MeshInstance3D in [$BodyMesh, $HeadMesh]:
 		mesh.material_override = _material
-	_reset()
+	_show_reset()
 
 
+## Host only. Returns true if this hit killed.
 func take_hit(amount: float, zone: Hitbox.Zone, _attacker_id: int) -> bool:
+	assert(multiplayer.is_server(), "take_hit is host-only")
 	if health <= 0.0:
 		return false
 	health -= amount
+	var killed: bool = health <= 0.0
+	Net.broadcast(self, &"_show_hit", [amount, zone, health])
+	if killed:
+		get_tree().create_timer(RESET_DELAY).timeout.connect(_server_reset)
+	return killed
+
+
+func _server_reset() -> void:
+	Net.broadcast(self, &"_show_reset")
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _show_hit(amount: float, zone: Hitbox.Zone, new_health: float) -> void:
+	if multiplayer.get_remote_sender_id() > 1:
+		return
+	health = new_health
 	_spawn_number(amount, zone)
 	if health > 0.0:
 		_update_label()
-		return false
-	_material.albedo_color = DEAD_COLOR
-	info_label.text = "DEAD"
-	get_tree().create_timer(RESET_DELAY).timeout.connect(_reset)
-	return true
+	else:
+		_material.albedo_color = DEAD_COLOR
+		info_label.text = "DEAD"
 
 
-func _reset() -> void:
+@rpc("any_peer", "call_local", "reliable")
+func _show_reset() -> void:
+	if multiplayer.get_remote_sender_id() > 1:
+		return
 	health = max_health
 	_material.albedo_color = ALIVE_COLOR
 	_update_label()
@@ -66,8 +85,8 @@ func _spawn_number(amount: float, zone: Hitbox.Zone) -> void:
 			label.modulate = LEG_NUMBER_COLOR
 		_:
 			label.modulate = BODY_NUMBER_COLOR
+	label.position = Vector3(randf_range(-0.25, 0.25), 1.9, 0.0) # Before add_child (interpolation).
 	add_child(label)
-	label.position = Vector3(randf_range(-0.25, 0.25), 1.9, 0.0)
 
 	var tween := label.create_tween().set_parallel()
 	tween.tween_property(label, "position:y", label.position.y + NUMBER_RISE, NUMBER_TIME)

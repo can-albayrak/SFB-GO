@@ -2,7 +2,7 @@ class_name Movement
 extends Node
 ## Quake/Source-style movement: ground friction + acceleration, air strafing,
 ## timed bunny hop with a speed cap, crouch, crouch-jump and slide.
-## Tuning values are exported so they can be adjusted per scene in the inspector.
+## Runs only on the owning peer. Tuning comes from MovementDef (data/movement/).
 
 const STAND_HEIGHT: float = 1.8
 const CROUCH_HEIGHT: float = 1.15
@@ -15,28 +15,8 @@ const MIN_SPEED: float = 0.05
 @export var collision: CollisionShape3D
 @export var head: Node3D
 
-@export_group("Ground")
-@export var ground_accel: float = 10.0
-@export var friction: float = 6.0
-@export var stop_speed: float = 2.0 ## Below this speed friction acts as if moving this fast (quick stops).
-@export var walk_mult: float = 0.52
-@export var crouch_mult: float = 0.4
-
-@export_group("Air")
-@export var gravity: float = 16.0
-@export var jump_velocity: float = 5.6
-@export var air_accel: float = 12.0
-@export var air_speed_cap: float = 0.8 ## Limits air gain per direction, which is what makes strafing work.
-@export var bhop_cap_mult: float = 1.3 ## Horizontal speed is clamped to base * this on every jump.
-@export var jump_buffer_time: float = 0.08 ## Jump pressed this early before landing still counts.
-
-@export_group("Slide")
-@export var slide_min_speed_mult: float = 0.85
-@export var slide_boost_mult: float = 1.2
-@export var slide_friction: float = 0.8
-@export var slide_duration: float = 0.75
-@export var slide_cooldown: float = 0.8
-
+## Set by Player from its ClassDef before the first step.
+var def: MovementDef
 ## Full run speed this tick (class speed * weapon mult * buffs). Set by Player.
 var base_speed: float = 6.0
 var is_crouched: bool = false
@@ -53,7 +33,7 @@ var _eye_height: float = STAND_EYE
 
 func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	var on_floor: bool = body.is_on_floor()
-	_jump_buffer = jump_buffer_time if cmd.jump else maxf(_jump_buffer - delta, 0.0)
+	_jump_buffer = def.jump_buffer_time if cmd.jump else maxf(_jump_buffer - delta, 0.0)
 	_slide_cooldown_left = maxf(_slide_cooldown_left - delta, 0.0)
 
 	var vel: Vector3 = body.velocity
@@ -69,15 +49,15 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 		# Jumping on the landing tick skips friction, which preserves speed (bunny hop).
 		_jump_buffer = 0.0
 		is_sliding = false
-		hvel = hvel.limit_length(base_speed * bhop_cap_mult)
-		vel.y = jump_velocity
+		hvel = hvel.limit_length(base_speed * def.bhop_cap_mult)
+		vel.y = def.jump_velocity
 		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
 	elif on_floor:
-		hvel = _apply_friction(hvel, slide_friction if is_sliding else friction, delta)
+		hvel = _apply_friction(hvel, def.slide_friction if is_sliding else def.friction, delta)
 		if not is_sliding:
-			hvel = _accelerate(hvel, wish_dir, wish_speed, ground_accel, delta)
+			hvel = _accelerate(hvel, wish_dir, wish_speed, def.ground_accel, delta)
 	else:
-		vel.y -= gravity * delta
+		vel.y -= def.gravity * delta
 		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
 
 	body.velocity = Vector3(hvel.x, vel.y, hvel.z)
@@ -93,33 +73,40 @@ func reset() -> void:
 	is_sliding = false
 	_jump_buffer = 0.0
 	_slide_left = 0.0
-	_set_crouched(false)
+	set_crouch_shape(false)
 	_eye_height = STAND_EYE
 	head.position.y = _eye_height
+
+
+## Resizes the movement capsule, feet fixed. Also used for remote players' crouch state.
+func set_crouch_shape(crouched: bool) -> void:
+	is_crouched = crouched
+	_capsule.height = CROUCH_HEIGHT if crouched else STAND_HEIGHT
+	collision.position.y = _capsule.height * 0.5
 
 
 func _update_slide(delta: float, cmd: PlayerCommand, on_floor: bool, hvel: Vector3) -> Vector3:
 	var speed: float = hvel.length()
 	if is_sliding:
 		_slide_left -= delta
-		if _slide_left <= 0.0 or not cmd.crouch or not on_floor or speed < base_speed * crouch_mult:
+		if _slide_left <= 0.0 or not cmd.crouch or not on_floor or speed < base_speed * def.crouch_mult:
 			is_sliding = false
 		return hvel
 
 	var can_slide: bool = on_floor and cmd.crouch_pressed and not cmd.walk \
-		and _slide_cooldown_left <= 0.0 and speed >= base_speed * slide_min_speed_mult
+		and _slide_cooldown_left <= 0.0 and speed >= base_speed * def.slide_min_speed_mult
 	if not can_slide:
 		return hvel
 
 	is_sliding = true
-	_slide_left = slide_duration
-	_slide_cooldown_left = slide_cooldown
-	return (hvel * slide_boost_mult).limit_length(base_speed * bhop_cap_mult)
+	_slide_left = def.slide_duration
+	_slide_cooldown_left = def.slide_cooldown
+	return (hvel * def.slide_boost_mult).limit_length(base_speed * def.bhop_cap_mult)
 
 
 func _update_crouch(want: bool, on_floor: bool) -> void:
 	if want and not is_crouched:
-		_set_crouched(true)
+		set_crouch_shape(true)
 		if not on_floor:
 			# Crouch-jump: pull the legs up instead of lowering the head.
 			body.position.y += HEIGHT_DIFF
@@ -128,19 +115,13 @@ func _update_crouch(want: bool, on_floor: bool) -> void:
 		var xform: Transform3D = body.global_transform
 		if on_floor:
 			if not body.test_move(xform, Vector3.UP * HEIGHT_DIFF):
-				_set_crouched(false)
+				set_crouch_shape(false)
 		elif not body.test_move(xform, Vector3.DOWN * HEIGHT_DIFF):
 			body.position.y -= HEIGHT_DIFF
 			_eye_height += HEIGHT_DIFF
-			_set_crouched(false)
+			set_crouch_shape(false)
 		elif not body.test_move(xform, Vector3.UP * HEIGHT_DIFF):
-			_set_crouched(false)
-
-
-func _set_crouched(crouched: bool) -> void:
-	is_crouched = crouched
-	_capsule.height = CROUCH_HEIGHT if crouched else STAND_HEIGHT
-	collision.position.y = _capsule.height * 0.5
+			set_crouch_shape(false)
 
 
 func _update_eye(delta: float) -> void:
@@ -159,9 +140,9 @@ func _get_wish_dir(move: Vector2) -> Vector3:
 
 func _get_wish_speed(cmd: PlayerCommand) -> float:
 	if is_crouched:
-		return base_speed * crouch_mult
+		return base_speed * def.crouch_mult
 	if cmd.walk:
-		return base_speed * walk_mult
+		return base_speed * def.walk_mult
 	return base_speed
 
 
@@ -173,15 +154,15 @@ func _accelerate(hvel: Vector3, wish_dir: Vector3, wish_speed: float, accel: flo
 
 
 func _air_accelerate(hvel: Vector3, wish_dir: Vector3, wish_speed: float, delta: float) -> Vector3:
-	var add_speed: float = minf(wish_speed, air_speed_cap) - hvel.dot(wish_dir)
+	var add_speed: float = minf(wish_speed, def.air_speed_cap) - hvel.dot(wish_dir)
 	if add_speed <= 0.0:
 		return hvel
-	return hvel + wish_dir * minf(air_accel * wish_speed * delta, add_speed)
+	return hvel + wish_dir * minf(def.air_accel * wish_speed * delta, add_speed)
 
 
 func _apply_friction(hvel: Vector3, fric: float, delta: float) -> Vector3:
 	var speed: float = hvel.length()
 	if speed < MIN_SPEED:
 		return Vector3.ZERO
-	var drop: float = maxf(speed, stop_speed) * fric * delta
+	var drop: float = maxf(speed, def.stop_speed) * fric * delta
 	return hvel * (maxf(speed - drop, 0.0) / speed)

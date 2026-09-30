@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
 [ext_resource type="Resource" path="res://data/weapons/assault_rifle.tres" id="3_ar"]
 [ext_resource type="Resource" path="res://data/weapons/pistol.tres" id="4_pistol"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="5_move"]
 
 [resource]
 script = ExtResource("1_class")
@@ -11,5 +12,6 @@ id = &"wolf"
 display_name = "Wolf"
 max_health = 100
 move_speed = 6.0
+movement = ExtResource("5_move")
 primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_ar")])
 secondary_weapon = ExtResource("4_pistol")

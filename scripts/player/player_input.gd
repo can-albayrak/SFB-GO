@@ -11,6 +11,9 @@ var _suppress_fire: bool = false
 
 
 func _ready() -> void:
+	if not is_multiplayer_authority():
+		set_process_unhandled_input(false)
+		return
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 

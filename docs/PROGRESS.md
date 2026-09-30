@@ -2,7 +2,7 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 1 – Temel his
+**Şu anki aşama:** 2 – Ağ
 **Son güncelleme:** 2026-09-30
 
 ## Aşamalar
@@ -12,8 +12,8 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | # | Aşama | Önerilen model | Durum |
 | --- | --- | --- | --- |
 | 0 | Kurulum (Godot, MCP, repo, proje iskeleti) | Opus | ✅ Bitti |
-| 1 | Temel his: Wolf ile hareket, hitscan ateş, test haritası (tek oyunculu) | Opus → Sonnet | ⏳ Devam ediyor |
-| 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | Opus | Bekliyor |
+| 1 | Temel his: Wolf ile hareket, hitscan ateş, test haritası (tek oyunculu) | Opus → Sonnet | ✅ Bitti |
+| 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | Opus | ⏳ Devam ediyor |
 | 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | Opus → Sonnet | Bekliyor |
 | 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | Opus | Bekliyor |
 | 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | Sonnet | Bekliyor |
@@ -46,14 +46,28 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Test haritası: hasar sayısı gösteren mankenler, parkur, bhop pisti
 - [x] HUD: crosshair, hit marker (kırmızı = kill), can, mermi, hız göstergesi
 - [x] Ana menü → Test Range
-- [ ] **Can'ın his testi** ve ayarlama (hareket/recoil değerleri)
+- [x] Can'ın his testi: hareket iyi; hasar fazla bulundu → AR 25→20, tabanca 26→22
+- [x] Aşama sonu kod incelemesi. Düzeltilenler: eğilince hitbox'lar, tepeye bakıp spreyde görüş taşması, AR'da kısa tık, yüksek FPS'te recoil titremesi, efektlerin bir frame orijinde görünmesi, hareket değerleri `.tres`'e taşındı
+
+## Aşama 2 – Ağ
+
+- [x] `Net`: ENet host/join (port 7777), isim kaydı, host çıkınca menüye dönüş, offline test range
+- [x] Ana menü: isim, Host Game, IP + Join, Test Range; komut satırı `--host` / `--join=IP` / `--name=X`
+- [x] `game.tscn`: harita yükleme, MultiplayerSpawner ile oyuncu spawn, geç katılma, ayrılanın silinmesi
+- [x] Hareket senkronu: sahip → host → diğerleri 30 Hz, 100 ms interpolasyon, uzak oyuncu gövde modeli
+- [x] Host-authoritative ateş: client istek atar, host doğrular + raycast + hasar, hit onayı sadece atana
+- [x] Can / ölüm `StateSync` ile host'tan; ölüm ekranı ("KILLED BY X"), 3 sn sonra rastgele noktada doğma
+- [x] Esc paneli: Resume / Leave Game
+- [x] Headless 2 instance testi: bağlanma, spawn, hareket senkronu, host'un client'ı öldürmesi, yeniden doğma
+- [ ] **Can + arkadaşla gerçek test** (iki bilgisayar, Tailscale)
 - [ ] Aşama sonu kod incelemesi
 
 ## Bilinen sorunlar
 
-- Oyuncu hitbox'ları eğilince alçalmıyor (aşama 2/3'te, başka oyuncular vurulabilir olunca).
 - Silah modeli duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
-- Esc sadece fareyi serbest bırakıyor; duraklatma menüsü yok (ayarlar menüsüyle birlikte gelecek).
+- Uzak oyuncularda silah modeli yok, tracer gözden çıkar (aşama 8 modelleriyle).
+- Lag compensation yok: hızlı hareket eden hedefi vurmak için hafif önden nişan gerekebilir (aşama 3).
+- Spawn noktası rastgele, koruma yok (aşama 3).
 
 ## Denge notları
 
@@ -68,3 +82,4 @@ _Henüz yok._
 | 2026-09-30 | – | Tasarım tamamlandı, dokümanlar hazırlandı |
 | 2026-09-30 | 0 | MCP bağlandı, proje iskeleti kuruldu (project.godot, autoload'lar, klasörler, Input Map, katmanlar); çalıştı, hata yok. Kalan: git + GitHub repo |
 | 2026-09-30 | 0→1 | Git + GitHub bağlandı, aşama 0 bitti. Aşama 1 ilk sürüm: hareket, AR + tabanca, mankenli test haritası, HUD. Headless testte hasar/kafa çarpanı doğrulandı. Sırada his testi. |
+| 2026-09-30 | 1→2 | His testi olumlu, hasar düşürüldü. Kod incelemesi düzeltmeleri. Aşama 2 ilk sürüm: host/join, hareket senkronu, host-authoritative hasar, ölüm/doğma; headless iki instance testinde doğrulandı. Sırada gerçek iki bilgisayar testi. |

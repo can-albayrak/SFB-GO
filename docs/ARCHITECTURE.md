@@ -30,10 +30,12 @@ sfb-go/
 │   └── settings.gd          # Kullanıcı ayarları (user://settings.cfg)
 ├── data/
 │   ├── classes/             # ClassDef .tres (hawk.tres, bear.tres ...)
+│   ├── movement/            # MovementDef .tres (standard.tres: ivme, zıplama, bhop, slide)
 │   ├── weapons/             # WeaponDef .tres
 │   └── abilities/           # AbilityDef .tres
 ├── scripts/
-│   ├── defs/                # class_def.gd, weapon_def.gd, ability_def.gd
+│   ├── defs/                # class_def.gd, weapon_def.gd, ability_def.gd, movement_def.gd
+│   ├── game/                # game.gd (maç sahnesi: harita yükleme, spawn, respawn)
 │   ├── player/              # player.gd, movement.gd, player_input.gd, player_command.gd, hitbox.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, projectile_weapon.gd, melee_weapon.gd, thrown_weapon.gd
@@ -41,7 +43,8 @@ sfb-go/
 │   ├── pickups/             # pickup.gd, airdrop.gd
 │   └── ui/                  # hud.gd, scoreboard.gd, loadout_menu.gd, main_menu.gd
 ├── scenes/
-│   ├── main.tscn            # Giriş noktası: ana menü
+│   ├── main.tscn            # Giriş noktası: ana menü (isim, Host, Join, Test Range)
+│   ├── game.tscn            # Maç sahnesi: Map + HUD + Players + PlayerSpawner
 │   ├── player/player.tscn
 │   ├── weapons/             # Silah başına sahne (görsel + script)
 │   ├── projectiles/
@@ -76,14 +79,29 @@ sfb-go/
 - `health`, `kills`, `deaths`, `is_alive`, aktif buff'lar → host'ta tutulur, client'lara yayılır. Client bunları asla kendi değiştirmez.
 - Oyuncular `MultiplayerSpawner` ile spawn edilir (host spawn eder, herkeste çoğalır).
 
+### Oturum akışı (aşama 2)
+
+- `scenes/game.tscn` (`/root/Game`, `scripts/game/game.gd`): maç sahnesi. `Net.map_path` haritasını `Map` adıyla yükler (her peer'da aynı yol), `HUD`, `Players` ve `PlayerSpawner` içerir. Haritalar sadece geometri + `SpawnPoints` (Marker3D) + harita nesneleri (mankenler).
+- **Host:** `Net.host_game()` → ENet server (port 7777) → `game.tscn`. **Client:** `Net.join_game()` → bağlanınca `_request_register(name)` → host `_welcome(map_path)` ile cevaplar → client `game.tscn` yükler → `Game._request_spawn()`.
+- Host, sahnesi yüklenmiş peer'ları `Net.ingame_peers`'te tutar. Oyun RPC'leri sadece bunlara gider (`Net.broadcast(node, method, args)`), yüklenmekte olan client "node not found" almaz.
+- Spawn: `spawner.spawn_function` + `{id, position, yaw}` verisi. `Player.StateSync` (MultiplayerSynchronizer, authority 1, `public_visibility = false`) spawn görünürlüğünü belirler: host yeni peer için `set_visibility_for()` açınca mevcut oyuncular o peer'da da doğar (geç katılma).
+- **Test Range** = `OfflineMultiplayerPeer` ile aynı kod: biz peer 1'iz, `is_server()` true.
+- Host çıkarsa client'lar `server_disconnected` → ana menü ("Host left the game").
+- Komut satırı (test için): `-- --name=X --host` / `-- --join=IP`.
+
 ### Senkronizasyon
 
 | Veri | Yöntem | Sıklık |
 | --- | --- | --- |
-| Oyuncu pozisyonu, bakış yönü, hareket durumu | Sahibinden host'a, host'tan herkese; `unreliable_ordered` RPC | 30 Hz |
-| Diğer oyuncuların görüntüsü | Gelen state'ler arasında interpolasyon (~100 ms geriden) | Her frame |
-| Ateş etme | Client → host `request_fire(origin, dir, fire_time)` | Olay bazlı, reliable |
-| Hasar, ölüm, skor | Host → herkese | Olay bazlı, reliable |
+| Oyuncu pozisyonu, bakış yönü, crouch, `life` | Sahibi `_submit_state` → host `_relay_state` → diğerleri `_receive_state`; `unreliable_ordered` RPC, sahibin saat damgasıyla | 30 Hz |
+| Diğer oyuncuların görüntüsü | Snapshot tamponu, ~100 ms geriden interpolasyon (`Player._interpolate_remote`) | Her frame |
+| Ateş etme | Sahibi `_request_fire(origin, dir, slot)` → host doğrular (hayatta mı, ateş hızı, origin ≤ 3 m sapma) → `server_fire` | Olay bazlı, reliable |
+| `health`, `is_alive` | `StateSync` (ON_CHANGE, spawn'da da gönderilir) | Değişince |
+| Ölüm, yeniden doğma, hit onayı, uzak tracer | Host → `Net.broadcast` (`_announce_death`, `_respawn_at`, `_show_shot`) / `confirm_hit` sadece atana | Olay bazlı |
+
+- `life` sayacı her doğuşta artar; önceki hayattan geç gelen state paketleri atılır.
+- Host'tan gelmesi gereken RPC'ler `any_peer` + `_sender_is_host()` kontrolü kullanır (node authority'si sahibinde olduğu için `authority` modu kullanılamaz).
+- Ölüm/doğma (aşama 2): host `take_hit` → can 0 → `_die` → `Game` `Match.respawn_delay` (3 sn) sonra rastgele spawn noktasında `server_respawn`. Haritadan düşme: sahibi `_request_fall_death` ister, host karar verir.
 | Maç durumu | Host → herkese (katılana tam snapshot) | Olay bazlı + katılışta |
 
 ### Vuruş tespiti (hitscan)
@@ -151,9 +169,11 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 ├── Hitboxes (Node3D)
 │   ├── HeadHitbox (Area3D)         hitbox.gd       – zone = HEAD
 │   ├── BodyHitbox (Area3D)                         – zone = BODY
-│   └── LegHitbox (Area3D)                          – zone = LEG
+│   └── LegHitbox (Area3D)                          – zone = LEG (eğilince Hitbox.set_pose; kutular local_to_scene)
+├── Model (Node3D)                                  – başkalarının gördüğü gövde (sahibinde gizli)
 ├── Movement (Node)                 movement.gd     – Quake tarzı ivme, bhop, slide, crouch
 ├── PlayerInput (Node)              player_input.gd – sadece sahip client'ta aktif
+├── StateSync (MultiplayerSynchronizer)             – health, is_alive; authority host (1)
 └── AbilitySlot (Node)                              – aktif güç (aşama 4)
 ```
 
@@ -168,11 +188,11 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 
 - `Weapon` (taban): şarjör, ateş aralığı, şarjör değiştirme, recoil durumu. `HitscanWeapon._fire()` ray atar, `Hitbox`'a çarparsa `owner.take_hit(amount, zone, attacker_id) -> bool` çağırır (aşama 1'de yerel; aşama 2'de host'a taşınır).
 - Recoil: `WeaponDef.recoil_pattern` her atışta bakışa eklenen derece değerleri; ateş bitince `recoil_recovery` hızıyla sıfıra döner. İlk mermi her zaman tam isabetli.
-- Tracer ve mermi izi haritaya (oyuncunun parent'ı) eklenir.
+- Tracer ve mermi izi `ShotEffects` (sadece görsel) ile `Players` node'una eklenir. Uzak oyuncuların atışlarını host `_show_shot` ile yayar.
 
 ### Test haritası
 
-`scenes/maps/test_range.tscn`: 15/30/55 m'de mankenler (`scenes/maps/target_dummy.tscn`, 70/100/175 HP), zıplama/crouch-jump kasaları (0,8 / 1,4 / 2,2 m), rampa ve platform, crouch tüneli (1,3 m), 10 m işaretli bhop pisti. Mankenler katman 2'de (oyuncu gibi), hitbox'ları katman 3'te.
+`scenes/maps/test_range.tscn`: 15/30/55 m'de mankenler (`scenes/maps/target_dummy.tscn`, 70/100/175 HP), zıplama/crouch-jump kasaları (0,8 / 1,4 / 2,2 m), rampa ve platform, crouch tüneli (1,3 m), 10 m işaretli bhop pisti. Mankenler katman 2'de (oyuncu gibi), hitbox'ları katman 3'te. Oyuncu ve HUD haritada değil `game.tscn`'de; harita `SpawnPoints` (8 nokta) sağlar. Manken canı host'ta, hasar sayıları `Net.broadcast` ile herkeste görünür.
 
 ### Hareket
 
@@ -180,7 +200,7 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 - **Bunny hop:** Yere değdiği frame'de zıplarsa sürtünme uygulanmaz → hız korunur. Yatay hız üst sınırı `max_speed * 1.3` → sonsuz hızlanma yok.
 - **Slide:** Yerdeyken ve hız eşiğin üstündeyken Ctrl → kısa süreli düşük sürtünmeli kayma, alçak kapsül.
 - **Crouch:** Kapsül ve kamera alçalır, hız düşer. Havada crouch = crouch-jump (kasalara çıkış).
-- Değerler `movement.gd` içinde `@export` ve sınıfın `move_speed` çarpanıyla ölçeklenir.
+- Değerler `data/movement/standard.tres` (`MovementDef`, `ClassDef.movement`) dosyasında; koşu hızı sınıfın `move_speed` değeri. Hareket sadece sahip peer'da çalışır.
 
 ## Fizik katmanları
 

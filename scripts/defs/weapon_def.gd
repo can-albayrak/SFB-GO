@@ -27,6 +27,8 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var recoil_pattern: PackedVector2Array
 ## Degrees per second the view returns once firing stops.
 @export var recoil_recovery: float = 12.0
+## Recovery starts this long after the next shot would have been ready.
+@export var recoil_recovery_delay: float = 0.08
 
 @export_group("Scene")
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).
