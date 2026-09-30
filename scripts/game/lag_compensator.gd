@@ -50,9 +50,15 @@ func _physics_process(_delta: float) -> void:
 		samples.append(sample)
 		while not samples.is_empty() and (samples[0] as Sample).time < now - HISTORY_SECONDS:
 			samples.pop_front()
-	for player: Player in _history.keys():
-		if not is_instance_valid(player):
-			_history.erase(player)
+	# Untyped loop: a freed Player key must not be assigned to a typed variable.
+	for key: Variant in _history.keys():
+		if not is_instance_valid(key):
+			_history.erase(key)
+
+
+## Drops a player's history (on respawn), so shots never rewind into a previous life.
+func forget(player: Player) -> void:
+	_history.erase(player)
 
 
 ## Runs `weapon.server_fire` with every other living player rewound for `shooter`.
@@ -60,8 +66,11 @@ func fire_rewound(shooter: Player, weapon: Weapon, origin: Vector3, dir: Vector3
 	var rtt: float = _get_rtt_seconds(shooter.get_multiplayer_authority())
 	var now: float = _now()
 	var restore: Array[Array] = []
-	for target: Player in _history.keys():
-		if target == shooter or not is_instance_valid(target) or not target.is_alive:
+	for key: Variant in _history.keys():
+		if not is_instance_valid(key):
+			continue
+		var target: Player = key
+		if target == shooter or not target.is_alive:
 			continue
 		var extra: float = Player.INTERP_DELAY if target.is_local else 0.0
 		var rewind: float = minf(rtt + extra, MAX_REWIND)

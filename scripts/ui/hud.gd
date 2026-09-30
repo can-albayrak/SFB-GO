@@ -6,7 +6,6 @@ extends CanvasLayer
 
 var _player: Player
 var _weapon: Weapon
-var _next_match_at: float = 0.0
 
 @onready var crosshair: Crosshair = $Crosshair
 @onready var health_label: Label = $HealthLabel
@@ -46,7 +45,7 @@ func _process(_delta: float) -> void:
 	var ended: bool = Match.state == Match.State.ENDED
 	scoreboard.visible = ended or Input.is_action_pressed(&"scoreboard")
 	if ended:
-		next_label.text = "Next match in %d" % ceili(maxf(_next_match_at - _now(), 0.0))
+		next_label.text = "Next match in %d" % ceili(Match.end_screen_left)
 	if not is_instance_valid(_player):
 		return
 	speed_label.text = "%.1f m/s" % _player.movement.get_horizontal_speed()
@@ -54,6 +53,7 @@ func _process(_delta: float) -> void:
 
 
 func _update_top_bar() -> void:
+	top_bar.visible = Match.active
 	var parts: Array[String] = []
 	if Match.has_time_limit():
 		var seconds: int = ceili(Match.time_left)
@@ -110,8 +110,7 @@ func _on_player_died(victim: Player, killer_id: int, weapon_name: String, killer
 
 
 func _on_match_ended(winner_id: int, awards: Array) -> void:
-	_next_match_at = _now() + Match.rules.end_screen_time
-	winner_label.text = "%s WINS" % Net.get_player_name(winner_id) if winner_id != -1 else "MATCH OVER"
+	winner_label.text = "%s WINS" % Net.get_player_name(winner_id) if winner_id != -1 else "DRAW"
 	var lines: Array[String] = []
 	for award: Array in awards:
 		lines.append("%s:  %s  (%s)" % [award[0], Net.get_player_name(award[1]), award[2]])
@@ -155,7 +154,3 @@ func _on_resume_pressed() -> void:
 
 func _on_leave_pressed() -> void:
 	Net.leave()
-
-
-func _now() -> float:
-	return Time.get_ticks_msec() / 1000.0

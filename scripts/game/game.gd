@@ -120,17 +120,18 @@ func _update_leader() -> void:
 		player.set_leader(player.get_multiplayer_authority() == leader and not player.is_local)
 
 
-func _on_player_died(killer_id: int, weapon_name: String, headshot: bool, player: Player) -> void:
+func _on_player_died(killer_id: int, weapon_name: String, headshot: bool, is_melee: bool, player: Player) -> void:
 	var distance: float = 0.0
 	var killer := players_root.get_node_or_null(str(killer_id)) as Player
 	if killer != null:
 		distance = killer.global_position.distance_to(player.global_position)
-	Match.server_register_kill(killer_id, player.get_multiplayer_authority(), weapon_name, headshot, distance)
-	get_tree().create_timer(Match.rules.respawn_delay).timeout.connect(_respawn.bind(player))
+	Match.server_register_kill(killer_id, player.get_multiplayer_authority(), weapon_name, headshot, distance, is_melee)
+	get_tree().create_timer(Match.rules.respawn_delay).timeout.connect(_respawn.bind(player, player.get_life()))
 
 
-func _respawn(player: Player) -> void:
-	if not is_instance_valid(player) or player.is_alive:
+## `life` is the life that died; a restart in between makes this timer stale.
+func _respawn(player: Player, life: int) -> void:
+	if not is_instance_valid(player) or player.is_alive or player.get_life() != life:
 		return
 	var spawn: Marker3D = _pick_spawn_point(player.get_multiplayer_authority())
 	player.server_respawn(spawn.global_position, spawn.global_rotation.y)

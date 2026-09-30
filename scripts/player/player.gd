@@ -10,7 +10,7 @@ signal weapon_changed(weapon: Weapon)
 signal alive_changed(is_alive: bool)
 signal protection_changed(is_protected: bool)
 ## Host only. Game registers the kill and schedules the respawn.
-signal died(killer_id: int, weapon_name: String, headshot: bool)
+signal died(killer_id: int, weapon_name: String, headshot: bool, is_melee: bool)
 
 const MAX_PITCH: float = deg_to_rad(89.0)
 const FALL_DEATH_Y: float = -30.0
@@ -72,6 +72,7 @@ var _last_state_host_time: float = 0.0
 var _has_valid_position: bool = false
 var _protected_until: float = 0.0
 var _last_hit_weapon: String = ""
+var _last_hit_melee: bool = false
 var _last_hit_zone: Hitbox.Zone = Hitbox.Zone.BODY
 
 @onready var head: Node3D = $Head
@@ -182,12 +183,18 @@ func send_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 	_request_fire.rpc_id(1, origin, dir, slot)
 
 
+## Host only: false while spawn-protected, dead or between matches (no hit marker then).
+func can_take_damage() -> bool:
+	return is_alive and not is_protected and Match.state == Match.State.PLAYING
+
+
 ## Host only. Returns true if this hit killed.
-func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: String) -> bool:
+func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: String, is_melee: bool = false) -> bool:
 	assert(multiplayer.is_server(), "take_hit is host-only")
-	if not is_alive or is_protected or Match.state != Match.State.PLAYING:
+	if not can_take_damage():
 		return false
 	_last_hit_weapon = weapon_name
+	_last_hit_melee = is_melee
 	_last_hit_zone = zone
 	health = maxi(health - roundi(amount), 0)
 	if health > 0:
@@ -201,10 +208,18 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	assert(multiplayer.is_server(), "server_respawn is host-only")
 	_life += 1
 	_has_valid_position = false
+	var compensator: LagCompensator = LagCompensator.find(get_tree())
+	if compensator != null:
+		compensator.forget(self) # No rewinding into the previous life.
 	health = class_def.max_health
 	is_alive = true
 	_grant_protection()
 	Net.broadcast(self, &"_respawn_at", [spawn_position, yaw, _life])
+
+
+## Host: respawn counter, used to discard stale respawn timers.
+func get_life() -> int:
+	return _life
 
 
 func is_pose_crouched() -> bool:
@@ -240,7 +255,7 @@ func _die(killer_id: int) -> void:
 		killer_health = killer.health
 	var headshot: bool = _last_hit_zone == Hitbox.Zone.HEAD and killer_id != get_multiplayer_authority()
 	Net.broadcast(self, &"_announce_death", [killer_id, _last_hit_weapon, killer_health])
-	died.emit(killer_id, _last_hit_weapon, headshot)
+	died.emit(killer_id, _last_hit_weapon, headshot, _last_hit_melee)
 
 
 func _now() -> float:
@@ -431,7 +446,8 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
 		return
 	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + weapon.def.fire_interval * FIRE_RATE_TOLERANCE
-	is_protected = false # GDD: firing ends spawn protection.
+	if Match.state == Match.State.PLAYING:
+		is_protected = false # GDD: firing ends spawn protection.
 	var end_point: Vector3
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
 	if compensator != null:
@@ -460,7 +476,10 @@ func confirm_hit(zone: Hitbox.Zone, killed: bool) -> void:
 func _request_fall_death() -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority() or not is_alive:
 		return
+	if Match.state != Match.State.PLAYING:
+		return # Between matches: the restart respawns everyone anyway.
 	_last_hit_weapon = FALL_WEAPON_NAME
+	_last_hit_melee = false
 	_last_hit_zone = Hitbox.Zone.BODY
 	health = 0
 	_die(get_multiplayer_authority())

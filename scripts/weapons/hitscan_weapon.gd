@@ -40,6 +40,8 @@ func _apply_hit(hitbox: Hitbox) -> void:
 	var receiver: Node = hitbox.get_receiver()
 	if receiver == null or not receiver.has_method(&"take_hit"):
 		return
+	if receiver.has_method(&"can_take_damage") and not receiver.call(&"can_take_damage"):
+		return # Protected / dead / between matches: no damage, so no hit marker.
 	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
 	var shooter_id: int = player.get_multiplayer_authority()
 	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name)

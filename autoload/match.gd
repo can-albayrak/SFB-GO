@@ -11,14 +11,20 @@ var rules: MatchDef = DEFAULT_RULES.duplicate()
 var state: State = State.PLAYING
 ## Seconds left; counts down on every peer (the host re-sends it on join and restart).
 var time_left: float = 0.0
+## Seconds until the next match while ENDED; counts down on every peer.
+var end_screen_left: float = 0.0
 var kills: Dictionary[int, int] = {}
 var deaths: Dictionary[int, int] = {}
 ## True while a Game scene is running.
 var active: bool = false
+## Last finished match (kept for late joiners during the end screen). -1 = draw.
+var winner_id: int = -1
+var awards: Array = []
 
 # Host-only stats for end-of-match awards.
 var _self_kills: Dictionary[int, int] = {}
 var _longest_headshot: Dictionary[int, float] = {}
+var _knife_kills: Dictionary[int, int] = {}
 var _match_serial: int = 0
 
 
@@ -41,18 +47,20 @@ func get_deaths(peer_id: int) -> int:
 	return deaths.get(peer_id, 0)
 
 
-## Peer ids ordered by kills (desc), then deaths (asc).
+## Peer ids ordered by kills (desc), then deaths (asc), then peer id so every peer agrees.
 func get_ranking() -> Array[int]:
 	var ids: Array[int] = []
 	ids.assign(kills.keys())
 	ids.sort_custom(func(a: int, b: int) -> bool:
 		if get_kills(a) != get_kills(b):
 			return get_kills(a) > get_kills(b)
-		return get_deaths(a) < get_deaths(b))
+		if get_deaths(a) != get_deaths(b):
+			return get_deaths(a) < get_deaths(b)
+		return a < b)
 	return ids
 
 
-## The current sole leader with at least one kill, or -1 (tie or nobody scored).
+## The current sole leader with at least one kill, or -1 (tie on kills or nobody scored).
 func get_leader() -> int:
 	var ranking: Array[int] = get_ranking()
 	if ranking.is_empty() or get_kills(ranking[0]) == 0:
@@ -63,7 +71,12 @@ func get_leader() -> int:
 
 
 func _process(delta: float) -> void:
-	if not active or state != State.PLAYING or not has_time_limit():
+	if not active:
+		return
+	if state == State.ENDED:
+		end_screen_left = maxf(end_screen_left - delta, 0.0)
+		return
+	if not has_time_limit():
 		return
 	time_left = maxf(time_left - delta, 0.0)
 	if time_left <= 0.0 and multiplayer.is_server():
@@ -83,13 +96,18 @@ func server_begin() -> void:
 	time_left = rules.time_limit
 
 
-## Every peer, when the match scene closes.
+## Every peer, when the match scene closes. Nothing leaks into the next session.
 func end_session() -> void:
 	active = false
 	_match_serial += 1
 	kills.clear()
 	deaths.clear()
 	state = State.PLAYING
+	rules = DEFAULT_RULES.duplicate()
+	time_left = 0.0
+	end_screen_left = 0.0
+	winner_id = -1
+	awards = []
 
 
 ## Adds a peer to the scoreboard and sends it the full match state.
@@ -107,10 +125,11 @@ func server_remove_player(peer_id: int) -> void:
 	deaths.erase(peer_id)
 	_self_kills.erase(peer_id)
 	_longest_headshot.erase(peer_id)
+	_knife_kills.erase(peer_id)
 	Net.broadcast(self, &"_sync_scores", [kills, deaths])
 
 
-func server_register_kill(killer_id: int, victim_id: int, weapon_name: String, headshot: bool, distance: float) -> void:
+func server_register_kill(killer_id: int, victim_id: int, weapon_name: String, headshot: bool, distance: float, is_melee: bool) -> void:
 	assert(multiplayer.is_server(), "server_register_kill is host-only")
 	if state != State.PLAYING:
 		return
@@ -122,6 +141,8 @@ func server_register_kill(killer_id: int, victim_id: int, weapon_name: String, h
 		kills[killer_id] = get_kills(killer_id) + 1
 		if headshot:
 			_longest_headshot[killer_id] = maxf(_longest_headshot.get(killer_id, 0.0), distance)
+		if is_melee:
+			_knife_kills[killer_id] = _knife_kills.get(killer_id, 0) + 1
 	Net.broadcast(self, &"_on_kill", [killer_id, victim_id, weapon_name, headshot, get_kills(killer_id), get_deaths(victim_id)])
 	if not self_kill and rules.kill_target > 0 and get_kills(killer_id) >= rules.kill_target:
 		_end_match()
@@ -135,24 +156,39 @@ func _reset_scores() -> void:
 		deaths[peer_id] = 0
 	_self_kills.clear()
 	_longest_headshot.clear()
+	_knife_kills.clear()
 
 
 func _snapshot() -> Dictionary:
 	return {
 		"state": state,
 		"time_left": time_left,
+		"end_screen_left": end_screen_left,
 		"kill_target": rules.kill_target,
 		"time_limit": rules.time_limit,
 		"kills": kills,
 		"deaths": deaths,
+		"winner_id": winner_id,
+		"awards": awards,
 	}
+
+
+## Winner = sole top player with at least one kill; a full tie or no kills is a draw (-1).
+func _pick_winner() -> int:
+	var ranking: Array[int] = get_ranking()
+	if ranking.is_empty() or get_kills(ranking[0]) == 0:
+		return -1
+	if ranking.size() > 1:
+		var a: int = ranking[0]
+		var b: int = ranking[1]
+		if get_kills(a) == get_kills(b) and get_deaths(a) == get_deaths(b):
+			return -1
+	return ranking[0]
 
 
 func _end_match() -> void:
 	state = State.ENDED
-	var ranking: Array[int] = get_ranking()
-	var winner: int = ranking[0] if not ranking.is_empty() else -1
-	Net.broadcast(self, &"_on_match_ended", [winner, _compute_awards()])
+	Net.broadcast(self, &"_on_match_ended", [_pick_winner(), _compute_awards(), rules.end_screen_time])
 	var serial: int = _match_serial
 	get_tree().create_timer(rules.end_screen_time).timeout.connect(_restart.bind(serial))
 
@@ -167,19 +203,22 @@ func _restart(serial: int) -> void:
 	Net.broadcast(self, &"_on_match_started", [time_left, kills, deaths])
 
 
-## Array of [title, peer_id, detail]. Knife award arrives with quick melee (stage 4).
+## Array of [title, peer_id, detail].
 func _compute_awards() -> Array:
-	var awards: Array = []
+	var result: Array = []
 	var most_deaths: int = _best_key(deaths)
 	if most_deaths != -1:
-		awards.append(["Most Deaths", most_deaths, "%d deaths" % get_deaths(most_deaths)])
+		result.append(["Most Deaths", most_deaths, "%d deaths" % get_deaths(most_deaths)])
+	var knifer: int = _best_key(_knife_kills)
+	if knifer != -1:
+		result.append(["Most Knife Kills", knifer, "%d" % _knife_kills[knifer]])
 	var longest: int = _best_key(_longest_headshot)
 	if longest != -1:
-		awards.append(["Longest Headshot", longest, "%.0f m" % _longest_headshot[longest]])
+		result.append(["Longest Headshot", longest, "%.0f m" % _longest_headshot[longest]])
 	var self_killer: int = _best_key(_self_kills)
 	if self_killer != -1:
-		awards.append(["Most Self-Kills", self_killer, "%d" % _self_kills[self_killer]])
-	return awards
+		result.append(["Most Self-Kills", self_killer, "%d" % _self_kills[self_killer]])
+	return result
 
 
 ## Key with the highest positive value, or -1.
@@ -207,12 +246,17 @@ func _sync_full(snapshot: Dictionary) -> void:
 	active = true
 	state = snapshot["state"]
 	time_left = snapshot["time_left"]
+	end_screen_left = snapshot["end_screen_left"]
 	rules = DEFAULT_RULES.duplicate()
 	rules.kill_target = snapshot["kill_target"]
 	rules.time_limit = snapshot["time_limit"]
 	kills.assign(snapshot["kills"])
 	deaths.assign(snapshot["deaths"])
+	winner_id = snapshot["winner_id"]
+	awards = snapshot["awards"]
 	Events.scores_changed.emit()
+	if state == State.ENDED:
+		Events.match_ended.emit(winner_id, awards)
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -236,10 +280,13 @@ func _on_kill(killer_id: int, victim_id: int, weapon_name: String, headshot: boo
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _on_match_ended(winner_id: int, awards: Array) -> void:
+func _on_match_ended(new_winner_id: int, new_awards: Array, end_time: float) -> void:
 	if not _from_host():
 		return
 	state = State.ENDED
+	winner_id = new_winner_id
+	awards = new_awards
+	end_screen_left = end_time
 	Events.match_ended.emit(winner_id, awards)
 
 
@@ -251,5 +298,7 @@ func _on_match_started(new_time_left: float, new_kills: Dictionary, new_deaths: 
 	time_left = new_time_left
 	kills.assign(new_kills)
 	deaths.assign(new_deaths)
+	winner_id = -1
+	awards = []
 	Events.match_started.emit()
 	Events.scores_changed.emit()
