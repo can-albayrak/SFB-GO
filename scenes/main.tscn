@@ -1,5 +1,7 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+
 [node name="Main" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -7,6 +9,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.06, 0.04, 1)
 
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -16,7 +28,27 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Title" type="Label" parent="Center"]
+[node name="VBox" type="VBoxContainer" parent="Center"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 64
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.55, 0.25, 1)
+theme_override_font_sizes/font_size = 96
 text = "SFB:GO"
+horizontal_alignment = 1
+
+[node name="TestRangeButton" type="Button" parent="Center/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Test Range"
+
+[node name="QuitButton" type="Button" parent="Center/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Quit"

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/pistol.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"pistol"
+display_name = "Pistol"
+damage = 26.0
+headshot_mult = 2.0
+leg_mult = 0.75
+max_range = 150.0
+fire_interval = 0.15
+automatic = false
+magazine_size = 12
+reload_time = 1.5
+equip_time = 0.3
+move_speed_mult = 1.0
+recoil_pattern = PackedVector2Array(0, 0.9)
+recoil_recovery = 8.0
+scene = ExtResource("2_scene")

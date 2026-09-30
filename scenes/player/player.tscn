@@ -1,0 +1,83 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="Resource" path="res://data/classes/wolf.tres" id="2_wolf"]
+[ext_resource type="Script" path="res://scripts/player/hitbox.gd" id="3_hitbox"]
+[ext_resource type="Script" path="res://scripts/player/movement.gd" id="4_movement"]
+[ext_resource type="Script" path="res://scripts/player/player_input.gd" id="5_input"]
+
+[sub_resource type="CapsuleShape3D" id="Capsule_move"]
+resource_local_to_scene = true
+radius = 0.35
+height = 1.8
+
+[sub_resource type="SphereShape3D" id="Sphere_head"]
+radius = 0.16
+
+[sub_resource type="BoxShape3D" id="Box_body"]
+size = Vector3(0.5, 0.75, 0.32)
+
+[sub_resource type="BoxShape3D" id="Box_legs"]
+size = Vector3(0.45, 0.75, 0.3)
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_player")
+class_def = ExtResource("2_wolf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("Capsule_move")
+
+[node name="Head" type="Node3D" parent="."]
+position = Vector3(0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(0, 1.6, 0)
+near = 0.03
+
+[node name="WeaponHolder" type="Node3D" parent="Camera3D"]
+
+[node name="Hitboxes" type="Node3D" parent="."]
+
+[node name="HeadHitbox" type="Area3D" parent="Hitboxes"]
+position = Vector3(0, 1.62, 0)
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_hitbox")
+zone = 0
+
+[node name="Shape" type="CollisionShape3D" parent="Hitboxes/HeadHitbox"]
+shape = SubResource("Sphere_head")
+
+[node name="BodyHitbox" type="Area3D" parent="Hitboxes"]
+position = Vector3(0, 1.1, 0)
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_hitbox")
+zone = 1
+
+[node name="Shape" type="CollisionShape3D" parent="Hitboxes/BodyHitbox"]
+shape = SubResource("Box_body")
+
+[node name="LegHitbox" type="Area3D" parent="Hitboxes"]
+position = Vector3(0, 0.37, 0)
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_hitbox")
+zone = 2
+
+[node name="Shape" type="CollisionShape3D" parent="Hitboxes/LegHitbox"]
+shape = SubResource("Box_legs")
+
+[node name="Movement" type="Node" parent="." node_paths=PackedStringArray("collision", "head")]
+script = ExtResource("4_movement")
+collision = NodePath("../CollisionShape3D")
+head = NodePath("../Head")
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("5_input")

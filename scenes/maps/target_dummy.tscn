@@ -1,0 +1,88 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/maps/target_dummy.gd" id="1_dummy"]
+[ext_resource type="Script" path="res://scripts/player/hitbox.gd" id="2_hitbox"]
+
+[sub_resource type="CapsuleShape3D" id="Capsule_block"]
+radius = 0.3
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.26
+height = 1.4
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.15
+height = 0.3
+
+[sub_resource type="SphereShape3D" id="Sphere_head"]
+radius = 0.16
+
+[sub_resource type="BoxShape3D" id="Box_body"]
+size = Vector3(0.56, 0.75, 0.4)
+
+[sub_resource type="BoxShape3D" id="Box_legs"]
+size = Vector3(0.5, 0.75, 0.4)
+
+[node name="TargetDummy" type="Node3D"]
+script = ExtResource("1_dummy")
+
+[node name="Blocker" type="StaticBody3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape3D" parent="Blocker"]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("Capsule_block")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.75, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.62, 0)
+mesh = SubResource("SphereMesh_head")
+
+[node name="Hitboxes" type="Node3D" parent="."]
+
+[node name="HeadHitbox" type="Area3D" parent="Hitboxes"]
+position = Vector3(0, 1.62, 0)
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_hitbox")
+zone = 0
+
+[node name="Shape" type="CollisionShape3D" parent="Hitboxes/HeadHitbox"]
+shape = SubResource("Sphere_head")
+
+[node name="BodyHitbox" type="Area3D" parent="Hitboxes"]
+position = Vector3(0, 1.1, 0)
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_hitbox")
+zone = 1
+
+[node name="Shape" type="CollisionShape3D" parent="Hitboxes/BodyHitbox"]
+shape = SubResource("Box_body")
+
+[node name="LegHitbox" type="Area3D" parent="Hitboxes"]
+position = Vector3(0, 0.37, 0)
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_hitbox")
+zone = 2
+
+[node name="Shape" type="CollisionShape3D" parent="Hitboxes/LegHitbox"]
+shape = SubResource("Box_legs")
+
+[node name="InfoLabel" type="Label3D" parent="."]
+position = Vector3(0, 2.1, 0)
+billboard = 1
+no_depth_test = true
+pixel_size = 0.004
+font_size = 40
+outline_size = 10
+text = "100 / 100 HP"

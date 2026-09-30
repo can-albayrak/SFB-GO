@@ -34,7 +34,8 @@ sfb-go/
 │   └── abilities/           # AbilityDef .tres
 ├── scripts/
 │   ├── defs/                # class_def.gd, weapon_def.gd, ability_def.gd
-│   ├── player/              # player.gd, movement.gd, player_input.gd, hitbox.gd
+│   ├── player/              # player.gd, movement.gd, player_input.gd, player_command.gd, hitbox.gd
+│   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, projectile_weapon.gd, melee_weapon.gd, thrown_weapon.gd
 │   ├── abilities/           # ability.gd (taban), grapple.gd, dash.gd, shield.gd ...
 │   ├── pickups/             # pickup.gd, airdrop.gd
@@ -144,8 +145,8 @@ Sabit kurallar (kafa çarpanı istisnası gibi) `WeaponDef` alanlarıyla ifade e
 ```
 Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağlar
 ├── CollisionShape3D                                – hareket kapsülü
-├── Head (Node3D)                                   – kamera yüksekliği, eğilmede alçalır
-│   ├── Camera3D
+├── Head (Node3D)                                   – göz noktası, eğilmede alçalır (sadece pozisyon)
+├── Camera3D                                        – top_level, her frame Head'in interpolasyonlu pozisyonuna konur
 │   └── WeaponHolder (Node3D)                       – aktif silah sahnesi buraya eklenir
 ├── Hitboxes (Node3D)
 │   ├── HeadHitbox (Area3D)         hitbox.gd       – zone = HEAD
@@ -153,8 +154,25 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 │   └── LegHitbox (Area3D)                          – zone = LEG
 ├── Movement (Node)                 movement.gd     – Quake tarzı ivme, bhop, slide, crouch
 ├── PlayerInput (Node)              player_input.gd – sadece sahip client'ta aktif
-└── AbilitySlot (Node)                              – aktif güç
+└── AbilitySlot (Node)                              – aktif güç (aşama 4)
 ```
+
+### Girdi, bakış ve kamera
+
+- `PlayerInput.gather()` her physics tick'te bir `PlayerCommand` (RefCounted) üretir. `Movement` ve `Weapon` sadece bu komutu okur, böylece aşama 2'de aynı mantık ağdan gelen girdiyle de çalışır.
+- Fare bakışı input anında uygulanır: yaw = gövdenin `rotation.y`, pitch = `Player.look_pitch`. Hassasiyet CS ile aynı birimde (`sens * 0.022` derece/count), FOV 4:3 yatay (CS kuralı).
+- Physics interpolation açık (60 Hz tick, yüksek FPS'te akıcı). Kamera `top_level` ve interpolasyonu kapalı, `_process`'te yerleştirilir, bu yüzden fare gecikmesi olmaz.
+- Atış `get_aim_origin()` (tick anındaki göz) + `get_aim_basis()` (bakış + recoil) ile yapılır, kamera pozisyonuyla değil.
+
+### Silah
+
+- `Weapon` (taban): şarjör, ateş aralığı, şarjör değiştirme, recoil durumu. `HitscanWeapon._fire()` ray atar, `Hitbox`'a çarparsa `owner.take_hit(amount, zone, attacker_id) -> bool` çağırır (aşama 1'de yerel; aşama 2'de host'a taşınır).
+- Recoil: `WeaponDef.recoil_pattern` her atışta bakışa eklenen derece değerleri; ateş bitince `recoil_recovery` hızıyla sıfıra döner. İlk mermi her zaman tam isabetli.
+- Tracer ve mermi izi haritaya (oyuncunun parent'ı) eklenir.
+
+### Test haritası
+
+`scenes/maps/test_range.tscn`: 15/30/55 m'de mankenler (`scenes/maps/target_dummy.tscn`, 70/100/175 HP), zıplama/crouch-jump kasaları (0,8 / 1,4 / 2,2 m), rampa ve platform, crouch tüneli (1,3 m), 10 m işaretli bhop pisti. Mankenler katman 2'de (oyuncu gibi), hitbox'ları katman 3'te.
 
 ### Hareket
 
@@ -175,7 +193,7 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 | 5 | pickup | Pickup ve airdrop alanları |
 | 6 | grapple | Kanca takılabilen yüzeyler |
 
-Hitscan raycast maskesi: `world | hitbox`.
+Hitscan raycast maskesi: `world | hitbox`. Oyuncu kapsülü maskesi: `world | player` (oyuncular birbirinin içinden geçmez).
 
 ## Input Map
 

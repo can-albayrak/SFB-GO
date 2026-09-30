@@ -117,6 +117,8 @@ pause_menu={
 
 3d/physics_engine="Jolt Physics"
 common/physics_ticks_per_second=60
+common/physics_interpolation=true
+common/physics_jitter_fix=0.0
 
 [rendering]
 
