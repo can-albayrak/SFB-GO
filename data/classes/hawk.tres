@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ClassDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
+[ext_resource type="Resource" path="res://data/weapons/heavy_rifle.tres" id="3_heavy"]
+[ext_resource type="Resource" path="res://data/weapons/marksman_rifle.tres" id="4_marksman"]
+[ext_resource type="Resource" path="res://data/weapons/pistol.tres" id="5_pistol"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="6_move"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="7_knife"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="8_adef"]
+[ext_resource type="Resource" path="res://data/abilities/grapple.tres" id="9_grapple"]
+[ext_resource type="Resource" path="res://data/abilities/decoy.tres" id="10_decoy"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"hawk"
+display_name = "Hawk"
+max_health = 80
+move_speed = 6.6
+movement = ExtResource("6_move")
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_heavy"), ExtResource("4_marksman")])
+secondary_weapon = ExtResource("5_pistol")
+abilities = Array[ExtResource("8_adef")]([ExtResource("9_grapple"), ExtResource("10_decoy")])
+quick_melee = ExtResource("7_knife")

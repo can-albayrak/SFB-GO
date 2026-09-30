@@ -32,6 +32,12 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 ## Recovery starts this long after the next shot would have been ready.
 @export var recoil_recovery_delay: float = 0.08
 
+@export_group("Scope")
+@export var scope_zoom: float = 0.0 ## 0 = no scope; otherwise right mouse zooms by this factor.
+@export var scope_move_mult: float = 0.5 ## Speed multiplier while scoped (no sprint).
+@export var scope_sway: float = 0.0 ## Degrees of view sway while scoped (halved when crouched).
+@export var unscoped_spread: float = 0.0 ## Degrees of random cone when firing without the scope.
+
 @export_group("Scene")
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).
 

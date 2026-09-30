@@ -20,7 +20,8 @@ extends Resource
 
 @export_group("Slide")
 @export var slide_min_speed_mult: float = 0.85
-@export var slide_boost_mult: float = 1.2
-@export var slide_friction: float = 0.8
-@export var slide_duration: float = 0.75
-@export var slide_cooldown: float = 0.8
+@export var slide_boost_mult: float = 1.35
+@export var slide_friction: float = 0.35
+@export var slide_duration: float = 1.1
+@export var slide_cooldown: float = 0.9
+@export var slide_max_speed_mult: float = 1.55 ## Slide boost may exceed the bhop cap up to base * this.

@@ -15,6 +15,7 @@ signal died(killer_id: int, weapon_name: String, headshot: bool, is_melee: bool)
 
 const MAX_PITCH: float = deg_to_rad(89.0)
 const FALL_DEATH_Y: float = -30.0
+const SCOPE_FOV_LERP: float = 25.0 ## Per second; how fast the zoom eases in and out.
 const STATE_SEND_TICKS: int = 2 ## Physics ticks between state packets (60 Hz / 2 = 30 Hz).
 const INTERP_DELAY: float = 0.1 ## Remote players are drawn this far in the past.
 const INTERP_SNAP: float = 0.25 ## Re-sync the render clock if it drifts further than this.
@@ -59,6 +60,8 @@ var current_weapon: Weapon = null
 var melee_weapon: MeleeWeapon = null
 var ability: Ability = null
 var is_local: bool = false
+## Owner: right mouse held with a scoped weapon (zoom, slow, sway, no sprint).
+var is_scoped: bool = false
 ## Owner: the loadout last sent to the host (drives "Next spawn" on the HUD).
 var requested_loadout: PackedInt32Array = PackedInt32Array()
 
@@ -130,12 +133,17 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.is_server() and is_protected and _now() >= _protected_until:
 		is_protected = false
 	if not is_local or not is_alive:
+		is_scoped = false
 		return
 	var cmd: PlayerCommand = player_input.gather()
 	if cmd.weapon_slot >= 0:
 		equip(cmd.weapon_slot)
 
-	movement.base_speed = class_def.move_speed * current_weapon.def.move_speed_mult
+	is_scoped = cmd.secondary and current_weapon.def.scope_zoom > 0.0 		and not current_weapon.is_reloading and not movement.is_sliding
+	weapon_holder.visible = not is_scoped
+	if is_scoped:
+		cmd.sprint = false
+	movement.base_speed = class_def.move_speed * current_weapon.def.move_speed_mult 		* (current_weapon.def.scope_move_mult if is_scoped else 1.0)
 	movement.physics_step(delta, cmd)
 
 	if melee_weapon != null:
@@ -166,7 +174,8 @@ func _physics_process(delta: float) -> void:
 func _process(delta: float) -> void:
 	if is_local:
 		var eye: Vector3 = head.get_global_transform_interpolated().origin
-		camera.global_transform = Transform3D(_look_basis(current_weapon.get_view_recoil()), eye)
+		camera.global_transform = Transform3D(_look_basis(current_weapon.get_view_recoil() + _get_scope_sway()), eye)
+		camera.fov = lerpf(camera.fov, _get_target_fov(), minf(SCOPE_FOV_LERP * delta, 1.0))
 	else:
 		_interpolate_remote(delta)
 		if is_alive and is_protected:
@@ -190,7 +199,28 @@ func get_aim_origin() -> Vector3:
 
 ## Look direction including weapon recoil.
 func get_aim_basis() -> Basis:
-	return _look_basis(current_weapon.recoil_offset)
+	return _look_basis(current_weapon.recoil_offset + _get_scope_sway())
+
+
+## Zoom factor of the active scope (1 when not scoped). Mouse sensitivity is divided by it.
+func get_zoom() -> float:
+	return current_weapon.def.scope_zoom if is_scoped and current_weapon != null else 1.0
+
+
+## Degrees of scope sway (x = right, y = up); zero when not scoped.
+func _get_scope_sway() -> Vector2:
+	if not is_scoped:
+		return Vector2.ZERO
+	var t: float = Time.get_ticks_msec() / 1000.0
+	var amplitude: float = current_weapon.def.scope_sway * (0.5 if movement.is_crouched else 1.0)
+	return Vector2(sin(t * 1.1) + 0.5 * sin(t * 2.3), cos(t * 0.9) + 0.5 * cos(t * 1.9)) * amplitude
+
+
+func _get_target_fov() -> float:
+	var fov: float = Settings.get_vertical_fov()
+	if not is_scoped:
+		return fov
+	return rad_to_deg(2.0 * atan(tan(deg_to_rad(fov) * 0.5) / get_zoom()))
 
 
 ## Own body and hitboxes, so our rays never hit ourselves.
@@ -599,6 +629,32 @@ func flash(seconds: float) -> void:
 	if not _sender_is_host() or not is_local:
 		return
 	Events.local_flashed.emit(seconds)
+
+
+## Host: everyone sees the rope of a Hawk grapple.
+func show_grapple(point: Vector3, seconds: float) -> void:
+	assert(multiplayer.is_server(), "show_grapple is host-only")
+	Net.broadcast(self, &"_show_grapple", [point, seconds])
+
+
+## Host: everyone sees a hologram of this player where they stand now.
+func show_decoy(seconds: float) -> void:
+	assert(multiplayer.is_server(), "show_decoy is host-only")
+	Net.broadcast(self, &"_show_decoy", [global_position, rotation.y, seconds])
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _show_grapple(point: Vector3, seconds: float) -> void:
+	if not _sender_is_host():
+		return
+	get_parent().add_child(GrappleBeam.create(self, point, seconds))
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _show_decoy(at: Vector3, yaw: float, seconds: float) -> void:
+	if not _sender_is_host():
+		return
+	get_parent().add_child(Decoy.create(model, at, yaw, seconds)) # The copy keeps the crouch squash.
 
 
 @rpc("any_peer", "call_local", "unreliable")

@@ -9,7 +9,7 @@ const HIT_MASK: int = 1 | 4 # world | hitbox
 
 func _fire() -> void:
 	var origin: Vector3 = player.get_aim_origin()
-	var dir: Vector3 = -player.get_aim_basis().z
+	var dir: Vector3 = _apply_spread(-player.get_aim_basis().z)
 	var hit: Dictionary = _trace(origin, dir)
 	var end_point: Vector3 = hit["position"] if not hit.is_empty() else origin + dir * def.max_range
 	if not hit.is_empty() and not (hit["collider"] is Hitbox):
@@ -17,6 +17,16 @@ func _fire() -> void:
 	ShotEffects.spawn_muzzle_flash(muzzle)
 	ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
 	player.send_fire(origin, dir, player.weapons.find(self))
+
+
+## Scoped weapons fired from the hip scatter inside a cone (Hawk balance rule).
+func _apply_spread(dir: Vector3) -> Vector3:
+	if def.unscoped_spread <= 0.0 or player.is_scoped:
+		return dir
+	var angle: float = deg_to_rad(def.unscoped_spread) * sqrt(randf())
+	var around: float = randf() * TAU
+	var local := Vector3(sin(angle) * cos(around), sin(angle) * sin(around), -cos(angle))
+	return (Basis.looking_at(dir) * local).normalized()
 
 
 func server_fire(origin: Vector3, dir: Vector3) -> Vector3:

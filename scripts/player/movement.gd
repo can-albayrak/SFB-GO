@@ -11,6 +11,11 @@ const STAND_EYE: float = 1.6
 const CROUCH_EYE: float = 0.95
 const EYE_LERP_SPEED: float = 14.0
 const MIN_SPEED: float = 0.05
+const GRAPPLE_ARRIVE_DISTANCE: float = 0.8
+const GRAPPLE_CHEST: float = 1.0 ## Height above the feet that is pulled to the anchor.
+const GRAPPLE_STUCK_SPEED: float = 2.0 ## Pull ends when a wall stops us below this speed.
+const GRAPPLE_STUCK_GRACE: float = 0.25
+const GRAPPLE_ACCEL: float = 40.0 ## m/s^2 toward the pull speed, so the start is not a hard snap.
 
 @export var collision: CollisionShape3D
 @export var head: Node3D
@@ -26,6 +31,10 @@ var _jump_buffer: float = 0.0
 var _slide_left: float = 0.0
 var _slide_cooldown_left: float = 0.0
 var _eye_height: float = STAND_EYE
+var _grapple_target: Vector3 = Vector3.ZERO
+var _grapple_speed: float = 0.0
+var _grapple_time: float = 0.0
+var _grappling: bool = false
 
 @onready var body: CharacterBody3D = get_parent()
 @onready var _capsule: CapsuleShape3D = collision.shape
@@ -35,6 +44,9 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	var on_floor: bool = body.is_on_floor()
 	_jump_buffer = def.jump_buffer_time if cmd.jump else maxf(_jump_buffer - delta, 0.0)
 	_slide_cooldown_left = maxf(_slide_cooldown_left - delta, 0.0)
+
+	if _grappling and _step_grapple(delta, cmd):
+		return
 
 	var vel: Vector3 = body.velocity
 	var hvel := Vector3(vel.x, 0.0, vel.z)
@@ -65,11 +77,25 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	_update_eye(delta)
 
 
+## Owner: pulls the body toward `target` at up to `speed` until it arrives, hits a wall or jumps off.
+func start_grapple(target: Vector3, speed: float) -> void:
+	_grapple_target = target
+	_grapple_speed = speed
+	_grapple_time = 0.0
+	_grappling = true
+	is_sliding = false
+
+
+func is_grappling() -> bool:
+	return _grappling
+
+
 func get_horizontal_speed() -> float:
 	return Vector2(body.velocity.x, body.velocity.z).length()
 
 
 func reset() -> void:
+	_grappling = false
 	is_sliding = false
 	_jump_buffer = 0.0
 	_slide_left = 0.0
@@ -83,6 +109,21 @@ func set_crouch_shape(crouched: bool) -> void:
 	is_crouched = crouched
 	_capsule.height = CROUCH_HEIGHT if crouched else STAND_HEIGHT
 	collision.position.y = _capsule.height * 0.5
+
+
+## Returns true while the pull owns this tick (normal movement is skipped).
+func _step_grapple(delta: float, cmd: PlayerCommand) -> bool:
+	var to_target: Vector3 = _grapple_target - (body.global_position + Vector3.UP * GRAPPLE_CHEST)
+	var stuck: bool = _grapple_time > GRAPPLE_STUCK_GRACE and body.get_real_velocity().length() < GRAPPLE_STUCK_SPEED
+	if cmd.jump or to_target.length() < GRAPPLE_ARRIVE_DISTANCE or stuck or _grapple_time > 4.0:
+		_grappling = false # Keep the velocity: releasing mid-pull flings the player onward.
+		return false
+	_grapple_time += delta
+	var wanted: Vector3 = to_target.normalized() * _grapple_speed
+	body.velocity = body.velocity.move_toward(wanted, GRAPPLE_ACCEL * delta)
+	body.move_and_slide()
+	_update_eye(delta)
+	return true
 
 
 func _update_slide(delta: float, cmd: PlayerCommand, on_floor: bool, hvel: Vector3) -> Vector3:
@@ -101,7 +142,7 @@ func _update_slide(delta: float, cmd: PlayerCommand, on_floor: bool, hvel: Vecto
 	is_sliding = true
 	_slide_left = def.slide_duration
 	_slide_cooldown_left = def.slide_cooldown
-	return (hvel * def.slide_boost_mult).limit_length(base_speed * def.bhop_cap_mult)
+	return (hvel * def.slide_boost_mult).limit_length(base_speed * def.slide_max_speed_mult)
 
 
 func _update_crouch(want: bool, on_floor: bool) -> void:

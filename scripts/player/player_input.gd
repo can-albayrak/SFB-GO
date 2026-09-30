@@ -21,7 +21,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	var captured: bool = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	if event is InputEventMouseMotion and captured:
 		var motion: InputEventMouseMotion = event
-		var rad_per_count: float = deg_to_rad(Settings.get_look_degrees_per_count())
+		var rad_per_count: float = deg_to_rad(Settings.get_look_degrees_per_count()) / player.get_zoom()
 		player.rotate_y(-motion.screen_relative.x * rad_per_count)
 		player.look_pitch = clampf(player.look_pitch - motion.screen_relative.y * rad_per_count, -MAX_PITCH, MAX_PITCH)
 	elif event.is_action_pressed(&"respawn") and multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
@@ -48,6 +48,7 @@ func gather() -> PlayerCommand:
 	cmd.crouch = Input.is_action_pressed(&"crouch")
 	cmd.crouch_pressed = Input.is_action_just_pressed(&"crouch")
 	cmd.sprint = Input.is_action_pressed(&"sprint")
+	cmd.secondary = Input.is_action_pressed(&"secondary")
 	cmd.reload = Input.is_action_just_pressed(&"reload")
 	cmd.melee = Input.is_action_just_pressed(&"melee")
 	cmd.ability = Input.is_action_just_pressed(&"ability")

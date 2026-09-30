@@ -8,6 +8,7 @@ var jump: bool = false ## Pressed this tick.
 var crouch: bool = false ## Held.
 var crouch_pressed: bool = false ## Pressed this tick.
 var sprint: bool = false ## Held.
+var secondary: bool = false ## Held (scope).
 var fire: bool = false ## Held.
 var fire_pressed: bool = false ## Pressed this tick.
 var reload: bool = false ## Pressed this tick.

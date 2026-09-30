@@ -5,21 +5,23 @@
 
 [resource]
 script = ExtResource("1_def")
-id = &"burst_rifle"
-display_name = "Burst Rifle"
-damage = 28.0
+id = &"marksman_rifle"
+display_name = "Marksman Rifle"
+damage = 50.0
 headshot_mult = 2.0
 leg_mult = 0.75
-max_range = 250.0
-fire_interval = 0.38
+max_range = 400.0
+fire_interval = 0.45
 automatic = false
-burst_count = 3
-burst_interval = 0.07
-magazine_size = 30
-reload_time = 2.4
-equip_time = 0.45
+magazine_size = 10
+reload_time = 2.2
+equip_time = 0.5
 move_speed_mult = 1.0
-recoil_pattern = PackedVector2Array(0, 0.56, 0.05, 0.64, -0.05, 0.72)
+recoil_pattern = PackedVector2Array(0, 1.7)
 recoil_recovery = 10.0
-recoil_recovery_delay = 0.08
+recoil_recovery_delay = 0.1
+scope_zoom = 2.5
+scope_move_mult = 0.6
+scope_sway = 0.12
+unscoped_spread = 2.5
 scene = ExtResource("2_scene")

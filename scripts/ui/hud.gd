@@ -14,6 +14,7 @@ var _weapon: Weapon
 var _menu_opened_by_death: bool = false
 var _flash_left: float = 0.0
 var _flash_total: float = 0.0
+var _scope_overlay: ScopeOverlay
 
 @onready var crosshair: Crosshair = $Crosshair
 @onready var health_label: Label = $HealthLabel
@@ -38,6 +39,9 @@ var _flash_total: float = 0.0
 
 
 func _ready() -> void:
+	_scope_overlay = ScopeOverlay.new()
+	add_child(_scope_overlay)
+	move_child(_scope_overlay, 0) # Under every label, so health/ammo stay readable while scoped.
 	Events.local_player_spawned.connect(_on_local_player_spawned)
 	Events.hit_confirmed.connect(crosshair.show_hit)
 	Events.player_died.connect(_on_player_died)
@@ -83,6 +87,8 @@ func _process(delta: float) -> void:
 		_close_loadout_menu() # Mouse was recaptured by clicking the game.
 	pause_panel.visible = not captured and not loadout_menu.visible
 	speed_label.text = "%.1f m/s" % _player.movement.get_horizontal_speed()
+	_scope_overlay.active = _player.is_scoped
+	crosshair.visible = _player.is_alive and not _player.is_scoped
 	_update_ability_label()
 	_update_next_spawn_label()
 
