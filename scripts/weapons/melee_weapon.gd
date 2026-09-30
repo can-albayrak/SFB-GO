@@ -52,12 +52,12 @@ func tick_melee(delta: float) -> void:
 
 func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 	assert(multiplayer.is_server(), "server_fire is host-only")
-	var basis: Basis = Basis.looking_at(dir, Vector3.UP) if absf(dir.y) < 0.99 else Basis.looking_at(dir, Vector3.FORWARD)
+	var aim_basis: Basis = Basis.looking_at(dir, Vector3.UP) if absf(dir.y) < 0.99 else Basis.looking_at(dir, Vector3.FORWARD)
 	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var best_hitbox: Hitbox = null
 	var best_distance: float = INF
 	for offset: Vector2 in RAY_SPREAD:
-		var end: Vector3 = origin + dir * def.max_range + basis.x * offset.x + basis.y * offset.y
+		var end: Vector3 = origin + dir * def.max_range + aim_basis.x * offset.x + aim_basis.y * offset.y
 		var query := PhysicsRayQueryParameters3D.create(origin, end, HIT_MASK, player.get_hit_exclusions())
 		query.collide_with_areas = true
 		var hit: Dictionary = space.intersect_ray(query)

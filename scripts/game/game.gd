@@ -180,12 +180,12 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 # --- Grenades --------------------------------------------------------------
 
-func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, position: Vector3, velocity: Vector3) -> void:
+func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, point: Vector3, velocity: Vector3) -> void:
 	assert(multiplayer.is_server(), "server_spawn_grenade is host-only")
 	var grenade: Node = projectile_spawner.spawn({
 		"def": grenade_def.resource_path,
 		"thrower": thrower_id,
-		"position": position,
+		"position": point,
 		"velocity": velocity,
 	})
 	for id: int in Net.ingame_peers:
@@ -202,18 +202,18 @@ func _create_grenade(data: Variant) -> Node:
 
 
 ## Host: applies a grenade's effect, then every peer draws the explosion.
-func server_explode(grenade_def: GrenadeDef, thrower_id: int, position: Vector3) -> void:
+func server_explode(grenade_def: GrenadeDef, thrower_id: int, point: Vector3) -> void:
 	assert(multiplayer.is_server(), "server_explode is host-only")
 	match grenade_def.kind:
 		GrenadeDef.Kind.FRAG:
-			_apply_frag(grenade_def, thrower_id, position)
+			_apply_frag(grenade_def, thrower_id, point)
 		GrenadeDef.Kind.FLASH:
-			_apply_flash(grenade_def, position)
-	Net.broadcast(self, &"_explosion_fx", [grenade_def.kind, position])
+			_apply_flash(grenade_def, point)
+	Net.broadcast(self, &"_explosion_fx", [grenade_def.kind, point])
 
 
-func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, position: Vector3) -> void:
-	var origin: Vector3 = position + Vector3.UP * EXPLOSION_CENTER_OFFSET
+func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, point: Vector3) -> void:
+	var origin: Vector3 = point + Vector3.UP * EXPLOSION_CENTER_OFFSET
 	var thrower := players_root.get_node_or_null(str(thrower_id)) as Player
 	var receivers: Array[Node3D] = []
 	for player: Player in _get_players():
@@ -234,8 +234,8 @@ func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, position: Vector3) ->
 			thrower.confirm_hit.rpc_id(thrower_id, Hitbox.Zone.BODY, killed)
 
 
-func _apply_flash(grenade_def: GrenadeDef, position: Vector3) -> void:
-	var origin: Vector3 = position + Vector3.UP * EXPLOSION_CENTER_OFFSET
+func _apply_flash(grenade_def: GrenadeDef, point: Vector3) -> void:
+	var origin: Vector3 = point + Vector3.UP * EXPLOSION_CENTER_OFFSET
 	for player: Player in _get_players():
 		if not player.is_alive:
 			continue
@@ -255,10 +255,10 @@ func _has_line_of_sight(from: Vector3, to: Vector3) -> bool:
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _explosion_fx(kind: GrenadeDef.Kind, position: Vector3) -> void:
+func _explosion_fx(kind: GrenadeDef.Kind, point: Vector3) -> void:
 	if multiplayer.get_remote_sender_id() > 1:
 		return
-	ShotEffects.spawn_explosion(self, position, kind == GrenadeDef.Kind.FLASH)
+	ShotEffects.spawn_explosion(self, point, kind == GrenadeDef.Kind.FLASH)
 
 
 @rpc("any_peer", "call_remote", "reliable")
