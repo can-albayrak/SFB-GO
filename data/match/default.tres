@@ -4,4 +4,8 @@
 
 [resource]
 script = ExtResource("1_def")
+kill_target = 30
+time_limit = 900.0
 respawn_delay = 3.0
+spawn_protection = 2.0
+end_screen_time = 10.0

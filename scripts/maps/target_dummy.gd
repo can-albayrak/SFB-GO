@@ -35,7 +35,7 @@ func sync_to_peer(peer_id: int) -> void:
 
 
 ## Host only. Returns true if this hit killed.
-func take_hit(amount: float, zone: Hitbox.Zone, _attacker_id: int) -> bool:
+func take_hit(amount: float, zone: Hitbox.Zone, _attacker_id: int, _weapon_name: String) -> bool:
 	assert(multiplayer.is_server(), "take_hit is host-only")
 	if health <= 0.0:
 		return false

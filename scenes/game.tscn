@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/game/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="2_hud"]
+[ext_resource type="Script" path="res://scripts/game/lag_compensator.gd" id="3_lag"]
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_game")
@@ -12,3 +13,6 @@ script = ExtResource("1_game")
 
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
 spawn_path = NodePath("../Players")
+
+[node name="LagCompensator" type="Node" parent="."]
+script = ExtResource("3_lag")

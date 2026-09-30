@@ -41,5 +41,5 @@ func _apply_hit(hitbox: Hitbox) -> void:
 		return
 	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
 	var shooter_id: int = player.get_multiplayer_authority()
-	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id)
+	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name)
 	player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed)

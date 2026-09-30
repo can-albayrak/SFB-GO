@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/crosshair.gd" id="2_crosshair"]
+[ext_resource type="Script" path="res://scripts/ui/scoreboard.gd" id="3_scoreboard"]
+[ext_resource type="Script" path="res://scripts/ui/kill_feed.gd" id="4_killfeed"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -99,7 +101,7 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -500.0
-offset_top = -140.0
+offset_top = -190.0
 offset_right = 500.0
 offset_bottom = -60.0
 grow_horizontal = 2
@@ -107,10 +109,128 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.2, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 10
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 40
 text = "KILLED BY"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="TopBar" type="Label" parent="."]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 16.0
+offset_right = 300.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 30
+text = "15:00"
+horizontal_alignment = 1
+
+[node name="ProtectedLabel" type="Label" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 70.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+text = "SPAWN PROTECTION"
+horizontal_alignment = 1
+
+[node name="KillFeed" type="VBoxContainer" parent="."]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -620.0
+offset_top = 20.0
+offset_right = -30.0
+offset_bottom = 220.0
+grow_horizontal = 0
+mouse_filter = 2
+alignment = 0
+script = ExtResource("4_killfeed")
+
+[node name="Scoreboard" type="PanelContainer" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -180.0
+offset_right = 360.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_scoreboard")
+
+[node name="VBox" type="VBoxContainer" parent="Scoreboard"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Scoreboard/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "FREE FOR ALL"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="Scoreboard/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 30
+columns = 4
+
+[node name="EndPanel" type="VBoxContainer" parent="."]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -500.0
+offset_top = 90.0
+offset_right = 500.0
+offset_bottom = 300.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="WinnerLabel" type="Label" parent="EndPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 56
+text = "WINNER"
+horizontal_alignment = 1
+
+[node name="AwardsLabel" type="Label" parent="EndPanel"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+
+[node name="NextLabel" type="Label" parent="EndPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
 
 [node name="PausePanel" type="ColorRect" parent="."]
 layout_mode = 3

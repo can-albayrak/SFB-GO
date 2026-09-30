@@ -35,13 +35,13 @@ sfb-go/
 │   └── abilities/           # AbilityDef .tres
 ├── scripts/
 │   ├── defs/                # class_def.gd, weapon_def.gd, ability_def.gd, movement_def.gd
-│   ├── game/                # game.gd (maç sahnesi: harita yükleme, spawn, respawn)
+│   ├── game/                # game.gd (maç sahnesi: harita, spawn, respawn), lag_compensator.gd
 │   ├── player/              # player.gd, movement.gd, player_input.gd, player_command.gd, hitbox.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, projectile_weapon.gd, melee_weapon.gd, thrown_weapon.gd
 │   ├── abilities/           # ability.gd (taban), grapple.gd, dash.gd, shield.gd ...
 │   ├── pickups/             # pickup.gd, airdrop.gd
-│   └── ui/                  # hud.gd, scoreboard.gd, loadout_menu.gd, main_menu.gd
+│   └── ui/                  # hud.gd, crosshair.gd, scoreboard.gd, kill_feed.gd, main_menu.gd (loadout_menu.gd aşama 4)
 ├── scenes/
 │   ├── main.tscn            # Giriş noktası: ana menü (isim, Host, Join, Test Range)
 │   ├── game.tscn            # Maç sahnesi: Map + HUD + Players + PlayerSpawner
@@ -86,7 +86,18 @@ sfb-go/
 - `scenes/game.tscn` (`/root/Game`, `scripts/game/game.gd`): maç sahnesi. `Net.map_path` haritasını `Map` adıyla yükler (her peer'da aynı yol), `HUD`, `Players` ve `PlayerSpawner` içerir. Haritalar sadece geometri + `SpawnPoints` (Marker3D) + harita nesneleri (mankenler).
 - **Host:** `Net.host_game()` → ENet server (port 7777) → `game.tscn`. **Client:** `Net.join_game()` → bağlanınca `_request_register(name)` → host `_welcome(map_path)` ile cevaplar → client `game.tscn` yükler → `Game._request_spawn()`.
 - Host, sahnesi yüklenmiş peer'ları `Net.ingame_peers`'te tutar. Oyun RPC'leri sadece bunlara gider (`Net.broadcast(node, method, args)`), yüklenmekte olan client "node not found" almaz. Hareket yayını (`Net.state_peers`) katılımdan 0,5 sn sonra başlar; unreliable paketler reliable spawn paketlerini geçmesin diye. Geç katılana mankenlerin canı `sync_to_peer` ile gönderilir.
-- Maç kuralları `Match.rules` (`MatchDef`, `data/match/default.tres`): şimdilik `respawn_delay`.
+- Maç kuralları `Match.rules` (`MatchDef`, `data/match/default.tres`): kill hedefi, süre, respawn, spawn koruması, sonuç ekranı süresi. Host ana menüde kill/dakika seçer (`Match.configure`); Test Range'de limit yok.
+
+### Maç döngüsü (aşama 3, `autoload/match.gd`)
+
+- Durum host'ta: `kills`, `deaths`, `state` (PLAYING/ENDED), `time_left`. Her değişiklik `Net.broadcast` ile; katılana `_sync_full` snapshot. Süre her peer'da yerelde geri sayar.
+- Akış: `Player._die` → `died(killer, weapon, headshot)` → `Game._on_player_died` (mesafe hesaplar) → `Match.server_register_kill` → `_on_kill` herkese → `Events.kill_registered` (kill feed) + `scores_changed` (skor tablosu, taç).
+- Bitiş: kill hedefi veya süre → `_on_match_ended(winner, awards)` → `end_screen_time` (10 sn) sonra `_on_match_started` → `Events.match_started` → host herkesi yeniden doğurur. ENDED'da hasar yok.
+- Ödüller (host hesaplar): Most Deaths, Longest Headshot, Most Self-Kills. Knife ödülü hızlı yakın dövüşle (aşama 4) gelecek.
+- Doğma noktası: canlı düşmanlara en yakın mesafesi en büyük olan nokta (`Game._pick_spawn_point`).
+- Spawn koruması: `Player.is_protected` (host'ta, StateSync ile yayılır), `rules.spawn_protection` sn veya ateş edince biter; korumalıyken hasar yok, başkalarına model yanıp söner.
+- Taç: `Match.get_leader()` (tek başına lider, ≥1 kill) → `Player.set_leader`; kendinde çizilmez.
+- Ölüm ekranı: öldüren, silah ve öldürenin kalan canı (`_announce_death(killer_id, weapon_name, killer_health)`).
 - Spawn: `spawner.spawn_function` + `{id, position, yaw}` verisi. `Player.StateSync` (MultiplayerSynchronizer, authority 1, `public_visibility = false`) spawn görünürlüğünü belirler: host yeni peer için `set_visibility_for()` açınca mevcut oyuncular o peer'da da doğar (geç katılma).
 - **Test Range** = `OfflineMultiplayerPeer` ile aynı kod: biz peer 1'iz, `is_server()` true.
 - Host çıkarsa client'lar `server_disconnected` → ana menü ("Host left the game").
@@ -114,7 +125,10 @@ sfb-go/
 3. Host, atış zamanına göre diğer oyuncuların hitbox'larını geri sarar (lag compensation), raycast yapar, hasarı uygular.
 4. Host sonucu yayar → hit marker, hasar, kill feed.
 
-**Lag compensation:** Host her physics tick'te her oyuncunun hitbox pozisyonunu halka tampona (son ~500 ms) kaydeder. 2. aşamada basit hali (geri sarmasız) kurulur, altyapı buna uygun tasarlanır; geri sarma 3. aşama sonunda eklenir.
+**Lag compensation (`scripts/game/lag_compensator.gd`, Game'in çocuğu):** Host her physics tick'te her oyuncunun pozisyon/yaw/crouch'unu 1 sn'lik geçmişe yazar. `_request_fire` → `fire_rewound`: diğer canlı oyuncular atanın gördüğü ana geri sarılır, `server_fire` yapılır, geri konur.
+- Geri sarma = atanın RTT'si (ENet istatistiği). Host'un kendi oyuncusu host'ta canlı çizildiği için ona + `INTERP_DELAY` eklenir. Üst sınır 0,4 sn.
+- Transform bildirimleri ertelendiği için `Player.set_hit_pose` hitbox'ları `PhysicsServer3D.area_set_transform` ile anında fizik sunucusuna yazar.
+- Testte doğrulandı: 6 m/s koşan hedefe geri sarmayla 2 kill, geri sarmasız 25 sn'de tek isabet.
 
 **Hile koruması:** Arkadaş arası oyun, ağır anti-cheat yok. Host sadece bariz tutarsızlıkları reddeder:
 - **Aşırı hız:** `_is_plausible_move` host saatinde token bucket (bhop tavanı × 1,5, 1 sn tampon). Işınlanan paket atılır; hileci herkeste yerinde donar, atışları origin kontrolüne takılır. Her doğuşta sıfırlanır.

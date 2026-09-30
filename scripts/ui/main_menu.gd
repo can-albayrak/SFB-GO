@@ -1,7 +1,7 @@
 extends Control
 ## Entry point: name, Host / Join, offline Test Range.
 ## Command-line shortcuts for local testing (after `--`):
-##   --name=Can  --host  --join=127.0.0.1
+##   --name=Can  --host  --join=127.0.0.1  --kills=5  --minutes=2
 
 ## Command-line shortcuts run once per launch, not every time the menu is shown.
 static var _command_line_handled: bool = false
@@ -13,6 +13,8 @@ static var _command_line_handled: bool = false
 @onready var test_range_button: Button = %TestRangeButton
 @onready var quit_button: Button = %QuitButton
 @onready var status_label: Label = %StatusLabel
+@onready var kill_target_spin: SpinBox = %KillTargetSpin
+@onready var time_limit_spin: SpinBox = %TimeLimitSpin
 
 
 func _ready() -> void:
@@ -20,6 +22,8 @@ func _ready() -> void:
 	name_edit.max_length = Net.MAX_NAME_LENGTH
 	name_edit.text = Settings.player_name
 	status_label.text = Net.last_message
+	kill_target_spin.value = Match.DEFAULT_RULES.kill_target
+	time_limit_spin.value = Match.DEFAULT_RULES.time_limit / 60.0
 
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_join_pressed)
@@ -41,6 +45,10 @@ func _handle_command_line() -> void:
 			host = true
 		elif arg.begins_with("--join="):
 			join_address = arg.trim_prefix("--join=")
+		elif arg.begins_with("--kills="):
+			kill_target_spin.value = arg.trim_prefix("--kills=").to_int()
+		elif arg.begins_with("--minutes="):
+			time_limit_spin.value = arg.trim_prefix("--minutes=").to_float()
 	if host:
 		_on_host_pressed.call_deferred()
 	elif not join_address.is_empty():
@@ -54,6 +62,7 @@ func _save_name() -> void:
 
 func _on_host_pressed() -> void:
 	_save_name()
+	Match.configure(int(kill_target_spin.value), time_limit_spin.value)
 	var err: Error = Net.host_game(Settings.player_name)
 	if err != OK:
 		status_label.text = "Could not host (port %d busy?)" % Net.DEFAULT_PORT
@@ -75,6 +84,7 @@ func _on_join_pressed() -> void:
 
 func _on_test_range_pressed() -> void:
 	_save_name()
+	Match.configure(0, 0.0) # Practice: no kill or time limit.
 	Net.start_offline(Settings.player_name)
 
 

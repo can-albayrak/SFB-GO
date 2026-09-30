@@ -8,8 +8,9 @@ extends CharacterBody3D
 signal health_changed(health: int, max_health: int)
 signal weapon_changed(weapon: Weapon)
 signal alive_changed(is_alive: bool)
-## Host only. Game listens to schedule the respawn.
-signal died(killer_id: int)
+signal protection_changed(is_protected: bool)
+## Host only. Game registers the kill and schedules the respawn.
+signal died(killer_id: int, weapon_name: String, headshot: bool)
 
 const MAX_PITCH: float = deg_to_rad(89.0)
 const FALL_DEATH_Y: float = -30.0
@@ -24,6 +25,8 @@ const MAX_FIRE_ORIGIN_ERROR: float = 3.0 ## Metres between claimed and known eye
 const MOVE_SPEED_TOLERANCE: float = 1.5 ## Host allows horizontal speed up to bhop cap * this.
 const MOVE_BUDGET_SECONDS: float = 1.0 ## Movement budget window, absorbs packet bunching.
 const REMOTE_TRACER_DROP: float = 0.2
+const PROTECTION_BLINK_PERIOD: float = 0.25
+const FALL_WEAPON_NAME: String = "Fall"
 
 # Hitbox poses: x = centre height above feet, y = box height (0 = keep shape).
 const HEAD_POSE_STAND: Vector2 = Vector2(1.62, 0.0)
@@ -46,6 +49,8 @@ class Snapshot:
 
 var health: int = 0: set = _set_health
 var is_alive: bool = true: set = _set_alive
+## Spawn protection (host-owned, replicated): no damage taken; firing ends it.
+var is_protected: bool = false: set = _set_protected
 ## Vertical look angle in radians. Yaw is the body's own rotation.y.
 var look_pitch: float = 0.0
 var weapons: Array[Weapon] = []
@@ -66,6 +71,9 @@ var _move_budget: float = 0.0
 var _last_valid_position: Vector3 = Vector3.ZERO
 var _last_state_host_time: float = 0.0
 var _has_valid_position: bool = false
+var _protected_until: float = 0.0
+var _last_hit_weapon: String = ""
+var _last_hit_zone: Hitbox.Zone = Hitbox.Zone.BODY
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -74,6 +82,7 @@ var _has_valid_position: bool = false
 @onready var body_hitbox: Hitbox = $Hitboxes/BodyHitbox
 @onready var leg_hitbox: Hitbox = $Hitboxes/LegHitbox
 @onready var model: Node3D = $Model
+@onready var crown: Node3D = $Model/Crown
 @onready var collision: CollisionShape3D = $CollisionShape3D
 @onready var movement: Movement = $Movement
 @onready var player_input: PlayerInput = $PlayerInput
@@ -91,6 +100,8 @@ func _ready() -> void:
 	movement.def = class_def.movement
 	if multiplayer.is_server():
 		health = class_def.max_health # Clients already got the real value from StateSync's spawn state.
+		_grant_protection()
+	crown.visible = false
 	_create_weapons()
 	equip(0)
 
@@ -108,6 +119,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if multiplayer.is_server() and is_protected and _now() >= _protected_until:
+		is_protected = false
 	if not is_local or not is_alive:
 		return
 	var cmd: PlayerCommand = player_input.gather()
@@ -135,6 +148,8 @@ func _process(delta: float) -> void:
 		camera.global_transform = Transform3D(_look_basis(current_weapon.get_view_recoil()), eye)
 	else:
 		_interpolate_remote(delta)
+		if is_alive and is_protected:
+			model.visible = fmod(Time.get_ticks_msec() / 1000.0, PROTECTION_BLINK_PERIOD) < PROTECTION_BLINK_PERIOD * 0.6
 
 
 func equip(slot: int) -> void:
@@ -168,10 +183,12 @@ func send_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 
 
 ## Host only. Returns true if this hit killed.
-func take_hit(amount: float, _zone: Hitbox.Zone, attacker_id: int) -> bool:
+func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: String) -> bool:
 	assert(multiplayer.is_server(), "take_hit is host-only")
-	if not is_alive:
+	if not is_alive or is_protected or Match.state != Match.State.PLAYING:
 		return false
+	_last_hit_weapon = weapon_name
+	_last_hit_zone = zone
 	health = maxi(health - roundi(amount), 0)
 	if health > 0:
 		return false
@@ -186,13 +203,48 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	_has_valid_position = false
 	health = class_def.max_health
 	is_alive = true
+	_grant_protection()
 	Net.broadcast(self, &"_respawn_at", [spawn_position, yaw, _life])
+
+
+func is_pose_crouched() -> bool:
+	return _pose_crouched
+
+
+## Host lag compensation: moves the body and hitboxes and pushes the hitbox
+## transforms to the physics server at once (transform notifications are deferred).
+func set_hit_pose(pos: Vector3, yaw: float, crouched: bool) -> void:
+	global_position = pos
+	rotation.y = yaw
+	_apply_pose(crouched)
+	for hitbox: Hitbox in [head_hitbox, body_hitbox, leg_hitbox]:
+		PhysicsServer3D.area_set_transform(hitbox.get_rid(), hitbox.global_transform)
+
+
+## Every peer: crown over the current leader (never drawn on yourself).
+func set_leader(is_leader: bool) -> void:
+	crown.visible = is_leader
+
+
+func _grant_protection() -> void:
+	_protected_until = _now() + Match.rules.spawn_protection
+	is_protected = true
 
 
 func _die(killer_id: int) -> void:
 	is_alive = false
-	Net.broadcast(self, &"_announce_death", [killer_id])
-	died.emit(killer_id)
+	is_protected = false
+	var killer_health: int = 0
+	var killer := get_parent().get_node_or_null(str(killer_id)) as Player
+	if killer != null:
+		killer_health = killer.health
+	var headshot: bool = _last_hit_zone == Hitbox.Zone.HEAD and killer_id != get_multiplayer_authority()
+	Net.broadcast(self, &"_announce_death", [killer_id, _last_hit_weapon, killer_health])
+	died.emit(killer_id, _last_hit_weapon, headshot)
+
+
+func _now() -> float:
+	return Time.get_ticks_usec() / 1_000_000.0
 
 
 func _look_basis(recoil: Vector2) -> Basis:
@@ -244,6 +296,13 @@ func _set_alive(value: bool) -> void:
 	if is_node_ready():
 		_apply_alive_state()
 	alive_changed.emit(value)
+
+
+func _set_protected(value: bool) -> void:
+	is_protected = value
+	if is_node_ready() and not value:
+		_apply_alive_state() # Stop blinking with the model shown.
+	protection_changed.emit(value)
 
 
 func _sender_id() -> int:
@@ -372,7 +431,13 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
 		return
 	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + weapon.def.fire_interval * FIRE_RATE_TOLERANCE
-	var end_point: Vector3 = weapon.server_fire(origin, dir.normalized())
+	is_protected = false # GDD: firing ends spawn protection.
+	var end_point: Vector3
+	var compensator: LagCompensator = LagCompensator.find(get_tree())
+	if compensator != null:
+		end_point = compensator.fire_rewound(self, weapon, origin, dir.normalized())
+	else:
+		end_point = weapon.server_fire(origin, dir.normalized())
 	Net.broadcast(self, &"_show_shot", [origin, end_point])
 
 
@@ -394,15 +459,17 @@ func confirm_hit(zone: Hitbox.Zone, killed: bool) -> void:
 func _request_fall_death() -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority() or not is_alive:
 		return
+	_last_hit_weapon = FALL_WEAPON_NAME
+	_last_hit_zone = Hitbox.Zone.BODY
 	health = 0
 	_die(get_multiplayer_authority())
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _announce_death(killer_id: int) -> void:
+func _announce_death(killer_id: int, weapon_name: String, killer_health: int) -> void:
 	if not _sender_is_host():
 		return
-	Events.player_died.emit(self, killer_id)
+	Events.player_died.emit(self, killer_id, weapon_name, killer_health)
 
 
 @rpc("any_peer", "call_local", "reliable")
