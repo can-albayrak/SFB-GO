@@ -65,7 +65,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 ## Bilinen sorunlar
 
 - Silah modeli duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
-- Uzak oyuncularda silah modeli yok, tracer gözden çıkar (aşama 8 modelleriyle).
+- Uzak oyuncunun elindeki silah hep AR (silah değişimi senkronlanmıyor); tracer gözden çıkar. Model animasyonsuz, eğilince y'de basılır (aşama 8).
 - Lag compensation yok: hızlı hareket eden hedefi vurmak için hafif önden nişan gerekebilir (aşama 3).
 - Spawn noktası rastgele, koruma yok (aşama 3).
 - Host mermi/şarjör takibi yapmıyor: hileli client şarjör değiştirmeden ateş edebilir (arkadaş arası, bilinçli olarak ertelendi).
@@ -73,7 +73,9 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 ## Araçlar
 
 - MCP: `godot` (çalışıyor), `blender` (`uvx blender-mcp`; Blender'da BlenderMCP → Connect gerekli), `meshy` (`MESHY_API_KEY` Windows kullanıcı ortam değişkeninden, repoda yok). Hepsi `.mcp.json`'da.
-- Can'ın isteği: karakter + silahlar için basit, ne olduğu belli yer tutucu modeller (Meshy/Blender) aşama 8'den önce eklenecek. Meshy kredisi harcar: başta 3 model (karakter, AR, tabanca), fazlası sorulacak.
+- Yer tutucu modeller: `tools/blender/build_placeholders.py` (Blender 5.2 headless, MCP gerekmez) → `assets/models/characters/soldier.glb`, `assets/models/weapons/{assault_rifle,pistol,heavy_rifle,shotgun}.glb`. Değiştirmek için scripti düzenle, yeniden çalıştır:
+  `"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --background --factory-startup --python tools/blender/build_placeholders.py -- .`
+- Meshy şimdilik kullanılmıyor (Can'ın kararı). Detaylı modeller aşama 8'de.
 
 ## Denge notları
 

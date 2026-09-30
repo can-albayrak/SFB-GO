@@ -53,8 +53,10 @@ sfb-go/
 │   └── maps/
 │       ├── test_range.tscn  # Test haritası + hedef mankenleri
 │       └── mall/            # İlk gerçek harita
+├── tools/                   # .gdignore; oyun dışı araçlar
+│   └── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
 └── assets/
-    ├── models/
+    ├── models/              # characters/soldier.glb, weapons/*.glb (Blender'da +Y ileri = Godot -Z)
     ├── textures/
     ├── audio/
     └── shaders/

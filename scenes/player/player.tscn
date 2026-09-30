@@ -5,23 +5,13 @@
 [ext_resource type="Script" path="res://scripts/player/hitbox.gd" id="3_hitbox"]
 [ext_resource type="Script" path="res://scripts/player/movement.gd" id="4_movement"]
 [ext_resource type="Script" path="res://scripts/player/player_input.gd" id="5_input"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/soldier.glb" id="6_soldier"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/assault_rifle.glb" id="7_ar"]
 
 [sub_resource type="CapsuleShape3D" id="Capsule_move"]
 resource_local_to_scene = true
 radius = 0.35
 height = 1.8
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-radius = 0.3
-height = 1.45
-
-[sub_resource type="SphereMesh" id="SphereMesh_head"]
-radius = 0.16
-height = 0.32
-
-[sub_resource type="StandardMaterial3D" id="Mat_model"]
-albedo_color = Color(0.3, 0.36, 0.42, 1)
-roughness = 0.8
 
 [sub_resource type="SphereShape3D" id="Sphere_head"]
 radius = 0.16
@@ -63,15 +53,10 @@ near = 0.03
 
 [node name="Model" type="Node3D" parent="."]
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Model"]
-position = Vector3(0, 0.75, 0)
-mesh = SubResource("CapsuleMesh_body")
-surface_material_override/0 = SubResource("Mat_model")
+[node name="Soldier" parent="Model" instance=ExtResource("6_soldier")]
 
-[node name="HeadMesh" type="MeshInstance3D" parent="Model"]
-position = Vector3(0, 1.62, 0)
-mesh = SubResource("SphereMesh_head")
-surface_material_override/0 = SubResource("Mat_model")
+[node name="Rifle" parent="Model" instance=ExtResource("7_ar")]
+position = Vector3(0.19, 1.12, -0.3)
 
 [node name="Hitboxes" type="Node3D" parent="."]
 
