@@ -1,0 +1,26 @@
+# Godot 4
+.godot/
+*.translation
+
+# Builds and exports
+builds/
+export/
+*.zip
+*.pck
+*.exe
+
+# Export presets can hold credentials; keep a local copy only
+export_presets.cfg
+
+# Editor and OS
+.vscode/
+.idea/
+*.tmp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Mono (in case C# is added later)
+.mono/
+data_*/
+mono_crash.*.json
