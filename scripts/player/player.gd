@@ -24,7 +24,6 @@ const FIRE_BURST_SLACK: float = 0.25 ## Seconds of shots that may arrive bunched
 const MAX_FIRE_ORIGIN_ERROR: float = 3.0 ## Metres between claimed and known eye position.
 const MOVE_SPEED_TOLERANCE: float = 1.5 ## Host allows horizontal speed up to bhop cap * this.
 const MOVE_BUDGET_SECONDS: float = 1.0 ## Movement budget window, absorbs packet bunching.
-const REMOTE_TRACER_DROP: float = 0.2
 const PROTECTION_BLINK_PERIOD: float = 0.25
 const FALL_WEAPON_NAME: String = "Fall"
 
@@ -83,6 +82,7 @@ var _last_hit_zone: Hitbox.Zone = Hitbox.Zone.BODY
 @onready var leg_hitbox: Hitbox = $Hitboxes/LegHitbox
 @onready var model: Node3D = $Model
 @onready var crown: Node3D = $Model/Crown
+@onready var remote_muzzle: Marker3D = $Model/Rifle/Muzzle
 @onready var collision: CollisionShape3D = $CollisionShape3D
 @onready var movement: Movement = $Movement
 @onready var player_input: PlayerInput = $PlayerInput
@@ -442,10 +442,11 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 
 
 @rpc("any_peer", "call_local", "unreliable")
-func _show_shot(from: Vector3, to: Vector3) -> void:
+func _show_shot(_from: Vector3, to: Vector3) -> void:
 	if not _sender_is_host() or is_local:
 		return
-	ShotEffects.spawn_tracer(get_parent(), from + Vector3.DOWN * REMOTE_TRACER_DROP, to)
+	ShotEffects.spawn_muzzle_flash(remote_muzzle)
+	ShotEffects.spawn_tracer(get_parent(), remote_muzzle.global_position, to)
 
 
 @rpc("any_peer", "call_local", "reliable")

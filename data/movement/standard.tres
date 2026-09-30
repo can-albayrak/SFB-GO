@@ -4,9 +4,9 @@
 
 [resource]
 script = ExtResource("1_def")
-ground_accel = 10.0
-friction = 6.0
-stop_speed = 2.0
+ground_accel = 11.0
+friction = 7.0
+stop_speed = 2.5
 walk_mult = 0.52
 crouch_mult = 0.4
 gravity = 16.0
