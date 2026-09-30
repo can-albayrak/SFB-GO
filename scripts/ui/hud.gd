@@ -80,7 +80,7 @@ func _process(delta: float) -> void:
 		return
 	var captured: bool = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	if loadout_menu.visible and captured:
-		loadout_menu.visible = false # Mouse was recaptured by clicking the game.
+		_close_loadout_menu() # Mouse was recaptured by clicking the game.
 	pause_panel.visible = not captured and not loadout_menu.visible
 	speed_label.text = "%.1f m/s" % _player.movement.get_horizontal_speed()
 	_update_ability_label()

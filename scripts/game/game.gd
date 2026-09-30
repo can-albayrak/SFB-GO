@@ -161,6 +161,8 @@ func _respawn(player: Player, life: int) -> void:
 func _on_match_started() -> void:
 	if not multiplayer.is_server():
 		return
+	for grenade: Node in projectiles_root.get_children():
+		grenade.queue_free() # A grenade from the end screen must not blow up the new match.
 	for player: Player in _get_players():
 		var spawn: Marker3D = _pick_spawn_point(player.get_multiplayer_authority())
 		player.server_respawn(spawn.global_position, spawn.global_rotation.y)
@@ -168,6 +170,9 @@ func _on_match_started() -> void:
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	Match.server_remove_player(peer_id)
+	for grenade: Node in projectiles_root.get_children():
+		if grenade is Grenade and (grenade as Grenade).thrower_id == peer_id:
+			grenade.queue_free()
 	var player: Node = players_root.get_node_or_null(str(peer_id))
 	if player != null:
 		player.queue_free()

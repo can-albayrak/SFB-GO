@@ -13,7 +13,8 @@ var player: Player
 ## Owner-side seconds until ready (HUD).
 var cooldown_left: float = 0.0
 
-var _host_ready_at: float = -INF
+## Host clock time when the next use is accepted (carried across loadout swaps).
+var host_ready_at: float = -INF
 
 
 func setup(ability_def: AbilityDef, owner_player: Player) -> void:
@@ -42,9 +43,9 @@ func try_use(origin: Vector3, dir: Vector3) -> bool:
 func server_try_use(origin: Vector3, dir: Vector3) -> bool:
 	assert(multiplayer.is_server(), "server_try_use is host-only")
 	var now: float = Time.get_ticks_msec() / 1000.0
-	if now < _host_ready_at:
+	if now < host_ready_at:
 		return false
-	_host_ready_at = now + def.cooldown * HOST_COOLDOWN_TOLERANCE
+	host_ready_at = now + def.cooldown * HOST_COOLDOWN_TOLERANCE
 	server_use(origin, dir)
 	return true
 

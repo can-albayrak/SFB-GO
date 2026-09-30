@@ -200,7 +200,7 @@ func get_hit_exclusions() -> Array[RID]:
 
 ## Owning client: asks the host to resolve a shot.
 func send_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
-	_request_fire.rpc_id(1, origin, dir, slot)
+	_request_fire.rpc_id(1, origin, dir, slot, weapons[slot].def.id)
 
 
 ## Host only: false while spawn-protected, dead or between matches (no hit marker then).
@@ -326,13 +326,20 @@ func _apply_loadout() -> void:
 	if class_def.quick_melee != null:
 		melee_weapon = _add_weapon(class_def.quick_melee) as MeleeWeapon
 
+	# The cooldown belongs to the player, not the ability: swapping must not reset it.
+	var carried_cooldown: float = 0.0
+	var carried_host_ready: float = -INF
 	if ability != null:
+		carried_cooldown = ability.cooldown_left
+		carried_host_ready = ability.host_ready_at
 		ability.queue_free()
 		ability = null
 	var ability_def: AbilityDef = Loadout.get_ability(loadout)
 	if ability_def != null:
 		ability = ability_def.scene.instantiate()
 		ability.setup(ability_def, self)
+		ability.cooldown_left = carried_cooldown
+		ability.host_ready_at = carried_host_ready
 		add_child(ability)
 
 	equip(0)
@@ -509,19 +516,21 @@ func _interpolate_remote(delta: float) -> void:
 # --- Host-authoritative events ---------------------------------------------
 
 @rpc("any_peer", "call_local", "reliable")
-func _request_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
+func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringName) -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
 		return
 	if not is_alive or slot < 0 or slot >= weapons.size():
 		return
 	var weapon: Weapon = weapons[slot]
+	if weapon.def.id != weapon_id:
+		return # Fired with the previous loadout's weapon, still in flight after a swap.
 	var now: float = Time.get_ticks_msec() / 1000.0
 	# Budget, not gap between arrivals: bunched packets pass, sustained over-rate does not.
 	if now < _next_fire_time - FIRE_BURST_SLACK:
 		return
 	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
 		return
-	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + weapon.def.fire_interval * FIRE_RATE_TOLERANCE
+	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + weapon.def.get_average_shot_interval() * FIRE_RATE_TOLERANCE
 	if Match.state == Match.State.PLAYING:
 		is_protected = false # GDD: firing ends spawn protection.
 	var end_point: Vector3
@@ -558,7 +567,7 @@ func _request_melee(origin: Vector3, dir: Vector3) -> void:
 func _request_ability(origin: Vector3, dir: Vector3) -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
 		return
-	if not is_alive or ability == null:
+	if not is_alive or ability == null or Match.state != Match.State.PLAYING:
 		return
 	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
 		return
@@ -573,10 +582,13 @@ func _request_loadout(code: PackedInt32Array) -> void:
 	if not Loadout.is_valid(code):
 		return
 	# GDD: choosing within the first seconds after spawning switches at once.
-	if is_alive and _now() - _spawned_at <= Match.rules.loadout_swap_window:
+	var in_window: bool = _now() - _spawned_at <= Match.rules.loadout_swap_window
+	if is_alive and in_window and Match.state == Match.State.PLAYING:
+		# Only an unhurt player gets the new class's full health (no heal-by-swapping).
+		var was_full: bool = health >= class_def.max_health
 		_pending_loadout = PackedInt32Array()
 		loadout = code
-		health = class_def.max_health
+		health = class_def.max_health if was_full else mini(health, class_def.max_health)
 	else:
 		_pending_loadout = code
 

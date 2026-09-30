@@ -88,7 +88,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Modeller: bıçak, Burst Rifle, LMG, frag, flashbang (Blender scripti)
 - [x] Headless testler: loadout anında/ertelenmiş, bıçak 25, frag ~70 yakında, flash 3,2 sn, ağda loadout senkronu (0 hata)
 - [ ] **Can'ın oynayarak testi**
-- [ ] Aşama sonu kod incelemesi
+- [x] Aşama sonu kod incelemesi. Düzeltilenler: host Burst Rifle serisinin 2/3 mermisini reddediyordu (artık tetik aralığı seriye bölünüyor, testte 9/9), loadout değiştirerek sınırsız bomba + can doldurma istismarı (bekleme oyuncuda taşınıyor, sadece yaralanmamışsa can dolar, maç arası değişim yok), çıkan oyuncunun bombasıyla hayalet kill, ince duvarın arkasında bomba doğması, maç arası bombanın yeni maçta patlaması, eski silahla uçuştaki atış (silah id kontrolü), bozuk ayar dosyası
 
 ## Bilinen sorunlar
 
@@ -96,7 +96,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Uzak oyuncunun elindeki silah hep AR (silah değişimi senkronlanmıyor); tracer gözden çıkar. Model animasyonsuz, eğilince y'de basılır (aşama 8).
 - Lag compensation 400 ms'den yüksek gecikmede tam telafi etmez (bilinçli üst sınır).
 - Uzak oyuncunun elindeki model hep AR; bıçak savurma ve bomba atma başkalarına animasyon olarak görünmüyor (aşama 8).
-- Loadout değişimi (ilk 3 sn) güç bekleme süresini sıfırlıyor: kötüye kullanılabilir, gerekirse bekleme oyuncu nesnesine taşınacak.
+
 - Anonslar (Double Kill vb.) yok: aşama 9 (ses).
 - Host mermi/şarjör takibi yapmıyor: hileli client şarjör değiştirmeden ateş edebilir (arkadaş arası, bilinçli olarak ertelendi).
 

@@ -133,6 +133,8 @@ func server_register_kill(killer_id: int, victim_id: int, weapon_name: String, h
 	assert(multiplayer.is_server(), "server_register_kill is host-only")
 	if state != State.PLAYING:
 		return
+	if killer_id not in kills:
+		killer_id = victim_id # Killer left (e.g. their grenade outlived them): count as a self-kill.
 	var self_kill: bool = killer_id == victim_id
 	deaths[victim_id] = get_deaths(victim_id) + 1
 	if self_kill:

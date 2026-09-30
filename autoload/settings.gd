@@ -41,17 +41,27 @@ func load_settings() -> void:
 	var config := ConfigFile.new()
 	if config.load(PATH) != OK:
 		return
-	player_name = config.get_value("player", "name", player_name)
-	loadout_class = StringName(config.get_value("loadout", "class", String(loadout_class)))
-	loadout_primary = config.get_value("loadout", "primary", loadout_primary)
-	loadout_ability = config.get_value("loadout", "ability", loadout_ability)
-	fov = config.get_value("view", "fov", fov)
-	mouse_sensitivity = config.get_value("view", "sensitivity", mouse_sensitivity)
-	crosshair_color = config.get_value("crosshair", "color", crosshair_color)
-	crosshair_length = config.get_value("crosshair", "length", crosshair_length)
-	crosshair_gap = config.get_value("crosshair", "gap", crosshair_gap)
-	crosshair_thickness = config.get_value("crosshair", "thickness", crosshair_thickness)
-	crosshair_dot = config.get_value("crosshair", "dot", crosshair_dot)
+	player_name = _read(config, "player", "name", player_name)
+	loadout_class = StringName(_read(config, "loadout", "class", String(loadout_class)))
+	loadout_primary = _read(config, "loadout", "primary", loadout_primary)
+	loadout_ability = _read(config, "loadout", "ability", loadout_ability)
+	fov = _read(config, "view", "fov", fov)
+	mouse_sensitivity = _read(config, "view", "sensitivity", mouse_sensitivity)
+	crosshair_color = _read(config, "crosshair", "color", crosshair_color)
+	crosshair_length = _read(config, "crosshair", "length", crosshair_length)
+	crosshair_gap = _read(config, "crosshair", "gap", crosshair_gap)
+	crosshair_thickness = _read(config, "crosshair", "thickness", crosshair_thickness)
+	crosshair_dot = _read(config, "crosshair", "dot", crosshair_dot)
+
+
+## A hand-edited file with a wrong type falls back to the current value instead of erroring.
+func _read(config: ConfigFile, section: String, key: String, fallback: Variant) -> Variant:
+	var value: Variant = config.get_value(section, key, fallback)
+	if typeof(value) == typeof(fallback):
+		return value
+	if typeof(fallback) == TYPE_FLOAT and typeof(value) == TYPE_INT:
+		return float(value)
+	return fallback
 
 
 func save_settings() -> void:

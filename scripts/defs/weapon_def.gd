@@ -36,9 +36,10 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).
 
 
-## Shortest legal gap between two shots (host rate check).
-func get_min_shot_interval() -> float:
-	return burst_interval if burst_count > 1 else fire_interval
+## Average seconds per shot over sustained fire (host rate check). For bursts the
+## trigger interval is shared by all shots of the burst.
+func get_average_shot_interval() -> float:
+	return fire_interval / maxi(burst_count, 1)
 
 
 func zone_multiplier(zone: Hitbox.Zone) -> float:
