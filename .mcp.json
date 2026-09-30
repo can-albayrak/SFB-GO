@@ -7,6 +7,19 @@
       "env": {
         "GODOT_PATH": "C:\\Users\\Administrator\\Desktop\\godot\\Godot_v4.7.2-stable_win64.exe"
       }
+    },
+    "blender": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "C:\\Users\\Administrator\\AppData\\Local\\Microsoft\\WinGet\\Links\\uvx.exe", "blender-mcp"]
+    },
+    "meshy": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@meshy-ai/meshy-mcp-server"],
+      "env": {
+        "MESHY_API_KEY": "${MESHY_API_KEY}"
+      }
     }
   }
 }

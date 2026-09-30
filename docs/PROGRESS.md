@@ -60,7 +60,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Esc paneli: Resume / Leave Game
 - [x] Headless 2 instance testi: bağlanma, spawn, hareket senkronu, host'un client'ı öldürmesi, yeniden doğma
 - [ ] **Can + arkadaşla gerçek test** (iki bilgisayar, Tailscale)
-- [ ] Aşama sonu kod incelemesi
+- [x] Aşama sonu kod incelemesi. Düzeltilenler: host hız kontrolü (ışınlanma reddi, testte doğrulandı), jitter'da kaybolan atışlar (bütçe tabanlı ateş hızı), geç katılanda can/manken durumu, geç katılmada paket sırası, respawn süresi `data/match/default.tres`'e
 
 ## Bilinen sorunlar
 
@@ -68,6 +68,12 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Uzak oyuncularda silah modeli yok, tracer gözden çıkar (aşama 8 modelleriyle).
 - Lag compensation yok: hızlı hareket eden hedefi vurmak için hafif önden nişan gerekebilir (aşama 3).
 - Spawn noktası rastgele, koruma yok (aşama 3).
+- Host mermi/şarjör takibi yapmıyor: hileli client şarjör değiştirmeden ateş edebilir (arkadaş arası, bilinçli olarak ertelendi).
+
+## Araçlar
+
+- MCP: `godot` (çalışıyor), `blender` (`uvx blender-mcp`; Blender'da BlenderMCP → Connect gerekli), `meshy` (`MESHY_API_KEY` Windows kullanıcı ortam değişkeninden, repoda yok). Hepsi `.mcp.json`'da.
+- Can'ın isteği: karakter + silahlar için basit, ne olduğu belli yer tutucu modeller (Meshy/Blender) aşama 8'den önce eklenecek. Meshy kredisi harcar: başta 3 model (karakter, AR, tabanca), fazlası sorulacak.
 
 ## Denge notları
 
@@ -83,3 +89,4 @@ _Henüz yok._
 | 2026-09-30 | 0 | MCP bağlandı, proje iskeleti kuruldu (project.godot, autoload'lar, klasörler, Input Map, katmanlar); çalıştı, hata yok. Kalan: git + GitHub repo |
 | 2026-09-30 | 0→1 | Git + GitHub bağlandı, aşama 0 bitti. Aşama 1 ilk sürüm: hareket, AR + tabanca, mankenli test haritası, HUD. Headless testte hasar/kafa çarpanı doğrulandı. Sırada his testi. |
 | 2026-09-30 | 1→2 | His testi olumlu, hasar düşürüldü. Kod incelemesi düzeltmeleri. Aşama 2 ilk sürüm: host/join, hareket senkronu, host-authoritative hasar, ölüm/doğma; headless iki instance testinde doğrulandı. Sırada gerçek iki bilgisayar testi. |
+| 2026-09-30 | 2 | Aşama 2 kod incelemesi + düzeltmeler. Blender MCP (uv kuruldu) ve Meshy MCP `.mcp.json`'a eklendi; Can API anahtarını kendi ortamına girip uygulamayı yeniden başlatacak. Sırada: yer tutucu modeller, gerçek ağ testi, sonra aşama 3. |

@@ -18,8 +18,11 @@ const INTERP_DELAY: float = 0.1 ## Remote players are drawn this far in the past
 const INTERP_SNAP: float = 0.25 ## Re-sync the render clock if it drifts further than this.
 const INTERP_CATCHUP: float = 2.0
 const MAX_SNAPSHOTS: int = 30
-const FIRE_RATE_TOLERANCE: float = 0.75 ## Host rejects shots faster than fire_interval * this.
+const FIRE_RATE_TOLERANCE: float = 0.95 ## Sustained host-side rate limit: fire_interval * this.
+const FIRE_BURST_SLACK: float = 0.25 ## Seconds of shots that may arrive bunched up (jitter, resends).
 const MAX_FIRE_ORIGIN_ERROR: float = 3.0 ## Metres between claimed and known eye position.
+const MOVE_SPEED_TOLERANCE: float = 1.5 ## Host allows horizontal speed up to bhop cap * this.
+const MOVE_BUDGET_SECONDS: float = 1.0 ## Movement budget window, absorbs packet bunching.
 const REMOTE_TRACER_DROP: float = 0.2
 
 # Hitbox poses: x = centre height above feet, y = box height (0 = keep shape).
@@ -57,7 +60,12 @@ var _fall_reported: bool = false
 var _snapshots: Array[Snapshot] = []
 var _render_time: float = 0.0
 var _has_render_time: bool = false
-var _last_fire_time: float = -INF
+# Host-side validation state.
+var _next_fire_time: float = -INF
+var _move_budget: float = 0.0
+var _last_valid_position: Vector3 = Vector3.ZERO
+var _last_state_host_time: float = 0.0
+var _has_valid_position: bool = false
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -81,7 +89,8 @@ func _ready() -> void:
 	assert(class_def != null, "Player needs a ClassDef")
 	is_local = is_multiplayer_authority()
 	movement.def = class_def.movement
-	health = class_def.max_health
+	if multiplayer.is_server():
+		health = class_def.max_health # Clients already got the real value from StateSync's spawn state.
 	_create_weapons()
 	equip(0)
 
@@ -174,6 +183,7 @@ func take_hit(amount: float, _zone: Hitbox.Zone, attacker_id: int) -> bool:
 func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	assert(multiplayer.is_server(), "server_respawn is host-only")
 	_life += 1
+	_has_valid_position = false
 	health = class_def.max_health
 	is_alive = true
 	Net.broadcast(self, &"_respawn_at", [spawn_position, yaw, _life])
@@ -259,12 +269,38 @@ func _send_state() -> void:
 func _submit_state(time: float, pos: Vector3, yaw: float, pitch: float, crouched: bool, life: int) -> void:
 	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
 		return
+	if not _is_plausible_move(pos, life):
+		return
 	_store_snapshot(time, pos, yaw, pitch, crouched, life)
 	_relay_state(time, pos, yaw, pitch, crouched, life)
 
 
+## Host: token-bucket speed check on the host clock. Teleports are dropped, so a
+## cheating client freezes in place for everyone and its shots fail the origin check.
+func _is_plausible_move(pos: Vector3, life: int) -> bool:
+	var now: float = Time.get_ticks_usec() / 1_000_000.0
+	var max_speed: float = class_def.move_speed * class_def.movement.bhop_cap_mult * MOVE_SPEED_TOLERANCE
+	if life < _life:
+		return false
+	if not _has_valid_position:
+		# First packet since spawn/respawn: the host placed this player itself.
+		_has_valid_position = true
+		_last_valid_position = pos
+		_last_state_host_time = now
+		_move_budget = max_speed * MOVE_BUDGET_SECONDS
+		return true
+	_move_budget = minf(_move_budget + (now - _last_state_host_time) * max_speed, max_speed * MOVE_BUDGET_SECONDS)
+	_last_state_host_time = now
+	var moved: float = Vector2(pos.x - _last_valid_position.x, pos.z - _last_valid_position.z).length()
+	if moved > _move_budget:
+		return false
+	_move_budget -= moved
+	_last_valid_position = pos
+	return true
+
+
 func _relay_state(time: float, pos: Vector3, yaw: float, pitch: float, crouched: bool, life: int) -> void:
-	for peer_id: int in Net.ingame_peers:
+	for peer_id: int in Net.state_peers:
 		if peer_id != 1 and peer_id != get_multiplayer_authority():
 			_receive_state.rpc_id(peer_id, time, pos, yaw, pitch, crouched, life)
 
@@ -330,11 +366,12 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 		return
 	var weapon: Weapon = weapons[slot]
 	var now: float = Time.get_ticks_msec() / 1000.0
-	if now - _last_fire_time < weapon.def.fire_interval * FIRE_RATE_TOLERANCE:
+	# Budget, not gap between arrivals: bunched packets pass, sustained over-rate does not.
+	if now < _next_fire_time - FIRE_BURST_SLACK:
 		return
 	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
 		return
-	_last_fire_time = now
+	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + weapon.def.fire_interval * FIRE_RATE_TOLERANCE
 	var end_point: Vector3 = weapon.server_fire(origin, dir.normalized())
 	Net.broadcast(self, &"_show_shot", [origin, end_point])
 

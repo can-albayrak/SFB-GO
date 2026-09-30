@@ -17,6 +17,9 @@ var player_names: Dictionary[int, String] = {}
 var map_path: String = DEFAULT_MAP_PATH
 ## Host only: peers whose game scene is loaded (host included). Gameplay RPCs go only to these.
 var ingame_peers: Array[int] = []
+## Host only: ingame peers that also receive movement relays. Added shortly after joining,
+## because unreliable state packets can overtake the reliable spawn packets.
+var state_peers: Array[int] = []
 ## Shown by the main menu after returning (e.g. "Host left the game").
 var last_message: String = ""
 
@@ -85,6 +88,7 @@ func broadcast(node: Node, method: StringName, args: Array = []) -> void:
 func _reset_state() -> void:
 	player_names.clear()
 	ingame_peers.clear()
+	state_peers.clear()
 	map_path = DEFAULT_MAP_PATH
 	last_message = ""
 
@@ -113,6 +117,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	print("[Net] %s left" % get_player_name(peer_id))
 	player_names.erase(peer_id)
 	ingame_peers.erase(peer_id)
+	state_peers.erase(peer_id)
 	_sync_names.rpc(player_names)
 
 

@@ -5,6 +5,8 @@ extends Node3D
 ## the host never replicates nodes to a peer that is still loading.
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/player/player.tscn")
+## Movement relays start this long after a peer joins, so its spawn packets arrive first.
+const STATE_RELAY_DELAY: float = 0.5
 
 var _spawn_points: Array[Marker3D] = []
 
@@ -56,6 +58,15 @@ func _add_ingame_peer(peer_id: int) -> void:
 		new_player.get_node("StateSync").set_visibility_for(id, true)
 	new_player.died.connect(_on_player_died.bind(new_player))
 
+	for dummy: Node in get_tree().get_nodes_in_group(TargetDummy.GROUP):
+		(dummy as TargetDummy).sync_to_peer(peer_id)
+	get_tree().create_timer(STATE_RELAY_DELAY).timeout.connect(_enable_state_relay.bind(peer_id))
+
+
+func _enable_state_relay(peer_id: int) -> void:
+	if peer_id in Net.ingame_peers and peer_id not in Net.state_peers:
+		Net.state_peers.append(peer_id)
+
 
 # Stage 3 replaces this with "farthest from enemies".
 func _pick_spawn_point() -> Marker3D:
@@ -71,7 +82,7 @@ func _get_players() -> Array[Player]:
 
 
 func _on_player_died(_killer_id: int, player: Player) -> void:
-	get_tree().create_timer(Match.respawn_delay).timeout.connect(_respawn.bind(player))
+	get_tree().create_timer(Match.rules.respawn_delay).timeout.connect(_respawn.bind(player))
 
 
 func _respawn(player: Player) -> void:

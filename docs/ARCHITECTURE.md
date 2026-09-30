@@ -83,7 +83,8 @@ sfb-go/
 
 - `scenes/game.tscn` (`/root/Game`, `scripts/game/game.gd`): maç sahnesi. `Net.map_path` haritasını `Map` adıyla yükler (her peer'da aynı yol), `HUD`, `Players` ve `PlayerSpawner` içerir. Haritalar sadece geometri + `SpawnPoints` (Marker3D) + harita nesneleri (mankenler).
 - **Host:** `Net.host_game()` → ENet server (port 7777) → `game.tscn`. **Client:** `Net.join_game()` → bağlanınca `_request_register(name)` → host `_welcome(map_path)` ile cevaplar → client `game.tscn` yükler → `Game._request_spawn()`.
-- Host, sahnesi yüklenmiş peer'ları `Net.ingame_peers`'te tutar. Oyun RPC'leri sadece bunlara gider (`Net.broadcast(node, method, args)`), yüklenmekte olan client "node not found" almaz.
+- Host, sahnesi yüklenmiş peer'ları `Net.ingame_peers`'te tutar. Oyun RPC'leri sadece bunlara gider (`Net.broadcast(node, method, args)`), yüklenmekte olan client "node not found" almaz. Hareket yayını (`Net.state_peers`) katılımdan 0,5 sn sonra başlar; unreliable paketler reliable spawn paketlerini geçmesin diye. Geç katılana mankenlerin canı `sync_to_peer` ile gönderilir.
+- Maç kuralları `Match.rules` (`MatchDef`, `data/match/default.tres`): şimdilik `respawn_delay`.
 - Spawn: `spawner.spawn_function` + `{id, position, yaw}` verisi. `Player.StateSync` (MultiplayerSynchronizer, authority 1, `public_visibility = false`) spawn görünürlüğünü belirler: host yeni peer için `set_visibility_for()` açınca mevcut oyuncular o peer'da da doğar (geç katılma).
 - **Test Range** = `OfflineMultiplayerPeer` ile aynı kod: biz peer 1'iz, `is_server()` true.
 - Host çıkarsa client'lar `server_disconnected` → ana menü ("Host left the game").
@@ -113,7 +114,11 @@ sfb-go/
 
 **Lag compensation:** Host her physics tick'te her oyuncunun hitbox pozisyonunu halka tampona (son ~500 ms) kaydeder. 2. aşamada basit hali (geri sarmasız) kurulur, altyapı buna uygun tasarlanır; geri sarma 3. aşama sonunda eklenir.
 
-**Hile koruması:** Arkadaş arası oyun, ağır anti-cheat yok. Host sadece bariz tutarsızlıkları reddeder (ateş hızı sınırı, aşırı hız, ölüyken ateş).
+**Hile koruması:** Arkadaş arası oyun, ağır anti-cheat yok. Host sadece bariz tutarsızlıkları reddeder:
+- **Aşırı hız:** `_is_plausible_move` host saatinde token bucket (bhop tavanı × 1,5, 1 sn tampon). Işınlanan paket atılır; hileci herkeste yerinde donar, atışları origin kontrolüne takılır. Her doğuşta sıfırlanır.
+- **Ateş hızı:** Bütçe tabanlı (`fire_interval × 0,95`, 0,25 sn birikme payı): ağ dalgalanmasında toplu gelen atışlar kaybolmaz, sürekli fazla hız reddedilir.
+- **Ölüyken ateş**, geçersiz slot, origin'i bilinen gözden 3 m'den uzak atış reddedilir.
+- Host mermi/şarjör takibi yapmaz (bilinçli; arkadaş arası).
 
 ### Fiziksel mermiler (bomba, roket, bıçak)
 

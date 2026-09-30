@@ -3,5 +3,6 @@ extends Node
 ## Only the host mutates state here; clients receive it via RPC.
 ## Stage 2 only uses the respawn delay; FFA rules arrive in stage 3.
 
-## Seconds between death and respawn (GDD: 3 s). Host-configurable later via the lobby.
-var respawn_delay: float = 3.0
+const DEFAULT_RULES: MatchDef = preload("res://data/match/default.tres")
+
+var rules: MatchDef = DEFAULT_RULES
