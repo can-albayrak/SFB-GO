@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="GrenadeDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/grenade_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/projectiles/launcher_grenade.tscn" id="2_projectile"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"grenade_launcher_round"
+display_name = "Grenade Launcher"
+kind = 0
+projectile = ExtResource("2_projectile")
+throw_speed = 24.0
+throw_lift = 2.0
+fuse_time = 3.0
+radius = 4.0
+damage = 95.0
+explode_on_impact = true

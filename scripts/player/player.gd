@@ -610,7 +610,9 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 		end_point = compensator.fire_rewound(self, weapon, origin, dir.normalized())
 	else:
 		end_point = weapon.server_fire(origin, dir.normalized())
-	if weapon.def.fire_type == WeaponDef.FireType.HITSCAN:
+	if weapon is ShotgunWeapon:
+		Net.broadcast(self, &"_on_pellets_fired", [(weapon as ShotgunWeapon).last_pellet_ends])
+	elif weapon.def.fire_type == WeaponDef.FireType.HITSCAN:
 		Net.broadcast(self, &"_show_shot", [origin, end_point])
 
 
@@ -848,6 +850,16 @@ func _show_shot(_from: Vector3, to: Vector3) -> void:
 		return
 	ShotEffects.spawn_muzzle_flash(remote_muzzle)
 	ShotEffects.spawn_tracer(get_parent(), remote_muzzle.global_position, to)
+
+
+## Host -> everyone: a remote player's shotgun blast (one tracer per pellet).
+@rpc("any_peer", "call_local", "unreliable")
+func _on_pellets_fired(ends: PackedVector3Array) -> void:
+	if not _sender_is_host() or is_local:
+		return
+	ShotEffects.spawn_muzzle_flash(remote_muzzle)
+	for end_point: Vector3 in ends:
+		ShotEffects.spawn_tracer(get_parent(), remote_muzzle.global_position, end_point)
 
 
 ## Host -> shooter only: a hit landed. Hit marker + damage number at `point` (shooter's screen only).

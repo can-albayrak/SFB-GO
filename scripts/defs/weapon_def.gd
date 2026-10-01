@@ -43,6 +43,19 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var move_spread_ref_speed: float = 6.6 ## m/s where the cone equals move_spread.
 @export var move_spread_exponent: float = 1.5 ## > 1: slow movement is barely punished.
 
+@export_group("Pellets")
+## Shotgun: one hitscan ray per entry, offset from the aim by (right, up) degrees. A fixed,
+## learnable pattern, computed the same way by the owner (visuals) and the host (damage).
+@export var pellet_pattern: PackedVector2Array
+## Damage falloff by distance: full up to falloff_start, then linear down to
+## falloff_min_mult at falloff_end and beyond. falloff_end <= falloff_start = no falloff.
+@export var falloff_start: float = 0.0
+@export var falloff_end: float = 0.0
+@export var falloff_min_mult: float = 1.0
+
+@export_group("Launcher")
+@export var grenade: GrenadeDef ## Explosive fired by a PROJECTILE weapon (Grenade Launcher).
+
 @export_group("Melee")
 @export var melee_spread_scale: float = 1.0 ## Widens the fan of hit rays (Sledgehammer).
 @export var melee_swing_angle: float = 70.0 ## View sweep per swing in degrees; 0 = no sweep (Chainsaw).
@@ -68,6 +81,14 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 ## trigger interval is shared by all shots of the burst.
 func get_average_shot_interval() -> float:
 	return fire_interval / maxi(burst_count, 1) / (2.0 if dual_wield else 1.0)
+
+
+## Damage multiplier for a hit `distance` metres away (shotgun falloff).
+func get_falloff_mult(distance: float) -> float:
+	if falloff_end <= falloff_start:
+		return 1.0
+	var share: float = clampf((distance - falloff_start) / (falloff_end - falloff_start), 0.0, 1.0)
+	return lerpf(1.0, falloff_min_mult, share)
 
 
 ## Degrees of cone added by moving at `speed` m/s (gradual speed penalty).

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/shotgun.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"shotgun"
+display_name = "Shotgun"
+damage = 12.0
+headshot_mult = 2.0
+leg_mult = 0.75
+max_range = 30.0
+fire_interval = 0.85
+automatic = false
+magazine_size = 6
+reload_time = 2.6
+equip_time = 0.5
+move_speed_mult = 1.0
+move_spread = 1.0
+pellet_pattern = PackedVector2Array(0, 0, 0, 2.6, -2.03, 1.62, -2.53, -0.58, -1.13, -2.34, 1.13, -2.34, 2.53, -0.58, 2.03, 1.62)
+falloff_start = 7.0
+falloff_end = 20.0
+falloff_min_mult = 0.1
+recoil_pattern = PackedVector2Array(0, 3.0)
+recoil_recovery = 10.0
+recoil_recovery_delay = 0.1
+scene = ExtResource("2_scene")

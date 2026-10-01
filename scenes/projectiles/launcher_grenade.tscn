@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/grenade.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/frag_grenade.glb" id="2_model"]
+
+[sub_resource type="PhysicsMaterial" id="PhysMat"]
+friction = 1.0
+rough = true
+bounce = 0.2
+
+[sub_resource type="SphereShape3D" id="Shape"]
+radius = 0.05
+
+[sub_resource type="SceneReplicationConfig" id="Repl"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="LauncherGrenade" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 3
+mass = 0.4
+physics_material_override = SubResource("PhysMat")
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 2
+angular_damp_mode = 1
+angular_damp = 6.0
+script = ExtResource("1_script")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="Sync" type="MultiplayerSynchronizer" parent="."]
+root_path = NodePath("..")
+public_visibility = false
+replication_config = SubResource("Repl")

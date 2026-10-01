@@ -191,6 +191,8 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, point: Vector3, velocity: Vector3) -> void:
 	assert(multiplayer.is_server(), "server_spawn_grenade is host-only")
+	if grenade_def.max_per_thrower > 0:
+		_limit_grenades(grenade_def, thrower_id, grenade_def.max_per_thrower - 1)
 	var grenade: Node = projectile_spawner.spawn({
 		"def": grenade_def.resource_path,
 		"thrower": thrower_id,
@@ -211,6 +213,19 @@ func server_spawn_knife(knife_def: WeaponDef, thrower_id: int, point: Vector3, v
 	})
 	for id: int in Net.ingame_peers:
 		knife.get_node("Sync").set_visibility_for(id, true)
+
+
+## Host: removes the oldest of this thrower's live grenades of this kind until `keep` remain.
+func _limit_grenades(grenade_def: GrenadeDef, thrower_id: int, keep: int) -> void:
+	var own: Array[Grenade] = []
+	for node: Node in projectiles_root.get_children():
+		var grenade := node as Grenade
+		if grenade == null or grenade.is_queued_for_deletion():
+			continue
+		if grenade.thrower_id == thrower_id and grenade.def.resource_path == grenade_def.resource_path:
+			own.append(grenade)
+	while own.size() > keep:
+		own.pop_front().queue_free() # Children are in spawn order: the oldest goes first.
 
 
 ## Host: a thrown knife that hit a player comes back after its timer.

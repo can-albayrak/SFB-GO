@@ -1,0 +1,70 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/grenade.gd" id="1_script"]
+
+[sub_resource type="PhysicsMaterial" id="PhysMat"]
+friction = 1.0
+rough = true
+bounce = 0.0
+
+[sub_resource type="CylinderShape3D" id="Shape"]
+height = 0.06
+radius = 0.15
+
+[sub_resource type="CylinderMesh" id="Mesh_mine"]
+top_radius = 0.13
+bottom_radius = 0.15
+height = 0.06
+radial_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="Mat_mine"]
+albedo_color = Color(0.25, 0.27, 0.2, 1)
+roughness = 0.7
+
+[sub_resource type="SphereMesh" id="Mesh_light"]
+radius = 0.025
+height = 0.05
+radial_segments = 8
+rings = 4
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+shading_mode = 0
+albedo_color = Color(1, 0.15, 0.1, 1)
+
+[sub_resource type="SceneReplicationConfig" id="Repl"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[node name="Landmine" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 1
+mass = 1.0
+physics_material_override = SubResource("PhysMat")
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 1
+angular_damp_mode = 1
+angular_damp = 10.0
+script = ExtResource("1_script")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape")
+
+[node name="Model" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_mine")
+surface_material_override/0 = SubResource("Mat_mine")
+
+[node name="Light" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.035, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_light")
+surface_material_override/0 = SubResource("Mat_light")
+
+[node name="Sync" type="MultiplayerSynchronizer" parent="."]
+root_path = NodePath("..")
+public_visibility = false
+replication_config = SubResource("Repl")

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ClassDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
+[ext_resource type="Resource" path="res://data/weapons/shotgun.tres" id="3_shotgun"]
+[ext_resource type="Resource" path="res://data/weapons/grenade_launcher.tres" id="4_launcher"]
+[ext_resource type="Resource" path="res://data/weapons/pistol.tres" id="5_pistol"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="6_move"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="7_knife"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="8_adef"]
+[ext_resource type="Resource" path="res://data/abilities/sticky_bomb.tres" id="9_sticky"]
+[ext_resource type="Resource" path="res://data/abilities/landmine.tres" id="10_mine"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"volcano"
+display_name = "Volcano"
+max_health = 110
+move_speed = 6.2
+movement = ExtResource("6_move")
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_shotgun"), ExtResource("4_launcher")])
+secondary_weapon = ExtResource("5_pistol")
+abilities = Array[ExtResource("8_adef")]([ExtResource("9_sticky"), ExtResource("10_mine")])
+quick_melee = ExtResource("7_knife")
