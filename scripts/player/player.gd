@@ -576,8 +576,10 @@ func _set_special_weapon(value: int) -> void:
 func _set_special_ammo(value: int) -> void:
 	special_ammo = value
 	if weapons.size() > SPECIAL_SLOT:
-		weapons[SPECIAL_SLOT].ammo = value
-		weapons[SPECIAL_SLOT].ammo_changed.emit(value, weapons[SPECIAL_SLOT].def.magazine_size)
+		var weapon: Weapon = weapons[SPECIAL_SLOT]
+		# The owner counts ahead of the host (shots in flight): never push its count back up.
+		weapon.ammo = mini(weapon.ammo, value) if is_local else value
+		weapon.ammo_changed.emit(weapon.ammo, weapon.def.magazine_size)
 
 
 func _set_powerups(value: int) -> void:

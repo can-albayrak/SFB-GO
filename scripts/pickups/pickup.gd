@@ -31,6 +31,7 @@ func _ready() -> void:
 	add_to_group(GROUP)
 	_build_visual()
 	_show(true)
+	Events.match_started.connect(_on_match_started)
 
 
 func _process(delta: float) -> void:
@@ -70,6 +71,12 @@ func sync_to_peer(peer_id: int) -> void:
 ## Host test helper: the pickup is back now.
 func server_reset() -> void:
 	Net.broadcast(self, &"_set_state", [true, 0.0])
+
+
+## Host: a new match starts with every pickup in place (like crates and drops).
+func _on_match_started() -> void:
+	if multiplayer.is_server() and not available:
+		server_reset()
 
 
 func _in_reach(player: Player) -> bool:

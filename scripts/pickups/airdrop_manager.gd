@@ -14,6 +14,8 @@ const POINTS_NODE: String = "AirdropPoints"
 const OPEN_DISTANCE: float = 2.2 ## Metres from the crate centre (owner side).
 const OPEN_DISTANCE_SLACK: float = 1.0 ## Host allows this much more (position lag).
 const DROP_PICKUP_RADIUS: float = 1.2
+const DROP_FLOOR_PROBE: float = 40.0 ## Metres down to look for a floor under a carrier who died in the air.
+const WORLD_MASK: int = 1
 
 ## Owner: 0..1 progress of the crate being opened (HUD), -1 when not opening.
 var local_progress: float = -1.0
@@ -97,6 +99,12 @@ func server_drop_weapon(index: int, ammo: int, point: Vector3) -> void:
 	assert(multiplayer.is_server(), "server_drop_weapon is host-only")
 	if ammo <= 0 or AirdropWeapons.get_def(index) == null:
 		return
+	# On the floor under the death spot (killed mid-jump); none below = fell off the map: lost.
+	var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.5, point + Vector3.DOWN * DROP_FLOOR_PROBE, WORLD_MASK)
+	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+	if point.y < Player.FALL_DEATH_Y or hit.is_empty():
+		return
+	point = hit["position"]
 	var id: int = _next_id
 	_next_id += 1
 	_drop_left[id] = Match.rules.weapon_drop_lifetime
@@ -301,7 +309,7 @@ func _request_open(id: int) -> void:
 	var peer_id: int = _sender_id()
 	var player: Player = _player(peer_id)
 	var crate: AirdropCrate = _crates.get(id)
-	if player == null or crate == null or not _can_open(player, crate, OPEN_DISTANCE + OPEN_DISTANCE_SLACK):
+	if Match.state != Match.State.PLAYING or player == null or crate == null or not _can_open(player, crate, OPEN_DISTANCE + OPEN_DISTANCE_SLACK):
 		_open_cancelled.rpc_id(peer_id)
 		return
 	if not _openers.has(id):

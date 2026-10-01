@@ -21,6 +21,7 @@ const CHARGE_STUCK_SPEED: float = 2.0 ## Charge ends early when a wall stops us 
 const CHARGE_STUCK_GRACE: float = 0.15
 const DASH_STUCK_SPEED: float = 2.0 ## Dash ends early when a wall stops us below this speed.
 const DASH_STUCK_GRACE: float = 0.05
+const FLOOR_PROBE_MIN: float = 0.15 ## Metres: a floor this close below always counts as landing.
 const GRAPPLE_ACCEL: float = 40.0 ## m/s^2 toward the pull speed, so the start is not a hard snap.
 
 ## Touched the ground after being in the air (camera landing dip).
@@ -115,7 +116,7 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 		hvel = hvel.limit_length(cap)
 		vel.y = def.jump_velocity
 		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
-	elif not on_floor and _jump_buffer > 0.0 and _air_jumps_used < air_jumps:
+	elif not on_floor and _jump_buffer > 0.0 and _air_jumps_used < air_jumps and not _floor_just_below(vel.y):
 		# Double Jump pickup: a second jump in the air, no speed gain.
 		_jump_buffer = 0.0
 		_air_jumps_used += 1
@@ -132,6 +133,17 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	body.velocity = Vector3(hvel.x, vel.y, hvel.z)
 	body.move_and_slide()
 	_update_eye(delta)
+
+
+## Falling onto a floor within the jump buffer: that press is a buffered landing hop
+## (bunny hop), not a Double Jump.
+func _floor_just_below(vertical_speed: float) -> bool:
+	if vertical_speed >= 0.0:
+		return false
+	var reach: float = maxf(-vertical_speed * def.jump_buffer_time, FLOOR_PROBE_MIN)
+	var from: Vector3 = body.global_position + Vector3.UP * 0.05
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * (reach + 0.05), 1, [body.get_rid()])
+	return not body.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 
 ## Owner: pulls the body toward `target` at up to `speed` until it arrives, hits a wall or jumps off.
