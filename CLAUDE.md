@@ -12,7 +12,7 @@ Arkadaşlar arası, en fazla 10 kişilik, sınıf tabanlı FPS. Godot 4 + GDScri
 
 1. `docs/PROGRESS.md` güncelle: işaretlenen maddeler, bilinen sorunlar, oturum günlüğüne bir satır.
 2. Mimari değiştiyse `docs/ARCHITECTURE.md` güncelle.
-3. Anlamlı bir mesajla commit.
+3. Anlamlı bir mesajla commit. **Commit mesajlarına ve PR açıklamalarına `Co-Authored-By`, Claude/Anthropic/model adı veya "Generated with" eki ekleme.**
 
 ## Kullanıcı (Can)
 
@@ -28,7 +28,7 @@ Arkadaşlar arası, en fazla 10 kişilik, sınıf tabanlı FPS. Godot 4 + GDScri
 - **Statik tipli GDScript.**
 - Bir aşamayı bitirmeden sonrakine geçme. Her aşama sonunda oynanabilir sürüm.
 - Kapsam dışı özellik ekleme (GDD'de yoksa önce sor).
-- Değişiklikten sonra projeyi Godot MCP ile çalıştırıp hata çıktısını kontrol et.
+- Değişiklikten sonra projeyi Godot MCP ile çalıştırıp hata çıktısını kontrol et. MCP yoksa (örn. bulut oturumu) Godot 4.7 headless ile doğrula: `godot --headless --path . --import` ve `godot --headless --path . --quit-after 300`, hata çıktısını oku.
 
 ## Bağlam tasarrufu
 
