@@ -2,12 +2,12 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 5 – Sınıflar (beş sınıfın kodu yazıldı; Cheetah, Volcano ve 2026-10-01 tasarım geçişi `cloud/design-pass` dalında, **Godot'ta headless doğrulandı** (smoke test + iki instance ağ testi), Can'ın oynama testi bekliyor. Aşama 2 iki bilgisayar testi ve aşama 3/4/5 oynama testleri bekliyor)
+**Şu anki aşama:** 5 – Sınıflar (beş sınıfın kodu yazıldı; Cheetah, Volcano ve 2026-10-01 tasarım geçişi main'de, **Godot'ta headless doğrulandı** (smoke test + iki instance ağ testi), Can'ın oynama testi bekliyor. Aşama 2 iki bilgisayar testi ve aşama 3/4/5 oynama testleri bekliyor)
 **Son güncelleme:** 2026-10-01
 
 ## Evde sıradaki oturum ("kaldığımız yerden devam")
 
-**Durum (2026-10-01 gece):** Her şey `cloud/design-pass` dalında, [PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açık, main'e merge edilmedi. Evde Godot 4.7.2 headless ile doğrulandı (1–2 bitti); sırada Can'ın oynama testi.
+**Durum (2026-10-01 gece):** `cloud/design-pass` ([PR #1](https://github.com/can-albayrak/SFB-GO/pull/1)) Can'ın isteğiyle main'e merge edildi (fast-forward) ve dal silindi. **Artık tek dal: `main`.** Evde Godot 4.7.2 headless ile doğrulandı (1–2 bitti); sırada Can'ın oynama testi.
 
 1. ~~**Dalı al**~~ ✅
 2. ~~**Godot doğrulaması**~~ ✅ İlk import'ta 3 hata çıktı, düzeltildi (`Net.request_ready` Godot'un `Node.request_ready`'siyle çakışıyordu → `request_lobby_ready`; `Loadout.ROSTER` preload'u Game → LoadoutMenu üzerinden derleme döngüsü yapıyordu → `Loadout.roster()` ilk kullanımda yükler; oyuncu çıkınca `LagCompensator` serbest kalmış anahtarı silmeye çalışıyordu, main'de de vardı). Sonra:
@@ -18,7 +18,7 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 4. **Paralelde asistan + Blender** (Blender'da BlenderMCP → Connect):
    - Karakter yüzü: Can'ın Avaturn GLB'sinden sadece kafa, poligon azaltma, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` (gitignore'da). 2 yüzle deneme.
    - AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod): iç mekân var mı, ölçek, parçalar → `docs/ASSETS.md`.
-5. **Testler geçince:** PR #1'i merge et, aşama 5'i kapat (aşama sonu inceleme bu sefer Godot'ta doğrulanmış kodla), aşama 6'ya (pickup + airdrop) geç.
+5. **Testler geçince:** aşama 5'i kapat (aşama sonu inceleme bu sefer Godot'ta doğrulanmış kodla), aşama 6'ya (pickup + airdrop) geç.
 
 **Bu oturumda yazılanlar (hepsi çalıştırılmadı):** hareket hissi, kamera hissi + Settings paneli, vuruş hissi, denge, Cheetah, Volcano, lobi + last host, kill ödülü (+20 can / +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi, player.gd bölünmesi, geç katılana parlama/kalkan senkronu, başkalarının elinde doğru silah modeli, otomatik smoke test.
 
@@ -132,7 +132,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [ ] **Can'ın Cheetah / Volcano oynama testi** (PR'daki test listesi)
 - [ ] Aşama sonu kod incelemesi (bağımsız agent) Can'ın oynama testinden sonra. Doğrulama oturumunda asistan tasarım geçişi diff'ini elle okudu: yukarıdaki 3 hata dışında bulgu yok
 
-## Tasarım geçişi (2026-10-01, `cloud/design-pass`) — headless doğrulandı, oynama testi bekliyor
+## Tasarım geçişi (2026-10-01, main'e merge edildi) — headless doğrulandı, oynama testi bekliyor
 
 İş bilgisayarında yazıldı (Godot yoktu); evde Godot 4.7.2 headless ile import + smoke test + iki instance ağ testi geçti. Maddeler Can oynayıp onaylayınca işaretlenecek.
 
@@ -145,8 +145,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 ## Bilinen sorunlar
 
-- `cloud/design-pass` headless testlerden geçti ama henüz kimse oynamadı: his (hareket, kamera, vuruş), UI yerleşimi ve iki bilgisayar testi Can'da.
-- Yerel `main` dalı (ana klasör) eski ve origin/main ile ortak geçmişi yok (geçmiş yeniden yazılmış). Oynama testi için ana klasörde `cloud/design-pass` checkout edilmeli; yerel `main` `git reset --hard origin/main` ile düzeltilebilir.
+- Tasarım geçişi headless testlerden geçti ama henüz kimse oynamadı: his (hareket, kamera, vuruş), UI yerleşimi ve iki bilgisayar testi Can'da. Oynanış testinden önce merge edildi (Can'ın kararı); sorun çıkarsa main'de düzeltilir.
 - Placeholder modeller: SMG = küçültülmüş AR, Dual Pistols = iki tabanca, Grenade Launcher = gerilmiş shotgun + silindir, mayın = silindir (aşama 8).
 - Hız cezası ve shotgun'ın merkez yönü sahibinde seçilir, host gelen yönü izler (unscoped spread ile aynı model; hileli client sapmasız ateş edebilir).
 - Hasar sayısı gerçekten düşen canı gösterir (kalan candan fazla vuruşta düşük sayı çıkar); kalkanın engellediği vuruşta marker/sayı yok.
@@ -211,4 +210,4 @@ _Henüz yok._
 | 2026-10-01 | 5 | (çalıştırılmadı) Kill ödülü (+20 can, +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi. `player.gd` 992 → 527 satır: NetSync / Requests / Status / Effects bileşenlerine bölündü (ayrı commit, sorun çıkarsa tek başına geri alınabilir). |
 | 2026-10-01 | – | Sadece tasarım: HUD/menü taslağı (ana menü, HUD, lobi, ölüm + loadout). Tema "lanetli PS2" (gündüz, parlak, fast-food, tel çit, yapıştırma yüzler); devlet teması kaldırıldı. Uygulama aşama 9. |
 | 2026-10-01 | 5 | (çalıştırılmadı) Geç katılana parlama/kalkan (StateSync `scope_glint`, `shield_up`), başkalarının elinde doğru silah (`held_slot` + WeaponDef `world_model`), `tests/smoke_test.tscn` otomatik testi. Evde devir planı bu dosyanın başında. |
-| 2026-10-01 | 5 | Evde Godot doğrulaması: import'ta 3 hata düzeltildi (lobi `request_ready` çakışması, roster preload döngüsü, çıkan oyuncuda lag comp hatası). Smoke test 83/0. Yeni `tests/net_test.tscn` (iki process, gerçek ENet): lobi ve geç katılma modlarında 0 hata. Tasarım geçişi diff'i elle incelendi. Sırada Can'ın oynama testi. |
+| 2026-10-01 | 5 | Evde Godot doğrulaması: import'ta 3 hata düzeltildi (lobi `request_ready` çakışması, roster preload döngüsü, çıkan oyuncuda lag comp hatası). Smoke test 83/0. Yeni `tests/net_test.tscn` (iki process, gerçek ENet): lobi ve geç katılma modlarında 0 hata. Tasarım geçişi diff'i elle incelendi. `cloud/design-pass` main'e merge edildi, dal silindi; tek dal main. Sırada Can'ın oynama testi. |
