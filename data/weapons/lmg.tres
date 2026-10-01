@@ -7,11 +7,11 @@
 script = ExtResource("1_def")
 id = &"lmg"
 display_name = "LMG"
-damage = 17.0
+damage = 14.0
 headshot_mult = 2.0
 leg_mult = 0.75
 max_range = 250.0
-fire_interval = 0.085
+fire_interval = 0.1
 automatic = true
 magazine_size = 100
 reload_time = 4.5

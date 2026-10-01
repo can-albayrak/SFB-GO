@@ -7,11 +7,11 @@
 script = ExtResource("1_def")
 id = &"burst_rifle"
 display_name = "Burst Rifle"
-damage = 28.0
+damage = 16.0
 headshot_mult = 2.0
 leg_mult = 0.75
 max_range = 250.0
-fire_interval = 0.38
+fire_interval = 0.42
 automatic = false
 burst_count = 3
 burst_interval = 0.07
