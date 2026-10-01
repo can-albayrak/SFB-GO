@@ -92,6 +92,8 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Düello süresi (TTK) | **Orta, ~0,6–1 sn** (aynı sınıf, gövde vuruşlarıyla ilk atıştan ölüme). Karşılıklı ateşleşme mümkün, ilk vuran avantajlı ama kesin kazanan değil. |
 | Beceri dengesi | **Dengeli:** nişan ve hareket birbirini dengeler. Hızlı hareket edeni vurmak zor ama imkânsız değil (kademeli hız cezası ile uyumlu). |
 | Mevcut durum | Wolf Assault Rifle şu an ~0,4 sn gövde TTK (20 hasar, 0,1 sn aralık); hedefin altında hızlı. Değerler `data/weapons/` içinde ayarlanacak, kod değişmez. |
+| Silah kimliği | Silahlar en çok **ateş ritmi ve sesle** ayrılır: SMG sık ve ince, Heavy Rifle yavaş ve tok, Shotgun tek patlama. Hasar/TTK birbirine yakın tutulur, fark his ve ritimdedir (menzil rolü dar tutulur, istisna: Shotgun yakın, Marksman/Heavy uzak). |
+| Geri tepme | Mevcut karar korunur: her silahta sabit, öğrenilebilir desen; CS'ten hafif. |
 
 **Not:** Kafa vuruşu (2x) TTK'yı yarıya indirir; bu, nişan becerisinin ödülü olarak kalır. Hawk Heavy Rifle'ın tek atışı bu TTK hedefinin dışındadır (kasıtlı istisna).
 
