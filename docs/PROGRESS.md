@@ -2,19 +2,18 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 5 – Sınıflar (beş sınıfın kodu yazıldı; Cheetah, Volcano ve 2026-10-01 tasarım geçişi `cloud/design-pass` dalında, **Godot'ta hiç çalıştırılmadı**. Aşama 2 iki bilgisayar testi ve aşama 3/4/5 oynama testleri bekliyor)
+**Şu anki aşama:** 5 – Sınıflar (beş sınıfın kodu yazıldı; Cheetah, Volcano ve 2026-10-01 tasarım geçişi `cloud/design-pass` dalında, **Godot'ta headless doğrulandı** (smoke test + iki instance ağ testi), Can'ın oynama testi bekliyor. Aşama 2 iki bilgisayar testi ve aşama 3/4/5 oynama testleri bekliyor)
 **Son güncelleme:** 2026-10-01
 
 ## Evde sıradaki oturum ("kaldığımız yerden devam")
 
-**Durum (2026-10-01 akşamı):** Her şey `cloud/design-pass` dalında, [PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açık, main'e merge edilmedi. Bu dalın kodu iş bilgisayarında yazıldı ve **Godot'ta hiç açılmadı** (sadece gdparse + statik kontrol + iki bağımsız inceleme). İlk iş doğrulama.
+**Durum (2026-10-01 gece):** Her şey `cloud/design-pass` dalında, [PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açık, main'e merge edilmedi. Evde Godot 4.7.2 headless ile doğrulandı (1–2 bitti); sırada Can'ın oynama testi.
 
-1. **Dalı al:** `git fetch` → `git checkout cloud/design-pass` → `git pull`.
-2. **Godot doğrulaması (asistan, Godot MCP ile ya da headless):**
-   - `godot --headless --path . --import` → Output'taki her `SCRIPT ERROR` / parse hatasını düzelt.
-   - **Otomatik test:** `godot --headless --path . res://tests/smoke_test.tscn` → `PASS` / `FAIL` satırları + `SMOKE TEST: x passed, y failed`. Her sınıfın her silahı mankene, yedek silah, V, Q güçleri, mayın, kill ödülü, elindeki silah, respawn, ayarlar ve lobi paneli. Test dosyasının kendisi de hiç çalışmadı; önce onun hatası çıkarsa onu düzelt.
-   - İki instance ağ testi: `--host` (lobiyi atlar) ve `--join=127.0.0.1` (loadout sormadan girer).
-   - Yeni `.gd.uid` dosyalarını commit et.
+1. ~~**Dalı al**~~ ✅
+2. ~~**Godot doğrulaması**~~ ✅ İlk import'ta 3 hata çıktı, düzeltildi (`Net.request_ready` Godot'un `Node.request_ready`'siyle çakışıyordu → `request_lobby_ready`; `Loadout.ROSTER` preload'u Game → LoadoutMenu üzerinden derleme döngüsü yapıyordu → `Loadout.roster()` ilk kullanımda yükler; oyuncu çıkınca `LagCompensator` serbest kalmış anahtarı silmeye çalışıyordu, main'de de vardı). Sonra:
+   - `--import` temiz, ana sahne `--quit-after 300` temiz.
+   - `res://tests/smoke_test.tscn`: **83 geçti, 0 kaldı.**
+   - Yeni `res://tests/net_test.tscn` (gerçek ENet, iki process, host önce): lobi modu **26 + 22 geçti**, `--late` geç katılma modu **25 + 23 geçti**, hata çıktısı yok. Komutlar dosyanın başında.
 3. **Can'ın oynama testi:** PR #1 açıklamasındaki madde madde test listesi (önce tek başına Test Range, sonra iki bilgisayar). Bölme commit'i `92f6d7b` (player.gd → NetSync / Requests / Status / Effects) sorun çıkarırsa tek başına geri alınabilir.
 4. **Paralelde asistan + Blender** (Blender'da BlenderMCP → Connect):
    - Karakter yüzü: Can'ın Avaturn GLB'sinden sadece kafa, poligon azaltma, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` (gitignore'da). 2 yüzle deneme.
@@ -129,13 +128,13 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [ ] **Can'ın Bear oynama testi**
 - [ ] **Cheetah** (70 can, 7,6 m/s) — yazıldı, Godot'ta çalıştırılmadı: SMG (8 hasar / 0,075 sn, koşarken isabetli), Dual Pistols (sol/sağ tık ayrı, ortak 16'lık şarjör, 1,2 sn şarjör), yedek tabanca, V bıçak; Dash (5 sn, havada da), Adrenaline (15 sn bekleme, 4 sn +%25 hız / +%30 ateş hızı, host da uygular)
 - [ ] **Volcano** (110 can, 6,2 m/s) — yazıldı, Godot'ta çalıştırılmadı: Shotgun (8 pellet sabit desen, host her pelleti izler, 7→20 m düşüş, hedef başına toplu hasar), Grenade Launcher (host-simüle, çarpınca patlar, kendine de hasar), yedek tabanca; Sticky Bomb (duvara/oyuncuya yapışır), Landmine (üstüne basanı patlatır, oyuncu başına 1)
-- [ ] Godot'ta açılış + headless doğrulama (`--import`, kısa çalıştırma, iki instance ağ testi)
+- [x] Godot'ta açılış + headless doğrulama: `--import` (3 hata düzeltildi), smoke test 83/0, iki instance ağ testi (lobi ve geç katılma) 0 hata
 - [ ] **Can'ın Cheetah / Volcano oynama testi** (PR'daki test listesi)
-- [ ] Aşama sonu kod incelemesi Godot'ta doğrulandıktan sonra tekrar (bu oturumdaki inceleme sadece statik)
+- [ ] Aşama sonu kod incelemesi (bağımsız agent) Can'ın oynama testinden sonra. Doğrulama oturumunda asistan tasarım geçişi diff'ini elle okudu: yukarıdaki 3 hata dışında bulgu yok
 
-## Tasarım geçişi (2026-10-01, `cloud/design-pass`) — yazıldı, çalıştırılmadı
+## Tasarım geçişi (2026-10-01, `cloud/design-pass`) — headless doğrulandı, oynama testi bekliyor
 
-İş bilgisayarında Godot yoktu; sadece gdparse sözdizimi kontrolü, kaynak/düğüm/RPC statik kontrolü ve bağımsız kod incelemesi yapıldı.
+İş bilgisayarında yazıldı (Godot yoktu); evde Godot 4.7.2 headless ile import + smoke test + iki instance ağ testi geçti. Maddeler Can oynayıp onaylayınca işaretlenecek.
 
 - [ ] Hareket hissi: coyote time (0,1 sn) + jump buffer (0,1 sn), slide'dan zıplamada hız korunur (kazanç yok), serbest hava ivmesi + havada da 1,3 tavanı, kademeli hız cezası (`WeaponDef.move_spread`, eğri, silah başına)
 - [ ] Kamera ve his: hızla FOV kayması, hafif head bob, iniş çökmesi, slide'da alçalma + yatma, hasar sarsıntısı; hepsi Settings'ten %0–100 (`data/camera/default.tres`)
@@ -146,7 +145,8 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 ## Bilinen sorunlar
 
-- **`cloud/design-pass` dalındaki her şey Godot'ta hiç açılmadı.** Projeyi açınca önce Output'taki hatalara bakılmalı. Yeni scriptlerin `.gd.uid` dosyaları ilk açılışta oluşacak (commit edilmeli).
+- `cloud/design-pass` headless testlerden geçti ama henüz kimse oynamadı: his (hareket, kamera, vuruş), UI yerleşimi ve iki bilgisayar testi Can'da.
+- Yerel `main` dalı (ana klasör) eski ve origin/main ile ortak geçmişi yok (geçmiş yeniden yazılmış). Oynama testi için ana klasörde `cloud/design-pass` checkout edilmeli; yerel `main` `git reset --hard origin/main` ile düzeltilebilir.
 - Placeholder modeller: SMG = küçültülmüş AR, Dual Pistols = iki tabanca, Grenade Launcher = gerilmiş shotgun + silindir, mayın = silindir (aşama 8).
 - Hız cezası ve shotgun'ın merkez yönü sahibinde seçilir, host gelen yönü izler (unscoped spread ile aynı model; hileli client sapmasız ateş edebilir).
 - Hasar sayısı gerçekten düşen canı gösterir (kalan candan fazla vuruşta düşük sayı çıkar); kalkanın engellediği vuruşta marker/sayı yok.
@@ -211,3 +211,4 @@ _Henüz yok._
 | 2026-10-01 | 5 | (çalıştırılmadı) Kill ödülü (+20 can, +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi. `player.gd` 992 → 527 satır: NetSync / Requests / Status / Effects bileşenlerine bölündü (ayrı commit, sorun çıkarsa tek başına geri alınabilir). |
 | 2026-10-01 | – | Sadece tasarım: HUD/menü taslağı (ana menü, HUD, lobi, ölüm + loadout). Tema "lanetli PS2" (gündüz, parlak, fast-food, tel çit, yapıştırma yüzler); devlet teması kaldırıldı. Uygulama aşama 9. |
 | 2026-10-01 | 5 | (çalıştırılmadı) Geç katılana parlama/kalkan (StateSync `scope_glint`, `shield_up`), başkalarının elinde doğru silah (`held_slot` + WeaponDef `world_model`), `tests/smoke_test.tscn` otomatik testi. Evde devir planı bu dosyanın başında. |
+| 2026-10-01 | 5 | Evde Godot doğrulaması: import'ta 3 hata düzeltildi (lobi `request_ready` çakışması, roster preload döngüsü, çıkan oyuncuda lag comp hatası). Smoke test 83/0. Yeni `tests/net_test.tscn` (iki process, gerçek ENet): lobi ve geç katılma modlarında 0 hata. Tasarım geçişi diff'i elle incelendi. Sırada Can'ın oynama testi. |

@@ -55,7 +55,9 @@ sfb-go/
 │   └── maps/
 │       ├── test_range.tscn  # Test haritası + hedef mankenleri
 │       └── mall/            # İlk gerçek harita
-├── tests/                   # smoke_test.tscn: headless otomatik test (godot --headless --path . res://tests/smoke_test.tscn)
+├── tests/                   # Headless otomatik testler (komutlar dosyaların başında)
+│   ├── smoke_test.tscn      # Tek process: her sınıf/silah/güç mankene, kill ödülü, UI panelleri
+│   └── net_test.tscn        # İki process, gerçek ENet: --role=host / --role=client (+ --late)
 ├── tools/                   # .gdignore; oyun dışı araçlar
 │   └── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
 └── assets/
@@ -188,7 +190,7 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 
 ### Loadout (aşama 4)
 
-- `data/classes/roster.tres` (`ClassRoster`): oynanabilir sınıfların sırası. Loadout = `PackedInt32Array [sınıf, birincil silah, güç]` roster indeksleri (`scripts/player/loadout.gd`: doğrulama, Settings'e kayıt, açıklama).
+- `data/classes/roster.tres` (`ClassRoster`): oynanabilir sınıfların sırası. `Loadout.roster()` ile ilk kullanımda yüklenir; `preload` edilmez, çünkü roster tüm silah/güç sahnelerini çeker ve bunların scriptleri (Game, LoadoutMenu) roster'ı okur → derleme döngüsü. Loadout = `PackedInt32Array [sınıf, birincil silah, güç]` roster indeksleri (`scripts/player/loadout.gd`: doğrulama, Settings'e kayıt, açıklama).
 - `Player.loadout` StateSync ile host'tan herkese yayılır (spawn'da da). Setter `_apply_loadout()` çağırır: `class_def`, hareket, silahlar (birincil + ikincil), bıçak (`MeleeWeapon`), `Ability` node'u yeniden kurulur. Her peer aynısını kurar: host hasar için, sahibi kullanım için, diğerleri görüntü için.
 - Seçim akışı: sahibi `request_loadout(code)` → host `_request_loadout` doğrular → doğuştan sonraki `rules.loadout_swap_window` (3 sn) içindeyse anında uygular + can doldurur, değilse `_pending_loadout` olarak saklar ve `server_respawn`'da uygular. İlk doğuşta client kendi kayıtlı seçimini `_request_spawn(loadout)` ile gönderir.
 - Son seçim `Settings` üzerinden `user://settings.cfg`'e kaydedilir (isim, loadout, FOV, hassasiyet, crosshair).
@@ -280,6 +282,8 @@ Aksiyon isimleri (`project.godot` içinde, fiziksel tuş kodu ile): `move_forwar
 ## Kodlama kuralları
 
 - Statik tip her yerde. `@onready var camera: Camera3D = $Head/Camera3D`.
+- Fonksiyon/değişken adı Godot'un kendi `Node` / `Node3D` üyeleriyle çakışmasın (örn. `request_ready`, `position`): proje uyarıları hata sayıyor, script derlenmez.
+- Sınıf scriptlerinde büyük kaynak ağaçlarını (`roster.tres` gibi) `const ... = preload(...)` ile tutma: başka scriptlerle derleme döngüsü kurabilir; ilk kullanımda `load` et.
 - İsimlendirme: dosya ve fonksiyon `snake_case`, `class_name` `PascalCase`, sinyal geçmiş zaman (`died`, `weapon_fired`).
 - Oyun içi tüm metinler İngilizce.
 - Kod yorumları İngilizce, kısa. Dokümanlar Türkçe.
