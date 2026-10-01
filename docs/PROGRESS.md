@@ -184,7 +184,8 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya.
 
-- 2026-10-01 (Can, ilk test): Cheetah zor kontrol ediliyor, zıplarken akıyor, havada çok yön değişiyor. Serbest hava ivmesi 10 → 3 (`MovementDef.air_control_accel`, `standard.tres`, tüm sınıflar). Tekrar test edilecek; yetmezse Cheetah'a ayrı `MovementDef`.
+- 2026-10-01 (Can, ilk test): Cheetah zor kontrol ediliyor, zıplarken akıyor, havada çok yön değişiyor. Serbest hava ivmesi 10 → 3 (`MovementDef.air_control_accel`, `standard.tres`, tüm sınıflar). Can: "daha iyi, gayet iyi".
+- 2026-10-01 (Can): Dual Pistols ateş aralığı 0,3 → 0,2 sn (tabanca başına; Cheetah'a TTK ~0,8 sn). SMG recoil deseni ×1,5.
 
 ## Oturum günlüğü
 
@@ -212,3 +213,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 5 | (çalıştırılmadı) Geç katılana parlama/kalkan (StateSync `scope_glint`, `shield_up`), başkalarının elinde doğru silah (`held_slot` + WeaponDef `world_model`), `tests/smoke_test.tscn` otomatik testi. Evde devir planı bu dosyanın başında. |
 | 2026-10-01 | 5 | Evde Godot doğrulaması: import'ta 3 hata düzeltildi (lobi `request_ready` çakışması, roster preload döngüsü, çıkan oyuncuda lag comp hatası). Smoke test 83/0. Yeni `tests/net_test.tscn` (iki process, gerçek ENet): lobi ve geç katılma modlarında 0 hata. Tasarım geçişi diff'i elle incelendi. `cloud/design-pass` main'e merge edildi, dal silindi; tek dal main. Sırada Can'ın oynama testi. |
 | 2026-10-01 | 5 | Can'ın ilk testi: ana klasörde eski `.godot` önbelleği yüzünden menü butonları çalışmıyordu (`--import` ile düzeldi). Cheetah/hava kontrolü fazla: `air_control_accel` 3 eklendi. |
+| 2026-10-01 | 5 | Hava ivmesi onaylandı. Dual Pistols daha hızlı (0,2 sn), SMG recoil ×1,5. |
