@@ -150,6 +150,10 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Hız cezası dürbündeyken de geçerli (dürbünle yürürken Heavy/Marksman artık tam isabetli değil).
 - Serbest hava kontrolü `standard.tres` ile tüm sınıflara geçerli (Wolf/Hawk/Bear da Quake tarzı air strafe yerine serbest yön değiştirme alıyor).
 - Maç bitince lobiye dönülmez; eskisi gibi 10 sn sonra yeni maç başlar.
+- Geç katılan, o anda zaten dürbünü açık olan Hawk'ın parlamasını Hawk dürbünü kapatıp açana kadar görmez (yeni peer'a durum gönderilmiyor; oyuncu düğümü henüz o peer'da doğmamış olabileceği için ertelendi). Kalkan paneli için de aynısı.
+- Ölüm ekranındaki "öldürenin kalan canı" kill ödülünden önceki can.
+- Aşama 6 notu: airdrop silahlarının `.tres`'inde `kill_ammo_reward = false` olmalı (varsayılan true).
+- Geç katılma loadout ekranında Esc oyundan çıkar (henüz oyuncu yok, pause menüsü yok).
 - Tek harita hâlâ test_range (mankenli). Mankensiz maç haritası aşama 7'de (mall).
 - Bear'ın yakın dövüş silahlarıyla Bear'a karşı TTK hedefin üstünde (1,5–2,4 sn); sadece hız cezası istendiği için hasarlara dokunulmadı.
 - Decoy sadece görsel: vurulamaz, kurşun içinden geçer (GDD "hologram" diyor; istenirse hitbox eklenir).

@@ -121,6 +121,8 @@ func _physics_process(delta: float) -> void:
 		status.server_tick()
 	if not is_local or not is_alive:
 		is_scoped = false
+		if is_local:
+			effects.report_scoped(false) # Re-sends on the next scope after a respawn.
 		return
 	var cmd: PlayerCommand = player_input.gather()
 	var stunned: bool = status.is_stunned_local()
@@ -230,11 +232,13 @@ func can_take_damage() -> bool:
 	return is_alive and not is_protected and Match.state == Match.State.PLAYING
 
 
-## Host only. Returns true if this hit killed.
-func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: String, is_melee: bool = false) -> bool:
+## Host only. Returns true if this hit killed. `bypass_shield`: damage from under the feet
+## (landmine) that a raised shield cannot stop.
+func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: String, is_melee: bool = false,
+		bypass_shield: bool = false) -> bool:
 	assert(multiplayer.is_server(), "take_hit is host-only")
 	last_damage_dealt = 0.0
-	if not can_take_damage() or status.shield_blocks(attacker_id):
+	if not can_take_damage() or (not bypass_shield and status.shield_blocks(attacker_id)):
 		return false
 	_last_hit_weapon = weapon_name
 	_last_hit_melee = is_melee

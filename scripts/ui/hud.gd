@@ -82,6 +82,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if not is_instance_valid(_player):
+		# Late joiner still picking a loadout (no player yet): Esc leaves the game.
+		if event.is_action_pressed(&"pause_menu") and loadout_menu.visible:
+			get_viewport().set_input_as_handled()
+			Net.leave()
 		return
 	if event.is_action_pressed(&"class_menu"):
 		if loadout_menu.visible:

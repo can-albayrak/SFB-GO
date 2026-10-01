@@ -138,7 +138,7 @@ func _find_trigger_victim() -> Player:
 func _hit_trigger_victim(victim: Player) -> void:
 	if def.trigger_victim_damage <= 0.0:
 		return
-	var killed: bool = victim.take_hit(def.trigger_victim_damage, Hitbox.Zone.LEG, thrower_id, def.display_name)
+	var killed: bool = victim.take_hit(def.trigger_victim_damage, Hitbox.Zone.LEG, thrower_id, def.display_name, false, true)
 	var thrower: Player = _get_thrower()
 	if thrower != null and (victim.last_damage_dealt > 0.0 or killed):
 		thrower.confirm_hit.rpc_id(thrower_id, Hitbox.Zone.LEG, killed, victim.last_damage_dealt, victim.global_position)
