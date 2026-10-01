@@ -124,6 +124,12 @@ Adet = farklı model sayısı (yerleştirirken tekrar kullanılır). Durum: `ara
 
 **Toplam:** ~40–50 farklı model, 15–20 doku.
 
+## Adaylar (indirilip Blender'da kontrol edilecek)
+
+| Model | Lisans | Ne için | Kontrol edilecek |
+| --- | --- | --- | --- |
+| [Suburban Mall 1980 – novusod (Sketchfab)](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) | CC-BY (kredi zorunlu: "Suburban Mall 1980" by novusod) | Dış cephe / genel kütle referansı, belki başlangıç modeli; 80'ler AVM silüeti, Caldor ve Sears ana mağaza blokları | 14,1k üçgen: büyük ihtimalle sadece dış kabuk. İç mekân var mı, gerçek ölçek ne (hedef bina ~64 × 48 m), parçalar ayrı mı. Ham dosya `private_assets/` altına. |
+
 ## İncelenen ama kullanılamayanlar
 
 | Model | Neden olmaz |

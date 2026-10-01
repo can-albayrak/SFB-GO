@@ -5,6 +5,17 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 **Şu anki aşama:** 5 – Sınıflar (beş sınıfın kodu yazıldı; Cheetah, Volcano ve 2026-10-01 tasarım geçişi `cloud/design-pass` dalında, **Godot'ta hiç çalıştırılmadı**. Aşama 2 iki bilgisayar testi ve aşama 3/4/5 oynama testleri bekliyor)
 **Son güncelleme:** 2026-10-01
 
+## Evde sıradaki oturum ("kaldığımız yerden devam")
+
+İki iş paralel yürür: Can oyunu test eder, Claude Blender'da çalışır (Blender MCP: Blender'da BlenderMCP → Connect).
+
+1. **Can: `cloud/design-pass` testi** ([PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açıklamasındaki test listesi). İlk iş: projeyi editörde aç, Output'taki kırmızı hataları Claude'a yapıştır; yeni `.uid` dosyalarını commit et. Godot MCP evde çalışıyorsa Claude headless doğrulamayı da yapar.
+2. **Claude + Blender: karakter yüzü.** Can'ın verdiği Avaturn GLB'den sadece kafayı çıkar, poligonu azalt, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` altında, repoya girmez (`.gitignore`'da). 2 yüzle deneme.
+3. **Claude + Blender: AVM adayı.** [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod) indirilip `private_assets/` altında açılır: iç mekân var mı, ölçek, parçalar. Sonuç `docs/ASSETS.md`'ye işlenir.
+4. Test hatalarına göre düzeltmeler; ayrıca bekleyen: Hawk namlu parlaması (GDD dengeleyici, kodda yok).
+
+Not: Harita blockout'u aşama 7; şimdilik sadece model incelemesi ve hazırlık.
+
 ## Aşamalar
 
 Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğerine geçilmez.
@@ -181,3 +192,4 @@ _Henüz yok._
 | 2026-10-01 | – | Sadece tasarım: karakter yüzleri kararı (tüm kafalar açık, fotoğraf tabanlı yüzler oyunla gelir, menüden seçilir, ID ile senkron). Eve gidince: `private_assets/` klasörü + `.gitignore`, Avaturn GLB'den kafa çıkarma denemesi (Blender), 2 yüzle test. |
 | 2026-10-01 | 5 | `cloud/design-pass` (iş bilgisayarı, Godot yok, **çalıştırılmadı**): hareket hissi, kamera hissi + Settings paneli, vuruş hissi, denge (.tres), Cheetah, Volcano, lobi + last host. gdparse + statik kontrol + bağımsız inceleme. Can'ın toplu testi ve Godot'ta doğrulama bekliyor. |
 | 2026-10-01 | – | Sadece tasarım: harita ölçeği 4–6 oyuncuya göre (GDD: bina ~64×48 m, uçtan uca 15–20 sn, 10–12 spawn, 3 airdrop). `docs/ASSETS.md`: AVM prop/doku ihtiyaç listesi ve lisans takibi. Eksik bulundu: Hawk namlu parlaması (GDD dengeleyici) kodda yok. |
+| 2026-10-01 | – | AVM adayı bulundu: Suburban Mall 1980 (Sketchfab, CC-BY) → ASSETS.md "Adaylar". Evdeki oturum planı PROGRESS başına yazıldı (test + Blender: yüz modeli ve AVM kontrolü). |
