@@ -37,6 +37,10 @@ var last_message: String = ""
 var in_lobby: bool = false
 ## Lobby "ready" flags by peer id (host-owned, mirrored to everyone).
 var ready_peers: Dictionary[int, bool] = {}
+## Client: a late joiner picks a loadout before entering (false for command-line joins).
+var ask_loadout_on_join: bool = true
+## Client: set by _welcome; Game shows the loadout menu before asking to spawn.
+var pick_on_join: bool = false
 ## Lobby settings as the host last set them (shown to everyone in the lobby).
 var lobby_kill_target: int = 0
 var lobby_minutes: float = 0.0
@@ -162,6 +166,7 @@ func _reset_state() -> void:
 	map_path = DEFAULT_MAP_PATH
 	last_message = ""
 	in_lobby = false
+	pick_on_join = false
 	_session_serial += 1
 	ready_peers.clear()
 	lobby_kill_target = 0
@@ -224,6 +229,7 @@ func _request_register(player_name: String) -> void:
 
 @rpc("authority", "call_remote", "reliable")
 func _welcome(host_map_path: String) -> void:
+	pick_on_join = ask_loadout_on_join and not in_lobby # Lobby peers already picked there.
 	in_lobby = false
 	map_path = host_map_path
 	get_tree().change_scene_to_file(GAME_PATH)

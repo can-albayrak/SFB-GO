@@ -1,7 +1,8 @@
 extends Control
 ## Lobby (GDD "Lobi"): player list with names, ready flags and an empty face slot (faces
-## come in stage 8). The host sets kill target / minutes / map and presses Start; clients
-## toggle Ready. No chat or teams. Once the match runs, new peers join it directly.
+## come in stage 8). Everyone picks the loadout for their first spawn here (saved in
+## Settings, used by Game on spawn). The host sets kill target / minutes / map and presses
+## Start; clients toggle Ready. No chat or teams. Late joiners pick on joining instead.
 
 const BACKGROUND_COLOR: Color = Color(0.12, 0.06, 0.04, 1.0)
 const TITLE_COLOR: Color = Color(1.0, 0.55, 0.25)
@@ -29,6 +30,9 @@ var _start_button: Button
 var _kills_spin: SpinBox
 var _minutes_spin: SpinBox
 var _map_option: OptionButton
+var _loadout_label: Label
+var _loadout_overlay: CenterContainer
+var _loadout_menu: LoadoutMenu
 
 
 func _ready() -> void:
@@ -67,6 +71,17 @@ func _build() -> void:
 	_list.add_theme_constant_override(&"separation", 6)
 	box.add_child(_list)
 
+	box.add_child(_label("YOUR LOADOUT", SMALL_SIZE, SECTION_COLOR))
+	var loadout_row := HBoxContainer.new()
+	loadout_row.add_theme_constant_override(&"separation", 12)
+	box.add_child(loadout_row)
+	_loadout_label = _label(Loadout.describe(Loadout.from_settings()), FONT_SIZE, Color.WHITE)
+	_loadout_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	loadout_row.add_child(_loadout_label)
+	var change := _button("Change")
+	change.pressed.connect(_open_loadout)
+	loadout_row.add_child(change)
+
 	box.add_child(_label("MATCH", SMALL_SIZE, SECTION_COLOR))
 	if multiplayer.is_server():
 		_build_host_controls(box)
@@ -81,6 +96,15 @@ func _build() -> void:
 	var leave := _button("Leave")
 	leave.pressed.connect(func() -> void: Net.leave())
 	box.add_child(leave)
+
+	# Loadout picker drawn over everything (same three-step menu as in game).
+	_loadout_overlay = CenterContainer.new()
+	_loadout_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_loadout_overlay.visible = false
+	add_child(_loadout_overlay)
+	_loadout_menu = LoadoutMenu.new()
+	_loadout_overlay.add_child(_loadout_menu)
+	_loadout_menu.confirmed.connect(_on_loadout_confirmed)
 
 
 func _build_host_controls(box: VBoxContainer) -> void:
@@ -147,6 +171,18 @@ func _refresh() -> void:
 		var map_name: String = Net.MAP_NAMES[clampi(Net.lobby_map_index, 0, Net.MAP_NAMES.size() - 1)]
 		_rules_label.text = "%d kills  ·  %d min  ·  %s  ·  waiting for the host" % [
 			Net.lobby_kill_target, roundi(Net.lobby_minutes), map_name]
+
+
+func _open_loadout() -> void:
+	_loadout_overlay.visible = true
+	_loadout_menu.open(Loadout.from_settings())
+
+
+## The first spawn uses the saved loadout (Game sends Loadout.from_settings()).
+func _on_loadout_confirmed(code: PackedInt32Array) -> void:
+	Loadout.save_to_settings(code)
+	_loadout_label.text = Loadout.describe(code)
+	_loadout_overlay.visible = false
 
 
 func _on_rules_changed() -> void:

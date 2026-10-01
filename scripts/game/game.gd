@@ -51,7 +51,24 @@ func _ready() -> void:
 		Match.server_begin()
 		_add_ingame_peer(1, Loadout.from_settings())
 	else:
-		_request_spawn.rpc_id(1, Loadout.from_settings())
+		if Net.pick_on_join:
+			_pick_loadout_then_spawn()
+		else:
+			_request_spawn.rpc_id(1, Loadout.from_settings())
+
+
+## Late joiner (GDD): choose class and weapons first, then ask the host for a player.
+func _pick_loadout_then_spawn() -> void:
+	Net.pick_on_join = false
+	var menu := $HUD/LoadoutMenu as LoadoutMenu
+	menu.confirmed.connect(_on_join_loadout_picked, CONNECT_ONE_SHOT)
+	menu.open(Loadout.from_settings())
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _on_join_loadout_picked(code: PackedInt32Array) -> void:
+	Loadout.save_to_settings(code)
+	_request_spawn.rpc_id(1, code)
 
 
 func _exit_tree() -> void:

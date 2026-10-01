@@ -64,7 +64,7 @@ func _handle_command_line() -> void:
 		_host_without_lobby.call_deferred()
 	elif not join_address.is_empty():
 		address_edit.text = join_address
-		_on_join_pressed.call_deferred()
+		_join.call_deferred(false) # Scripted joins spawn at once (headless tests).
 
 
 func _save_name() -> void:
@@ -89,6 +89,11 @@ func _host_without_lobby() -> void:
 
 
 func _on_join_pressed() -> void:
+	_join(true)
+
+
+## `ask_loadout`: a late joiner picks a loadout before entering the match.
+func _join(ask_loadout: bool) -> void:
 	_save_name()
 	var address: String = address_edit.text.strip_edges()
 	if address.is_empty():
@@ -98,13 +103,14 @@ func _on_join_pressed() -> void:
 	if err != OK:
 		status_label.text = "Could not connect"
 		return
+	Net.ask_loadout_on_join = ask_loadout
 	status_label.text = "Connecting to %s..." % address
 	_set_buttons_disabled(true)
 
 
 func _on_last_host_pressed() -> void:
 	address_edit.text = Settings.last_host
-	_on_join_pressed()
+	_join(true)
 
 
 func _on_test_range_pressed() -> void:
