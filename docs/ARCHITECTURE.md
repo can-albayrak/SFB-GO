@@ -20,7 +20,7 @@ Kod yapısının ve kuralların referansı. Tasarım için `GDD.md`, durum için
 sfb-go/
 ├── project.godot
 ├── CLAUDE.md
-├── .mcp.json                # Claude Code için Godot MCP ayarı
+├── .mcp.json                # Godot MCP ayarı
 ├── docs/                    # GDD, ARCHITECTURE, PROGRESS (.gdignore: Godot import etmez)
 ├── addons/                  # Godot eklentileri (şimdilik boş)
 ├── autoload/                # Global singleton'lar

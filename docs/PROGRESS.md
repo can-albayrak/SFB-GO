@@ -9,18 +9,18 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğerine geçilmez.
 
-| # | Aşama | Önerilen model | Durum |
-| --- | --- | --- | --- |
-| 0 | Kurulum (Godot, MCP, repo, proje iskeleti) | Opus | ✅ Bitti |
-| 1 | Temel his: Wolf ile hareket, hitscan ateş, test haritası (tek oyunculu) | Opus → Sonnet | ✅ Bitti |
-| 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | Opus | ⏳ Devam ediyor |
-| 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | Opus → Sonnet | ✅ Bitti (oynama testi bekliyor) |
-| 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | Opus | ⏳ Devam ediyor |
-| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | Sonnet | ⏳ Hawk ve Bear yapıldı (test bekliyor), sırada Cheetah |
-| 6 | Pickup'lar ve airdrop | Sonnet | Bekliyor |
-| 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Sonnet | Bekliyor |
-| 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | Sonnet | Bekliyor |
-| 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | Sonnet | Bekliyor |
+| # | Aşama | Durum |
+| --- | --- | --- |
+| 0 | Kurulum (Godot, MCP, repo, proje iskeleti) | ✅ Bitti |
+| 1 | Temel his: Wolf ile hareket, hitscan ateş, test haritası (tek oyunculu) | ✅ Bitti |
+| 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | ⏳ Devam ediyor |
+| 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | ✅ Bitti (oynama testi bekliyor) |
+| 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | ⏳ Devam ediyor |
+| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ⏳ Hawk ve Bear yapıldı (test bekliyor), sırada Cheetah |
+| 6 | Pickup'lar ve airdrop | Bekliyor |
+| 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Bekliyor |
+| 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | Bekliyor |
+| 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | Bekliyor |
 
 Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler → commit → gerekirse Release.
 
@@ -29,7 +29,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Godot 4.4+ kuruldu (4.7.2, `Desktop\godot\`)
 - [x] Godot'ta boş proje oluşturuldu (Mobile renderer, Jolt fizik, 60 Hz) bu klasörde
 - [x] Godot MCP eklentisi: gerekmiyor, `@coding-solo/godot-mcp` Godot'u dışarıdan çalıştırıyor
-- [x] Claude Code'a Godot MCP eklendi (`.mcp.json`)
+- [x] Godot MCP eklendi (`.mcp.json`)
 - [ ] Blender + Blender connector kuruldu (aşama 8'e kadar ertelenebilir)
 - [x] GitHub private repo: github.com/can-albayrak/SFB-GO
 - [x] Klasör yapısı (`docs/ARCHITECTURE.md`) oluşturuldu, boş klasörlerde `.gitkeep`

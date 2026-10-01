@@ -15,4 +15,3 @@ Arkadaşlar arası, en fazla 10 kişilik, sınıf tabanlı free-for-all FPS. God
 ## Geliştirme
 
 - Godot 4.4+ ile `project.godot` dosyasını aç.
-- Claude Code bu klasörde açıldığında `CLAUDE.md` dosyasını otomatik okur.
