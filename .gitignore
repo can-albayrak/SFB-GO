@@ -24,3 +24,6 @@ desktop.ini
 .mono/
 data_*/
 mono_crash.*.json
+
+# Private source assets (face photos, downloaded avatars); never commit
+private_assets/
