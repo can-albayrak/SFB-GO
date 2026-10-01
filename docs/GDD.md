@@ -52,6 +52,21 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 | Yedek silah | Bear hariç herkese tek tip tabanca. Bear'a 3 Throwing Knife. |
 | FOV ve fare | Varsayılan FOV 90 (80–110), fare hassasiyeti, crosshair özelleştirme (renk, boyut, boşluk) |
 
+### Hareket hissi (hedef)
+
+Hedef: **Apex gibi akıcı, CS gibi kesin**; savaş hiç durmasın. Aşağıdakiler tasarım kararı, sayıları oynadıkça `data/movement/` altında ayarlanır (kodda sabit yok).
+
+| Konu | Karar |
+| --- | --- |
+| Yerde frenleme | CS tarzı: hızlı ve sert durma (counter-strafe), kaygan değil |
+| Hız cezası | **Kademeli:** hız arttıkça isabet düşer. Net bir eşik yok; koşarken ateş imkânsız değil, sadece daha dağınık. Sınıfa göre ölçeklenir (Cheetah SMG koşarken isabetli kalır). |
+| Slide sonrası zıplama | Hız **korunur** (kazanç yok). Zamanlı slide + zıplama sürtünmeye hız kaybettirmez. |
+| Hava kontrolü | Şimdilik **serbest** hava ivmesi (strafe ile yön değiştirme), yatay hız tavanı (`max_speed * 1.3`) kalır. Oynadıkça güncellenecek. |
+| Affedicilik | Coyote time (kenardan düştükten kısa süre sonra zıplama kabul edilir) ve jump buffer (yere değmeden hemen önce basılan zıplama saklanır) |
+| Kapsam dışı | Apex'in tap-strafe, wall-bounce, superglide gibi öğrenmesi zor teknikleri alınmaz |
+
+**Açık sorular (oynadıkça karar verilecek):** hız cezası eğrisi, hava ivmesi miktarı, coyote/buffer süreleri, kamera tepkileri (FOV kayması, iniş sarsıntısı, slide'da kamera alçalması).
+
 ### Tuş atamaları (hepsi ayarlardan değiştirilebilir)
 
 | Tuş | İşlev |
@@ -183,6 +198,12 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 - Her yüksek noktaya en az iki yoldan çıkılabilir.
 - Hiçbir görüş hattında 2–3 sn'den uzun açıkta kalınmaz.
 - Dar alanlar kısa yol olur, ama etrafından dolanan uzun bir yol da vardır.
+
+**Hareket pürüzsüzlüğü (takılmama kuralları):**
+
+- Duvar ve siper köşeleri pahlanır veya yuvarlanır; oyuncu köşeden takılmadan kayıp geçer.
+- Zeminler düz kalır. Kablo, moloz gibi dekoratif detaylar **collision'sız** olur; collision sadece gerçek bir nedeni olan nesnelerde (siper, basamak) bulunur.
+- Basamaklar yumuşatılır (kamera step-up'ta interpolasyonla). Godot'ta hazır step-up yok, gerekirse eklenecek.
 
 **Boyut ve yerleşim:**
 

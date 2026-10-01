@@ -150,3 +150,4 @@ _Henüz yok._
 | 2026-09-30 | 4 | CS tarzı zıplama, Shift sprint / Ctrl slide, test range'de T ile respawn. Godot'ta hatasız açıldı; Can'ın his testi bekliyor. |
 | 2026-09-30 | 5 | Recoil/slide tuning, dürbün sistemi, Hawk (Heavy/Marksman Rifle, Grapple, Decoy). Headless testte doğrulandı; Can'ın testi bekliyor. |
 | 2026-09-30 | 5 | Bear: yakın dövüş ana silahlar, Shield, Charge, fırlatma bıçakları, tekme. Headless testte doğrulandı; Can'ın testi bekliyor. |
+| 2026-10-01 | – | Sadece tasarım (kod yok): GDD'ye "Hareket hissi" bölümü ve harita pürüzsüzlük kuralları eklendi (kademeli hız cezası, slide sonrası hız korunur, serbest hava ivmesi, coyote time + jump buffer). Uygulama sonraki hareket tuning oturumunda. |
