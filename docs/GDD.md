@@ -47,7 +47,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 | Geri tepme | Her silahta sabit, öğrenilebilir desen; CS'ten belirgin şekilde hafif |
 | Can | Yenilenme yok, yalnızca Health pickup |
 | Mermi | Yedek mermi sınırsız, sadece şarjör değiştirilir (airdrop silahı hariç) |
-| Ayak sesi | Belirgin; Shift ile yavaş yürürken sessiz |
+| Ayak sesi | Yön ve konum anlaşılacak kadar belirgin (aşırı vurgulanmaz). **Ctrl ile eğilip yürürken** ses çok az çıkar. |
 | Hızlı yakın dövüş | Herkese `V` ile bıçak: 25 hasar, ~1,5 m menzil, 0,8 sn bekleme. Bear'da `V` = kısa tekme (az hasar, geri itme). |
 | Yedek silah | Bear hariç herkese tek tip tabanca. Bear'a 3 Throwing Knife. |
 | FOV ve fare | Varsayılan FOV 90 (80–110), fare hassasiyeti, crosshair özelleştirme (renk, boyut, boşluk) |
@@ -109,14 +109,23 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 **Not:** Kafa vuruşu (2x) TTK'yı yarıya indirir; bu, nişan becerisinin ödülü olarak kalır. Hawk Heavy Rifle'ın tek atışı bu TTK hedefinin dışındadır (kasıtlı istisna).
 
+### Ses (hedef)
+
+| Konu | Karar |
+| --- | --- |
+| Ayak sesi | Düşmanın nerede olduğu anlaşılır (yön ve mesafe), ama aşırı vurgulanmaz. Eğilip yürümek (Ctrl) çok az ses çıkarır; koşma, slide ve zıplama ayrı sesler verir. |
+| Müzik | Maçta **hafif arka plan** müziği (distopik, düşük sesli); menüde ve maç sonunda ayrı parçalar. Ayarlardan kapatılır/kısılır; ses efektlerini bastırmaz. |
+| Anons | **Soğuk, bürokratik hoparlör** sesi: sakin, düz, hafif tuhaf ("Airdrop Incoming", "Double Kill"). |
+| Genel kimlik | 2000'ler tarzı, kaba ve sentetik (bkz. Vuruş hissi). |
+
 ### Tuş atamaları (hepsi ayarlardan değiştirilebilir)
 
 | Tuş | İşlev |
 | --- | --- |
 | WASD | Hareket |
 | Space | Zıplama |
-| Ctrl | Eğilme / koşarken slide |
-| Shift | Yavaş yürüme (sessiz) |
+| Ctrl | Eğilme (eğilip yürürken sessiz) / koşarken slide |
+| Shift | Koşma (sprint) |
 | Sol / sağ tık | Ateş / ikincil (dürbün, çift tabanca sağ el) |
 | Q | Özel güç |
 | R | Şarjör |
