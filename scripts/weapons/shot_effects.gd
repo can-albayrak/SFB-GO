@@ -15,6 +15,9 @@ const EXPLOSION_FRAG_COLOR: Color = Color(1.0, 0.55, 0.2, 0.9)
 const EXPLOSION_FLASH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.9)
 const IMPACT_RADIUS: float = 0.025
 const IMPACT_LIFETIME: float = 8.0
+const BEAM_TIME: float = 0.5
+const BEAM_RADIUS: float = 0.03
+const BEAM_COLOR: Color = Color(0.45, 0.85, 1.0, 0.9)
 
 static var _flash_mesh: QuadMesh
 static var _glow_texture: GradientTexture2D
@@ -26,6 +29,37 @@ static func spawn_tracer(parent: Node3D, from: Vector3, to: Vector3) -> void:
 	if from.distance_to(to) <= Tracer.LENGTH:
 		return
 	parent.add_child(Tracer.create(from, to))
+
+
+## Railgun: a straight glowing beam that fades out. `parent` sits at the world origin.
+static func spawn_beam(parent: Node3D, from: Vector3, to: Vector3) -> void:
+	var length: float = from.distance_to(to)
+	if length < 0.01:
+		return
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = BEAM_RADIUS
+	mesh.bottom_radius = BEAM_RADIUS
+	mesh.height = 1.0
+	mesh.radial_segments = 6
+	mesh.rings = 1
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.albedo_color = BEAM_COLOR
+	mesh.material = material
+	var beam := MeshInstance3D.new()
+	beam.mesh = mesh
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	beam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	var axis: Vector3 = (to - from) / length
+	var helper: Vector3 = Vector3.RIGHT if absf(axis.x) < 0.9 else Vector3.FORWARD
+	var side: Vector3 = axis.cross(helper).normalized()
+	beam.transform = Transform3D(Basis(side, axis, side.cross(axis)) * Basis.from_scale(Vector3(1.0, length, 1.0)), (from + to) * 0.5)
+	parent.add_child(beam)
+	var tween := beam.create_tween()
+	tween.tween_property(material, "albedo_color:a", 0.0, BEAM_TIME)
+	tween.tween_callback(beam.queue_free)
 
 
 ## Brief flash + light parented to the muzzle, so it follows the gun.

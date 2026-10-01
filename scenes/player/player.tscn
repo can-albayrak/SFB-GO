@@ -64,6 +64,15 @@ properties/5/replication_mode = 2
 properties/6/path = NodePath(".:held_slot")
 properties/6/spawn = true
 properties/6/replication_mode = 2
+properties/7/path = NodePath(".:powerups")
+properties/7/spawn = true
+properties/7/replication_mode = 2
+properties/8/path = NodePath(".:special_ammo")
+properties/8/spawn = true
+properties/8/replication_mode = 2
+properties/9/path = NodePath(".:special_weapon")
+properties/9/spawn = true
+properties/9/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2

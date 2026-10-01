@@ -7,7 +7,8 @@ extends Node
 ## host starts the match.
 ## Covers: lobby / late join, spawning on both sides, loadout swap in the window and at the
 ## next spawn, held weapon, Shield, host damage, kill + kill reward + respawn, scope glint,
-## and a lag-compensated client shot that kills the host's player.
+## a lag-compensated client shot that kills the host's player, and stage 6 state: a pickup
+## boost, an airdrop weapon and a crate reaching the client.
 ## Each side prints PASS / FAIL lines and quits with exit code 1 when anything failed.
 ## Script errors in game code are not caught here: read Godot's output too.
 ## Both sides share user://, so the settings file is put back as it was at the end.
@@ -25,6 +26,7 @@ const SPOT_DIRECTIONS: int = 8
 const WORLD_MASK: int = 1
 const SCOPE_HOLD: float = 0.5 ## Client keeps the scope up this long after the host has it.
 const SHOT_SETTLE: float = 0.6 ## Client waits this long once the host's player is in place.
+const SPEED_PICKUP: PickupDef = preload("res://data/pickups/speed.tres")
 
 var _passes: int = 0
 var _failures: int = 0
@@ -130,6 +132,14 @@ func _run_host() -> void:
 	_check(shot, "client's lag-compensated shot killed the host's player")
 	_check(Match.get_kills(_peer) == 1, "kill registered for the client")
 
+	# Stage 6: boost, airdrop weapon and a crate, all decided here and replicated.
+	them.status.server_take_pickup(SPEED_PICKUP)
+	_check(them.powerups != 0, "client's speed boost glow set on the host")
+	them.give_special_weapon(_airdrop_index(&"rocket_launcher"), 6)
+	var airdrops: AirdropManager = AirdropManager.find(get_tree())
+	_check(airdrops != null and airdrops.server_drop() >= 0, "host drops a crate")
+	_check(await _wait_until(func() -> bool: return them.held_slot == Player.SPECIAL_SLOT), "client took the airdrop weapon in hand")
+
 	_check(await _wait_until(func() -> bool: return _find_player(_peer) == null, STEP_TIMEOUT * 2.0), "client's player removed after it left")
 
 
@@ -233,6 +243,17 @@ func _run_client() -> void:
 	_check(await _wait_until(func() -> bool: return _kill_confirmed), "host confirmed our Heavy Rifle kill")
 	_check(await _wait_until(func() -> bool: return Match.get_kills(my_id) == 1), "our kill counted on the client")
 
+	_check(await _wait_until(func() -> bool: return me.status.get_speed_mult() > 1.0 and me.powerups != 0),
+		"speed boost reached the owner")
+	_check(await _wait_until(func() -> bool: return me.weapons.size() == 3 and me.special_ammo == 6),
+		"airdrop weapon replicated with its rounds")
+	_check(await _wait_until(func() -> bool: return me.current_weapon == me.weapons[me.weapons.size() - 1]),
+		"airdrop weapon in hand")
+	_check(await _wait_until(func() -> bool:
+		var airdrops: AirdropManager = AirdropManager.find(get_tree())
+		return airdrops != null and not airdrops._crates.is_empty()), "crate appeared on the client")
+	await _seconds(0.5) # Let the host see held_slot before we leave.
+
 
 func _on_player_died(victim: Player, killer_id: int, _weapon_name: String, _killer_health: int) -> void:
 	if victim.is_local and killer_id == 1:
@@ -259,6 +280,14 @@ func _code(class_id: StringName, primary_id: StringName, ability_id: StringName)
 				ability = ai
 		return Loadout.make(ci, primary, ability)
 	return Loadout.default_code()
+
+
+func _airdrop_index(id: StringName) -> int:
+	var weapons: Array[WeaponDef] = AirdropWeapons.roster().weapons
+	for i: int in weapons.size():
+		if weapons[i].id == id:
+			return i
+	return -1
 
 
 func _find_button(root: Node, text: String) -> Button:

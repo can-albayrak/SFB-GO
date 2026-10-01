@@ -33,6 +33,14 @@ enum ViewHands { NONE, RIGHT, BOTH }
 ## each with its own fire_interval (Dual Pistols).
 @export var dual_wield: bool = false
 
+@export_group("Airdrop")
+## Airdrop weapon (GDD "Airdrop"): the magazine is all the ammo there is (no reload), the
+## host counts it, the gun is gone when empty and drops with its rounds when the carrier dies.
+@export var airdrop: bool = false
+@export var carry_speed_mult: float = 1.0 ## Carrier's speed while it is in the inventory.
+@export var pierce_walls: bool = false ## Railgun: the beam goes through every wall.
+@export var spin_up_time: float = 0.0 ## Minigun: seconds of holding fire before it shoots.
+
 @export_group("Recoil")
 ## Per-shot view kick in degrees: x = right, y = up. Shots past the end reuse the last entry.
 @export var recoil_pattern: PackedVector2Array

@@ -4,7 +4,8 @@ extends Node
 ##   godot --path . --write-movie shot.png --quit-after 30 res://tests/ui_preview.tscn -- --screen=range
 ## Screens: lobby, loadout, range (offline Test Range: HUD, view model, post-process),
 ## death (killed by a fall), scoreboard (Tab board shown), and frozen body poses for the
-## first-person legs: down (look at your feet), walk, slide.
+## first-person legs: down (look at your feet), walk, slide; drops (Test Range rules: pickups
+## and a falling airdrop crate).
 ## Nothing is saved: the settings file is left alone.
 
 const FAKE_NAMES: Dictionary[int, String] = {1: "Can", 2: "Grizz", 3: "Volt"}
@@ -42,8 +43,11 @@ func _open(screen: String) -> void:
 			root.add_child(center)
 			center.add_child(menu)
 			menu.open(Loadout.make(2, 0, 0))
-		"range", "death", "scoreboard", "down", "slide", "walk", "scope":
-			Match.configure(20, 10.0)
+		"range", "death", "scoreboard", "down", "slide", "walk", "scope", "drops":
+			if screen == "drops":
+				Match.configure_test_range()
+			else:
+				Match.configure(20, 10.0)
 			Net.player_names.assign({1: "Can"})
 			Net.map_path = Net.DEFAULT_MAP_PATH
 			get_tree().change_scene_to_file(Net.GAME_PATH)
@@ -52,6 +56,19 @@ func _open(screen: String) -> void:
 			var player := game.players_root.get_node_or_null("1") as Player
 			if screen == "death" and player != null:
 				player.server_fall_death()
+			elif screen == "drops" and player != null:
+				# Pickups ahead, a crate coming down behind them.
+				player.set_physics_process(false)
+				player.global_position = Vector3(0.0, 0.1, 34.0)
+				player.rotation.y = 0.0
+				player.look_pitch = deg_to_rad(-4.0)
+				var airdrops: AirdropManager = AirdropManager.find(get_tree())
+				var id: int = airdrops.server_drop()
+				var crate: AirdropCrate = airdrops._crates.get(id)
+				if crate != null:
+					var to_crate: Vector3 = crate.landing_point - player.global_position
+					player.rotation.y = atan2(-to_crate.x, -to_crate.z)
+					player.look_pitch = deg_to_rad(12.0)
 			elif screen == "scoreboard":
 				Input.action_press(&"scoreboard")
 			elif player != null and screen in ["down", "slide", "walk", "scope"]:

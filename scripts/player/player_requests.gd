@@ -75,10 +75,13 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 		end_point = compensator.fire_rewound(player, weapon, origin, dir.normalized())
 	else:
 		end_point = weapon.server_fire(origin, dir.normalized())
+	var pierce: bool = weapon.def.pierce_walls
 	if weapon is ShotgunWeapon:
 		player.effects.server_show_pellets((weapon as ShotgunWeapon).last_pellet_ends)
 	elif weapon.def.fire_type == WeaponDef.FireType.HITSCAN:
-		player.effects.server_show_shot(origin, end_point)
+		player.effects.server_show_shot(origin, end_point, pierce)
+	if weapon.def.airdrop and slot == Player.SPECIAL_SLOT:
+		player.server_use_special_round() # Last: an empty gun is removed right here.
 
 
 ## Host: alive, not stunned, inside this slot's fire-rate budget, plausible origin. Charges the budget.

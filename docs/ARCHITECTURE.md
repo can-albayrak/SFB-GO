@@ -42,7 +42,7 @@ sfb-go/
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, shotgun_weapon.gd, dual_pistols_weapon.gd, launcher_weapon.gd, melee_weapon.gd, throwing_knife_weapon.gd
 │   ├── abilities/           # ability.gd (taban), grenade_ability.gd, grenade.gd (bomba/mermi), grapple, decoy, shield, charge, dash, adrenaline
-│   ├── pickups/             # pickup.gd, airdrop.gd
+│   ├── pickups/             # pickup.gd, airdrop_manager.gd, airdrop_crate.gd, weapon_drop.gd, airdrop_weapons.gd
 │   └── ui/                  # hud.gd (+ hud_bar.gd, hud_weapon_icon.gd), crosshair.gd, damage_number.gd, scoreboard.gd, kill_feed.gd, main_menu.gd, lobby.gd, loadout_menu.gd, settings_panel.gd, screen_fx.gd
 ├── scenes/
 │   ├── main.tscn            # Giriş noktası: ana menü (isim, Host, Join, Last host, Test Range, Settings)
@@ -119,7 +119,7 @@ sfb-go/
 | Oyuncu pozisyonu, bakış yönü, crouch, `life` | Sahibi `_submit_state` → host `_relay_state` → diğerleri `_receive_state`; `unreliable_ordered` RPC, sahibin saat damgasıyla | 30 Hz |
 | Diğer oyuncuların görüntüsü | Snapshot tamponu, ~100 ms geriden interpolasyon (`Player._interpolate_remote`) | Her frame |
 | Ateş etme | Sahibi `_request_fire(origin, dir, slot)` → host doğrular (hayatta mı, ateş hızı, origin ≤ 3 m sapma) → `server_fire` | Olay bazlı, reliable |
-| `health`, `is_alive`, `is_protected`, `loadout`, `scope_glint`, `shield_up`, `held_slot` | `StateSync` (ON_CHANGE, spawn'da da gönderilir; geç katılan da alır). Parlama ve elindeki silah sahibinin isteğiyle (`Requests._request_equip`, `Effects._request_scope`) host'ta değişir | Değişince |
+| `health`, `is_alive`, `is_protected`, `loadout`, `scope_glint`, `shield_up`, `held_slot`, `powerups`, `special_ammo`, `special_weapon` | `StateSync` (ON_CHANGE, spawn'da da gönderilir; geç katılan da alır). Parlama ve elindeki silah sahibinin isteğiyle (`Requests._request_equip`, `Effects._request_scope`) host'ta değişir | Değişince |
 | Ölüm, yeniden doğma, hit onayı, uzak tracer | Host → `Net.broadcast` (`_announce_death`, `_respawn_at`, `_show_shot`, shotgun için `_on_pellets_fired`) / `confirm_hit(zone, killed, amount, point)` sadece atana (hit marker + hasar sayısı) / `_on_hurt(amount)` sadece vurulanın sahibine (kamera sarsıntısı) | Olay bazlı |
 
 - `life` sayacı her doğuşta artar; önceki hayattan geç gelen state paketleri atılır.
@@ -147,6 +147,12 @@ sfb-go/
 - **Hız:** token bucket, sınıf hızı × host'taki Adrenaline hız çarpanı × bhop tavanı × 1,5. Dash (18 m/s × 0,15 sn ≈ 2,7 m) bu 1 sn'lik bütçeye sığar.
 - **Ölüyken ateş**, geçersiz slot, origin'i bilinen gözden 3 m'den uzak atış reddedilir.
 - Host mermi/şarjör takibi yapmaz (bilinçli; arkadaş arası).
+
+### Pickup'lar ve airdrop (aşama 6)
+
+- **Pickup** (`scripts/pickups/pickup.gd`, haritada `Pickups/...`, `PickupDef`): host her tick yakındaki canlı oyuncuya bakar (Health sadece canı eksiğe), `PlayerStatus.server_take_pickup` → Health anında; Speed/Double Jump host saatinde + sahibine `_receive_pickup`. `Net.broadcast(_set_state)` ile herkes ikon/hologram; geç katılana `sync_to_peer`. `Player.powerups` bit maskesi → `Effects.show_powerups` ışık.
+- **Airdrop silahı:** `Player.SPECIAL_SLOT` (2). Host `give_special_weapon(index, ammo)` → `special_ammo`, `special_weapon` StateSync → her peer `_apply_special` (silahı ekler/çıkarır; sahibi eline alır). Ateşte host `server_use_special_round` (mermi biter → kaldırılır). `_die`'da `AirdropManager.server_drop_weapon`. `WeaponDef.airdrop / carry_speed_mult / pierce_walls / spin_up_time`; `GrenadeDef.knockback` (patlama itmesi, `status.server_knockback`).
+- **AirdropManager** (`Game/Airdrops`, kodla eklenir): host zamanlayıcı (`MatchDef` airdrop alanları) → `_spawn_crate` herkese (kasa iniş zamanı her peer'da yerel), `_remove_crate`, `_spawn_drop` / `_remove_drop`. Açma: sahibi `tick_local(player, cmd.interact)` → `_request_open` / `_request_cancel`; host `_update_openers` (mesafe, canlı, silahsız, `Player.last_hurt_time` başlangıçtan önce) → süre dolunca rastgele silah; iptalde `_open_cancelled` sahibine. Geç katılana `sync_to_peer` (kasalar kalan düşüş süresiyle, yerdeki silahlar).
 
 ### Fiziksel mermiler (bomba, roket, bıçak)
 
@@ -285,7 +291,7 @@ Hitscan raycast maskesi: `world | hitbox`. Oyuncu kapsülü maskesi: `world | pl
 
 ## Input Map
 
-Aksiyon isimleri (`project.godot` içinde, fiziksel tuş kodu ile): `move_forward`, `move_back`, `move_left`, `move_right`, `jump`, `crouch` (Ctrl: eğil; koşarken basınca slide), `sprint` (Shift), `respawn` (T, sadece test range), `fire`, `secondary`, `ability`, `reload`, `interact`, `melee`, `weapon_primary`, `weapon_secondary`, `class_menu`, `scoreboard`, `pause_menu` (Esc).
+Aksiyon isimleri (`project.godot` içinde, fiziksel tuş kodu ile): `move_forward`, `move_back`, `move_left`, `move_right`, `jump`, `crouch` (Ctrl: eğil; koşarken basınca slide), `sprint` (Shift), `respawn` (T, sadece test range), `fire`, `secondary`, `ability`, `reload`, `interact` (E basılı: kasa aç), `melee`, `weapon_primary`, `weapon_secondary`, `weapon_special` (3, airdrop silahı), `class_menu`, `scoreboard`, `pause_menu` (Esc).
 
 ## Kodlama kuralları
 

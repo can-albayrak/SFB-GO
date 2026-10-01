@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/minigun.tscn" id="2_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/lmg.glb" id="3_world"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"minigun"
+display_name = "Minigun"
+damage = 15.0
+headshot_mult = 2.0
+leg_mult = 0.75
+max_range = 150.0
+fire_interval = 0.05
+automatic = true
+magazine_size = 200
+reload_time = 0.0
+equip_time = 0.9
+move_speed_mult = 0.8
+kill_ammo_reward = false
+airdrop = true
+carry_speed_mult = 0.85
+spin_up_time = 0.6
+move_spread = 1.6
+recoil_pattern = PackedVector2Array(0, 0.12, 0.06, 0.1, -0.06, 0.1)
+recoil_recovery = 12.0
+recoil_recovery_delay = 0.05
+scene = ExtResource("2_scene")
+world_model = ExtResource("3_world")
+world_model_scale = 1.1
+world_muzzle = Vector3(0, 0.03, -0.75)

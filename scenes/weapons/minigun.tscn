@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/hitscan_weapon.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/lmg.glb" id="2_model"]
+
+[sub_resource type="CylinderMesh" id="Mesh_barrels"]
+top_radius = 0.06
+bottom_radius = 0.06
+height = 0.35
+radial_segments = 8
+
+[sub_resource type="StandardMaterial3D" id="Mat_barrels"]
+albedo_color = Color(0.15, 0.15, 0.16, 1)
+metallic = 0.6
+roughness = 0.5
+
+[node name="Minigun" type="Node3D"]
+position = Vector3(0.2, -0.26, -0.5)
+script = ExtResource("1_script")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+scale = Vector3(0.75, 0.75, 0.6)
+
+[node name="Barrels" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.02, -0.42)
+rotation = Vector3(1.5708, 0, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_barrels")
+surface_material_override/0 = SubResource("Mat_barrels")
+
+[node name="Muzzle" type="Marker3D" parent="."]
+position = Vector3(0, 0.02, -0.6)

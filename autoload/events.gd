@@ -32,6 +32,14 @@ signal match_ended(winner_id: int, awards: Array)
 @warning_ignore("unused_signal")
 signal local_flashed(seconds: float)
 
+## Every peer: a crate is coming down at `point` (announcement).
+@warning_ignore("unused_signal")
+signal airdrop_incoming(point: Vector3)
+
+## Every peer: `peer_id` opened a crate and got `weapon_name`.
+@warning_ignore("unused_signal")
+signal airdrop_opened(peer_id: int, weapon_name: String)
+
 ## Local player stunned (Bear's Charge) for `seconds`.
 @warning_ignore("unused_signal")
 signal local_stunned(seconds: float)

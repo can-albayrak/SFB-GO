@@ -2,15 +2,16 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** Görsel geçiş (aşama 8/9'un UI, atmosfer ve birinci şahıs gövde kısmı, Can'ın kararıyla aşama 6'dan önce). Sonra aşama 6 – Pickup'lar ve airdrop. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
+**Şu anki aşama:** 6 – Pickup'lar ve airdrop: yazıldı, headless testlerden geçti, Can'ın oynama testi bekliyor. Görsel geçişin ilk turu (UI, atmosfer, birinci şahıs gövde) yapıldı. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
 **Son güncelleme:** 2026-10-01
 
 ## Sıradaki oturum
 
 **Durum:** Tek dal `main`. Aşama 5 kapandı: Godot'ta headless doğrulandı, Can oynadı (Cheetah, hareket, lobi iki pencere, Hawk parlaması), aşama sonu bağımsız inceleme yapıldı ve bulgular düzeltildi. Smoke test 88/0, ağ testi lobi + geç katılma 0 hata.
 
+0. **Aşama 6 oynama testi (Can):** Test Range'de 5 sn'de bir airdrop (en fazla 3 aktif), pickup'lar spawn'ın önünde. E ile kasa aç, 3 ile airdrop silahı. Sonra aşama sonu bağımsız inceleme → aşama 7 (AVM blockout).
 0. **Görsel geçiş (sürüyor):** Can'ın oyunda bakıp yorumlaması: menüler, HUD, ekran filtresi, atmosfer, kollar/bacaklar. Sonra karakter ve silah modelleri (Blender), yüzler.
-1. **Aşama 6 – Pickup'lar ve airdrop:** Can'ın isteği: Test Range'de airdrop 5 sn'de bir insin, haritada her silah zaten varsa inmesin. GDD'deki değerlerle (pickup 45 sn / 5–6 nokta, airdrop 3. dakikadan sonra her 2–3 dk, airdrop silahları). Host-authoritative: pickup/airdrop kararları sadece host. Airdrop silahlarının `.tres`'inde `kill_ammo_reward = false`. Test haritasına geçici pickup / airdrop noktaları; yeni testler `smoke_test` ve `net_test`'e.
+1. ~~**Aşama 6 – Pickup'lar ve airdrop:**~~ yazıldı (aşağıda). Notlar: GDD'deki değerlerle (pickup 45 sn / 5–6 nokta, airdrop 3. dakikadan sonra her 2–3 dk, airdrop silahları). Host-authoritative: pickup/airdrop kararları sadece host. Airdrop silahlarının `.tres`'inde `kill_ammo_reward = false`. Test haritasına geçici pickup / airdrop noktaları; yeni testler `smoke_test` ve `net_test`'e.
 2. **Paralelde (Can hazır olunca) Blender:** karakter yüzü denemesi (Avaturn GLB → sadece kafa, poligon azaltma, 512 px doku; ham dosyalar `private_assets/`), AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) kontrolü → `docs/ASSETS.md`.
 3. **Can'da bekleyen:** Bear ve Volcano'nun ayrıntılı oynanışı.
 
@@ -32,7 +33,7 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | ✅ Bitti (oynama testi bekliyor) |
 | 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | ⏳ Devam ediyor |
 | 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ✅ Bitti (2026-10-01) |
-| 6 | Pickup'lar ve airdrop | ⏭️ Sıradaki |
+| 6 | Pickup'lar ve airdrop | ⏳ Yazıldı, headless doğrulandı; Can'ın testi ve aşama sonu incelemesi bekliyor |
 | 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Bekliyor |
 | 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | ⏳ Atmosfer, ekran filtresi, birinci şahıs gövde (yer tutucu) yapıldı; modeller bekliyor |
 | 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | ⏳ Menü/HUD yeni tasarımı ve grafik ayarları yapıldı |
@@ -126,6 +127,18 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Can'ın testi: Cheetah (hava ivmesi 10 → 3, Dual Pistols 0,2 sn, SMG recoil ×1,5), lobi iki pencerede sorunsuz. Volcano ayrıntılı oynanmadı
 - [x] Aşama sonu kod incelemesi (bağımsız agent, `4b950ce..main`). Düzeltilenler: silah değiştirince ikinci silahın atışlarını host reddediyordu (ateş bütçesi artık slot başına), host'un reddettiği fırlatma bıçağı o hayat boyunca kayboluyordu (artık geri verilir), düşük canlı sınıftan geçerek can doldurma (artık "bu hayatta yaralandı mı" bakılır), Most Knife Kills Bear'ın çekiç/pençe/testere/tekme kill'lerini sayıyordu, fırlatma bıçağını saymıyordu (`WeaponDef.counts_as_knife`), loadout değişince kalkan kalıyordu, mayın düşerken patlayabiliyordu (artık yere oturunca kurulur), stun grapple/charge/dash'i durdurmuyordu, Start'tan hemen sonra katılan oyuncusuz kalabiliyordu (host Game hazır olunca alır), ölünce STUNNED yazısı ve grapple ipi kalıyordu, client host'un hayat sayacını ileri itebiliyordu. Smoke test'e 5 kontrol eklendi (88/0)
 
+## Aşama 6 – Pickup'lar ve airdrop
+
+- [x] `PickupDef` (`data/pickups/`): Health +50 (sadece canı eksiğe), Speed ×1,3 8 sn, Double Jump 10 sn, 45 sn'de geri gelir. `Pickup` harita nesnesi (`Map/Pickups/...`): host kimin aldığına karar verir, herkes dönen ikon / ışık / geri sayım hologramı görür, geç katılana durum gönderilir
+- [x] Boost'lar host saatinde (hız kontrolü) ve sahibinde (his); `Player.powerups` (StateSync) ile başkaları oyuncuyu boost renginde parlarken görür; ölünce biter. Double Jump: havada bir zıplama daha (`Movement.air_jumps`)
+- [x] Airdrop silahları (`data/weapons/airdrop_roster.tres`): Railgun (999, 8 mermi, duvar ve oyuncu deler, ışın), Minigun (15 × 0,05 sn, 200 mermi, 0,6 sn ısınma), Rocket Launcher (200 merkez, 6 m, roket itmesi = rocket jump, kendine %40). Şarjör = tüm mermi, şarjör değiştirme yok, mermiyi host sayar
+- [x] 3. slot (`Player.SPECIAL_SLOT`, tuş 3): `special_weapon` / `special_ammo` StateSync; alınca hemen elde, taşırken %15 yavaş, başında duvar arkasından görünen "▼ RAILGUN" işareti, mermi bitince silah yok olur, ölünce kalan mermisiyle yere düşer (`WeaponDrop`, 45 sn), üstünden geçen alır
+- [x] `AirdropManager` (`Game/Airdrops`): ilk 180 sn, sonra 120–180 sn'de bir, haritadaki `AirdropPoints`'ten boş bir nokta; kasa 12 sn paraşütle iner, kırmızı ışık hüzmesi; E 3 sn basılı tutunca açılır (hasar, ölüm, uzaklaşma iptal eder), rastgele silah. HUD: "AIRDROP INCOMING", "CAN GOT THE RAILGUN", açma barı, boost süreleri, 3 silahlı sağ alt
+- [x] Test Range (`test_range.tres`): 5 sn'de bir kasa, 4 sn düşüş, en fazla 3 aktif (kasa + yerdeki + taşınan); 3 pickup spawn'ın önünde, 3 airdrop noktası
+- [x] Headless: smoke test 112/0 (her pickup, kasa açma, Railgun duvar arkası, mermi sayımı, Minigun ısınma, rocket jump, ölünce düşme + alma), ağ testi lobi 29 + 26 / geç katılma 28 + 27 (boost, airdrop silahı, kasa client'a ulaşıyor)
+- [ ] **Can'ın oynama testi**
+- [ ] Aşama sonu bağımsız kod incelemesi
+
 ## Tasarım geçişi (2026-10-01) — bitti
 
 İş bilgisayarında yazıldı (Godot yoktu); evde Godot 4.7.2 headless ile doğrulandı, Can oynadı, aşama 5 ile kapandı. Kamera hissi, Settings ve vuruş hissi için ayrıca yorum gelmedi; oynadıkça ayarlanır.
@@ -174,6 +187,8 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Silah modeli ve birinci şahıs kollar duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
 - Birinci şahıs kollar/bacaklar kutu yer tutucu; silah sallanması ve şarjör animasyonu yok, eller silaha sabit. Bacaklar yan yürürken de ileri-geri adım atar.
 - Dürbün katmanı ve ayarlar paneli 0×0 boyutta kalıyordu (dürbünde sadece zoom vardı): `set_anchors_and_offsets_preset` ile düzeldi. Ayarlarda listenin sonunda tekerlek oyuna dönüyordu: tekerlek artık fareyi yakalamaz.
+- Aşama 6: kasanın collision'ı yok (içinden geçilir). Airdrop silah modelleri yer tutucu (Railgun = Heavy Rifle + mavi bobin, Minigun = LMG + namlu, Rocket = tüp). Minigun'un dönmesi başkalarına görünmüyor. Pickup alma host'un gördüğü konuma göre (~100 ms geriden). Speed pickup Adrenaline ile çarpılarak birleşir. Anons sesleri aşama 9.
+- Aşama 6: oyuncu oyundan çıkarken taşıdığı airdrop silahı kaybolur (yere düşmez).
 - Ekran filtresi HUD ve menüleri de etkiler (bilinçli: PS2 hissi); yazılar okunmazsa filtre ayarlardan kapatılır.
 - Uzak oyuncu modeli animasyonsuz, eğilince y'de basılır; elindeki silah artık doğru model (`held_slot`) ama tutuş pozu yok (aşama 8).
 - Lag compensation 400 ms'den yüksek gecikmede tam telafi etmez (bilinçli üst sınır).
@@ -227,3 +242,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 5 → 6 | Parlama küçültüldü/kısıldı. Aşama sonu bağımsız inceleme: 11 bulgu düzeltildi (slot başına ateş bütçesi, bıçak iadesi, can doldurma açığı, knife ödülü, kalkan/loadout, mayın kurulması, stun, Start sonrası katılma, ölüm sonrası kalıntılar, hayat sayacı), Charge penceresi bilinen sorun. Smoke 88/0, ağ testi 0 hata. **Aşama 5 kapandı.** Sırada aşama 6. |
 | 2026-10-01 | görsel | İki PC testi geçti (aşama 2 bitti). Can'ın kararıyla görsel geçiş öne alındı: `Style` teması, taslağa göre ana menü / lobi / loadout / ayarlar / Esc / HUD / ölüm ekranı, soğuk atmosfer + kirli beton dokusu, PS2 ekran filtresi (ayarlardan kapanır, render ölçeği), birinci şahıs kollar ve bacaklar. `tests/ui_preview.tscn` ile ekran yakalama. Smoke 88/0, ağ testi 0 hata. |
 | 2026-10-01 | görsel | Can'ın ikinci turu: dürbün maskesi/nişangahı görünmüyordu (boyut 0) → düzeldi + hareket ederken bulanıklık ve daha fazla isabetsizlik; ayarlarda tekerlek menüyü kapatıyordu → düzeldi; Dash uzadı, shotgun 8 mermi, GL −%15, mayın büyüdü; Test Range: güç bekleme süresi yok, sınırsız mermi (`data/match/test_range.tres`). Airdrop aşama 6'da. |
+| 2026-10-01 | 6 | Aşama 6: pickup'lar (Health/Speed/Double Jump, parlama, geri sayım), airdrop (duyuru, hüzme, paraşüt, E ile açma), Railgun/Minigun/Rocket Launcher, 3. slot, ölünce düşen silah, Test Range 5 sn'de bir kasa. Smoke 112/0, ağ testi 0 hata. Can'ın testi bekliyor. |

@@ -230,7 +230,7 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 - Yerleri sabit; alındığında yerinde geri sayım hologramı kalır.
 - Health güvenli ve dar yerlerde, Speed ve Double Jump açık ve riskli yerlerde.
 - Renkler: Health yeşil, Speed sarı, Double Jump mavi. Etkisi altındaki oyuncu parlar.
-- İki oyuncu aynı anda basarsa host karar verir.
+- İki oyuncu aynı anda basarsa host karar verir. Health sadece canı eksik olana verilir (dolu canla basınca harcanmaz). Boost'lar ölünce biter.
 
 ## Airdrop
 
@@ -238,7 +238,7 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 2. 3–4 olası noktadan biri seçilir (host); ışık hüzmesi iner, kasa 10–15 sn'de paraşütle düşer.
 3. Kasayı açmak için `E` 3 sn basılı tutulur; hasar alınırsa iptal olur.
 
-**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür ve yavaşlar. Ölünce silah kalan mermisiyle yere düşer. Kill ödülü bu silahlara mermi eklemez.
+**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür (başının üstünde duvar arkasından da görünen işaret) ve yavaşlar (%15). Ölünce silah kalan mermisiyle yere düşer, üstünden geçen alır (45 sn sonra kaybolur). Kill ödülü bu silahlara mermi eklemez. Airdrop silahı **3** tuşunda; kasadan alınca hemen elde olur. Silah taşırken kasa açılamaz.
 
 **Silah:** Her airdrop'ta rastgele biri, kasa açılana kadar bilinmez. Hasarlar oynadıkça ayarlanır.
 

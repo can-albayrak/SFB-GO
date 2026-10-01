@@ -40,6 +40,10 @@ func _ready() -> void:
 			_spawn_points.append(child as Marker3D)
 	assert(not _spawn_points.is_empty(), "Map has no SpawnPoints")
 
+	var airdrops := AirdropManager.new()
+	airdrops.name = "Airdrops" # Same path on every peer (RPCs).
+	add_child(airdrops)
+
 	spawner.spawn_function = _create_player
 	spawner.spawned.connect(_on_player_node_added.unbind(1))
 	projectile_spawner.spawn_function = _create_grenade
@@ -109,6 +113,11 @@ func _add_ingame_peer(peer_id: int, loadout: PackedInt32Array) -> void:
 
 	for dummy: Node in get_tree().get_nodes_in_group(TargetDummy.GROUP):
 		(dummy as TargetDummy).sync_to_peer(peer_id)
+	for pickup: Node in get_tree().get_nodes_in_group(Pickup.GROUP):
+		(pickup as Pickup).sync_to_peer(peer_id)
+	var airdrops: AirdropManager = AirdropManager.find(get_tree())
+	if airdrops != null and peer_id != 1:
+		airdrops.sync_to_peer(peer_id)
 	get_tree().create_timer(STATE_RELAY_DELAY).timeout.connect(_enable_state_relay.bind(peer_id))
 
 
@@ -300,6 +309,10 @@ func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, point: Vector3) -> vo
 		var amount: float = grenade_def.damage * (1.0 - distance / grenade_def.radius)
 		if receiver == thrower:
 			amount *= grenade_def.self_damage_mult
+		if grenade_def.knockback > 0.0 and receiver is Player:
+			# Rocket blast pushes, the shooter included (rocket jump). Movement is the owner's.
+			var push: Vector3 = (center - origin).normalized() * grenade_def.knockback * (1.0 - distance / grenade_def.radius)
+			(receiver as Player).status.server_knockback(push)
 		var killed: bool = receiver.call(&"take_hit", amount, Hitbox.Zone.BODY, thrower_id, grenade_def.display_name, false)
 		var dealt: float = receiver.get(&"last_damage_dealt")
 		if thrower != null and receiver != thrower and (dealt > 0.0 or killed):

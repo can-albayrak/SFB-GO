@@ -60,6 +60,9 @@ func _run() -> void:
 	await _test_kill_reward()
 	await _test_quick_switch()
 	await _test_swap_rules()
+	await _test_pickups()
+	await _test_airdrop()
+	await _test_airdrop_weapons()
 	await _test_held_weapon()
 	await _test_respawn()
 	await _test_ui()
@@ -177,6 +180,168 @@ func _test_swap_rules() -> void:
 	_check(_player.health < _player.class_def.max_health, "hurt swap does not refill (%d)" % _player.health)
 	_player.status.reset_host()
 	_player.health = _player.class_def.max_health
+
+
+## Each pickup kind on the test range: taken by walking onto it, effect applied, then gone.
+func _test_pickups() -> void:
+	await _set_loadout(Loadout.make(0, 0, 0))
+	_player.is_protected = false
+	for node: Node in get_tree().get_nodes_in_group(Pickup.GROUP):
+		var pickup := node as Pickup
+		pickup.server_reset()
+		var label: String = "pickup %s" % pickup.def.display_name
+		_player.health = 30
+		_player.global_position = pickup.global_position + Vector3.UP * 0.05
+		_player.velocity = Vector3.ZERO
+		await _frames(3)
+		_check(not pickup.available, label + " taken")
+		match pickup.def.kind:
+			PickupDef.Kind.HEALTH:
+				_check(_player.health == 30 + pickup.def.heal, label + " heals (%d)" % _player.health)
+			PickupDef.Kind.SPEED:
+				_check(_player.status.get_host_speed_mult() > 1.0 and _player.status.get_speed_mult() > 1.0,
+					label + " speeds up on host and owner")
+				_check(_player.powerups & (1 << PickupDef.Kind.SPEED) != 0, label + " glow replicated state")
+			PickupDef.Kind.DOUBLE_JUMP:
+				_check(_player.status.has_double_jump(), label + " gives a double jump")
+		_player.global_position = _dummy.global_position + _away * 10.0 # Off the spot first.
+		await _frames(2)
+		pickup.server_reset()
+		await _frames(2)
+		_check(pickup.available, label + " back after its timer")
+	_player.status.reset_host()
+	_player.status.reset_local()
+	_player.health = _player.class_def.max_health
+
+
+## A crate drops, lands and opens after holding E for the open time; the opener gets a weapon.
+func _test_airdrop() -> void:
+	var airdrops: AirdropManager = AirdropManager.find(get_tree())
+	_check(airdrops != null, "airdrop manager exists")
+	if airdrops == null:
+		return
+	await _set_loadout(Loadout.make(0, 0, 0))
+	var id: int = airdrops.server_drop()
+	_check(id >= 0, "airdrop crate dropped on a point")
+	await _frames(1)
+	var crate: AirdropCrate = airdrops._crates.get(id)
+	if crate == null:
+		_check(false, "airdrop crate exists")
+		return
+	airdrops.server_land_all()
+	_player.global_position = crate.landing_point + Vector3(1.0, 0.05, 0.0)
+	_player.velocity = Vector3.ZERO
+	await _frames(2)
+	# The player's own tick would report "E not held" (no input in headless): hold it here instead.
+	_player.set_physics_process(false)
+	var waited: float = 0.0
+	while _player.special_weapon < 0 and waited < Match.rules.airdrop_open_time + 1.5:
+		airdrops.tick_local(_player, true)
+		await get_tree().physics_frame
+		waited += 1.0 / Engine.physics_ticks_per_second
+	airdrops.tick_local(_player, false)
+	_player.set_physics_process(true)
+	_check(_player.special_weapon >= 0 and _player.weapons.size() == 3, "holding E opens the crate and gives an airdrop weapon")
+	_check(_player.current_weapon == _player.weapons[Player.SPECIAL_SLOT], "airdrop weapon taken in hand")
+	_check(not airdrops._crates.has(id), "opened crate is removed")
+	_player.special_weapon = -1
+
+
+func _test_airdrop_weapons() -> void:
+	await _set_loadout(Loadout.make(0, 0, 0))
+	_player.is_protected = false
+	var railgun: int = _airdrop_index(&"railgun")
+	var minigun: int = _airdrop_index(&"minigun")
+	var rocket: int = _airdrop_index(&"rocket_launcher")
+
+	# Railgun through the backstop wall: shooter north of it, the 55 m dummy south of it.
+	_player.give_special_weapon(railgun, 8)
+	await _frames(2)
+	var far_dummy: TargetDummy = _dummy_nearest(Vector3(0.0, 0.0, -35.0))
+	_player.global_position = Vector3(0.0, 0.05, -46.0)
+	_player.velocity = Vector3.ZERO
+	await _frames(2)
+	far_dummy.health = DUMMY_HEALTH
+	_player.requests.reset_fire_budgets()
+	var origin: Vector3 = _player.get_aim_origin()
+	var target: Vector3 = far_dummy.global_position + Vector3.UP * BODY_HEIGHT
+	_player.requests._request_fire(origin, (target - origin).normalized(), Player.SPECIAL_SLOT, &"railgun")
+	await _frames(1)
+	_check(far_dummy.health < DUMMY_HEALTH, "railgun hits through a wall (%.0f)" % (DUMMY_HEALTH - far_dummy.health))
+	_check(_player.special_ammo == 7, "host counts airdrop rounds (%d)" % _player.special_ammo)
+	_player.special_ammo = 1
+	_player.requests.reset_fire_budgets()
+	_player.requests._request_fire(origin, (target - origin).normalized(), Player.SPECIAL_SLOT, &"railgun")
+	await _frames(1)
+	_check(_player.special_weapon == -1 and _player.weapons.size() == 2, "empty airdrop weapon disappears")
+
+	# Minigun spins up before firing.
+	_player.give_special_weapon(minigun, 200)
+	await _frames(2)
+	var gun: Weapon = _player.weapons[Player.SPECIAL_SLOT]
+	gun._cooldown = 0.0
+	var cmd := PlayerCommand.new()
+	cmd.fire = true
+	cmd.fire_pressed = true
+	gun.tick(0.1, cmd)
+	_check(gun.ammo == 200, "minigun does not fire before spinning up")
+	for i: int in 10:
+		gun.tick(0.1, cmd)
+	_check(gun.ammo < 200, "minigun fires once spun up (%d)" % gun.ammo)
+	_player.special_weapon = -1
+
+	# Rocket at your own feet pushes you up (rocket jump).
+	_player.give_special_weapon(rocket, 6)
+	await _place(HITSCAN_DISTANCE)
+	_player.health = _player.class_def.max_health
+	_player.requests.reset_fire_budgets()
+	origin = _player.get_aim_origin()
+	var feet: Vector3 = _player.global_position + _away * 1.0
+	_player.requests._request_fire(origin, (feet - origin).normalized(), Player.SPECIAL_SLOT, &"rocket_launcher")
+	var pushed: bool = false
+	for i: int in 30:
+		await get_tree().physics_frame
+		if _player.velocity.y > 1.0:
+			pushed = true
+			break
+	_check(pushed, "rocket blast pushes the shooter (rocket jump)")
+	_check(_player.health < _player.class_def.max_health, "rocket hurts the shooter a little (%d)" % _player.health)
+	_clear_projectiles()
+
+	# Dying drops the weapon with its rounds; walking over it picks it up.
+	var airdrops: AirdropManager = AirdropManager.find(get_tree())
+	_player.give_special_weapon(rocket, 4)
+	await _frames(1)
+	var drops_before: int = airdrops._drops.size()
+	_player.server_fall_death()
+	await _frames(1)
+	_check(airdrops._drops.size() == drops_before + 1 and _player.special_weapon == -1, "carrier's death drops the weapon")
+	_game.test_respawn(_player)
+	await _frames(2)
+	var drop: WeaponDrop = airdrops._drops.values().back()
+	_player.global_position = drop.position + Vector3.UP * 0.05
+	_player.velocity = Vector3.ZERO
+	await _frames(3)
+	_check(_player.special_weapon == rocket and _player.special_ammo == 4, "walking over a dropped weapon picks it up with its rounds")
+	_player.special_weapon = -1
+	_player.health = _player.class_def.max_health
+
+
+func _airdrop_index(id: StringName) -> int:
+	var weapons: Array[WeaponDef] = AirdropWeapons.roster().weapons
+	for i: int in weapons.size():
+		if weapons[i].id == id:
+			return i
+	return -1
+
+
+func _dummy_nearest(point: Vector3) -> TargetDummy:
+	var best: TargetDummy = null
+	for node: Node in get_tree().get_nodes_in_group(TargetDummy.GROUP):
+		var dummy := node as TargetDummy
+		if best == null or dummy.global_position.distance_to(point) < best.global_position.distance_to(point):
+			best = dummy
+	return best
 
 
 func _code_for(class_id: StringName) -> PackedInt32Array:

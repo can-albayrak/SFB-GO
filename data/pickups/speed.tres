@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PickupDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/pickup_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"speed"
+display_name = "Speed"
+kind = 1
+duration = 8.0
+speed_mult = 1.3
+respawn_time = 45.0
+color = Color(1, 0.85, 0.25, 1)

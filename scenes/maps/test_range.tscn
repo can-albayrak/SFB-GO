@@ -1,6 +1,10 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/maps/target_dummy.tscn" id="3_dummy"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/pickup.tscn" id="4_pickup"]
+[ext_resource type="Resource" path="res://data/pickups/health.tres" id="5_health"]
+[ext_resource type="Resource" path="res://data/pickups/speed.tres" id="6_speed"]
+[ext_resource type="Resource" path="res://data/pickups/double_jump.tres" id="7_double_jump"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
 sky_top_color = Color(0.17, 0.2, 0.25, 1)
@@ -280,3 +284,28 @@ rotation = Vector3(0, 0.785398, 0)
 [node name="Spawn8" type="Marker3D" parent="SpawnPoints"]
 position = Vector3(-35, 0.1, 35)
 rotation = Vector3(0, -0.785398, 0)
+
+[node name="Pickups" type="Node3D" parent="."]
+
+[node name="Health" parent="Pickups" instance=ExtResource("4_pickup")]
+position = Vector3(-6, 0, 24)
+def = ExtResource("5_health")
+
+[node name="Speed" parent="Pickups" instance=ExtResource("4_pickup")]
+position = Vector3(0, 0, 27)
+def = ExtResource("6_speed")
+
+[node name="DoubleJump" parent="Pickups" instance=ExtResource("4_pickup")]
+position = Vector3(6, 0, 24)
+def = ExtResource("7_double_jump")
+
+[node name="AirdropPoints" type="Node3D" parent="."]
+
+[node name="Drop1" type="Marker3D" parent="AirdropPoints"]
+position = Vector3(12, 0, 2)
+
+[node name="Drop2" type="Marker3D" parent="AirdropPoints"]
+position = Vector3(-12, 0, 2)
+
+[node name="Drop3" type="Marker3D" parent="AirdropPoints"]
+position = Vector3(16, 0, 30)

@@ -54,6 +54,7 @@ func gather() -> PlayerCommand:
 	cmd.reload = Input.is_action_just_pressed(&"reload")
 	cmd.melee = Input.is_action_just_pressed(&"melee")
 	cmd.ability = Input.is_action_just_pressed(&"ability")
+	cmd.interact = Input.is_action_pressed(&"interact")
 
 	if _suppress_fire and not Input.is_action_pressed(&"fire"):
 		_suppress_fire = false
@@ -70,4 +71,6 @@ func gather() -> PlayerCommand:
 		cmd.weapon_slot = 0
 	elif Input.is_action_just_pressed(&"weapon_secondary"):
 		cmd.weapon_slot = 1
+	elif Input.is_action_just_pressed(&"weapon_special"):
+		cmd.weapon_slot = Player.SPECIAL_SLOT
 	return cmd

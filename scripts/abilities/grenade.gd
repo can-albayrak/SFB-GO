@@ -32,7 +32,9 @@ func setup(grenade_def: GrenadeDef, thrower: int, velocity: Vector3) -> void:
 	def = grenade_def
 	thrower_id = thrower
 	linear_velocity = velocity
-	if def.trigger_radius <= 0.0: # Mines fly flat so they land the right way up.
+	if def.knockback > 0.0 and velocity.length_squared() > 0.0001:
+		basis = Basis.looking_at(velocity.normalized()) # Rocket: nose first, no tumble.
+	elif def.trigger_radius <= 0.0: # Mines fly flat so they land the right way up.
 		angular_velocity = Vector3(randf_range(-SPIN, SPIN), randf_range(-SPIN, SPIN), randf_range(-SPIN, SPIN))
 	_fuse_left = def.fuse_time
 	$Sync.set_multiplayer_authority(1)

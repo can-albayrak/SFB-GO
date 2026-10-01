@@ -21,6 +21,8 @@ const SCOPE_FOV_LERP: float = 25.0 ## Per second; how fast the zoom eases in and
 const INTERP_DELAY: float = 0.1 ## Remote players are drawn this far in the past.
 const PROTECTION_BLINK_PERIOD: float = 0.25
 const FALL_WEAPON_NAME: String = "Fall"
+## Weapon slot of a carried airdrop weapon (key 3); 0 / 1 are the loadout's guns.
+const SPECIAL_SLOT: int = 2
 
 # Hitbox poses: x = centre height above feet, y = box height (0 = keep shape).
 const HEAD_POSE_STAND: Vector2 = Vector2(1.62, 0.0)
@@ -43,6 +45,14 @@ var scope_glint: bool = false: set = _set_scope_glint
 var shield_up: bool = false: set = _set_shield_up
 ## Host-owned, replicated: weapon slot in hand, so everyone sees the right model.
 var held_slot: int = 0: set = _set_held_slot
+## Host-owned, replicated: bit per active pickup boost (1 << PickupDef.Kind); others see a glow.
+var powerups: int = 0: set = _set_powerups
+## Host-owned, replicated: carried airdrop weapon (index into AirdropWeapons, -1 = none).
+var special_weapon: int = -1: set = _set_special_weapon
+## Host-owned, replicated: rounds left in it (the host counts airdrop ammo).
+var special_ammo: int = 0: set = _set_special_ammo
+## Host: host-clock time this player last lost health (cancels opening a crate).
+var last_hurt_time: float = -INF
 ## Vertical look angle in radians. Yaw is the body's own rotation.y.
 var look_pitch: float = 0.0
 var weapons: Array[Weapon] = []
@@ -104,6 +114,7 @@ func _ready() -> void:
 	effects.setup()
 	effects.show_glint(scope_glint)
 	effects.show_shield(shield_up)
+	effects.show_powerups(powerups)
 	_apply_loadout()
 	if multiplayer.is_server():
 		health = class_def.max_health # Clients already got the real value from StateSync's spawn state.
@@ -153,7 +164,10 @@ func _physics_process(delta: float) -> void:
 		cmd.sprint = false
 	effects.report_scoped(is_scoped) # Others see the glint.
 	var scope_mult: float = weapon_def.scope_move_mult if is_scoped else 1.0
-	movement.base_speed = class_def.move_speed * weapon_def.move_speed_mult * status.get_speed_mult() * scope_mult
+	# GDD: carrying an airdrop weapon slows you down, in hand or not.
+	var carry_mult: float = weapons[SPECIAL_SLOT].def.carry_speed_mult if weapons.size() > SPECIAL_SLOT else 1.0
+	movement.base_speed = class_def.move_speed * weapon_def.move_speed_mult * status.get_speed_mult() * scope_mult * carry_mult
+	movement.air_jumps = 1 if status.has_double_jump() else 0
 	movement.physics_step(delta, cmd)
 
 	if melee_weapon != null:
@@ -169,6 +183,9 @@ func _physics_process(delta: float) -> void:
 		ability.tick(delta)
 		if cmd.ability and ability.try_use(get_aim_origin(), -get_aim_basis().z):
 			requests.send_ability(get_aim_origin(), -get_aim_basis().z)
+	var airdrops: AirdropManager = AirdropManager.find(get_tree())
+	if airdrops != null:
+		airdrops.tick_local(self, cmd.interact)
 	apply_pose(movement.is_crouched)
 	net_sync.tick_send()
 
@@ -264,6 +281,7 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 	last_damage_dealt = before - health
 	if health < before:
 		_hurt_since_spawn = true
+		last_hurt_time = _now()
 		_on_hurt.rpc_id(get_multiplayer_authority(), before - health)
 	if health > 0:
 		return false
@@ -276,6 +294,7 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	assert(multiplayer.is_server(), "server_respawn is host-only")
 	_life += 1
 	net_sync.reset_validation()
+	special_weapon = -1 # Only a match restart respawns a carrier; a death already dropped it.
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
 	if compensator != null:
 		compensator.forget(self) # No rewinding into the previous life.
@@ -289,6 +308,23 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	is_alive = true
 	_grant_protection()
 	Net.broadcast(self, &"_respawn_at", [spawn_position, yaw, _life])
+
+
+## Host: hands this player an airdrop weapon with `ammo` rounds (crate or dropped gun).
+func give_special_weapon(index: int, ammo: int) -> void:
+	assert(multiplayer.is_server(), "give_special_weapon is host-only")
+	special_ammo = ammo # First, so the new gun is built with it.
+	special_weapon = index
+
+
+## Host: one airdrop round fired; the gun is gone when empty (Test Range: endless).
+func server_use_special_round() -> void:
+	assert(multiplayer.is_server(), "server_use_special_round is host-only")
+	if Match.rules.infinite_ammo:
+		return
+	special_ammo -= 1
+	if special_ammo <= 0:
+		special_weapon = -1
 
 
 ## Host: a validated loadout request. Within the first seconds after spawning it switches at
@@ -369,6 +405,12 @@ func _die(killer_id: int) -> void:
 	is_protected = false
 	scope_glint = false
 	status.reset_host()
+	if special_weapon >= 0:
+		# GDD: the airdrop weapon falls where its carrier died, with the rounds left.
+		var airdrops: AirdropManager = AirdropManager.find(get_tree())
+		if airdrops != null:
+			airdrops.server_drop_weapon(special_weapon, special_ammo, global_position)
+		special_weapon = -1
 	var killer_health: int = 0
 	var killer := get_parent().get_node_or_null(str(killer_id)) as Player
 	if killer != null:
@@ -442,8 +484,32 @@ func _apply_loadout() -> void:
 	equip(0)
 	if multiplayer.is_server():
 		held_slot = 0
+	_apply_special(false) # A carried airdrop weapon survives a loadout swap.
 	effects.show_held_weapon(held_slot)
 	loadout_changed.emit()
+
+
+## Adds or removes the airdrop weapon in SPECIAL_SLOT to match `special_weapon` (every peer).
+## `take_in_hand`: the owner switches to a newly gained one at once.
+func _apply_special(take_in_hand: bool) -> void:
+	if weapons.size() > SPECIAL_SLOT:
+		var old: Weapon = weapons.pop_back()
+		if current_weapon == old:
+			current_weapon = null
+		weapon_holder.remove_child(old)
+		old.queue_free()
+	var def: WeaponDef = AirdropWeapons.get_def(special_weapon)
+	if def != null:
+		var weapon: Weapon = _add_weapon(def)
+		weapon.ammo = special_ammo
+		weapons.append(weapon)
+		if is_local and take_in_hand:
+			equip(SPECIAL_SLOT)
+	if current_weapon == null:
+		equip(0)
+	if multiplayer.is_server() and held_slot >= weapons.size():
+		held_slot = 0
+	effects.show_carrier(def.display_name if def != null else "")
 
 
 func _add_weapon(def: WeaponDef) -> Weapon:
@@ -496,6 +562,28 @@ func _set_shield_up(value: bool) -> void:
 	shield_up = value
 	if is_node_ready():
 		effects.show_shield(value)
+
+
+func _set_special_weapon(value: int) -> void:
+	if value == special_weapon and class_def != null:
+		return
+	special_weapon = value
+	if is_node_ready():
+		_apply_special(true)
+		effects.show_held_weapon(held_slot)
+
+
+func _set_special_ammo(value: int) -> void:
+	special_ammo = value
+	if weapons.size() > SPECIAL_SLOT:
+		weapons[SPECIAL_SLOT].ammo = value
+		weapons[SPECIAL_SLOT].ammo_changed.emit(value, weapons[SPECIAL_SLOT].def.magazine_size)
+
+
+func _set_powerups(value: int) -> void:
+	powerups = value
+	if is_node_ready():
+		effects.show_powerups(value)
 
 
 func _set_held_slot(value: int) -> void:

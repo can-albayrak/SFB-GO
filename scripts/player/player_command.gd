@@ -16,3 +16,4 @@ var reload: bool = false ## Pressed this tick.
 var weapon_slot: int = -1 ## Requested slot this tick, -1 = none.
 var melee: bool = false ## Pressed this tick.
 var ability: bool = false ## Pressed this tick.
+var interact: bool = false ## Held (open an airdrop crate).

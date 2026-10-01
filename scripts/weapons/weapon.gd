@@ -21,6 +21,7 @@ var _since_shot: float = INF
 var _shot_index: int = 0
 var _burst_left: int = 0
 var _burst_timer: float = 0.0
+var _spin: float = 0.0 ## Minigun: seconds of spin built up by holding fire.
 
 @onready var muzzle: Marker3D = $Muzzle
 
@@ -38,6 +39,7 @@ func draw() -> void:
 
 func holster() -> void:
 	visible = false
+	_spin = 0.0
 	_burst_left = 0
 	_set_reloading(false)
 	_reset_recoil()
@@ -84,6 +86,11 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 
 	# fire_pressed also counts for automatics, so a click shorter than one tick still fires.
 	var wants_fire: bool = cmd.fire_pressed or (def.automatic and cmd.fire)
+	if def.spin_up_time > 0.0:
+		# Minigun: barrels spin up while fire is held and run down when released.
+		_spin = minf(_spin + delta, def.spin_up_time) if wants_fire else maxf(_spin - delta * 2.0, 0.0)
+		if _spin < def.spin_up_time:
+			return
 	if not wants_fire or _cooldown > 0.0:
 		return
 	if def.uses_ammo and ammo <= 0:
@@ -136,7 +143,7 @@ func server_fire(origin: Vector3, _dir: Vector3) -> Vector3:
 
 
 func _start_reload() -> void:
-	if ammo >= def.magazine_size:
+	if ammo >= def.magazine_size or def.airdrop: # Airdrop weapons: the magazine is all there is.
 		return
 	_reload_left = def.reload_time
 	_set_reloading(true)

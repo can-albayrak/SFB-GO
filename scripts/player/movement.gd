@@ -37,9 +37,12 @@ var is_crouched: bool = false
 var is_sliding: bool = false
 ## Input direction of the last tick (world, flat); zero when no movement key is held.
 var last_wish_dir: Vector3 = Vector3.ZERO
+## Extra jumps allowed in the air this tick (Double Jump pickup); set by the player.
+var air_jumps: int = 0
 
 var _jump_buffer: float = 0.0
 var _coyote_left: float = 0.0
+var _air_jumps_used: int = 0
 var _coyote_from_slide: bool = false ## Was sliding on the last tick on the ground.
 var _was_on_floor: bool = true
 var _fall_speed: float = 0.0
@@ -75,6 +78,7 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	if on_floor:
 		_coyote_left = def.coyote_time
 		_coyote_from_slide = is_sliding
+		_air_jumps_used = 0
 	else:
 		_coyote_left = maxf(_coyote_left - delta, 0.0)
 
@@ -109,6 +113,12 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 		if def.slide_jump_keeps_speed and from_slide:
 			cap = maxf(cap, hvel.length()) # Slide speed is kept, never raised.
 		hvel = hvel.limit_length(cap)
+		vel.y = def.jump_velocity
+		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
+	elif not on_floor and _jump_buffer > 0.0 and _air_jumps_used < air_jumps:
+		# Double Jump pickup: a second jump in the air, no speed gain.
+		_jump_buffer = 0.0
+		_air_jumps_used += 1
 		vel.y = def.jump_velocity
 		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
 	elif on_floor:
@@ -191,6 +201,7 @@ func reset() -> void:
 	_jump_buffer = 0.0
 	_coyote_left = 0.0
 	_coyote_from_slide = false
+	_air_jumps_used = 0
 	_was_on_floor = true
 	_fall_speed = 0.0
 	_slide_left = 0.0

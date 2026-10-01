@@ -1,8 +1,8 @@
 class_name PlayerStatus
 extends Node
 ## Timed states of one Player that the host decides and the owner feels: Bear's Shield,
-## the Charge stun, kick knockback, the Adrenaline boost, the kill reward and thrown-knife
-## returns. The host keeps its own clock; the owner is told by RPC.
+## the Charge stun, kick knockback, the Adrenaline boost, pickups (health, Speed, Double Jump),
+## the kill reward and thrown-knife returns. The host keeps its own clock; the owner is told by RPC.
 ## Child node "Status" of the player scene, so its RPC path is the same everywhere.
 
 const SHIELD_BLOCK_COS: float = 0.26 ## Hits from within ~75 degrees of the facing are blocked.
@@ -18,6 +18,13 @@ var _buff_fire_mult: float = 1.0
 var _host_buff_until: float = 0.0 ## Host clock.
 var _host_buff_speed_mult: float = 1.0
 var _host_buff_fire_mult: float = 1.0
+# Pickup boosts (Speed, Double Jump): owner copy for handling, host copy for checks and the glow.
+var _speed_pickup_left: float = 0.0 ## Owner.
+var _speed_pickup_mult: float = 1.0
+var _double_jump_left: float = 0.0 ## Owner.
+var _host_speed_pickup_until: float = 0.0 ## Host clock.
+var _host_speed_pickup_mult: float = 1.0
+var _host_powerup_until: Dictionary[int, float] = {} ## Host clock, by PickupDef.Kind.
 
 @onready var player: Player = get_parent()
 
@@ -26,12 +33,16 @@ var _host_buff_fire_mult: float = 1.0
 func tick_local(delta: float) -> void:
 	_stun_left = maxf(_stun_left - delta, 0.0)
 	_buff_left = maxf(_buff_left - delta, 0.0)
+	_speed_pickup_left = maxf(_speed_pickup_left - delta, 0.0)
+	_double_jump_left = maxf(_double_jump_left - delta, 0.0)
 
 
 ## Host, every physics tick.
 func server_tick() -> void:
 	if _shield_until > 0.0 and _now() >= _shield_until:
 		clear_shield()
+	if not _host_powerup_until.is_empty():
+		_update_powerup_glow()
 
 
 func is_stunned_local() -> bool:
@@ -46,13 +57,19 @@ func is_stunned_host() -> bool:
 func reset_local() -> void:
 	_stun_left = 0.0
 	_buff_left = 0.0
+	_speed_pickup_left = 0.0
+	_double_jump_left = 0.0
 
 
 ## Host: respawn or death.
 func reset_host() -> void:
 	_stun_until = 0.0
 	_host_buff_until = 0.0
+	_host_speed_pickup_until = 0.0
+	_host_powerup_until.clear()
 	clear_shield()
+	if multiplayer.is_server():
+		player.powerups = 0
 
 
 ## Both sides: a loadout change ends any boost and Bear's Shield (it belongs to the class that used it).
@@ -70,6 +87,50 @@ func server_kill_reward(heal: int, ammo: int) -> void:
 	player.health = mini(player.health + heal, player.class_def.max_health)
 	if ammo > 0:
 		_receive_kill_ammo.rpc_id(player.get_multiplayer_authority(), ammo)
+
+
+## Host: a pickup was taken. Health now; a boost runs on the host clock (speed check, glow)
+## and is told to the owner, who feels it.
+func server_take_pickup(def: PickupDef) -> void:
+	assert(multiplayer.is_server(), "server_take_pickup is host-only")
+	if def.kind == PickupDef.Kind.HEALTH:
+		player.health = mini(player.health + def.heal, player.class_def.max_health)
+		return
+	var until: float = _now() + def.duration
+	_host_powerup_until[def.kind] = until
+	if def.kind == PickupDef.Kind.SPEED:
+		_host_speed_pickup_until = until
+		_host_speed_pickup_mult = def.speed_mult
+	_update_powerup_glow()
+	_receive_pickup.rpc_id(player.get_multiplayer_authority(), def.kind, def.duration, def.speed_mult)
+
+
+## Host: Player.powerups (replicated) = bit per active boost kind; everyone sees the glow.
+func _update_powerup_glow() -> void:
+	var now: float = _now()
+	var mask: int = 0
+	for kind: int in _host_powerup_until.keys():
+		if now < _host_powerup_until[kind]:
+			mask |= 1 << kind
+		else:
+			_host_powerup_until.erase(kind)
+	if player.powerups != mask:
+		player.powerups = mask
+
+
+## Owner: a Double Jump pickup is active.
+func has_double_jump() -> bool:
+	return _double_jump_left > 0.0
+
+
+## Owner: seconds left on a pickup boost (HUD), 0 when inactive.
+func get_pickup_left(kind: PickupDef.Kind) -> float:
+	match kind:
+		PickupDef.Kind.SPEED:
+			return _speed_pickup_left
+		PickupDef.Kind.DOUBLE_JUMP:
+			return _double_jump_left
+	return 0.0
 
 
 ## Host: Shield ability. Frontal hits are blocked for `seconds`; everyone sees the panel.
@@ -139,7 +200,8 @@ func server_start_buff(seconds: float, speed_mult: float, fire_mult: float) -> v
 
 ## Owner: movement speed multiplier from an active boost.
 func get_speed_mult() -> float:
-	return _buff_speed_mult if _buff_left > 0.0 else 1.0
+	var mult: float = _buff_speed_mult if _buff_left > 0.0 else 1.0
+	return mult * (_speed_pickup_mult if _speed_pickup_left > 0.0 else 1.0)
 
 
 ## Owner: fire rate multiplier from an active boost (weapons divide their intervals by it).
@@ -153,7 +215,9 @@ func get_buff_left() -> float:
 
 
 func get_host_speed_mult() -> float:
-	return _host_buff_speed_mult if _now() < _host_buff_until else 1.0
+	var now: float = _now()
+	var mult: float = _host_buff_speed_mult if now < _host_buff_until else 1.0
+	return mult * (_host_speed_pickup_mult if now < _host_speed_pickup_until else 1.0)
 
 
 func get_host_fire_rate_mult() -> float:
@@ -176,6 +240,18 @@ func _receive_stun(seconds: float) -> void:
 	_stun_left = seconds
 	player.movement.cancel_specials()
 	Events.local_stunned.emit(seconds)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _receive_pickup(kind: PickupDef.Kind, seconds: float, speed_mult: float) -> void:
+	if not _from_host_to_owner() or not player.is_alive:
+		return
+	match kind:
+		PickupDef.Kind.SPEED:
+			_speed_pickup_left = seconds
+			_speed_pickup_mult = speed_mult
+		PickupDef.Kind.DOUBLE_JUMP:
+			_double_jump_left = seconds
 
 
 @rpc("any_peer", "call_local", "reliable")

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="2_scene"]
+[ext_resource type="Resource" path="res://data/weapons/rocket_round.tres" id="3_round"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/shotgun.glb" id="4_world"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"rocket_launcher"
+display_name = "Rocket Launcher"
+fire_type = 1
+damage = 200.0
+max_range = 100.0
+fire_interval = 1.0
+automatic = false
+magazine_size = 6
+reload_time = 0.0
+equip_time = 0.8
+move_speed_mult = 0.9
+kill_ammo_reward = false
+airdrop = true
+carry_speed_mult = 0.85
+recoil_pattern = PackedVector2Array(0, 3)
+recoil_recovery = 8.0
+recoil_recovery_delay = 0.1
+grenade = ExtResource("3_round")
+scene = ExtResource("2_scene")
+world_model = ExtResource("4_world")
+world_model_scale = 1.2
+world_muzzle = Vector3(0, 0.046, -0.69)

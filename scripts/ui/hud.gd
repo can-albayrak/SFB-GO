@@ -2,7 +2,8 @@ extends CanvasLayer
 ## In-game HUD for the local player, Red Faction / TimeSplitters era (GDD "Görsel referans"):
 ## bottom left bevelled health and ability bars with the class, bottom right weapon
 ## silhouettes with rounds, top centre timer and leader score, kill feed, Tab scoreboard,
-## spawn protection, death screen ("FLATLINED" + loadout menu), end of match, flashbang
+## spawn protection, pickup boosts, airdrop announcements and the crate opening bar,
+## death screen ("FLATLINED" + loadout menu), end of match, flashbang
 ## white-out and the Esc panel (resume / settings / leave). Built in code from Style; the
 ## scene holds only the crosshair, kill feed, scoreboard, flash overlay and loadout menu.
 ## The small speed readout is a tuning aid for bunny hop / slide.
@@ -19,6 +20,10 @@ const OTHER_WEAPON_ALPHA: float = 0.55
 const DIM_COLOR: Color = Color(0.04, 0.04, 0.045, 0.82)
 const PAUSE_DIM: Color = Color(0.0, 0.0, 0.0, 0.55)
 const DEATH_TINT: Color = Color(0.43, 0.08, 0.06, 0.35)
+const OTHER_ROWS: int = 2 ## The guns not in hand (loadout + airdrop weapon).
+const BANNER_TIME: float = 3.0
+const OPEN_BAR_SIZE: Vector2 = Vector2(220.0, 16.0)
+const BOOST_DEFS: Array[PickupDef] = [preload("res://data/pickups/speed.tres"), preload("res://data/pickups/double_jump.tres")]
 
 var _player: Player
 ## The loadout menu was opened by dying (closes itself on respawn).
@@ -40,9 +45,14 @@ var _weapon_name_label: Label
 var _current_icon: HudWeaponIcon
 var _ammo_label: Label
 var _magazine_label: Label
-var _other_row: Control
-var _other_icon: HudWeaponIcon
-var _other_ammo_label: Label
+var _other_rows: Array[HBoxContainer] = []
+var _other_icons: Array[HudWeaponIcon] = []
+var _other_ammo_labels: Array[Label] = []
+var _boost_labels: Array[Label] = []
+var _open_box: VBoxContainer
+var _open_bar: HudBar
+var _banner: Label
+var _banner_left: float = 0.0
 var _top_bar: HBoxContainer
 var _time_label: Label
 var _time_divider: Label
@@ -88,6 +98,9 @@ func _ready() -> void:
 	Events.match_ended.connect(_on_match_ended)
 	Events.match_started.connect(_on_match_started)
 	Events.local_flashed.connect(_on_local_flashed)
+	Events.airdrop_incoming.connect(func(_point: Vector3) -> void: _show_banner("AIRDROP INCOMING"))
+	Events.airdrop_opened.connect(func(peer_id: int, weapon_name: String) -> void:
+		_show_banner("%s GOT THE %s" % [Net.get_player_name(peer_id).to_upper(), weapon_name.to_upper()]))
 	loadout_menu.confirmed.connect(_on_loadout_confirmed)
 	scoreboard.visible = false
 	_pause_panel.visible = false
@@ -118,6 +131,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	_update_top_bar()
 	_update_flash(delta)
+	if _banner_left > 0.0:
+		_banner_left -= delta
+		_banner.visible = _banner_left > 0.0
 	var ended: bool = Match.state == Match.State.ENDED
 	scoreboard.visible = (ended or Input.is_action_pressed(&"scoreboard")) and not loadout_menu.visible
 	if ended:
@@ -148,6 +164,8 @@ func _process(delta: float) -> void:
 	_update_health()
 	_update_ability()
 	_update_weapons()
+	_update_boosts()
+	_update_open_bar()
 	_update_next_spawn_label()
 
 
@@ -166,6 +184,12 @@ func _build_hud() -> Control:
 	left.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	left.add_theme_constant_override(&"separation", 6)
 	root.add_child(left)
+	for def: PickupDef in BOOST_DEFS:
+		var boost := Style.label("", &"HudSmallLabel", 13)
+		boost.add_theme_color_override(&"font_color", def.color)
+		boost.visible = false
+		left.add_child(boost)
+		_boost_labels.append(boost)
 	var health_row := HBoxContainer.new()
 	health_row.add_theme_constant_override(&"separation", 8)
 	left.add_child(health_row)
@@ -213,17 +237,21 @@ func _build_hud() -> Control:
 	ammo_box.add_child(_ammo_label)
 	_magazine_label = _centered(Style.label("", &"HudSmallLabel", 15))
 	ammo_box.add_child(_magazine_label)
-	var other_row := HBoxContainer.new()
-	other_row.alignment = BoxContainer.ALIGNMENT_END
-	other_row.add_theme_constant_override(&"separation", 10)
-	other_row.modulate.a = OTHER_WEAPON_ALPHA
-	right.add_child(other_row)
-	_other_row = other_row
-	_other_icon = HudWeaponIcon.new()
-	_other_icon.custom_minimum_size = OTHER_ICON_SIZE
-	other_row.add_child(_other_icon)
-	_other_ammo_label = _centered(Style.label("", &"HudLabel", 15))
-	other_row.add_child(_other_ammo_label)
+	for i: int in OTHER_ROWS:
+		var other_row := HBoxContainer.new()
+		other_row.alignment = BoxContainer.ALIGNMENT_END
+		other_row.add_theme_constant_override(&"separation", 10)
+		other_row.modulate.a = OTHER_WEAPON_ALPHA
+		right.add_child(other_row)
+		var icon := HudWeaponIcon.new()
+		icon.custom_minimum_size = OTHER_ICON_SIZE
+		other_row.add_child(icon)
+		var ammo := _centered(Style.label("", &"HudLabel", 15))
+		ammo.custom_minimum_size.x = 34.0
+		other_row.add_child(ammo)
+		_other_rows.append(other_row)
+		_other_icons.append(icon)
+		_other_ammo_labels.append(ammo)
 
 	# Top centre: time | LEADER kills / target.
 	_top_bar = HBoxContainer.new()
@@ -256,6 +284,27 @@ func _build_hud() -> Control:
 	_speed_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_speed_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(_speed_label)
+	# Crate opening bar under the crosshair, and the big announcement line.
+	_open_box = VBoxContainer.new()
+	_open_box.set_anchors_preset(Control.PRESET_CENTER)
+	_open_box.offset_left = -OPEN_BAR_SIZE.x * 0.5
+	_open_box.offset_right = OPEN_BAR_SIZE.x * 0.5
+	_open_box.offset_top = 70.0
+	_open_box.offset_bottom = 110.0
+	_open_box.add_theme_constant_override(&"separation", 4)
+	var open_label := Style.label("OPENING CRATE", &"HudSmallLabel", 12)
+	open_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_open_box.add_child(open_label)
+	_open_bar = HudBar.new()
+	_open_bar.custom_minimum_size = OPEN_BAR_SIZE
+	_open_bar.set_colors(Color("f0c8a0"), Color("c8784a"), Color("8a4a2a"))
+	_open_box.add_child(_open_bar)
+	_open_box.visible = false
+	root.add_child(_open_box)
+	_banner = _center_label("", &"TitleLabel", 34, -250.0)
+	_banner.visible = false
+	root.add_child(_banner)
+
 	_protected_label.visible = false
 	_stun_label.visible = false
 	_next_spawn_label.visible = false
@@ -423,12 +472,39 @@ func _update_weapons() -> void:
 	else:
 		_ammo_label.text = str(weapon.ammo)
 		_magazine_label.text = "/ %d" % weapon.def.magazine_size
-	var other_slot: int = 1 - slot if slot >= 0 and _player.weapons.size() == 2 else -1
-	_other_row.visible = other_slot >= 0
-	if other_slot >= 0:
+	var row: int = 0
+	for other_slot: int in _player.weapons.size():
+		if other_slot == slot or row >= OTHER_ROWS:
+			continue
 		var other: Weapon = _player.weapons[other_slot]
-		_other_icon.shape = HudWeaponIcon.shape_for(other.def, other_slot)
-		_other_ammo_label.text = str(other.ammo) if other.def.uses_ammo else ""
+		_other_rows[row].visible = true
+		_other_icons[row].shape = HudWeaponIcon.shape_for(other.def, other_slot)
+		_other_ammo_labels[row].text = str(other.ammo) if other.def.uses_ammo else ""
+		row += 1
+	for i: int in range(row, OTHER_ROWS):
+		_other_rows[i].visible = false
+
+
+func _update_boosts() -> void:
+	for i: int in BOOST_DEFS.size():
+		var left: float = _player.status.get_pickup_left(BOOST_DEFS[i].kind)
+		_boost_labels[i].visible = left > 0.0
+		if left > 0.0:
+			_boost_labels[i].text = "%s  %d" % [BOOST_DEFS[i].display_name.to_upper(), ceili(left)]
+
+
+func _update_open_bar() -> void:
+	var airdrops: AirdropManager = AirdropManager.find(get_tree())
+	var progress: float = airdrops.local_progress if airdrops != null and _player.is_alive else -1.0
+	_open_box.visible = progress >= 0.0
+	if progress >= 0.0:
+		_open_bar.value = progress
+
+
+func _show_banner(text: String) -> void:
+	_banner.text = text
+	_banner.visible = true
+	_banner_left = BANNER_TIME
 
 
 func _update_top_bar() -> void:
