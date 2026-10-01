@@ -81,8 +81,9 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Düşman tepkisi | Vurulan oyuncunun modeli kısa süreli **flinch** (üst gövde sarsılması) gösterir; sadece görsel, hareketi/nişanı etkilemez. Animasyon aşama 8'de. Şimdilik kan/kıvılcım efekti yeterli. |
 | Ses kimliği | 2000'ler tarzı: kaba, sentetik, hafif tuhaf. Kafa vuruşu ve öldürme ayrı sesler. Aşama 9. |
 | Hit-stop | Kullanılmaz (ağ senkronunu ve nişan hissini bozmasın). Gerekirse sadece yakın dövüşte kamera sarsıntısı. |
+| Vurulan oyuncunun ekranı | Hasar alınca **hafif kamera sarsıntısı** (nişanı bozmaz, sadece görsel). Hasar yönü göstergesi sonra karar verilecek. |
 
-**Açık sorular:** Silah başına ses/kamera tekmesi farkı, vurulan oyuncunun kendi ekranında kamera sarsıntısı ve hasar yönü göstergesi.
+**Açık sorular:** Silah başına ses/kamera tekmesi farkı, hasar yönü göstergesi.
 
 ### Tuş atamaları (hepsi ayarlardan değiştirilebilir)
 
