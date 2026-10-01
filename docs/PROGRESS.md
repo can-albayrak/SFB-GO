@@ -136,7 +136,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] `AirdropManager` (`Game/Airdrops`): ilk 180 sn, sonra 120–180 sn'de bir, haritadaki `AirdropPoints`'ten boş bir nokta; kasa 12 sn paraşütle iner, kırmızı ışık hüzmesi; E 3 sn basılı tutunca açılır (hasar, ölüm, uzaklaşma iptal eder), rastgele silah. HUD: "AIRDROP INCOMING", "CAN GOT THE RAILGUN", açma barı, boost süreleri, 3 silahlı sağ alt
 - [x] Test Range (`test_range.tres`): 5 sn'de bir kasa, 4 sn düşüş, en fazla 3 aktif (kasa + yerdeki + taşınan); 3 pickup spawn'ın önünde, 3 airdrop noktası
 - [x] Headless: smoke test 112/0 (her pickup, kasa açma, Railgun duvar arkası, mermi sayımı, Minigun ısınma, rocket jump, ölünce düşme + alma), ağ testi lobi 29 + 26 / geç katılma 28 + 27 (boost, airdrop silahı, kasa client'a ulaşıyor)
-- [ ] **Can'ın oynama testi**
+- [x] Can'ın oynama testi: "güzel, gayet iyi". Düzeltilen: kasanın içinden geçiliyordu (inince katı, dünya katmanı), dürbünde görüş kendiliğinden aşağı kayıyordu (yavaş silahlarda geri tepmenin geri inişi tüm atış aralığını bekliyordu; artık en fazla 0,2 sn)
 - [ ] Aşama sonu bağımsız kod incelemesi
 
 ## Tasarım geçişi (2026-10-01) — bitti
@@ -187,7 +187,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Silah modeli ve birinci şahıs kollar duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
 - Birinci şahıs kollar/bacaklar kutu yer tutucu; silah sallanması ve şarjör animasyonu yok, eller silaha sabit. Bacaklar yan yürürken de ileri-geri adım atar.
 - Dürbün katmanı ve ayarlar paneli 0×0 boyutta kalıyordu (dürbünde sadece zoom vardı): `set_anchors_and_offsets_preset` ile düzeldi. Ayarlarda listenin sonunda tekerlek oyuna dönüyordu: tekerlek artık fareyi yakalamaz.
-- Aşama 6: kasanın collision'ı yok (içinden geçilir). Airdrop silah modelleri yer tutucu (Railgun = Heavy Rifle + mavi bobin, Minigun = LMG + namlu, Rocket = tüp). Minigun'un dönmesi başkalarına görünmüyor. Pickup alma host'un gördüğü konuma göre (~100 ms geriden). Speed pickup Adrenaline ile çarpılarak birleşir. Anons sesleri aşama 9.
+- Aşama 6: Airdrop silah modelleri yer tutucu (Railgun = Heavy Rifle + mavi bobin, Minigun = LMG + namlu, Rocket = tüp). Minigun'un dönmesi başkalarına görünmüyor. Pickup alma host'un gördüğü konuma göre (~100 ms geriden). Speed pickup Adrenaline ile çarpılarak birleşir. Anons sesleri aşama 9.
 - Aşama 6: oyuncu oyundan çıkarken taşıdığı airdrop silahı kaybolur (yere düşmez).
 - Ekran filtresi HUD ve menüleri de etkiler (bilinçli: PS2 hissi); yazılar okunmazsa filtre ayarlardan kapatılır.
 - Uzak oyuncu modeli animasyonsuz, eğilince y'de basılır; elindeki silah artık doğru model (`held_slot`) ama tutuş pozu yok (aşama 8).
@@ -243,3 +243,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | görsel | İki PC testi geçti (aşama 2 bitti). Can'ın kararıyla görsel geçiş öne alındı: `Style` teması, taslağa göre ana menü / lobi / loadout / ayarlar / Esc / HUD / ölüm ekranı, soğuk atmosfer + kirli beton dokusu, PS2 ekran filtresi (ayarlardan kapanır, render ölçeği), birinci şahıs kollar ve bacaklar. `tests/ui_preview.tscn` ile ekran yakalama. Smoke 88/0, ağ testi 0 hata. |
 | 2026-10-01 | görsel | Can'ın ikinci turu: dürbün maskesi/nişangahı görünmüyordu (boyut 0) → düzeldi + hareket ederken bulanıklık ve daha fazla isabetsizlik; ayarlarda tekerlek menüyü kapatıyordu → düzeldi; Dash uzadı, shotgun 8 mermi, GL −%15, mayın büyüdü; Test Range: güç bekleme süresi yok, sınırsız mermi (`data/match/test_range.tres`). Airdrop aşama 6'da. |
 | 2026-10-01 | 6 | Aşama 6: pickup'lar (Health/Speed/Double Jump, parlama, geri sayım), airdrop (duyuru, hüzme, paraşüt, E ile açma), Railgun/Minigun/Rocket Launcher, 3. slot, ölünce düşen silah, Test Range 5 sn'de bir kasa. Smoke 112/0, ağ testi 0 hata. Can'ın testi bekliyor. |
+| 2026-10-01 | 6 | Can'ın testi olumlu. Kasa katı oldu; dürbünde gecikmeli geri tepme inişi (görüş kendiliğinden aşağı kayma) düzeldi. |

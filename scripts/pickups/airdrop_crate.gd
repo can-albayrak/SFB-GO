@@ -15,6 +15,7 @@ const BEAM_HEIGHT: float = 80.0
 const BEAM_RADIUS: float = 0.35
 const BEAM_COLOR: Color = Color(0.95, 0.35, 0.25, 0.22)
 const LIGHT_COLOR: Color = Color(1.0, 0.4, 0.3)
+const WORLD_LAYER: int = 1 ## Landed crates are solid like the map: players stand on it, shots stop.
 
 var crate_id: int = 0
 var landing_point: Vector3 = Vector3.ZERO
@@ -22,6 +23,7 @@ var fall_time: float = 10.0
 var _fall_left: float = 0.0
 var _body: Node3D
 var _canopy: Node3D
+var _solid: StaticBody3D
 
 
 static func create(id: int, point: Vector3, seconds_left: float, total_fall: float) -> AirdropCrate:
@@ -56,6 +58,16 @@ func _ready() -> void:
 	light.position.y = 1.2
 	_body.add_child(light)
 	add_child(_beam())
+	_solid = StaticBody3D.new()
+	_solid.collision_layer = WORLD_LAYER
+	_solid.collision_mask = 0
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = CRATE_SIZE
+	shape.shape = box
+	shape.position.y = CRATE_SIZE.y * 0.5
+	_solid.add_child(shape)
+	add_child(_solid)
 	_update_fall()
 
 
@@ -70,6 +82,7 @@ func _update_fall() -> void:
 	_body.position.y = FALL_HEIGHT * share
 	_body.rotation.y = share * 2.0 # A slow turn on the way down.
 	_canopy.visible = _fall_left > 0.0
+	_solid.process_mode = Node.PROCESS_MODE_INHERIT if _fall_left <= 0.0 else Node.PROCESS_MODE_DISABLED
 
 
 func _box(box_size: Vector3, color: Color, at: Vector3) -> MeshInstance3D:

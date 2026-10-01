@@ -5,6 +5,9 @@ extends Node3D
 ## Reserve ammo is unlimited (GDD); only the magazine matters.
 
 signal ammo_changed(ammo: int, magazine_size: int)
+## Slow guns (bolt, pump, launchers) start settling the kick this soon after a shot instead of
+## after their whole fire interval; otherwise the view drifts down long after you re-aimed.
+const RECOIL_SETTLE_WAIT_CAP: float = 0.2
 signal reload_changed(is_reloading: bool)
 
 var def: WeaponDef
@@ -171,7 +174,7 @@ func _apply_recoil_kick() -> void:
 
 
 func _update_recoil(delta: float) -> void:
-	if _since_shot < def.fire_interval + def.recoil_recovery_delay:
+	if _since_shot < minf(def.fire_interval, RECOIL_SETTLE_WAIT_CAP) + def.recoil_recovery_delay:
 		return
 	recoil_offset = recoil_offset.move_toward(Vector2.ZERO, def.recoil_recovery * delta)
 	if recoil_offset == Vector2.ZERO:
