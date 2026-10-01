@@ -237,7 +237,12 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 
 Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku, sert ışık, hafif tuhaf detaylar. Karakterler normal insanlar.
 
-**Karakter yüzleri:** Her karakterin kafası **açık** olur (maske, kask yok; yüz hep görünür). Oyuncuların gerçek yüz fotoğraflarından üretilen kafalar kullanılacak (~10 kişi, izinler alındı). Önce 2 yüzle deneme; aşama 8. Ham fotoğraflar repoya girmez.
+**Karakter yüzleri:** Her karakterin kafası **açık** olur (maske, kask yok; yüz hep görünür). Gerçek yüz fotoğraflarından üretilen kafalar kullanılır (~10 kişi, izinler alındı).
+
+- **Yöntem:** Yüzler **oyunla birlikte gelir**. Kafalar Blender'da önceden hazırlanır (Avaturn GLB → sadece kafa → poligon azaltma → 512 px doku), oyuna gömülür. Oyuncu ana menüden/loadout'ta "Face" seçer; ağda sadece yüz ID'si (örn. `face_can`) senkronlanır. Kozmetiktir, oynanışı etkilemez.
+- **Plan:** Önce 2 yüzle deneme (aşama 8). Tarz tutarsa kalan yüzler eklenir.
+- **Kapsam dışı:** Oyuncunun oyun içinden kendi model/fotoğrafını yüklemesi yoktur.
+- Ham fotoğraflar ve indirilen avatar dosyaları repoya girmez (`private_assets/`, `.gitignore`'da).
 
 - **Modeller:** Karakterler ~3–5 bin poligon, dokular ~512px fotoğraf tabanlı
 - **Atmosfer:** Turuncu-kırmızı gökyüzü, yoğun sis, baked ışık
