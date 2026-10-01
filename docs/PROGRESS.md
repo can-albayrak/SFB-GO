@@ -210,6 +210,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya.
 
 - 2026-10-01 (Can, ilk test): Cheetah zor kontrol ediliyor, zıplarken akıyor, havada çok yön değişiyor. Serbest hava ivmesi 10 → 3 (`MovementDef.air_control_accel`, `standard.tres`, tüm sınıflar). Can: "daha iyi, gayet iyi".
+- 2026-10-02 (Can): Fırlatma bıçağı küçük ve çok yaylı geliyordu: model ~1,6×, isabet yarıçapı 0,2 m (`projectile_radius`), hız 24 → 34 m/s, kaldırma 2 → 0,8, yerçekimi 14 → 7 (`throw_gravity`).
 - 2026-10-01 (Can, ikinci tur): Dash 0,15 sn × 18 m/s → 0,25 sn × 22 m/s (2,7 → 5,5 m). Shotgun şarjörü 6 → 8. Grenade Launcher hasarı 95 → 81 (−%15). Mayın tetik yarıçapı 0,8 → 1,3 m, modeli ~1,7× büyüdü. Dürbünde hareket isabetsizliği: Heavy Rifle `move_spread` 3 → 6, Marksman 2 → 3,5 (CS gibi; dürbünde yürürken görüntü de bulanıklaşır).
 - 2026-10-01 (Can): Dual Pistols ateş aralığı 0,3 → 0,2 sn (tabanca başına; Cheetah'a TTK ~0,8 sn). SMG recoil deseni ×1,5.
 
@@ -246,3 +247,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 6 | Aşama 6: pickup'lar (Health/Speed/Double Jump, parlama, geri sayım), airdrop (duyuru, hüzme, paraşüt, E ile açma), Railgun/Minigun/Rocket Launcher, 3. slot, ölünce düşen silah, Test Range 5 sn'de bir kasa. Smoke 112/0, ağ testi 0 hata. Can'ın testi bekliyor. |
 | 2026-10-01 | 6 | Can'ın testi olumlu. Kasa katı oldu; dürbünde gecikmeli geri tepme inişi (görüş kendiliğinden aşağı kayma) düzeldi. |
 | 2026-10-01 | 6 → 7 | Aşama 6 sonu bağımsız inceleme: 5 düzeltme (havada ölen taşıyıcının silahı zemine iner, Minigun sayacı, pickup'lar maç başında sıfırlanır, Double Jump bunny hop'u yemez, maç sonunda kasa açılmaz). **Aşama 6 kapandı.** |
+| 2026-10-02 | 7 | Bıçak: büyük model, 0,2 m isabet yarıçapı, daha hızlı ve düz atış. Smoke 113/0. Yarın/bugün: aşama 7 (AVM) ve modeller. |

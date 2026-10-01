@@ -1,12 +1,14 @@
 class_name ThrownKnife
 extends Node3D
-## Thrown knife (Bear's secondary). The host simulates the arc with a ray per tick and
-## replicates position/rotation (Sync). A hit damages and removes it; a miss sticks it into
+## Thrown knife (Bear's secondary). The host simulates the flight each tick (a ray for walls,
+## a sphere of def.projectile_radius along the path for players) and replicates
+## position/rotation (Sync). A hit damages and removes it; a miss sticks it into
 ## the world where the thrower can pick it up by walking over it. Either way the knife is
 ## back in the thrower's inventory after def.return_time.
 
-const HIT_MASK: int = 1 | 4 # world | hitbox
-const GRAVITY: float = 14.0
+const WORLD_MASK: int = 1
+const HITBOX_MASK: int = 4
+const SWEEP_SAMPLES: int = 3 ## Sphere checks along each tick's path (radius 0.2 at 34 m/s: no gaps).
 const PICKUP_RADIUS: float = 1.3
 const PICKUP_CENTER_HEIGHT: float = 1.0
 const STICK_DEPTH: float = 0.04 ## Metres the blade sinks into the surface.
@@ -46,20 +48,51 @@ func _physics_process(delta: float) -> void:
 	if _stuck:
 		_check_pickup()
 		return
-	_velocity.y -= GRAVITY * delta
+	_velocity.y -= def.throw_gravity * delta
 	var from: Vector3 = global_position
 	var to: Vector3 = from + _velocity * delta
-	var query := PhysicsRayQueryParameters3D.create(from, to, HIT_MASK, _get_thrower_exclusions())
-	query.collide_with_areas = true
-	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
+	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var wall: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, WORLD_MASK, _get_thrower_exclusions()))
+	var wall_share: float = from.distance_to(wall["position"]) / maxf(from.distance_to(to), 0.0001) if not wall.is_empty() else INF
+	var body: Array = _sweep_hitboxes(space, from, to, wall_share)
+	if not body.is_empty():
+		_hit_player(body[0] as Hitbox, body[1])
+	elif not wall.is_empty():
+		_stick(wall["position"], wall["collider"])
+	else:
 		global_position = to
 		_face(_velocity)
-		return
-	if hit["collider"] is Hitbox:
-		_hit_player(hit["collider"] as Hitbox, hit["position"])
-	else:
-		_stick(hit["position"], hit["collider"])
+
+
+## [hitbox, point] of the first player hitbox within def.projectile_radius of the path before
+## `limit` (share of the path where a wall stops it), or [] for none.
+func _sweep_hitboxes(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3, limit: float) -> Array:
+	if def.projectile_radius <= 0.0:
+		var query := PhysicsRayQueryParameters3D.create(from, to, HITBOX_MASK, _get_thrower_exclusions())
+		query.collide_with_areas = true
+		query.collide_with_bodies = false
+		var hit: Dictionary = space.intersect_ray(query)
+		if hit.is_empty() or from.distance_to(hit["position"]) / maxf(from.distance_to(to), 0.0001) > limit:
+			return []
+		return [hit["collider"], hit["position"]]
+	var sphere := SphereShape3D.new()
+	sphere.radius = def.projectile_radius
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape = sphere
+	params.collision_mask = HITBOX_MASK
+	params.collide_with_areas = true
+	params.collide_with_bodies = false
+	params.exclude = _get_thrower_exclusions()
+	for i: int in range(1, SWEEP_SAMPLES + 1):
+		var share: float = float(i) / SWEEP_SAMPLES
+		if share > limit:
+			break
+		var point: Vector3 = from.lerp(to, share)
+		params.transform = Transform3D(Basis.IDENTITY, point)
+		for result: Dictionary in space.intersect_shape(params, 4):
+			if result["collider"] is Hitbox:
+				return [result["collider"], point]
+	return []
 
 
 func _hit_player(hitbox: Hitbox, point: Vector3) -> void:

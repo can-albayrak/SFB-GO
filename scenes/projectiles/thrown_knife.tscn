@@ -15,6 +15,7 @@ properties/1/replication_mode = 1
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
+scale = Vector3(1.7, 1.7, 1.7)
 
 [node name="Sync" type="MultiplayerSynchronizer" parent="."]
 root_path = NodePath("..")

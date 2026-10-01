@@ -59,6 +59,7 @@ func _run() -> void:
 	await _test_abilities()
 	await _test_kill_reward()
 	await _test_quick_switch()
+	await _test_knife_radius()
 	await _test_swap_rules()
 	await _test_pickups()
 	await _test_airdrop()
@@ -155,6 +156,21 @@ func _test_quick_switch() -> void:
 		_player.requests._request_fire(origin, (_dummy_target() - origin).normalized(), slot, _player.weapons[slot].def.id)
 		await _frames(1)
 		_check(_dummy.health < DUMMY_HEALTH, "quick switch: slot %d shot accepted right after the other" % slot)
+
+
+## Bear's thrown knife has a hit radius: a throw 30 cm beside the body still lands.
+func _test_knife_radius() -> void:
+	await _set_loadout(_code_for(&"bear"))
+	await _place(HITSCAN_DISTANCE * 2.0)
+	_dummy.health = DUMMY_HEALTH
+	_player.requests.reset_fire_budgets()
+	var origin: Vector3 = _player.get_aim_origin()
+	var side: Vector3 = _away.cross(Vector3.UP).normalized() * 0.3
+	var target: Vector3 = _dummy_target() + side
+	_player.requests._request_fire(origin, (target - origin).normalized(), 1, &"throwing_knives")
+	await get_tree().create_timer(PROJECTILE_WAIT).timeout
+	_check(_dummy.health < DUMMY_HEALTH, "thrown knife 30 cm off the body still hits")
+	_clear_projectiles()
 
 
 ## Inside the swap window: hurt players never refill by swapping, and a swap drops the Shield.

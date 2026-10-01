@@ -77,6 +77,8 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export_group("Thrown")
 @export var throw_speed: float = 22.0
 @export var throw_lift: float = 2.0 ## Extra upward speed, so throws arc.
+@export var throw_gravity: float = 14.0 ## m/s^2 pulling a thrown item down (lower = flatter flight).
+@export var projectile_radius: float = 0.0 ## Hit area around a thrown item's path (0 = a thin ray).
 @export var return_time: float = 8.0 ## Seconds until a thrown item is back in the inventory.
 @export var projectile: PackedScene
 
