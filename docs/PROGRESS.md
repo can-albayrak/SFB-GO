@@ -10,20 +10,20 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 **Durum (2026-10-01 akşamı):** Her şey `cloud/design-pass` dalında, [PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açık, main'e merge edilmedi. Bu dalın kodu iş bilgisayarında yazıldı ve **Godot'ta hiç açılmadı** (sadece gdparse + statik kontrol + iki bağımsız inceleme). İlk iş doğrulama.
 
 1. **Dalı al:** `git fetch` → `git checkout cloud/design-pass` → `git pull`.
-2. **Godot doğrulaması (Claude, Godot MCP ile ya da headless):**
+2. **Godot doğrulaması (asistan, Godot MCP ile ya da headless):**
    - `godot --headless --path . --import` → Output'taki her `SCRIPT ERROR` / parse hatasını düzelt.
    - **Otomatik test:** `godot --headless --path . res://tests/smoke_test.tscn` → `PASS` / `FAIL` satırları + `SMOKE TEST: x passed, y failed`. Her sınıfın her silahı mankene, yedek silah, V, Q güçleri, mayın, kill ödülü, elindeki silah, respawn, ayarlar ve lobi paneli. Test dosyasının kendisi de hiç çalışmadı; önce onun hatası çıkarsa onu düzelt.
    - İki instance ağ testi: `--host` (lobiyi atlar) ve `--join=127.0.0.1` (loadout sormadan girer).
    - Yeni `.gd.uid` dosyalarını commit et.
 3. **Can'ın oynama testi:** PR #1 açıklamasındaki madde madde test listesi (önce tek başına Test Range, sonra iki bilgisayar). Bölme commit'i `92f6d7b` (player.gd → NetSync / Requests / Status / Effects) sorun çıkarırsa tek başına geri alınabilir.
-4. **Paralelde Claude + Blender** (Blender'da BlenderMCP → Connect):
+4. **Paralelde asistan + Blender** (Blender'da BlenderMCP → Connect):
    - Karakter yüzü: Can'ın Avaturn GLB'sinden sadece kafa, poligon azaltma, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` (gitignore'da). 2 yüzle deneme.
    - AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod): iç mekân var mı, ölçek, parçalar → `docs/ASSETS.md`.
 5. **Testler geçince:** PR #1'i merge et, aşama 5'i kapat (aşama sonu inceleme bu sefer Godot'ta doğrulanmış kodla), aşama 6'ya (pickup + airdrop) geç.
 
 **Bu oturumda yazılanlar (hepsi çalıştırılmadı):** hareket hissi, kamera hissi + Settings paneli, vuruş hissi, denge, Cheetah, Volcano, lobi + last host, kill ödülü (+20 can / +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi, player.gd bölünmesi, geç katılana parlama/kalkan senkronu, başkalarının elinde doğru silah modeli, otomatik smoke test.
 
-**Henüz yazılmayan kararlar:** yüz seçimi (aşama 8, yüzler gelince), airdrop silahları ve pickup'lar (aşama 6; GDD'de değerler yazılı), HUD/menü yeni tasarımı (aşama 9; Claude Design taslağı "SFB:GO HUD ve Menü": HUD beğenildi, menüler sade nötr gri; GDD "Görsel referans").
+**Henüz yazılmayan kararlar:** yüz seçimi (aşama 8, yüzler gelince), airdrop silahları ve pickup'lar (aşama 6; GDD'de değerler yazılı), HUD/menü yeni tasarımı (aşama 9; tasarım taslağı "SFB:GO HUD ve Menü": HUD beğenildi, menüler sade nötr gri; GDD "Görsel referans").
 
 **Notlar:** Harita blockout'u aşama 7 (4–6 kişi ölçeği GDD'de). Dosya başına ~500–560 satır yeterli; `player.gd` 563.
 
