@@ -67,6 +67,23 @@ Hedef: **Apex gibi akıcı, CS gibi kesin**; savaş hiç durmasın. Aşağıdaki
 
 **Açık sorular (oynadıkça karar verilecek):** hız cezası eğrisi, hava ivmesi miktarı, coyote/buffer süreleri, kamera tepkileri (FOV kayması, iniş sarsıntısı, slide'da kamera alçalması).
 
+### Vuruş hissi (hedef)
+
+Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi vermez); ses, marker ve hasar sayısı aynı anda çalışır. Değerler ve görseller oynadıkça ayarlanır.
+
+| Konu | Karar |
+| --- | --- |
+| Hit marker | Klasik **X**. Gövde/bacak vuruşu **beyaz**, kafa vuruşu **kırmızı**. |
+| Crosshair ayarı | Ayarlar menüsünde: renk, boyut, boşluk (mevcut karar), ayrıca hit marker'ın görünürlüğü. Maç içinden de erişilir. |
+| Hasar sayıları | Maçta da gösterilir (sadece vuranın ekranında). Test range'de de var. |
+| Test mankenleri | Sadece `test_range`'de. Host'un oynattığı maç haritalarında manken olmaz. |
+| Öldürme anı | Ayrı efekt yok; kill sesi + kill feed yeterli. |
+| Düşman tepkisi | Vurulan oyuncunun modeli kısa süreli **flinch** (üst gövde sarsılması) gösterir; sadece görsel, hareketi/nişanı etkilemez. Animasyon aşama 8'de. Şimdilik kan/kıvılcım efekti yeterli. |
+| Ses kimliği | 2000'ler tarzı: kaba, sentetik, hafif tuhaf. Kafa vuruşu ve öldürme ayrı sesler. Aşama 9. |
+| Hit-stop | Kullanılmaz (ağ senkronunu ve nişan hissini bozmasın). Gerekirse sadece yakın dövüşte kamera sarsıntısı. |
+
+**Açık sorular:** Silah başına ses/kamera tekmesi farkı, vurulan oyuncunun kendi ekranında kamera sarsıntısı ve hasar yönü göstergesi.
+
 ### Tuş atamaları (hepsi ayarlardan değiştirilebilir)
 
 | Tuş | İşlev |
