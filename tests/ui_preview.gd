@@ -1,0 +1,75 @@
+extends Node
+## Opens one screen with made-up data, for looking at the UI (and capturing frames):
+##   godot --path . res://tests/ui_preview.tscn -- --screen=lobby
+##   godot --path . --write-movie shot.png --quit-after 30 res://tests/ui_preview.tscn -- --screen=range
+## Screens: lobby, loadout, range (offline Test Range: HUD, view model, post-process),
+## death (killed by a fall), scoreboard (Tab board shown), and frozen body poses for the
+## first-person legs: down (look at your feet), walk, slide.
+## Nothing is saved: the settings file is left alone.
+
+const FAKE_NAMES: Dictionary[int, String] = {1: "Can", 2: "Grizz", 3: "Volt"}
+
+
+func _ready() -> void:
+	var screen: String = "lobby"
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--screen="):
+			screen = arg.trim_prefix("--screen=")
+	_open.call_deferred(screen)
+
+
+func _open(screen: String) -> void:
+	get_tree().current_scene = null # Net changes scenes; stay alive as a plain child of root.
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	match screen:
+		"lobby":
+			Net.player_names.assign(FAKE_NAMES)
+			Net.ready_peers.assign({2: true, 3: false})
+			Net.lobby_kill_target = 20
+			Net.lobby_minutes = 10.0
+			get_tree().change_scene_to_file(Net.LOBBY_PATH)
+		"loadout":
+			var menu := LoadoutMenu.new()
+			var center := CenterContainer.new()
+			center.set_anchors_preset(Control.PRESET_FULL_RECT)
+			var back := ColorRect.new()
+			back.color = Style.BG
+			back.set_anchors_preset(Control.PRESET_FULL_RECT)
+			var root := Control.new()
+			root.set_anchors_preset(Control.PRESET_FULL_RECT)
+			add_child(root)
+			root.add_child(back)
+			root.add_child(center)
+			center.add_child(menu)
+			menu.open(Loadout.make(2, 0, 0))
+		"range", "death", "scoreboard", "down", "slide", "walk":
+			Match.configure(20, 10.0)
+			Net.player_names.assign({1: "Can"})
+			Net.map_path = Net.DEFAULT_MAP_PATH
+			get_tree().change_scene_to_file(Net.GAME_PATH)
+			await get_tree().create_timer(0.5).timeout
+			var game: Game = Game.find(get_tree())
+			var player := game.players_root.get_node_or_null("1") as Player
+			if screen == "death" and player != null:
+				player.server_fall_death()
+			elif screen == "scoreboard":
+				Input.action_press(&"scoreboard")
+			elif player != null and screen in ["down", "slide", "walk"]:
+				_pose_body(player, screen)
+
+
+## Freezes the local player in a pose to look at the first-person body.
+func _pose_body(player: Player, screen: String) -> void:
+	player.set_physics_process(false)
+	var forward: Vector3 = -player.global_basis.z
+	match screen:
+		"down":
+			player.look_pitch = deg_to_rad(-70.0)
+		"walk":
+			player.look_pitch = deg_to_rad(-45.0)
+			player.velocity = forward * 6.6
+		"slide":
+			player.look_pitch = deg_to_rad(-5.0)
+			player.movement.is_sliding = true
+			player.head.position.y = Movement.CROUCH_EYE
+			player.velocity = forward * 9.0

@@ -22,6 +22,7 @@ automatic = true
 magazine_size = 1
 reload_time = 0.0
 uses_ammo = false
+view_hands = 1
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0

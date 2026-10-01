@@ -2,6 +2,23 @@
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 
+[sub_resource type="Gradient" id="BackGradient"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(0.106, 0.11, 0.122, 1, 0.071, 0.075, 0.082, 1, 0.043, 0.043, 0.047, 1)
+
+[sub_resource type="GradientTexture2D" id="BackTexture"]
+gradient = SubResource("BackGradient")
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
+
+[sub_resource type="Gradient" id="LineGradient"]
+colors = PackedColorArray(0.91, 0.914, 0.922, 1, 0.91, 0.914, 0.922, 0)
+
+[sub_resource type="GradientTexture2D" id="LineTexture"]
+gradient = SubResource("LineGradient")
+width = 280
+height = 2
+
 [node name="Main" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -11,100 +28,136 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.12, 0.06, 0.04, 1)
+texture = SubResource("BackTexture")
+expand_mode = 1
+stretch_mode = 0
 
-[node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Column" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 70.0
+offset_right = 488.0
+offset_bottom = 680.0
+theme_override_constants/separation = 6
 
-[node name="VBox" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(360, 0)
+[node name="Title" type="Label" parent="Column"]
 layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Title" type="Label" parent="Center/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.55, 0.25, 1)
-theme_override_font_sizes/font_size = 96
+theme_type_variation = &"TitleLabel"
 text = "SFB:GO"
-horizontal_alignment = 1
 
-[node name="NameEdit" type="LineEdit" parent="Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
+[node name="Underline" type="TextureRect" parent="Column"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+size_flags_horizontal = 0
+texture = SubResource("LineTexture")
+
+[node name="Subtitle" type="Label" parent="Column"]
+layout_mode = 2
+theme_type_variation = &"MonoLabel"
+text = "FREE-FOR-ALL  ·  4–6 PLAYERS"
+
+[node name="Gap" type="Control" parent="Column"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="NameTitle" type="Label" parent="Column"]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+text = "SFB CITIZEN ID"
+
+[node name="NameEdit" type="LineEdit" parent="Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 38)
+layout_mode = 2
+size_flags_horizontal = 0
 placeholder_text = "Your name"
 
-[node name="HostButton" type="Button" parent="Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
+[node name="Gap2" type="Control" parent="Column"]
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Host Game"
 
-[node name="JoinRow" type="HBoxContainer" parent="Center/VBox"]
+[node name="Menu" type="VBoxContainer" parent="Column"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 2
+
+[node name="HostButton" type="Button" parent="Column/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 20
+text = "HOST GAME"
+alignment = 0
+
+[node name="JoinRow" type="HBoxContainer" parent="Column/Menu"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="AddressEdit" type="LineEdit" parent="Center/VBox/JoinRow"]
+[node name="JoinButton" type="Button" parent="Column/Menu/JoinRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
+custom_minimum_size = Vector2(110, 44)
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
+theme_type_variation = &"RowButton"
+theme_override_font_sizes/font_size = 20
+text = "JOIN"
+alignment = 0
+
+[node name="AddressEdit" type="LineEdit" parent="Column/Menu/JoinRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 34)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 15
 text = "127.0.0.1"
 placeholder_text = "Host IP"
 
-[node name="JoinButton" type="Button" parent="Center/VBox/JoinRow"]
+[node name="LastHostButton" type="Button" parent="Column/Menu"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(130, 54)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Join"
+theme_type_variation = &"RowButton"
+theme_override_colors/font_color = Color(0.486, 0.502, 0.529, 1)
+theme_override_font_sizes/font_size = 14
+text = "Reconnect to last host"
+alignment = 0
 
-[node name="LastHostButton" type="Button" parent="Center/VBox"]
+[node name="TestRangeButton" type="Button" parent="Column/Menu"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Last host"
-
-[node name="TestRangeButton" type="Button" parent="Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Test Range"
-
-[node name="SettingsButton" type="Button" parent="Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Settings"
-
-[node name="QuitButton" type="Button" parent="Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Quit"
-
-[node name="StatusLabel" type="Label" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.75, 0.5, 1)
+theme_type_variation = &"RowButton"
 theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
+text = "TEST RANGE"
+alignment = 0
+
+[node name="SettingsButton" type="Button" parent="Column/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_type_variation = &"RowButton"
+theme_override_font_sizes/font_size = 20
+text = "SETTINGS"
+alignment = 0
+
+[node name="QuitButton" type="Button" parent="Column/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_type_variation = &"RowButton"
+theme_override_colors/font_color = Color(0.486, 0.502, 0.529, 1)
+theme_override_font_sizes/font_size = 20
+text = "QUIT"
+alignment = 0
+
+[node name="StatusLabel" type="Label" parent="Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"

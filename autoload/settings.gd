@@ -1,5 +1,5 @@
 extends Node
-## Local user settings: name, last loadout, FOV, sensitivity, crosshair (graphics/keys later).
+## Local user settings: name, last loadout, FOV, sensitivity, crosshair, camera feel, graphics (keys later).
 ## Persisted to user://settings.cfg; edited in SettingsPanel (main menu and Esc menu).
 
 ## A value changed in the settings panel (crosshair redraws, etc.).
@@ -38,6 +38,10 @@ var camera_landing: float = 1.0
 var camera_slide: float = 1.0
 var camera_damage_shake: float = 1.0
 
+## Graphics (GDD): PS2-style screen filter (grain, vignette, colour crush) and 3D render scale.
+var post_process: bool = true
+var render_scale: float = 1.0
+
 
 func _ready() -> void:
 	load_settings()
@@ -75,6 +79,8 @@ func load_settings() -> void:
 	camera_landing = _read(config, "camera", "landing", camera_landing)
 	camera_slide = _read(config, "camera", "slide", camera_slide)
 	camera_damage_shake = _read(config, "camera", "damage_shake", camera_damage_shake)
+	post_process = _read(config, "graphics", "post_process", post_process)
+	render_scale = clampf(_read(config, "graphics", "render_scale", render_scale), 0.5, 1.0)
 
 
 ## A hand-edited file with a wrong type falls back to the current value instead of erroring.
@@ -107,4 +113,6 @@ func save_settings() -> void:
 	config.set_value("camera", "landing", camera_landing)
 	config.set_value("camera", "slide", camera_slide)
 	config.set_value("camera", "damage_shake", camera_damage_shake)
+	config.set_value("graphics", "post_process", post_process)
+	config.set_value("graphics", "render_scale", render_scale)
 	config.save(PATH)

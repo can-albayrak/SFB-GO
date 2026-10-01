@@ -3,10 +3,10 @@
 [ext_resource type="PackedScene" path="res://scenes/maps/target_dummy.tscn" id="3_dummy"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
-sky_top_color = Color(0.45, 0.12, 0.06, 1)
-sky_horizon_color = Color(0.95, 0.45, 0.2, 1)
-ground_bottom_color = Color(0.12, 0.07, 0.05, 1)
-ground_horizon_color = Color(0.95, 0.45, 0.2, 1)
+sky_top_color = Color(0.17, 0.2, 0.25, 1)
+sky_horizon_color = Color(0.4, 0.44, 0.5, 1)
+ground_bottom_color = Color(0.1, 0.11, 0.13, 1)
+ground_horizon_color = Color(0.36, 0.39, 0.44, 1)
 
 [sub_resource type="Sky" id="Sky"]
 sky_material = SubResource("SkyMat")
@@ -15,31 +15,63 @@ sky_material = SubResource("SkyMat")
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
-ambient_light_energy = 0.45
+ambient_light_energy = 0.5
 tonemap_mode = 2
 fog_enabled = true
-fog_light_color = Color(0.85, 0.45, 0.25, 1)
-fog_density = 0.006
+fog_light_color = Color(0.33, 0.37, 0.43, 1)
+fog_density = 0.007
+fog_sky_affect = 0.6
+
+[sub_resource type="FastNoiseLite" id="GritNoise"]
+noise_type = 5
+frequency = 0.18
+fractal_octaves = 3
+
+[sub_resource type="Gradient" id="GritRamp"]
+colors = PackedColorArray(0.72, 0.72, 0.72, 1, 1, 1, 1, 1)
+
+[sub_resource type="NoiseTexture2D" id="GritTexture"]
+width = 128
+height = 128
+seamless = true
+color_ramp = SubResource("GritRamp")
+noise = SubResource("GritNoise")
 
 [sub_resource type="StandardMaterial3D" id="Mat_floor"]
-albedo_color = Color(0.42, 0.42, 0.44, 1)
-roughness = 0.9
+albedo_color = Color(0.4, 0.41, 0.43, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.95
+uv1_scale = Vector3(0.35, 0.35, 0.35)
+uv1_triplanar = true
+texture_filter = 2
 
 [sub_resource type="StandardMaterial3D" id="Mat_wall"]
-albedo_color = Color(0.3, 0.27, 0.26, 1)
-roughness = 0.9
+albedo_color = Color(0.33, 0.35, 0.39, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.95
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+texture_filter = 2
 
 [sub_resource type="StandardMaterial3D" id="Mat_crate"]
-albedo_color = Color(0.55, 0.42, 0.28, 1)
-roughness = 0.8
+albedo_color = Color(0.45, 0.42, 0.34, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.85
+uv1_scale = Vector3(1.2, 1.2, 1.2)
+uv1_triplanar = true
+texture_filter = 2
 
 [sub_resource type="StandardMaterial3D" id="Mat_concrete"]
-albedo_color = Color(0.6, 0.58, 0.55, 1)
-roughness = 0.9
+albedo_color = Color(0.62, 0.62, 0.62, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.95
+uv1_scale = Vector3(0.6, 0.6, 0.6)
+uv1_triplanar = true
+texture_filter = 2
 
 [sub_resource type="StandardMaterial3D" id="Mat_marker"]
 shading_mode = 0
-albedo_color = Color(1, 0.85, 0.2, 1)
+albedo_color = Color(0.85, 0.75, 0.25, 1)
 
 [node name="TestRange" type="Node3D"]
 
@@ -49,8 +81,8 @@ environment = SubResource("Env")
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation = Vector3(-0.872665, 0.523599, 0)
 position = Vector3(0, 20, 0)
-light_color = Color(1, 0.85, 0.7, 1)
-light_energy = 1.2
+light_color = Color(0.86, 0.9, 1, 1)
+light_energy = 0.95
 shadow_enabled = true
 
 [node name="Geometry" type="Node3D" parent="."]

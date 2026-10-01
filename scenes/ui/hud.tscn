@@ -19,148 +19,18 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("2_crosshair")
 
-[node name="HealthLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = -100.0
-offset_right = 400.0
-offset_bottom = -40.0
-grow_vertical = 0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 44
-text = "+ 100"
-vertical_alignment = 2
-
-[node name="WeaponLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -400.0
-offset_top = -140.0
-offset_right = -40.0
-offset_bottom = -100.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 26
-text = "Weapon"
-horizontal_alignment = 2
-vertical_alignment = 2
-
-[node name="AmmoLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -400.0
-offset_top = -100.0
-offset_right = -40.0
-offset_bottom = -40.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 44
-text = "30 / 30"
-horizontal_alignment = 2
-vertical_alignment = 2
-
-[node name="SpeedLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -150.0
-offset_top = -70.0
-offset_right = 150.0
-offset_bottom = -40.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 18
-text = "0.0 m/s"
-horizontal_alignment = 1
-
-[node name="DeathLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -500.0
-offset_top = 70.0
-offset_right = 500.0
-offset_bottom = 190.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 0.3, 0.2, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 10
-theme_override_font_sizes/font_size = 40
-text = "KILLED BY"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TopBar" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -300.0
-offset_top = 16.0
-offset_right = 300.0
-offset_bottom = 60.0
-grow_horizontal = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 30
-text = "15:00"
-horizontal_alignment = 1
-
-[node name="ProtectedLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = 40.0
-offset_right = 200.0
-offset_bottom = 70.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 20
-text = "SPAWN PROTECTION"
-horizontal_alignment = 1
-
 [node name="KillFeed" type="VBoxContainer" parent="."]
 layout_mode = 3
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -620.0
-offset_top = 20.0
-offset_right = -30.0
-offset_bottom = 220.0
+offset_left = -520.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = 160.0
 grow_horizontal = 0
 mouse_filter = 2
-alignment = 0
+theme_override_constants/separation = 2
 script = ExtResource("4_killfeed")
 
 [node name="Scoreboard" type="PanelContainer" parent="."]
@@ -171,9 +41,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -360.0
-offset_top = -180.0
+offset_top = -200.0
 offset_right = 360.0
-offset_bottom = 220.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -181,94 +51,20 @@ script = ExtResource("3_scoreboard")
 
 [node name="VBox" type="VBoxContainer" parent="Scoreboard"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Scoreboard/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_type_variation = &"HeaderLabel"
 text = "FREE FOR ALL"
-horizontal_alignment = 1
 
 [node name="Grid" type="GridContainer" parent="Scoreboard/VBox"]
 layout_mode = 2
 theme_override_constants/h_separation = 30
+theme_override_constants/v_separation = 6
 columns = 4
 
-[node name="EndPanel" type="VBoxContainer" parent="."]
-layout_mode = 3
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -500.0
-offset_top = 90.0
-offset_right = 500.0
-offset_bottom = 300.0
-grow_horizontal = 2
-mouse_filter = 2
-theme_override_constants/separation = 6
-
-[node name="WinnerLabel" type="Label" parent="EndPanel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 10
-theme_override_font_sizes/font_size = 56
-text = "WINNER"
-horizontal_alignment = 1
-
-[node name="AwardsLabel" type="Label" parent="EndPanel"]
-layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 1
-
-[node name="NextLabel" type="Label" parent="EndPanel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
-
-[node name="AbilityLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = -140.0
-offset_right = 500.0
-offset_bottom = -100.0
-grow_vertical = 0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
-text = "Q"
-vertical_alignment = 2
-
-[node name="NextSpawnLabel" type="Label" parent="."]
-layout_mode = 3
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -400.0
-offset_top = -110.0
-offset_right = 400.0
-offset_bottom = -80.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 20
-text = "Next spawn"
-horizontal_alignment = 1
-
 [node name="FlashOverlay" type="ColorRect" parent="."]
-layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -278,58 +74,12 @@ mouse_filter = 2
 color = Color(1, 1, 1, 0)
 
 [node name="LoadoutMenu" type="PanelContainer" parent="."]
-layout_mode = 3
-anchors_preset = 8
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -430.0
-offset_top = -250.0
-offset_right = 430.0
-offset_bottom = 250.0
+offset_left = -500.0
+offset_top = 230.0
+offset_right = 500.0
+offset_bottom = 550.0
 grow_horizontal = 2
-grow_vertical = 2
 script = ExtResource("5_loadout")
-
-[node name="PausePanel" type="ColorRect" parent="."]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.55)
-
-[node name="Center" type="CenterContainer" parent="PausePanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="PausePanel/Center"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="ResumeButton" type="Button" parent="PausePanel/Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 52)
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Resume"
-
-[node name="SettingsButton" type="Button" parent="PausePanel/Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 52)
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Settings"
-
-[node name="LeaveButton" type="Button" parent="PausePanel/Center/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 52)
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Leave Game"

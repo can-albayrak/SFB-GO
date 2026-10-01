@@ -18,4 +18,5 @@ magazine_size = 1
 reload_time = 0.0
 equip_time = 0.0
 counts_as_knife = true
+view_hands = 1
 scene = ExtResource("2_scene")

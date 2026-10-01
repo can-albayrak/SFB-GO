@@ -27,7 +27,8 @@ sfb-go/
 │   ├── events.gd            # Sinyal otobüsü
 │   ├── net.gd               # Bağlantı, oyuncu kaydı
 │   ├── match.gd             # Maç durumu, skor, spawn (sadece host karar verir)
-│   └── settings.gd          # Kullanıcı ayarları (user://settings.cfg), `changed` sinyali
+│   ├── settings.gd          # Kullanıcı ayarları (user://settings.cfg), `changed` sinyali
+│   └── style.gd             # Görünüm: renk paleti, sistem fontları, Theme (varsayılan temaya birleştirilir), ScreenFx
 ├── data/
 │   ├── classes/             # ClassDef .tres (wolf, hawk, bear, cheetah, volcano) + roster.tres
 │   ├── camera/              # CameraFeelDef .tres (default.tres: FOV kayması, head bob, iniş, slide, sarsıntı)
@@ -37,12 +38,12 @@ sfb-go/
 ├── scripts/
 │   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd, camera_feel_def.gd
 │   ├── game/                # game.gd (maç sahnesi: harita, spawn, respawn), lag_compensator.gd
-│   ├── player/              # player.gd + bileşenler (player_net_sync, player_requests, player_status, player_effects), movement.gd, camera_feel.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd
+│   ├── player/              # player.gd + bileşenler (player_net_sync, player_requests, player_status, player_effects), movement.gd, camera_feel.gd, first_person_legs.gd, first_person_arms.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, shotgun_weapon.gd, dual_pistols_weapon.gd, launcher_weapon.gd, melee_weapon.gd, throwing_knife_weapon.gd
 │   ├── abilities/           # ability.gd (taban), grenade_ability.gd, grenade.gd (bomba/mermi), grapple, decoy, shield, charge, dash, adrenaline
 │   ├── pickups/             # pickup.gd, airdrop.gd
-│   └── ui/                  # hud.gd, crosshair.gd, damage_number.gd, scoreboard.gd, kill_feed.gd, main_menu.gd, lobby.gd, loadout_menu.gd, settings_panel.gd
+│   └── ui/                  # hud.gd (+ hud_bar.gd, hud_weapon_icon.gd), crosshair.gd, damage_number.gd, scoreboard.gd, kill_feed.gd, main_menu.gd, lobby.gd, loadout_menu.gd, settings_panel.gd, screen_fx.gd
 ├── scenes/
 │   ├── main.tscn            # Giriş noktası: ana menü (isim, Host, Join, Last host, Test Range, Settings)
 │   ├── lobby.tscn           # Lobi (UI kodla kurulur: scripts/ui/lobby.gd)
@@ -57,14 +58,15 @@ sfb-go/
 │       └── mall/            # İlk gerçek harita
 ├── tests/                   # Headless otomatik testler (komutlar dosyaların başında)
 │   ├── smoke_test.tscn      # Tek process: her sınıf/silah/güç mankene, kill ödülü, UI panelleri
-│   └── net_test.tscn        # İki process, gerçek ENet: --role=host / --role=client (+ --late)
+│   ├── net_test.tscn        # İki process, gerçek ENet: --role=host / --role=client (+ --late)
+│   └── ui_preview.tscn      # Sahte veriyle tek ekran (--screen=lobby|loadout|range|death|scoreboard|down|walk|slide); --write-movie ile kare yakalanır
 ├── tools/                   # .gdignore; oyun dışı araçlar
 │   └── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
 └── assets/
     ├── models/              # characters/soldier.glb, weapons/*.glb (Blender'da +Y ileri = Godot -Z)
     ├── textures/
     ├── audio/
-    └── shaders/
+    └── shaders/             # ps2_screen.gdshader + ps2_screen.tres (ekran filtresi değerleri)
 ```
 
 ## Autoload'lar
@@ -74,7 +76,8 @@ sfb-go/
 | `Events` | Global sinyaller (`player_killed`, `match_ended`, `airdrop_incoming`...). Sistemler birbirini doğrudan çağırmaz, buradan haberleşir. | Herkes emit eder |
 | `Net` | Host/join, peer listesi, oyuncu isimleri, bağlantı kopması | Host + client |
 | `Match` | Skor, kill hedefi, süre, spawn seçimi, pickup/airdrop zamanlayıcıları | **Sadece host** değiştirir, client'lara RPC ile yayar |
-| `Settings` | İsim, son host, FOV, hassasiyet, crosshair + hit marker, kamera efekti ölçekleri (tuş/grafik sonra). `SettingsPanel` ana menü ve Esc menüsünden açılır. | Yerel |
+| `Settings` | İsim, son host, FOV, hassasiyet, crosshair + hit marker, kamera efekti ölçekleri, grafik (ekran filtresi, render ölçeği). `SettingsPanel` ana menü ve Esc menüsünden açılır. | Yerel |
+| `Style` | UI görünümü (GDD "Görsel referans"): palet sabitleri (`Style.PANEL`, `Style.TEXT`...), sistem fontları (Arimo/Arial, Cousine/Courier New; dosya gömülmez), Theme + varyasyonlar (`TitleLabel`, `HeaderLabel`, `MonoLabel`, `DimLabel`, `HudLabel`, `HudSmallLabel`, `RowButton`, `FrameButton`, `PrimaryButton`, `HeaderPanel`, `InsetPanel`). Theme motorun varsayılan temasına birleştirilir (CanvasLayer altındaki HUD dahil her Control alır). Root'a `ScreenFx` ekler. | Yerel |
 
 ## Ağ modeli
 
@@ -243,6 +246,9 @@ Bileşenler sahnede sabit düğümler: RPC'leri her peer'da aynı yolda (`Player
 - Physics interpolation açık (60 Hz tick, yüksek FPS'te akıcı). Kamera `top_level` ve interpolasyonu kapalı, `_process`'te yerleştirilir, bu yüzden fare gecikmesi olmaz.
 - Atış `get_aim_origin()` (tick anındaki göz) + `get_aim_basis()` (bakış + recoil) ile yapılır, kamera pozisyonuyla değil.
 - **Kamera hissi (`CameraFeel`, sadece sahibinde, sadece görsel):** hızla artan FOV kayması, head bob, iniş çökmesi (`Movement.landed`), slide'da alçalma + yan yatma, hasar sarsıntısı (host `_on_hurt`). Miktarlar `data/camera/default.tres`, her efekt `Settings.camera_*` (0–1) ile ölçeklenir. Nişan bunlardan etkilenmez.
+- **Birinci şahıs gövde (sadece sahibinde, sadece görsel):** `FirstPersonLegs` (Player'ın çocuğu): iki kemikli bacak, ayak hedefi hızla adım atar, çömelince katlanır, havada toplanır, slide'da öne uzanır (kalça gözün önüne geçer, botlar görünür). `FirstPersonArms` (WeaponHolder'ın çocuğu): eldivenler gösterilen silaha (bıçak savurma dahil) her frame yapışır, kollar ekran dışındaki dirseklere uzanır. Tutuş noktası silah sahnesindeki `RightHand`/`LeftHand` Marker3D'den, yoksa namluya göre tahmin; `WeaponDef.view_hands` (NONE/RIGHT/BOTH). Gölge yok.
+- **Ekran filtresi (`ScreenFx`, CanvasLayer 120, her şeyin üstünde):** `assets/shaders/ps2_screen.gdshader` — doygunluk/kontrast/soğuk ton, 5 bit renk + Bayer dither, grain, vignette (değerler `ps2_screen.tres`). `Settings.post_process` kapatır, `Settings.render_scale` root viewport'un `scaling_3d_scale`'i.
+- **UI ölçeği:** taban 1280×720, `canvas_items` stretch + `expand`: UI her çözünürlükte aynı düzende büyür, 3D tam çözünürlükte.
 - **Vuruş hissi:** host onayından sonra (`confirm_hit`) X hit marker (gövde/bacak beyaz, kafa kırmızı; `Settings.hit_marker_enabled`) ve sadece vuranın ekranında hasar sayısı (`DamageNumber`, Label3D). Mankenler artık kendi sayılarını göstermez. Hit-stop yok.
 
 ### Silah

@@ -19,4 +19,5 @@ automatic = false
 magazine_size = 1
 reload_time = 0.0
 uses_ammo = false
+view_hands = 0
 scene = ExtResource("2_scene")

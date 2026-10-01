@@ -2,16 +2,17 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 6 – Pickup'lar ve airdrop (başlanmadı). Aşama 5 kapandı (2026-10-01). Aşama 2'nin gerçek iki bilgisayar testi hâlâ bekliyor.
+**Şu anki aşama:** Görsel geçiş (aşama 8/9'un UI, atmosfer ve birinci şahıs gövde kısmı, Can'ın kararıyla aşama 6'dan önce). Sonra aşama 6 – Pickup'lar ve airdrop. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
 **Son güncelleme:** 2026-10-01
 
 ## Sıradaki oturum
 
 **Durum:** Tek dal `main`. Aşama 5 kapandı: Godot'ta headless doğrulandı, Can oynadı (Cheetah, hareket, lobi iki pencere, Hawk parlaması), aşama sonu bağımsız inceleme yapıldı ve bulgular düzeltildi. Smoke test 88/0, ağ testi lobi + geç katılma 0 hata.
 
+0. **Görsel geçiş (sürüyor):** Can'ın oyunda bakıp yorumlaması: menüler, HUD, ekran filtresi, atmosfer, kollar/bacaklar. Sonra karakter ve silah modelleri (Blender), yüzler.
 1. **Aşama 6 – Pickup'lar ve airdrop:** GDD'deki değerlerle (pickup 45 sn / 5–6 nokta, airdrop 3. dakikadan sonra her 2–3 dk, airdrop silahları). Host-authoritative: pickup/airdrop kararları sadece host. Airdrop silahlarının `.tres`'inde `kill_ammo_reward = false`. Test haritasına geçici pickup / airdrop noktaları; yeni testler `smoke_test` ve `net_test`'e.
 2. **Paralelde (Can hazır olunca) Blender:** karakter yüzü denemesi (Avaturn GLB → sadece kafa, poligon azaltma, 512 px doku; ham dosyalar `private_assets/`), AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) kontrolü → `docs/ASSETS.md`.
-3. **Can'da bekleyen:** gerçek iki bilgisayar testi (Tailscale), Bear ve Volcano'nun ayrıntılı oynanışı.
+3. **Can'da bekleyen:** Bear ve Volcano'nun ayrıntılı oynanışı.
 
 **Doğrulama komutları:** `--import`, `res://tests/smoke_test.tscn`, `res://tests/net_test.tscn` (host önce, `--role=host` / `--role=client`, `+ --late`). Büyük bir pull'dan sonra ana klasörde önce `--import` (yoksa eski `.godot` önbelleği yüzünden menü scripti derlenmez, butonlar çalışmaz).
 
@@ -27,14 +28,14 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | --- | --- | --- |
 | 0 | Kurulum (Godot, MCP, repo, proje iskeleti) | ✅ Bitti |
 | 1 | Temel his: Wolf ile hareket, hitscan ateş, test haritası (tek oyunculu) | ✅ Bitti |
-| 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | ⏳ Devam ediyor |
+| 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | ✅ Bitti (iki bilgisayar testi 2026-10-01) |
 | 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | ✅ Bitti (oynama testi bekliyor) |
 | 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | ⏳ Devam ediyor |
 | 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ✅ Bitti (2026-10-01) |
 | 6 | Pickup'lar ve airdrop | ⏭️ Sıradaki |
 | 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Bekliyor |
-| 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | Bekliyor |
-| 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | Bekliyor |
+| 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | ⏳ Atmosfer, ekran filtresi, birinci şahıs gövde (yer tutucu) yapıldı; modeller bekliyor |
+| 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | ⏳ Menü/HUD yeni tasarımı ve grafik ayarları yapıldı |
 
 Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler → commit → gerekirse Release.
 
@@ -73,7 +74,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Can / ölüm `StateSync` ile host'tan; ölüm ekranı ("KILLED BY X"), 3 sn sonra rastgele noktada doğma
 - [x] Esc paneli: Resume / Leave Game
 - [x] Headless 2 instance testi: bağlanma, spawn, hareket senkronu, host'un client'ı öldürmesi, yeniden doğma
-- [ ] **Can + arkadaşla gerçek test** (iki bilgisayar, Tailscale)
+- [x] **Can + arkadaşla gerçek test** (iki bilgisayar): bağlandı, sorun yok (2026-10-01)
 - [x] Aşama sonu kod incelemesi. Düzeltilenler: host hız kontrolü (ışınlanma reddi, testte doğrulandı), jitter'da kaybolan atışlar (bütçe tabanlı ateş hızı), geç katılanda can/manken durumu, geç katılmada paket sırası, respawn süresi `data/match/default.tres`'e
 
 ## Aşama 3 – Maç döngüsü
@@ -136,6 +137,17 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Denge: AR 16/0,12 (0,72 sn), Burst 16/0,42 (0,84 sn), LMG 14/0,10 (0,70 sn), Marksman 0,6 sn aralık, Heavy Rifle bacak ×0,26 (öldürmez), Bear 6,3 m/s
 - [x] Lobi: oyuncu listesi, hazır durumu, boş yüz yeri; host kill/süre/harita seçip Start der; geç katılma aynı yol. "Last host" ile tek tık bağlanma (`user://settings.cfg`)
 
+## Görsel geçiş (2026-10-01, aşama 8/9'dan öne alındı)
+
+- [x] `Style` autoload: palet, sistem fontları, Theme (varsayılan temaya birleştirilir); UI tabanı 1280×720 + canvas_items stretch
+- [x] Ana menü, lobi (oyuncu tablosu + yüz yeri, loadout, maç ayarları), loadout menüsü (3 sütun + özet + DEPLOY), ayarlar, Esc paneli: tasarım taslağı "SFB:GO HUD ve Menü"
+- [x] HUD: sol altta bevel can / güç barı + sınıf, sağ altta silah silüeti + mermi (diğer silah soluk), üstte süre | LEADER, kill feed, skor tablosu, ölüm ekranı (FLATLINED + geri sayım + loadout), maç sonu
+- [x] Atmosfer: soğuk kapalı gökyüzü, mavimsi sis, prosedürel kirli beton dokusu (test range)
+- [x] Ekran filtresi: grain, vignette, soğuk/yıkanmış renk, 5 bit renk + dither; Settings'te kapatma ve render ölçeği
+- [x] Birinci şahıs: silahı tutan eldivenli kollar, aşağı bakınca ve kayarken görünen bacaklar (prosedürel)
+- [ ] Can'ın oyunda değerlendirmesi
+- [ ] HUD silah ikonları gerçek modellerden render (modeller gelince), menü arka planı AVM kamera turu (aşama 7/8)
+
 ## Bilinen sorunlar
 
 - Bear ve Volcano ayrıntılı oynanmadı; gerçek iki bilgisayar testi henüz yok (sadece aynı PC'de iki pencere).
@@ -159,7 +171,9 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Stun ve knockback client tarafında uygulanıyor; host sadece stunlu oyuncunun ateş/güç isteklerini reddediyor (hareketi değil).
 - Shield hasar yönünü saldıranın konumundan hesaplıyor (bomba dahil), bu yüzden arkadan patlayan bomba önden sayılabilir.
 
-- Silah modeli duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
+- Silah modeli ve birinci şahıs kollar duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
+- Birinci şahıs kollar/bacaklar kutu yer tutucu; silah sallanması ve şarjör animasyonu yok, eller silaha sabit. Bacaklar yan yürürken de ileri-geri adım atar.
+- Ekran filtresi HUD ve menüleri de etkiler (bilinçli: PS2 hissi); yazılar okunmazsa filtre ayarlardan kapatılır.
 - Uzak oyuncu modeli animasyonsuz, eğilince y'de basılır; elindeki silah artık doğru model (`held_slot`) ama tutuş pozu yok (aşama 8).
 - Lag compensation 400 ms'den yüksek gecikmede tam telafi etmez (bilinçli üst sınır).
 - Bıçak savurma ve bomba atma başkalarına animasyon olarak görünmüyor (aşama 8).
@@ -209,3 +223,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 5 | Can'ın ilk testi: ana klasörde eski `.godot` önbelleği yüzünden menü butonları çalışmıyordu (`--import` ile düzeldi). Cheetah/hava kontrolü fazla: `air_control_accel` 3 eklendi. |
 | 2026-10-01 | 5 | Hava ivmesi onaylandı. Dual Pistols daha hızlı (0,2 sn), SMG recoil ×1,5. |
 | 2026-10-01 | 5 → 6 | Parlama küçültüldü/kısıldı. Aşama sonu bağımsız inceleme: 11 bulgu düzeltildi (slot başına ateş bütçesi, bıçak iadesi, can doldurma açığı, knife ödülü, kalkan/loadout, mayın kurulması, stun, Start sonrası katılma, ölüm sonrası kalıntılar, hayat sayacı), Charge penceresi bilinen sorun. Smoke 88/0, ağ testi 0 hata. **Aşama 5 kapandı.** Sırada aşama 6. |
+| 2026-10-01 | görsel | İki PC testi geçti (aşama 2 bitti). Can'ın kararıyla görsel geçiş öne alındı: `Style` teması, taslağa göre ana menü / lobi / loadout / ayarlar / Esc / HUD / ölüm ekranı, soğuk atmosfer + kirli beton dokusu, PS2 ekran filtresi (ayarlardan kapanır, render ölçeği), birinci şahıs kollar ve bacaklar. `tests/ui_preview.tscn` ile ekran yakalama. Smoke 88/0, ağ testi 0 hata. |

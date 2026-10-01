@@ -10,10 +10,10 @@ const LABEL_WIDTH: float = 230.0
 const SLIDER_WIDTH: float = 260.0
 const VALUE_WIDTH: float = 80.0
 const FONT_SIZE: int = 18
-const TITLE_SIZE: int = 16
-const HEADER_SIZE: int = 28
-const TITLE_COLOR: Color = Color(1.0, 0.6, 0.3)
-const DIM_COLOR: Color = Color(0.0, 0.0, 0.0, 0.5)
+const TITLE_SIZE: int = 12
+const HEADER_SIZE: int = 40
+const TITLE_COLOR: Color = Color("7c8087")
+const DIM_COLOR: Color = Color(0.04, 0.04, 0.045, 0.85)
 
 var _rows: VBoxContainer
 
@@ -34,10 +34,7 @@ func _ready() -> void:
 	root.add_theme_constant_override(&"separation", 12)
 	panel.add_child(root)
 
-	var header := Label.new()
-	header.text = "SETTINGS"
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	header.add_theme_font_size_override(&"font_size", HEADER_SIZE)
+	var header := Style.label("SETTINGS", &"TitleLabel", HEADER_SIZE)
 	root.add_child(header)
 
 	var scroll := ScrollContainer.new()
@@ -51,6 +48,7 @@ func _ready() -> void:
 
 	var close_button := Button.new()
 	close_button.text = "CLOSE"
+	close_button.theme_type_variation = &"PrimaryButton"
 	close_button.custom_minimum_size = Vector2(0.0, 48.0)
 	close_button.add_theme_font_size_override(&"font_size", 22)
 	close_button.pressed.connect(close)
@@ -108,10 +106,17 @@ func _rebuild() -> void:
 	_add_percent("Damage shake", Settings.camera_damage_shake,
 		func(v: float) -> void: Settings.camera_damage_shake = v)
 
+	_add_section("GRAPHICS")
+	_add_toggle("Screen filter (grain, PS2 colour)", Settings.post_process,
+		func(on: bool) -> void: Settings.post_process = on)
+	_add_slider("Render scale %", 50.0, 100.0, 5.0, Settings.render_scale * 100.0, "%.0f",
+		func(v: float) -> void: Settings.render_scale = v / 100.0)
+
 
 func _add_section(title: String) -> void:
 	var label := Label.new()
 	label.text = title
+	label.theme_type_variation = &"HeaderLabel"
 	label.add_theme_font_size_override(&"font_size", TITLE_SIZE)
 	label.add_theme_color_override(&"font_color", TITLE_COLOR)
 	_rows.add_child(label)

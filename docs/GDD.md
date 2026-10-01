@@ -302,15 +302,16 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 - Ham fotoğraflar ve indirilen avatar dosyaları repoya girmez (`private_assets/`, `.gitignore`'da).
 
 - **Modeller:** Karakterler ~3–5 bin poligon, dokular ~512px fotoğraf tabanlı
-- **Atmosfer:** Turuncu-kırmızı gökyüzü, yoğun sis, baked ışık
-- **Post-process:** Hafif film grain, sıcak renk ayarı, ince vignette
+- **Atmosfer:** Soğuk ve kapalı: gri-mavi gökyüzü, hafif mavimsi sis, baked ışık (eski "turuncu gökyüzü" kararı "Görsel referans" ile değişti)
+- **Post-process (ekran filtresi):** Film grain, ince vignette, hafif soğuk ve yıkanmış renk, PS2 tarzı renk derinliği (5 bit) + dither. Ayarlardan kapatılır.
+- **Birinci şahıs gövde:** Oyuncu kendi kollarını (silahı tutan eldivenli eller) ve aşağı bakınca / kayarken bacaklarını görür. Şimdilik kutu yer tutucu ve prosedürel hareket; aşama 8'de gerçek model.
 - **Tuhaf detaylar:** Sahte marka reklam panoları, tuhaf posterler, hoparlör anonsları
 
 **Performans (GTX 1050 Ti, 1080p, 100+ FPS):**
 
 - Godot Mobile renderer (Vulkan, hafif)
 - LightmapGI ile önceden pişirilmiş ışık, sınırlı dinamik gölge
-- Grafik menüsü: çözünürlük ölçeği, sis kalitesi, post-process aç/kapa
+- Grafik menüsü: çözünürlük ölçeği (3D render ölçeği), post-process aç/kapa (sis kalitesi sonra)
 
 ## Test ve dağıtım
 

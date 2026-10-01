@@ -118,6 +118,9 @@ func _ready() -> void:
 		camera.current = true
 		_camera_feel = CameraFeel.new()
 		movement.landed.connect(_camera_feel.on_landed)
+		# Your own body in view: legs on the body, arms with the view model (visual only).
+		add_child(FirstPersonLegs.create(self))
+		weapon_holder.add_child(FirstPersonArms.create(self))
 		Events.local_player_spawned.emit(self)
 	else:
 		# Remote players are placed in _process from snapshots.

@@ -30,7 +30,7 @@ func _ready() -> void:
 	if not Settings.last_host.is_empty():
 		address_edit.text = Settings.last_host
 	last_host_button.visible = not Settings.last_host.is_empty()
-	last_host_button.text = "Last host: %s" % Settings.last_host
+	last_host_button.text = "Reconnect to last host  ·  %s" % Settings.last_host
 
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_join_pressed)

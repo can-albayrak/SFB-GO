@@ -3,6 +3,8 @@ extends Resource
 ## Balance data for one weapon. Values live in data/weapons/*.tres, never in code.
 
 enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
+## Which first-person hands hold the weapon (the view model arms follow it).
+enum ViewHands { NONE, RIGHT, BOTH }
 
 @export var id: StringName
 @export var display_name: String
@@ -78,6 +80,9 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 
 @export_group("Scene")
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).
+
+@export_group("View Model")
+@export var view_hands: ViewHands = ViewHands.BOTH
 
 @export_group("World Model")
 ## What other players see in this player's hand (a model, no script). Null = empty hand.

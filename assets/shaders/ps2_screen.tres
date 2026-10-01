@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/ps2_screen.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/saturation = 0.8
+shader_parameter/contrast = 1.08
+shader_parameter/tint = Vector3(0.95, 0.98, 1.04)
+shader_parameter/color_levels = 32.0
+shader_parameter/dither = 1.0
+shader_parameter/grain = 0.05
+shader_parameter/vignette = 0.45
