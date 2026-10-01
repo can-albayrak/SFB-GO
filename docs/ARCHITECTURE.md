@@ -27,23 +27,25 @@ sfb-go/
 │   ├── events.gd            # Sinyal otobüsü
 │   ├── net.gd               # Bağlantı, oyuncu kaydı
 │   ├── match.gd             # Maç durumu, skor, spawn (sadece host karar verir)
-│   └── settings.gd          # Kullanıcı ayarları (user://settings.cfg)
+│   └── settings.gd          # Kullanıcı ayarları (user://settings.cfg), `changed` sinyali
 ├── data/
-│   ├── classes/             # ClassDef .tres (hawk.tres, bear.tres ...)
-│   ├── movement/            # MovementDef .tres (standard.tres: ivme, zıplama, bhop, slide)
+│   ├── classes/             # ClassDef .tres (wolf, hawk, bear, cheetah, volcano) + roster.tres
+│   ├── camera/              # CameraFeelDef .tres (default.tres: FOV kayması, head bob, iniş, slide, sarsıntı)
+│   ├── movement/            # MovementDef .tres (standard.tres: ivme, zıplama, bhop, slide, coyote)
 │   ├── weapons/             # WeaponDef .tres
 │   └── abilities/           # AbilityDef .tres
 ├── scripts/
-│   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd
+│   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd, camera_feel_def.gd
 │   ├── game/                # game.gd (maç sahnesi: harita, spawn, respawn), lag_compensator.gd
-│   ├── player/              # player.gd, movement.gd, player_input.gd, player_command.gd, hitbox.gd
+│   ├── player/              # player.gd, movement.gd, camera_feel.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
-│   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, projectile_weapon.gd, melee_weapon.gd, thrown_weapon.gd
-│   ├── abilities/           # ability.gd (taban), grenade_ability.gd, grenade.gd (mermi); aşama 5: grapple, dash, shield ...
+│   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, shotgun_weapon.gd, dual_pistols_weapon.gd, launcher_weapon.gd, melee_weapon.gd, throwing_knife_weapon.gd
+│   ├── abilities/           # ability.gd (taban), grenade_ability.gd, grenade.gd (bomba/mermi), grapple, decoy, shield, charge, dash, adrenaline
 │   ├── pickups/             # pickup.gd, airdrop.gd
-│   └── ui/                  # hud.gd, crosshair.gd, scoreboard.gd, kill_feed.gd, main_menu.gd (loadout_menu.gd aşama 4)
+│   └── ui/                  # hud.gd, crosshair.gd, damage_number.gd, scoreboard.gd, kill_feed.gd, main_menu.gd, lobby.gd, loadout_menu.gd, settings_panel.gd
 ├── scenes/
-│   ├── main.tscn            # Giriş noktası: ana menü (isim, Host, Join, Test Range)
+│   ├── main.tscn            # Giriş noktası: ana menü (isim, Host, Join, Last host, Test Range, Settings)
+│   ├── lobby.tscn           # Lobi (UI kodla kurulur: scripts/ui/lobby.gd)
 │   ├── game.tscn            # Maç sahnesi: Map + HUD + Players + PlayerSpawner
 │   ├── player/player.tscn
 │   ├── weapons/             # Silah başına sahne (görsel + script)
@@ -69,7 +71,7 @@ sfb-go/
 | `Events` | Global sinyaller (`player_killed`, `match_ended`, `airdrop_incoming`...). Sistemler birbirini doğrudan çağırmaz, buradan haberleşir. | Herkes emit eder |
 | `Net` | Host/join, peer listesi, oyuncu isimleri, bağlantı kopması | Host + client |
 | `Match` | Skor, kill hedefi, süre, spawn seçimi, pickup/airdrop zamanlayıcıları | **Sadece host** değiştirir, client'lara RPC ile yayar |
-| `Settings` | FOV, hassasiyet, crosshair, tuş atamaları, grafik ayarları | Yerel |
+| `Settings` | İsim, son host, FOV, hassasiyet, crosshair + hit marker, kamera efekti ölçekleri (tuş/grafik sonra). `SettingsPanel` ana menü ve Esc menüsünden açılır. | Yerel |
 
 ## Ağ modeli
 
@@ -84,7 +86,8 @@ sfb-go/
 ### Oturum akışı (aşama 2)
 
 - `scenes/game.tscn` (`/root/Game`, `scripts/game/game.gd`): maç sahnesi. `Net.map_path` haritasını `Map` adıyla yükler (her peer'da aynı yol), `HUD`, `Players` ve `PlayerSpawner` içerir. Haritalar sadece geometri + `SpawnPoints` (Marker3D) + harita nesneleri (mankenler).
-- **Host:** `Net.host_game()` → ENet server (port 7777) → `game.tscn`. **Client:** `Net.join_game()` → bağlanınca `_request_register(name)` → host `_welcome(map_path)` ile cevaplar → client `game.tscn` yükler → `Game._request_spawn()`.
+- **Host:** `Net.host_game()` → ENet server (port 7777) → `lobby.tscn` (komut satırı `--host`: `use_lobby = false`, doğrudan `game.tscn`). **Client:** `Net.join_game()` → bağlanınca adres `Settings.last_host`'a kaydedilir, `_request_register(name)` → host lobi açıksa `_welcome_lobby()` (client `lobby.tscn` yükler), maç sürüyorsa `_welcome(map_path)` → client `game.tscn` yükler → `Game._request_spawn()`.
+- **Lobi (`Net.in_lobby`):** oyuncu listesi, isim, hazır durumu (`_request_ready` → host `ready_peers` → `_on_lobby_synced` herkese), boş yüz yeri (aşama 8). Host kill/dakika/harita seçer (`server_set_lobby_settings`, `Net.MAP_NAMES/MAP_PATHS`) ve Start der: `server_start_match` → `Match.configure` → host `game.tscn` yükler, kendi `Game`'i hazır olunca lobideki her peer'a mevcut `_welcome`'ı gönderir. Yani lobiden gelenler geç katılanla aynı yoldan girer; `Game` ve `Match` lobiden habersizdir.
 - Host, sahnesi yüklenmiş peer'ları `Net.ingame_peers`'te tutar. Oyun RPC'leri sadece bunlara gider (`Net.broadcast(node, method, args)`), yüklenmekte olan client "node not found" almaz. Hareket yayını (`Net.state_peers`) katılımdan 0,5 sn sonra başlar; unreliable paketler reliable spawn paketlerini geçmesin diye. Geç katılana mankenlerin canı `sync_to_peer` ile gönderilir.
 - Maç kuralları `Match.rules` (`MatchDef`, `data/match/default.tres`): kill hedefi, süre, respawn, spawn koruması, sonuç ekranı süresi. Host ana menüde kill/dakika seçer (`Match.configure`); Test Range'de limit yok.
 
@@ -111,7 +114,7 @@ sfb-go/
 | Diğer oyuncuların görüntüsü | Snapshot tamponu, ~100 ms geriden interpolasyon (`Player._interpolate_remote`) | Her frame |
 | Ateş etme | Sahibi `_request_fire(origin, dir, slot)` → host doğrular (hayatta mı, ateş hızı, origin ≤ 3 m sapma) → `server_fire` | Olay bazlı, reliable |
 | `health`, `is_alive` | `StateSync` (ON_CHANGE, spawn'da da gönderilir) | Değişince |
-| Ölüm, yeniden doğma, hit onayı, uzak tracer | Host → `Net.broadcast` (`_announce_death`, `_respawn_at`, `_show_shot`) / `confirm_hit` sadece atana | Olay bazlı |
+| Ölüm, yeniden doğma, hit onayı, uzak tracer | Host → `Net.broadcast` (`_announce_death`, `_respawn_at`, `_show_shot`, shotgun için `_on_pellets_fired`) / `confirm_hit(zone, killed, amount, point)` sadece atana (hit marker + hasar sayısı) / `_on_hurt(amount)` sadece vurulanın sahibine (kamera sarsıntısı) | Olay bazlı |
 
 - `life` sayacı her doğuşta artar; önceki hayattan geç gelen state paketleri atılır.
 - Host'tan gelmesi gereken RPC'ler `any_peer` + `_sender_is_host()` kontrolü kullanır (node authority'si sahibinde olduğu için `authority` modu kullanılamaz).
@@ -132,7 +135,8 @@ sfb-go/
 
 **Hile koruması:** Arkadaş arası oyun, ağır anti-cheat yok. Host sadece bariz tutarsızlıkları reddeder:
 - **Aşırı hız:** `_is_plausible_move` host saatinde token bucket (bhop tavanı × 1,5, 1 sn tampon). Işınlanan paket atılır; hileci herkeste yerinde donar, atışları origin kontrolüne takılır. Her doğuşta sıfırlanır.
-- **Ateş hızı:** Bütçe tabanlı (`fire_interval × 0,95`, 0,25 sn birikme payı): ağ dalgalanmasında toplu gelen atışlar kaybolmaz, sürekli fazla hız reddedilir.
+- **Ateş hızı:** Bütçe tabanlı (`get_average_shot_interval() × 0,95`, 0,25 sn birikme payı): ağ dalgalanmasında toplu gelen atışlar kaybolmaz, sürekli fazla hız reddedilir. Seri silahta tetik aralığı seriye, çift tabancada ikiye bölünür; Adrenaline aktifken host kendi saatindeki çarpanla böler.
+- **Hız:** token bucket, sınıf hızı × host'taki Adrenaline hız çarpanı × bhop tavanı × 1,5. Dash (18 m/s × 0,15 sn ≈ 2,7 m) bu 1 sn'lik bütçeye sığar.
 - **Ölüyken ateş**, geçersiz slot, origin'i bilinen gözden 3 m'den uzak atış reddedilir.
 - Host mermi/şarjör takibi yapmaz (bilinçli; arkadaş arası).
 
@@ -177,7 +181,9 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 
 `AbilityDef` benzer: `id`, `display_name`, `cooldown`, `duration`, `scene` (Ability node'u). `GrenadeDef extends AbilityDef`: `kind` (FRAG/FLASH), `projectile`, `throw_speed`, `throw_lift`, `fuse_time`, `radius`, `damage`, `flash_duration`.
 
-`WeaponDef` ayrıca: `burst_count` / `burst_interval` (seri atış, tık başına), `get_min_shot_interval()` (host hız kontrolü). Yakın dövüş de bir `WeaponDef` (`fire_type = MELEE`, `max_range` = erişim, `fire_interval` = bekleme).
+`WeaponDef` ayrıca: `burst_count` / `burst_interval` (seri atış, tık başına), `get_average_shot_interval()` (host hız kontrolü), `dual_wield` (çift tabanca), `move_spread` / `move_spread_ref_speed` / `move_spread_exponent` (kademeli hız cezası: koni = move_spread × (hız / ref)^üs; eşik yok), `pellet_pattern` + `falloff_start` / `falloff_end` / `falloff_min_mult` (shotgun), `grenade` (PROJECTILE silahın attığı `GrenadeDef`). Yakın dövüş de bir `WeaponDef` (`fire_type = MELEE`, `max_range` = erişim, `fire_interval` = bekleme).
+
+`AbilityDef` ek alanları: `exit_speed` (Dash), `speed_mult` / `fire_rate_mult` (Adrenaline). `GrenadeDef` davranış alanları (varsayılanları eski frag/flash davranışı): `explode_on_impact` (GL mermisi), `sticky` (duvara/oyuncuya yapışır), `trigger_radius` + `arm_time` (mayın), `explode_on_fuse` (false = süre bitince sessizce kaybolur), `max_per_thrower` (oyuncu başına aktif sınır; eskisi silinir).
 
 ### Loadout (aşama 4)
 
@@ -192,7 +198,13 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 - `Q`: `Ability.try_use` (sahibi: yerel bekleme, HUD) → `_request_ability` → host kendi saatinde `server_try_use` (bekleme × 0,9 tolerans) → `server_use`. Hareket güçleri (aşama 5) `_use_local` ile sahibinde çalışır.
 - Bombalar: `GrenadeAbility.server_use` → `Game.server_spawn_grenade` → `ProjectileSpawner` (spawn_function, `Sync` görünürlüğü oyuncularla aynı desen). Fizik sadece host'ta; client kopyası donuk, `Sync` ile pozisyon/rotasyon alır. Zeminde sürtünme (`GROUND_DRAG`) kaymayı keser. Fitil bitince `Game.server_explode`: frag = yarıçap içinde görüş hattı olanlara doğrusal azalan hasar (kendine de, mankenlere de); flash = görüş hattı olan oyunculara bakış açısı ve mesafeye göre `Player.flash(sn)` → HUD beyaz ekran. Efekt `Game._explosion_fx` ile herkeste.
 
-Sabit kurallar (kafa çarpanı istisnası gibi) `WeaponDef` alanlarıyla ifade edilir; örn. Heavy Rifle'da `headshot_mult = 1.0, leg_mult = 1.0, damage = 999`.
+Sabit kurallar (kafa çarpanı istisnası gibi) `WeaponDef` alanlarıyla ifade edilir; örn. Heavy Rifle `damage = 250, leg_mult = 0.26` (gövde/kafa her sınıfı öldürür, bacak 65 = en düşük can 70'in altında).
+
+### Sınıf silahları ve güçleri (aşama 5)
+
+- **Cheetah:** SMG (hitscan, düşük `move_spread`), Dual Pistols (`DualPistolsWeapon`: sol tık sol, sağ tık sağ tabanca, ayrı bekleme, ortak şarjör; `PlayerCommand.secondary_pressed`). Dash (`DashAbility` → `Movement.start_dash`: girdi yönünde, yoksa bakış yönünde düz atılma, havada da, yerçekimsiz; bitince yatay hız `exit_speed`'e sınırlanır). Adrenaline (`AdrenalineAbility`: sahibinde `Player.start_buff_local` → hareket hızı ve `Weapon.get_fire_interval()`; host'ta `server_start_buff` → hız/ateş kontrolleri).
+- **Volcano:** Shotgun (`ShotgunWeapon`: sabit `pellet_pattern`, sahibi tracer için, host hasar için aynı ışınları atar; mesafeyle azalan hasar hedef başına toplanır → tek `take_hit` / `confirm_hit`). Grenade Launcher (`LauncherWeapon`: `WeaponDef.grenade`'i `Game.server_spawn_grenade` ile host'ta fırlatır, çarpınca patlar, atanı da yaralar). Sticky Bomb ve Landmine `GrenadeAbility` + `GrenadeDef` bayraklarıyla; yapışkan bomba oyuncuya yapışırsa host'ta o oyuncunun konumunu izler; mayın durunca donar, `arm_time` sonra üstüne/yanına gelen (atan hariç, hasar alabilen) oyuncuyla patlar, oyuncu başına 1 tane.
+- `Grenade` atanın gövdesiyle çarpışmaz (`add_collision_exception_with`); GL ve yapışkan bomba sahneleri oyunculara da çarpar (`collision_mask = 3`), frag/flash/mayın sadece dünyaya.
 
 ## Oyuncu yapısı
 
@@ -219,6 +231,8 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 - Fare bakışı input anında uygulanır: yaw = gövdenin `rotation.y`, pitch = `Player.look_pitch`. Hassasiyet CS ile aynı birimde (`sens * 0.022` derece/count), FOV 4:3 yatay (CS kuralı).
 - Physics interpolation açık (60 Hz tick, yüksek FPS'te akıcı). Kamera `top_level` ve interpolasyonu kapalı, `_process`'te yerleştirilir, bu yüzden fare gecikmesi olmaz.
 - Atış `get_aim_origin()` (tick anındaki göz) + `get_aim_basis()` (bakış + recoil) ile yapılır, kamera pozisyonuyla değil.
+- **Kamera hissi (`CameraFeel`, sadece sahibinde, sadece görsel):** hızla artan FOV kayması, head bob, iniş çökmesi (`Movement.landed`), slide'da alçalma + yan yatma, hasar sarsıntısı (host `_on_hurt`). Miktarlar `data/camera/default.tres`, her efekt `Settings.camera_*` (0–1) ile ölçeklenir. Nişan bunlardan etkilenmez.
+- **Vuruş hissi:** host onayından sonra (`confirm_hit`) X hit marker (gövde/bacak beyaz, kafa kırmızı; `Settings.hit_marker_enabled`) ve sadece vuranın ekranında hasar sayısı (`DamageNumber`, Label3D). Mankenler artık kendi sayılarını göstermez. Hit-stop yok.
 
 ### Silah
 
@@ -228,13 +242,14 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 
 ### Test haritası
 
-`scenes/maps/test_range.tscn`: 15/30/55 m'de mankenler (`scenes/maps/target_dummy.tscn`, 70/100/175 HP), zıplama/crouch-jump kasaları (0,8 / 1,4 / 2,2 m), rampa ve platform, crouch tüneli (1,3 m), 10 m işaretli bhop pisti. Mankenler katman 2'de (oyuncu gibi), hitbox'ları katman 3'te. Oyuncu ve HUD haritada değil `game.tscn`'de; harita `SpawnPoints` (8 nokta) sağlar. Manken canı host'ta, hasar sayıları `Net.broadcast` ile herkeste görünür.
+`scenes/maps/test_range.tscn`: 15/30/55 m'de mankenler (`scenes/maps/target_dummy.tscn`, 70/100/175 HP), zıplama/crouch-jump kasaları (0,8 / 1,4 / 2,2 m), rampa ve platform, crouch tüneli (1,3 m), 10 m işaretli bhop pisti. Mankenler katman 2'de (oyuncu gibi), hitbox'ları katman 3'te. Oyuncu ve HUD haritada değil `game.tscn`'de; harita `SpawnPoints` (8 nokta) sağlar. Manken canı host'ta, can yazısı `Net.broadcast` ile herkeste; hasar sayısı sadece vuranın ekranında (`DamageNumber`). Mankenler sadece bu haritada.
 
 ### Hareket
 
-- Quake/Source tarzı: yerde sürtünme + ivme, havada sınırlı hava ivmesi (strafe ile yön değiştirme).
-- **Bunny hop:** Yere değdiği frame'de zıplarsa sürtünme uygulanmaz → hız korunur. Yatay hız üst sınırı `max_speed * 1.3` → sonsuz hızlanma yok.
-- **Slide:** Yerdeyken ve hız eşiğin üstündeyken Ctrl → kısa süreli düşük sürtünmeli kayma, alçak kapsül.
+- Quake/Source tarzı: yerde sürtünme + ivme. Hava: `air_speed_cap = 0` → serbest hava ivmesi (strafe ile yön değiştirme), ama hava ivmesi yatay hızı `max(mevcut hız, base × bhop_cap_mult)` üstüne çıkaramaz.
+- **Bunny hop:** Yere değdiği frame'de zıplarsa sürtünme uygulanmaz → hız korunur. Zıplamada yatay hız `base × 1.3`'e kırpılır → sonsuz hızlanma yok.
+- **Affedicilik:** jump buffer (`jump_buffer_time`) ve coyote time (`coyote_time`: kenardan düştükten kısa süre sonra zıplama).
+- **Slide:** Yerdeyken ve hız eşiğin üstündeyken Ctrl (düz ileri) → kısa süreli düşük sürtünmeli kayma, alçak kapsül. Slide'dan zıplamada (`slide_jump_keeps_speed`) hız 1,3 tavanına kırpılmaz, korunur (kazanç yok; aynı tick'te başlayan slide sayılmaz).
 - **Crouch:** Kapsül ve kamera alçalır, hız düşer. Havada crouch = crouch-jump (kasalara çıkış).
 - Değerler `data/movement/standard.tres` (`MovementDef`, `ClassDef.movement`) dosyasında; koşu hızı sınıfın `move_speed` değeri. Hareket sadece sahip peer'da çalışır.
 

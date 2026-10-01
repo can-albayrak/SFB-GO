@@ -2,8 +2,8 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 5 – Sınıflar (Hawk ve Bear bitti; aşama 2 iki bilgisayar testi ve aşama 3/4 oynama testleri hâlâ bekliyor)
-**Son güncelleme:** 2026-09-30
+**Şu anki aşama:** 5 – Sınıflar (beş sınıfın kodu yazıldı; Cheetah, Volcano ve 2026-10-01 tasarım geçişi `cloud/design-pass` dalında, **Godot'ta hiç çalıştırılmadı**. Aşama 2 iki bilgisayar testi ve aşama 3/4/5 oynama testleri bekliyor)
+**Son güncelleme:** 2026-10-01
 
 ## Aşamalar
 
@@ -16,7 +16,7 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | ⏳ Devam ediyor |
 | 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | ✅ Bitti (oynama testi bekliyor) |
 | 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | ⏳ Devam ediyor |
-| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ⏳ Hawk ve Bear yapıldı (test bekliyor), sırada Cheetah |
+| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ⏳ Dördü de yazıldı; Cheetah/Volcano doğrulanmadı (Godot'ta açılıp test edilecek) |
 | 6 | Pickup'lar ve airdrop | Bekliyor |
 | 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Bekliyor |
 | 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | Bekliyor |
@@ -105,10 +105,36 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Yedek: 3 Throwing Knife (35 hasar, kafa 70, kavisli host-simüle `ThrownKnife`, duvara saplanır, üstünden geçince toplanır, isabet/ıska 8 sn sonra envantere döner); V = Tekme (8 hasar, 9 m/s geri itme)
 - [x] Headless test: sınıf yükleniyor, bıçak fırlat/saplan/topla, charge hareketi, shield/stun RPC, üç silahın mankene hasarı
 - [ ] **Can'ın Bear oynama testi**
-- [ ] Cheetah, Volcano
+- [ ] **Cheetah** (70 can, 7,6 m/s) — yazıldı, Godot'ta çalıştırılmadı: SMG (8 hasar / 0,075 sn, koşarken isabetli), Dual Pistols (sol/sağ tık ayrı, ortak 16'lık şarjör, 1,2 sn şarjör), yedek tabanca, V bıçak; Dash (5 sn, havada da), Adrenaline (15 sn bekleme, 4 sn +%25 hız / +%30 ateş hızı, host da uygular)
+- [ ] **Volcano** (110 can, 6,2 m/s) — yazıldı, Godot'ta çalıştırılmadı: Shotgun (8 pellet sabit desen, host her pelleti izler, 7→20 m düşüş, hedef başına toplu hasar), Grenade Launcher (host-simüle, çarpınca patlar, kendine de hasar), yedek tabanca; Sticky Bomb (duvara/oyuncuya yapışır), Landmine (üstüne basanı patlatır, oyuncu başına 1)
+- [ ] Godot'ta açılış + headless doğrulama (`--import`, kısa çalıştırma, iki instance ağ testi)
+- [ ] **Can'ın Cheetah / Volcano oynama testi** (PR'daki test listesi)
+- [ ] Aşama sonu kod incelemesi Godot'ta doğrulandıktan sonra tekrar (bu oturumdaki inceleme sadece statik)
+
+## Tasarım geçişi (2026-10-01, `cloud/design-pass`) — yazıldı, çalıştırılmadı
+
+İş bilgisayarında Godot yoktu; sadece gdparse sözdizimi kontrolü, kaynak/düğüm/RPC statik kontrolü ve bağımsız kod incelemesi yapıldı.
+
+- [ ] Hareket hissi: coyote time (0,1 sn) + jump buffer (0,1 sn), slide'dan zıplamada hız korunur (kazanç yok), serbest hava ivmesi + havada da 1,3 tavanı, kademeli hız cezası (`WeaponDef.move_spread`, eğri, silah başına)
+- [ ] Kamera ve his: hızla FOV kayması, hafif head bob, iniş çökmesi, slide'da alçalma + yatma, hasar sarsıntısı; hepsi Settings'ten %0–100 (`data/camera/default.tres`)
+- [ ] Settings paneli (ana menü + Esc): FOV, hassasiyet, crosshair (renk/boy/boşluk/kalınlık/nokta/hit marker), kamera efektleri
+- [ ] Vuruş hissi: host onaylı X hit marker (gövde/bacak beyaz, kafa kırmızı), maçta da hasar sayıları (sadece vuranın ekranında), hit marker aç/kapa
+- [ ] Denge: AR 16/0,12 (0,72 sn), Burst 16/0,42 (0,84 sn), LMG 14/0,10 (0,70 sn), Marksman 0,6 sn aralık, Heavy Rifle bacak ×0,26 (öldürmez), Bear 6,3 m/s
+- [ ] Lobi: oyuncu listesi, hazır durumu, boş yüz yeri; host kill/süre/harita seçip Start der; geç katılma aynı yol. "Last host" ile tek tık bağlanma (`user://settings.cfg`)
 
 ## Bilinen sorunlar
 
+- **`cloud/design-pass` dalındaki her şey Godot'ta hiç açılmadı.** Projeyi açınca önce Output'taki hatalara bakılmalı. Yeni scriptlerin `.gd.uid` dosyaları ilk açılışta oluşacak (commit edilmeli).
+- Placeholder modeller: SMG = küçültülmüş AR, Dual Pistols = iki tabanca, Grenade Launcher = gerilmiş shotgun + silindir, mayın = silindir (aşama 8).
+- Hız cezası ve shotgun'ın merkez yönü sahibinde seçilir, host gelen yönü izler (unscoped spread ile aynı model; hileli client sapmasız ateş edebilir).
+- Hasar sayısı gerçekten düşen canı gösterir (kalan candan fazla vuruşta düşük sayı çıkar); kalkanın engellediği vuruşta marker/sayı yok.
+- Adrenaline sahibinde host onayından önce başlar; host reddederse (stun, maç arası) 4 sn boyunca fazladan atışlar sessizce düşer.
+- Yapışkan bomba oyuncuya yapışınca diğer client'larda kurbanın ~100 ms önünde görünebilir (host o oyuncunun anlık konumunu izliyor, client'lar oyuncuyu geriden çiziyor).
+- Hız cezası dürbündeyken de geçerli (dürbünle yürürken Heavy/Marksman artık tam isabetli değil).
+- Serbest hava kontrolü `standard.tres` ile tüm sınıflara geçerli (Wolf/Hawk/Bear da Quake tarzı air strafe yerine serbest yön değiştirme alıyor).
+- Maç bitince lobiye dönülmez; eskisi gibi 10 sn sonra yeni maç başlar.
+- Tek harita hâlâ test_range (mankenli). Mankensiz maç haritası aşama 7'de (mall).
+- Bear'ın yakın dövüş silahlarıyla Bear'a karşı TTK hedefin üstünde (1,5–2,4 sn); sadece hız cezası istendiği için hasarlara dokunulmadı.
 - Decoy sadece görsel: vurulamaz, kurşun içinden geçer (GDD "hologram" diyor; istenirse hitbox eklenir).
 - Marksman Rifle şimdilik Burst Rifle modelini kullanıyor (yer tutucu, aşama 8).
 - Bear'ın Sledgehammer/Claws/Chainsaw modelleri bıçak modelinin büyütülmüş hali; tekme görünmez (aşama 8).
@@ -153,3 +179,4 @@ _Henüz yok._
 | 2026-10-01 | – | Sadece tasarım (kod yok): GDD'ye "Hareket hissi" bölümü ve harita pürüzsüzlük kuralları eklendi (kademeli hız cezası, slide sonrası hız korunur, serbest hava ivmesi, coyote time + jump buffer). Uygulama sonraki hareket tuning oturumunda. |
 | 2026-10-01 | – | Sadece tasarım (kod yok): GDD'ye "Vuruş hissi" bölümü eklendi (X hit marker, kafa kırmızı, maçta hasar sayıları, mankenler sadece test range'de, flinch, 2000'ler ses kimliği). Uygulama aşama 3/9'da. |
 | 2026-10-01 | – | Sadece tasarım: karakter yüzleri kararı (tüm kafalar açık, fotoğraf tabanlı yüzler oyunla gelir, menüden seçilir, ID ile senkron). Eve gidince: `private_assets/` klasörü + `.gitignore`, Avaturn GLB'den kafa çıkarma denemesi (Blender), 2 yüzle test. |
+| 2026-10-01 | 5 | `cloud/design-pass` (iş bilgisayarı, Godot yok, **çalıştırılmadı**): hareket hissi, kamera hissi + Settings paneli, vuruş hissi, denge (.tres), Cheetah, Volcano, lobi + last host. gdparse + statik kontrol + bağımsız inceleme. Can'ın toplu testi ve Godot'ta doğrulama bekliyor. |
