@@ -264,6 +264,12 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 
 **İlk harita:** Terk edilmiş alışveriş merkezi. Dar koridorlu mağazalar (Bear, Volcano), ortada açık atrium (Wolf), üst katlar ve yürüyen merdivenler (Hawk, Cheetah), dışarıda otopark ve çatı.
 
+**Yerleşim kararları:**
+
+- **Düzen:** Ortada açık atrium, etrafında **halka koridor**; dükkanlar halkaya açılır. Her yerden her yere birden fazla yol vardır, ölü uç ve sıkışma olmaz.
+- **Dikey geçiş:** Yürüyen merdiven, normal merdiven, zıplanabilir çıkıntılar ve atlama noktaları gibi birden fazla hızlı yol. Kat değiştirmek 5–10 sn sürer.
+- Dışarıda otopark ve çatı, atrium ve üst katlarla bağlanır; çatı grapple noktalarıyla güçlenir.
+
 **Süreç:** Önce basit bloklarla kurulur (blockout), birkaç maç test edilir, akış oturunca modellenir.
 
 ## Görsel tarz ve performans
