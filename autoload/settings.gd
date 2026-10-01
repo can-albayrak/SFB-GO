@@ -10,6 +10,8 @@ const CS_DEG_PER_COUNT: float = 0.022
 const PATH: String = "user://settings.cfg"
 
 var player_name: String = "Player"
+## Last host address that connected (main menu "Last host" button).
+var last_host: String = ""
 
 ## Last confirmed loadout (GDD: remembered, one click to respawn with it).
 var loadout_class: StringName = &"wolf"
@@ -56,6 +58,7 @@ func load_settings() -> void:
 	if config.load(PATH) != OK:
 		return
 	player_name = _read(config, "player", "name", player_name)
+	last_host = _read(config, "network", "last_host", last_host)
 	loadout_class = StringName(_read(config, "loadout", "class", String(loadout_class)))
 	loadout_primary = _read(config, "loadout", "primary", loadout_primary)
 	loadout_ability = _read(config, "loadout", "ability", loadout_ability)
@@ -87,6 +90,7 @@ func _read(config: ConfigFile, section: String, key: String, fallback: Variant) 
 func save_settings() -> void:
 	var config := ConfigFile.new()
 	config.set_value("player", "name", player_name)
+	config.set_value("network", "last_host", last_host)
 	config.set_value("loadout", "class", String(loadout_class))
 	config.set_value("loadout", "primary", loadout_primary)
 	config.set_value("loadout", "ability", loadout_ability)

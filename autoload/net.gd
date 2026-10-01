@@ -1,17 +1,28 @@
 extends Node
-## Connection handling: host/join, peer registry, player names, disconnects.
+## Connection handling: host/join, lobby, peer registry, player names, disconnects.
 ## Host is always peer 1 (ENet listen server). The offline test range uses
 ## OfflineMultiplayerPeer, where we are also peer 1 and is_server() is true,
 ## so the same host-authoritative code runs unchanged.
+##
+## Lobby (GDD): Host Game opens the lobby; peers that register while it is open load the
+## lobby too. The host picks kill target / minutes / map and starts: it loads the match,
+## then sends the usual _welcome to every lobby peer (the same path as a late join).
 
 signal players_changed
+## Every peer: ready states or the host's lobby settings changed.
+signal lobby_changed
 
 const DEFAULT_PORT: int = 7777
 const MAX_PLAYERS: int = 10
 const MAX_NAME_LENGTH: int = 16
 const MAIN_MENU_PATH: String = "res://scenes/main.tscn"
 const GAME_PATH: String = "res://scenes/game.tscn"
+const LOBBY_PATH: String = "res://scenes/lobby.tscn"
 const DEFAULT_MAP_PATH: String = "res://scenes/maps/test_range.tscn"
+## Maps the host can pick in the lobby (names and scene paths, same order).
+const MAP_NAMES: Array[String] = ["Test Range"]
+const MAP_PATHS: Array[String] = [DEFAULT_MAP_PATH]
+const GAME_WAIT_FRAMES: int = 600 ## Host: give up sending lobby peers in if the match never loads.
 
 var player_names: Dictionary[int, String] = {}
 var map_path: String = DEFAULT_MAP_PATH
@@ -22,8 +33,17 @@ var ingame_peers: Array[int] = []
 var state_peers: Array[int] = []
 ## Shown by the main menu after returning (e.g. "Host left the game").
 var last_message: String = ""
+## True while the lobby is open (host: new peers go to the lobby; client: we are in it).
+var in_lobby: bool = false
+## Lobby "ready" flags by peer id (host-owned, mirrored to everyone).
+var ready_peers: Dictionary[int, bool] = {}
+## Lobby settings as the host last set them (shown to everyone in the lobby).
+var lobby_kill_target: int = 0
+var lobby_minutes: float = 0.0
+var lobby_map_index: int = 0
 
 var _local_name: String = ""
+var _join_address: String = ""
 
 
 func _ready() -> void:
@@ -40,7 +60,8 @@ func start_offline(player_name: String) -> void:
 	get_tree().change_scene_to_file(GAME_PATH)
 
 
-func host_game(player_name: String, port: int = DEFAULT_PORT) -> Error:
+## `use_lobby` false = straight into the match (command-line --host, headless tests).
+func host_game(player_name: String, port: int = DEFAULT_PORT, use_lobby: bool = true) -> Error:
 	_reset_state()
 	var peer := ENetMultiplayerPeer.new()
 	var err: Error = peer.create_server(port, MAX_PLAYERS - 1)
@@ -49,7 +70,13 @@ func host_game(player_name: String, port: int = DEFAULT_PORT) -> Error:
 	multiplayer.multiplayer_peer = peer
 	player_names[1] = _clean_name(player_name, 1)
 	print("[Net] Hosting on port %d" % port)
-	get_tree().change_scene_to_file(GAME_PATH)
+	in_lobby = use_lobby
+	if use_lobby:
+		lobby_kill_target = Match.DEFAULT_RULES.kill_target
+		lobby_minutes = Match.DEFAULT_RULES.time_limit / 60.0
+		get_tree().change_scene_to_file(LOBBY_PATH)
+	else:
+		get_tree().change_scene_to_file(GAME_PATH)
 	return OK
 
 
@@ -61,6 +88,7 @@ func join_game(player_name: String, address: String, port: int = DEFAULT_PORT) -
 		return err
 	multiplayer.multiplayer_peer = peer
 	_local_name = player_name
+	_join_address = address
 	print("[Net] Connecting to %s:%d" % [address, port])
 	return OK
 
@@ -71,6 +99,40 @@ func leave(message: String = "") -> void:
 	_reset_state()
 	last_message = message
 	get_tree().change_scene_to_file(MAIN_MENU_PATH)
+
+
+## Host, lobby: start the match with these rules. Lobby peers follow once our match is loaded.
+func server_start_match(kill_target: int, minutes: float, map_index: int) -> void:
+	assert(multiplayer.is_server(), "server_start_match is host-only")
+	if not in_lobby:
+		return
+	in_lobby = false
+	Match.configure(kill_target, minutes)
+	map_path = MAP_PATHS[clampi(map_index, 0, MAP_PATHS.size() - 1)]
+	get_tree().change_scene_to_file(GAME_PATH)
+	for i: int in GAME_WAIT_FRAMES:
+		if Game.find(get_tree()) != null:
+			break
+		await get_tree().process_frame
+	if not multiplayer.multiplayer_peer is ENetMultiplayerPeer or Game.find(get_tree()) == null:
+		return # Left (or the match failed to load) while waiting.
+	for peer_id: int in player_names:
+		if peer_id != 1 and peer_id not in ingame_peers:
+			_welcome.rpc_id(peer_id, map_path)
+
+
+## Host, lobby: new rules picked in the lobby UI; everyone in the lobby sees them.
+func server_set_lobby_settings(kill_target: int, minutes: float, map_index: int) -> void:
+	assert(multiplayer.is_server(), "server_set_lobby_settings is host-only")
+	lobby_kill_target = kill_target
+	lobby_minutes = minutes
+	lobby_map_index = map_index
+	_broadcast_lobby()
+
+
+## Client, lobby: toggle our "ready" flag (shown to everyone; the host decides when to start).
+func request_ready(is_ready: bool) -> void:
+	_request_ready.rpc_id(1, is_ready)
 
 
 func get_player_name(peer_id: int) -> String:
@@ -91,6 +153,12 @@ func _reset_state() -> void:
 	state_peers.clear()
 	map_path = DEFAULT_MAP_PATH
 	last_message = ""
+	in_lobby = false
+	ready_peers.clear()
+	lobby_kill_target = 0
+	lobby_minutes = 0.0
+	lobby_map_index = 0
+	_join_address = ""
 
 
 func _clean_name(raw: String, peer_id: int) -> String:
@@ -100,6 +168,10 @@ func _clean_name(raw: String, peer_id: int) -> String:
 
 func _on_connected_to_server() -> void:
 	print("[Net] Connected as peer %d" % multiplayer.get_unique_id())
+	# Remembered only once it worked, so a typo never replaces a good address.
+	if not _join_address.is_empty():
+		Settings.last_host = _join_address
+		Settings.save_settings()
 	_request_register.rpc_id(1, _local_name)
 
 
@@ -118,7 +190,10 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	player_names.erase(peer_id)
 	ingame_peers.erase(peer_id)
 	state_peers.erase(peer_id)
+	ready_peers.erase(peer_id)
 	_sync_names.rpc(player_names)
+	if in_lobby:
+		_broadcast_lobby()
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -128,14 +203,51 @@ func _request_register(player_name: String) -> void:
 	var peer_id: int = multiplayer.get_remote_sender_id()
 	player_names[peer_id] = _clean_name(player_name, peer_id)
 	print("[Net] %s joined (peer %d)" % [player_names[peer_id], peer_id])
-	_welcome.rpc_id(peer_id, map_path)
+	if in_lobby:
+		ready_peers[peer_id] = false
+		_welcome_lobby.rpc_id(peer_id)
+	else:
+		_welcome.rpc_id(peer_id, map_path) # Match running: late join.
 	_sync_names.rpc(player_names)
+	if in_lobby:
+		_broadcast_lobby()
 
 
 @rpc("authority", "call_remote", "reliable")
 func _welcome(host_map_path: String) -> void:
+	in_lobby = false
 	map_path = host_map_path
 	get_tree().change_scene_to_file(GAME_PATH)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _welcome_lobby() -> void:
+	in_lobby = true
+	get_tree().change_scene_to_file(LOBBY_PATH)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _request_ready(is_ready: bool) -> void:
+	if not multiplayer.is_server() or not in_lobby:
+		return
+	var peer_id: int = multiplayer.get_remote_sender_id()
+	if not player_names.has(peer_id):
+		return
+	ready_peers[peer_id] = is_ready
+	_broadcast_lobby()
+
+
+func _broadcast_lobby() -> void:
+	_on_lobby_synced.rpc(ready_peers, lobby_kill_target, lobby_minutes, lobby_map_index)
+
+
+@rpc("authority", "call_local", "reliable")
+func _on_lobby_synced(new_ready: Dictionary, kill_target: int, minutes: float, map_index: int) -> void:
+	ready_peers.assign(new_ready)
+	lobby_kill_target = kill_target
+	lobby_minutes = minutes
+	lobby_map_index = map_index
+	lobby_changed.emit()
 
 
 @rpc("authority", "call_local", "reliable")
