@@ -8,8 +8,9 @@ const FIRE_RATE_TOLERANCE: float = 0.95 ## Sustained host-side rate limit: shot 
 const FIRE_BURST_SLACK: float = 0.25 ## Seconds of shots that may arrive bunched up (jitter, resends).
 const MAX_FIRE_ORIGIN_ERROR: float = 3.0 ## Metres between claimed and known eye position.
 
-# Host: fire-rate budgets (host clock).
-var _next_fire_time: float = -INF
+# Host: fire-rate budgets (host clock). One per weapon slot: a quick switch to the other gun
+# must not wait out the slow gun's interval.
+var _next_fire_times: Array[float] = []
 var _next_melee_time: float = -INF
 
 @onready var player: Player = get_parent()
@@ -57,19 +58,16 @@ func _end_protection() -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringName) -> void:
-	if not _from_owner() or not player.is_alive or player.status.is_stunned_host():
-		return
-	if slot < 0 or slot >= player.weapons.size():
+	if not _from_owner() or slot < 0 or slot >= player.weapons.size():
 		return
 	var weapon: Weapon = player.weapons[slot]
 	if weapon.def.id != weapon_id:
 		return # Fired with the previous loadout's weapon, still in flight after a swap.
-	var now: float = Time.get_ticks_msec() / 1000.0
-	# Budget, not gap between arrivals: bunched packets pass, sustained over-rate does not.
-	if now < _next_fire_time - FIRE_BURST_SLACK or not _origin_ok(origin):
+	if not _accept_fire(weapon, slot, origin):
+		# The owner already took a throwing knife from its hand; it only comes back from the host.
+		if weapon.def.fire_type == WeaponDef.FireType.THROWN and player.is_alive:
+			player.status.server_return_throwable()
 		return
-	var interval: float = weapon.def.get_average_shot_interval() * FIRE_RATE_TOLERANCE / player.status.get_host_fire_rate_mult()
-	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + interval
 	_end_protection()
 	var end_point: Vector3
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
@@ -81,6 +79,26 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 		player.effects.server_show_pellets((weapon as ShotgunWeapon).last_pellet_ends)
 	elif weapon.def.fire_type == WeaponDef.FireType.HITSCAN:
 		player.effects.server_show_shot(origin, end_point)
+
+
+## Host: alive, not stunned, inside this slot's fire-rate budget, plausible origin. Charges the budget.
+func _accept_fire(weapon: Weapon, slot: int, origin: Vector3) -> bool:
+	if not player.is_alive or player.status.is_stunned_host() or not _origin_ok(origin):
+		return false
+	while _next_fire_times.size() <= slot:
+		_next_fire_times.append(-INF)
+	var now: float = Time.get_ticks_msec() / 1000.0
+	# Budget, not gap between arrivals: bunched packets pass, sustained over-rate does not.
+	if now < _next_fire_times[slot] - FIRE_BURST_SLACK:
+		return false
+	var interval: float = weapon.def.get_average_shot_interval() * FIRE_RATE_TOLERANCE / player.status.get_host_fire_rate_mult()
+	_next_fire_times[slot] = maxf(_next_fire_times[slot], now - FIRE_BURST_SLACK) + interval
+	return true
+
+
+## Test helper: forget every fire-rate budget.
+func reset_fire_budgets() -> void:
+	_next_fire_times.clear()
 
 
 @rpc("any_peer", "call_local", "reliable")

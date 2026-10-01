@@ -220,6 +220,8 @@ func _on_health_changed(health: int, _max_health: int) -> void:
 
 func _on_alive_changed(is_alive: bool) -> void:
 	crosshair.visible = is_alive
+	_stun_left = 0.0 # A stun never outlives the life it hit.
+	_stun_label.visible = false
 	if is_alive:
 		death_label.visible = false
 		if loadout_menu.visible and _menu_opened_by_death:

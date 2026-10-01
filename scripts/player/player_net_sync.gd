@@ -102,8 +102,8 @@ func _is_plausible_move(pos: Vector3, life: int) -> bool:
 	var movement_def: MovementDef = player.class_def.movement
 	var max_speed: float = player.class_def.move_speed * player.status.get_host_speed_mult() \
 		* movement_def.bhop_cap_mult * MOVE_SPEED_TOLERANCE
-	if life < player.get_life():
-		return false
+	if life != player.get_life():
+		return false # Older life, or a newer one the host never started (a client cannot skip ahead).
 	if not _has_valid_position:
 		_has_valid_position = true
 		_last_valid_position = pos

@@ -32,7 +32,7 @@ static func create(player: Player, anchor: Vector3, lifetime: float) -> GrappleB
 
 func _process(delta: float) -> void:
 	_left -= delta
-	if _left <= 0.0 or not is_instance_valid(_player):
+	if _left <= 0.0 or not is_instance_valid(_player) or not _player.is_alive:
 		queue_free()
 		return
 	var from: Vector3 = _player.global_position + Vector3.UP * HAND_HEIGHT

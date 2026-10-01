@@ -2,29 +2,22 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 5 – Sınıflar (beş sınıfın kodu yazıldı; Cheetah, Volcano ve 2026-10-01 tasarım geçişi main'de, **Godot'ta headless doğrulandı** (smoke test + iki instance ağ testi), Can'ın oynama testi bekliyor. Aşama 2 iki bilgisayar testi ve aşama 3/4/5 oynama testleri bekliyor)
+**Şu anki aşama:** 6 – Pickup'lar ve airdrop (başlanmadı). Aşama 5 kapandı (2026-10-01). Aşama 2'nin gerçek iki bilgisayar testi hâlâ bekliyor.
 **Son güncelleme:** 2026-10-01
 
-## Evde sıradaki oturum ("kaldığımız yerden devam")
+## Sıradaki oturum
 
-**Durum (2026-10-01 gece):** `cloud/design-pass` ([PR #1](https://github.com/can-albayrak/SFB-GO/pull/1)) Can'ın isteğiyle main'e merge edildi (fast-forward) ve dal silindi. **Artık tek dal: `main`.** Evde Godot 4.7.2 headless ile doğrulandı (1–2 bitti); sırada Can'ın oynama testi.
+**Durum:** Tek dal `main`. Aşama 5 kapandı: Godot'ta headless doğrulandı, Can oynadı (Cheetah, hareket, lobi iki pencere, Hawk parlaması), aşama sonu bağımsız inceleme yapıldı ve bulgular düzeltildi. Smoke test 88/0, ağ testi lobi + geç katılma 0 hata.
 
-1. ~~**Dalı al**~~ ✅
-2. ~~**Godot doğrulaması**~~ ✅ İlk import'ta 3 hata çıktı, düzeltildi (`Net.request_ready` Godot'un `Node.request_ready`'siyle çakışıyordu → `request_lobby_ready`; `Loadout.ROSTER` preload'u Game → LoadoutMenu üzerinden derleme döngüsü yapıyordu → `Loadout.roster()` ilk kullanımda yükler; oyuncu çıkınca `LagCompensator` serbest kalmış anahtarı silmeye çalışıyordu, main'de de vardı). Sonra:
-   - `--import` temiz, ana sahne `--quit-after 300` temiz.
-   - `res://tests/smoke_test.tscn`: **83 geçti, 0 kaldı.**
-   - Yeni `res://tests/net_test.tscn` (gerçek ENet, iki process, host önce): lobi modu **26 + 22 geçti**, `--late` geç katılma modu **25 + 23 geçti**, hata çıktısı yok. Komutlar dosyanın başında.
-3. **Can'ın oynama testi:** PR #1 açıklamasındaki madde madde test listesi (önce tek başına Test Range, sonra iki bilgisayar). Bölme commit'i `92f6d7b` (player.gd → NetSync / Requests / Status / Effects) sorun çıkarırsa tek başına geri alınabilir.
-4. **Paralelde asistan + Blender** (Blender'da BlenderMCP → Connect):
-   - Karakter yüzü: Can'ın Avaturn GLB'sinden sadece kafa, poligon azaltma, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` (gitignore'da). 2 yüzle deneme.
-   - AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod): iç mekân var mı, ölçek, parçalar → `docs/ASSETS.md`.
-5. **Testler geçince:** aşama 5'i kapat (aşama sonu inceleme bu sefer Godot'ta doğrulanmış kodla), aşama 6'ya (pickup + airdrop) geç.
+1. **Aşama 6 – Pickup'lar ve airdrop:** GDD'deki değerlerle (pickup 45 sn / 5–6 nokta, airdrop 3. dakikadan sonra her 2–3 dk, airdrop silahları). Host-authoritative: pickup/airdrop kararları sadece host. Airdrop silahlarının `.tres`'inde `kill_ammo_reward = false`. Test haritasına geçici pickup / airdrop noktaları; yeni testler `smoke_test` ve `net_test`'e.
+2. **Paralelde (Can hazır olunca) Blender:** karakter yüzü denemesi (Avaturn GLB → sadece kafa, poligon azaltma, 512 px doku; ham dosyalar `private_assets/`), AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) kontrolü → `docs/ASSETS.md`.
+3. **Can'da bekleyen:** gerçek iki bilgisayar testi (Tailscale), Bear ve Volcano'nun ayrıntılı oynanışı.
 
-**Bu oturumda yazılanlar (hepsi çalıştırılmadı):** hareket hissi, kamera hissi + Settings paneli, vuruş hissi, denge, Cheetah, Volcano, lobi + last host, kill ödülü (+20 can / +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi, player.gd bölünmesi, geç katılana parlama/kalkan senkronu, başkalarının elinde doğru silah modeli, otomatik smoke test.
+**Doğrulama komutları:** `--import`, `res://tests/smoke_test.tscn`, `res://tests/net_test.tscn` (host önce, `--role=host` / `--role=client`, `+ --late`). Büyük bir pull'dan sonra ana klasörde önce `--import` (yoksa eski `.godot` önbelleği yüzünden menü scripti derlenmez, butonlar çalışmaz).
 
-**Henüz yazılmayan kararlar:** yüz seçimi (aşama 8, yüzler gelince), airdrop silahları ve pickup'lar (aşama 6; GDD'de değerler yazılı), HUD/menü yeni tasarımı (aşama 9; tasarım taslağı "SFB:GO HUD ve Menü": HUD beğenildi, menüler sade nötr gri; GDD "Görsel referans").
+**Henüz yazılmayan kararlar:** yüz seçimi (aşama 8, yüzler gelince), HUD/menü yeni tasarımı (aşama 9; tasarım taslağı "SFB:GO HUD ve Menü": HUD beğenildi, menüler sade nötr gri; GDD "Görsel referans").
 
-**Notlar:** Harita blockout'u aşama 7 (4–6 kişi ölçeği GDD'de). Dosya başına ~500–560 satır yeterli; `player.gd` 563.
+**Notlar:** Harita blockout'u aşama 7 (4–6 kişi ölçeği GDD'de). Dosya başına ~500–560 satır yeterli; `player.gd` 567.
 
 ## Aşamalar
 
@@ -37,8 +30,8 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | 2 | Ağ: host/join menüsü, hareket senkronu, hasar, ölme/doğma | ⏳ Devam ediyor |
 | 3 | Maç döngüsü: FFA kuralları, spawn seçimi/koruması, skor tablosu, kill feed, lag compensation | ✅ Bitti (oynama testi bekliyor) |
 | 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | ⏳ Devam ediyor |
-| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ⏳ Dördü de yazıldı; Cheetah/Volcano doğrulanmadı (Godot'ta açılıp test edilecek) |
-| 6 | Pickup'lar ve airdrop | Bekliyor |
+| 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ✅ Bitti (2026-10-01) |
+| 6 | Pickup'lar ve airdrop | ⏭️ Sıradaki |
 | 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Bekliyor |
 | 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | Bekliyor |
 | 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | Bekliyor |
@@ -120,32 +113,33 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Hawk (80 can): Heavy Rifle (250 hasar = her yerden tek atış, 1,5 sn kurma, 5 mermi), Marksman Rifle (50 hasar: kafa 1 / gövde 2 / bacak 3 atış); yedek tabanca
 - [x] Grapple (15 sn, 40 m, 12 m/s çekme; ıska cooldown yemez; zıplayınca bırakır; herkes ipi görür) ve Decoy (15 sn, 8 sn hologram, sadece görsel)
 - [x] Headless test: sınıf/silah/güç yükleniyor, zoom/FOV, grapple yukarı çekiyor, decoy + ip düğümleri oluşuyor
-- [ ] **Can'ın Hawk oynama testi**
+- [x] Can'ın Hawk testi: dürbün parlaması küçültüldü ve kısıldı (0,06 → 0,04, %60)
 - [x] Bear (175 can, hız 6,0): Sledgehammer (72 hasar, 1,1 sn, geniş alan), Claws (28 hasar, 0,25 sn), Chainsaw (sürekli 7 hasar/0,1 sn, %75 hız); ana silah olarak yakın dövüş (`MeleeWeapon._fire`, `uses_ammo=false`)
 - [x] Bear güçleri: Shield (12 sn, 3 sn, önden ~75° içinden gelen hasarı host engeller, herkes paneli görür), Charge (12 sn, 13 m/s x 0,55 sn, çarptığı rakibi 2 sn stunlar: host eylemleri reddeder, client girdiyi kilitler)
 - [x] Yedek: 3 Throwing Knife (35 hasar, kafa 70, kavisli host-simüle `ThrownKnife`, duvara saplanır, üstünden geçince toplanır, isabet/ıska 8 sn sonra envantere döner); V = Tekme (8 hasar, 9 m/s geri itme)
 - [x] Headless test: sınıf yükleniyor, bıçak fırlat/saplan/topla, charge hareketi, shield/stun RPC, üç silahın mankene hasarı
-- [ ] **Can'ın Bear oynama testi**
-- [ ] **Cheetah** (70 can, 7,6 m/s) — yazıldı, Godot'ta çalıştırılmadı: SMG (8 hasar / 0,075 sn, koşarken isabetli), Dual Pistols (sol/sağ tık ayrı, ortak 16'lık şarjör, 1,2 sn şarjör), yedek tabanca, V bıçak; Dash (5 sn, havada da), Adrenaline (15 sn bekleme, 4 sn +%25 hız / +%30 ateş hızı, host da uygular)
-- [ ] **Volcano** (110 can, 6,2 m/s) — yazıldı, Godot'ta çalıştırılmadı: Shotgun (8 pellet sabit desen, host her pelleti izler, 7→20 m düşüş, hedef başına toplu hasar), Grenade Launcher (host-simüle, çarpınca patlar, kendine de hasar), yedek tabanca; Sticky Bomb (duvara/oyuncuya yapışır), Landmine (üstüne basanı patlatır, oyuncu başına 1)
+- [ ] Can'ın ayrıntılı Bear oynanışı (aşama Can'ın kararıyla kapatıldı; sorun çıkarsa düzeltilir)
+- [x] **Cheetah** (70 can, 7,6 m/s): SMG (8 hasar / 0,075 sn, koşarken isabetli), Dual Pistols (sol/sağ tık ayrı, ortak 16'lık şarjör, 1,2 sn şarjör), yedek tabanca, V bıçak; Dash (5 sn, havada da), Adrenaline (15 sn bekleme, 4 sn +%25 hız / +%30 ateş hızı, host da uygular)
+- [x] **Volcano** (110 can, 6,2 m/s): Shotgun (8 pellet sabit desen, host her pelleti izler, 7→20 m düşüş, hedef başına toplu hasar), Grenade Launcher (host-simüle, çarpınca patlar, kendine de hasar), yedek tabanca; Sticky Bomb (duvara/oyuncuya yapışır), Landmine (üstüne basanı patlatır, oyuncu başına 1)
 - [x] Godot'ta açılış + headless doğrulama: `--import` (3 hata düzeltildi), smoke test 83/0, iki instance ağ testi (lobi ve geç katılma) 0 hata
-- [ ] **Can'ın Cheetah / Volcano oynama testi** (PR'daki test listesi)
-- [ ] Aşama sonu kod incelemesi (bağımsız agent) Can'ın oynama testinden sonra. Doğrulama oturumunda asistan tasarım geçişi diff'ini elle okudu: yukarıdaki 3 hata dışında bulgu yok
+- [x] Can'ın testi: Cheetah (hava ivmesi 10 → 3, Dual Pistols 0,2 sn, SMG recoil ×1,5), lobi iki pencerede sorunsuz. Volcano ayrıntılı oynanmadı
+- [x] Aşama sonu kod incelemesi (bağımsız agent, `4b950ce..main`). Düzeltilenler: silah değiştirince ikinci silahın atışlarını host reddediyordu (ateş bütçesi artık slot başına), host'un reddettiği fırlatma bıçağı o hayat boyunca kayboluyordu (artık geri verilir), düşük canlı sınıftan geçerek can doldurma (artık "bu hayatta yaralandı mı" bakılır), Most Knife Kills Bear'ın çekiç/pençe/testere/tekme kill'lerini sayıyordu, fırlatma bıçağını saymıyordu (`WeaponDef.counts_as_knife`), loadout değişince kalkan kalıyordu, mayın düşerken patlayabiliyordu (artık yere oturunca kurulur), stun grapple/charge/dash'i durdurmuyordu, Start'tan hemen sonra katılan oyuncusuz kalabiliyordu (host Game hazır olunca alır), ölünce STUNNED yazısı ve grapple ipi kalıyordu, client host'un hayat sayacını ileri itebiliyordu. Smoke test'e 5 kontrol eklendi (88/0)
 
-## Tasarım geçişi (2026-10-01, main'e merge edildi) — headless doğrulandı, oynama testi bekliyor
+## Tasarım geçişi (2026-10-01) — bitti
 
-İş bilgisayarında yazıldı (Godot yoktu); evde Godot 4.7.2 headless ile import + smoke test + iki instance ağ testi geçti. Maddeler Can oynayıp onaylayınca işaretlenecek.
+İş bilgisayarında yazıldı (Godot yoktu); evde Godot 4.7.2 headless ile doğrulandı, Can oynadı, aşama 5 ile kapandı. Kamera hissi, Settings ve vuruş hissi için ayrıca yorum gelmedi; oynadıkça ayarlanır.
 
-- [ ] Hareket hissi: coyote time (0,1 sn) + jump buffer (0,1 sn), slide'dan zıplamada hız korunur (kazanç yok), serbest hava ivmesi + havada da 1,3 tavanı, kademeli hız cezası (`WeaponDef.move_spread`, eğri, silah başına)
-- [ ] Kamera ve his: hızla FOV kayması, hafif head bob, iniş çökmesi, slide'da alçalma + yatma, hasar sarsıntısı; hepsi Settings'ten %0–100 (`data/camera/default.tres`)
-- [ ] Settings paneli (ana menü + Esc): FOV, hassasiyet, crosshair (renk/boy/boşluk/kalınlık/nokta/hit marker), kamera efektleri
-- [ ] Vuruş hissi: host onaylı X hit marker (gövde/bacak beyaz, kafa kırmızı), maçta da hasar sayıları (sadece vuranın ekranında), hit marker aç/kapa
-- [ ] Denge: AR 16/0,12 (0,72 sn), Burst 16/0,42 (0,84 sn), LMG 14/0,10 (0,70 sn), Marksman 0,6 sn aralık, Heavy Rifle bacak ×0,26 (öldürmez), Bear 6,3 m/s
-- [ ] Lobi: oyuncu listesi, hazır durumu, boş yüz yeri; host kill/süre/harita seçip Start der; geç katılma aynı yol. "Last host" ile tek tık bağlanma (`user://settings.cfg`)
+- [x] Hareket hissi: coyote time (0,1 sn) + jump buffer (0,1 sn), slide'dan zıplamada hız korunur (kazanç yok), serbest hava ivmesi + havada da 1,3 tavanı, kademeli hız cezası (`WeaponDef.move_spread`, eğri, silah başına)
+- [x] Kamera ve his: hızla FOV kayması, hafif head bob, iniş çökmesi, slide'da alçalma + yatma, hasar sarsıntısı; hepsi Settings'ten %0–100 (`data/camera/default.tres`)
+- [x] Settings paneli (ana menü + Esc): FOV, hassasiyet, crosshair (renk/boy/boşluk/kalınlık/nokta/hit marker), kamera efektleri
+- [x] Vuruş hissi: host onaylı X hit marker (gövde/bacak beyaz, kafa kırmızı), maçta da hasar sayıları (sadece vuranın ekranında), hit marker aç/kapa
+- [x] Denge: AR 16/0,12 (0,72 sn), Burst 16/0,42 (0,84 sn), LMG 14/0,10 (0,70 sn), Marksman 0,6 sn aralık, Heavy Rifle bacak ×0,26 (öldürmez), Bear 6,3 m/s
+- [x] Lobi: oyuncu listesi, hazır durumu, boş yüz yeri; host kill/süre/harita seçip Start der; geç katılma aynı yol. "Last host" ile tek tık bağlanma (`user://settings.cfg`)
 
 ## Bilinen sorunlar
 
-- Tasarım geçişi headless testlerden geçti ama henüz kimse oynamadı: his (hareket, kamera, vuruş), UI yerleşimi ve iki bilgisayar testi Can'da. Oynanış testinden önce merge edildi (Can'ın kararı); sorun çıkarsa main'de düzeltilir.
+- Bear ve Volcano ayrıntılı oynanmadı; gerçek iki bilgisayar testi henüz yok (sadece aynı PC'de iki pencere).
+- Charge'ın host'taki çarpma penceresi istek gelince başlar ve host'un çizdiği (~100 ms geriden) konumu kullanır: charge'ın son ~100–150 ms'si hedeflere karşı denenmez; duvara erken çarpan charge'da pencere bitene kadar 1,3 m'ye giren yine stunlanır.
 - Placeholder modeller: SMG = küçültülmüş AR, Dual Pistols = iki tabanca, Grenade Launcher = gerilmiş shotgun + silindir, mayın = silindir (aşama 8).
 - Hız cezası ve shotgun'ın merkez yönü sahibinde seçilir, host gelen yönü izler (unscoped spread ile aynı model; hileli client sapmasız ateş edebilir).
 - Hasar sayısı gerçekten düşen canı gösterir (kalan candan fazla vuruşta düşük sayı çıkar); kalkanın engellediği vuruşta marker/sayı yok.
@@ -214,3 +208,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 5 | Evde Godot doğrulaması: import'ta 3 hata düzeltildi (lobi `request_ready` çakışması, roster preload döngüsü, çıkan oyuncuda lag comp hatası). Smoke test 83/0. Yeni `tests/net_test.tscn` (iki process, gerçek ENet): lobi ve geç katılma modlarında 0 hata. Tasarım geçişi diff'i elle incelendi. `cloud/design-pass` main'e merge edildi, dal silindi; tek dal main. Sırada Can'ın oynama testi. |
 | 2026-10-01 | 5 | Can'ın ilk testi: ana klasörde eski `.godot` önbelleği yüzünden menü butonları çalışmıyordu (`--import` ile düzeldi). Cheetah/hava kontrolü fazla: `air_control_accel` 3 eklendi. |
 | 2026-10-01 | 5 | Hava ivmesi onaylandı. Dual Pistols daha hızlı (0,2 sn), SMG recoil ×1,5. |
+| 2026-10-01 | 5 → 6 | Parlama küçültüldü/kısıldı. Aşama sonu bağımsız inceleme: 11 bulgu düzeltildi (slot başına ateş bütçesi, bıçak iadesi, can doldurma açığı, knife ödülü, kalkan/loadout, mayın kurulması, stun, Start sonrası katılma, ölüm sonrası kalıntılar, hayat sayacı), Charge penceresi bilinen sorun. Smoke 88/0, ağ testi 0 hata. **Aşama 5 kapandı.** Sırada aşama 6. |

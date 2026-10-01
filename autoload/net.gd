@@ -221,10 +221,23 @@ func _request_register(player_name: String) -> void:
 		ready_peers[peer_id] = false
 		_welcome_lobby.rpc_id(peer_id)
 	else:
-		_welcome.rpc_id(peer_id, map_path) # Match running: late join.
+		_welcome_when_game_ready(peer_id) # Match running (or loading right after Start): late join.
 	_sync_names.rpc(player_names)
 	if in_lobby:
 		_broadcast_lobby()
+
+
+## Host: a late joiner is sent in once our match scene exists (it may still be loading just
+## after Start), so its spawn request never reaches a host without a Game.
+func _welcome_when_game_ready(peer_id: int) -> void:
+	var serial: int = _session_serial
+	for i: int in GAME_WAIT_FRAMES:
+		if Game.find(get_tree()) != null:
+			break
+		await get_tree().process_frame
+	if serial != _session_serial or not player_names.has(peer_id) or Game.find(get_tree()) == null:
+		return
+	_welcome.rpc_id(peer_id, map_path)
 
 
 @rpc("authority", "call_remote", "reliable")

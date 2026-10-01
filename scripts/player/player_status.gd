@@ -55,10 +55,11 @@ func reset_host() -> void:
 	clear_shield()
 
 
-## Both sides: a loadout change ends any boost (it belongs to the class that used it).
+## Both sides: a loadout change ends any boost and Bear's Shield (it belongs to the class that used it).
 func clear_buffs() -> void:
 	_buff_left = 0.0
 	_host_buff_until = 0.0
+	clear_shield()
 
 
 ## Host: kill reward. Health is host-owned; ammo lives on the owner, so the owner adds it.
@@ -173,6 +174,7 @@ func _receive_stun(seconds: float) -> void:
 	if not _from_host_to_owner():
 		return
 	_stun_left = seconds
+	player.movement.cancel_specials()
 	Events.local_stunned.emit(seconds)
 
 

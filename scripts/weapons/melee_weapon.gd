@@ -120,7 +120,7 @@ func _apply_melee_hit(hitbox: Hitbox, dir: Vector3, point: Vector3) -> void:
 		return
 	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
 	var shooter_id: int = player.get_multiplayer_authority()
-	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name, true)
+	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name, def.counts_as_knife)
 	var dealt: float = receiver.get(&"last_damage_dealt")
 	if dealt <= 0.0 and not killed:
 		return # Blocked by a raised shield.

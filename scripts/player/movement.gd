@@ -159,6 +159,18 @@ func start_dash(dir: Vector3, speed: float, seconds: float, exit_speed: float) -
 	is_sliding = false
 
 
+## Owner: a stun ends any grapple pull, charge or dash at once.
+func cancel_specials() -> void:
+	_grappling = false
+	_charge_left = 0.0
+	if _dash_left > 0.0:
+		_dash_left = 0.0
+		var hvel := Vector3(body.velocity.x, 0.0, body.velocity.z)
+		if _dash_exit_speed > 0.0:
+			hvel = hvel.limit_length(_dash_exit_speed)
+		body.velocity = Vector3(hvel.x, body.velocity.y, hvel.z)
+
+
 func is_dashing() -> bool:
 	return _dash_left > 0.0
 

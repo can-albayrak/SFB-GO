@@ -99,7 +99,7 @@ sfb-go/
 - Durum host'ta: `kills`, `deaths`, `state` (PLAYING/ENDED), `time_left`. Her değişiklik `Net.broadcast` ile; katılana `_sync_full` snapshot. Süre her peer'da yerelde geri sayar.
 - Akış: `Player._die` → `died(killer, weapon, headshot)` → `Game._on_player_died` (mesafe hesaplar) → `Match.server_register_kill` → `_on_kill` herkese → `Events.kill_registered` (kill feed) + `scores_changed` (skor tablosu, taç).
 - Bitiş: kill hedefi veya süre → `_on_match_ended(winner, awards)` → `end_screen_time` (10 sn) sonra `_on_match_started` → `Events.match_started` → host herkesi yeniden doğurur. ENDED'da hasar yok.
-- Ödüller (host hesaplar): Most Deaths, Longest Headshot, Most Self-Kills. Knife ödülü hızlı yakın dövüşle (aşama 4) gelecek.
+- Ödüller (host hesaplar): Most Deaths, Longest Headshot, Most Self-Kills, Most Knife Kills (sadece `WeaponDef.counts_as_knife` silahlar: V bıçağı ve fırlatma bıçakları; `take_hit`'in `is_melee` argümanı bu bayrak).
 - Doğma noktası: canlı düşmanlara en yakın mesafesi en büyük olan nokta (`Game._pick_spawn_point`).
 - Spawn koruması: `Player.is_protected` (host'ta, StateSync ile yayılır), `rules.spawn_protection` sn veya ateş edince biter; korumalıyken hasar yok, başkalarına model yanıp söner.
 - Taç: `Match.get_leader()` (tek başına lider, ≥1 kill) → `Player.set_leader`; kendinde çizilmez.
@@ -138,7 +138,9 @@ sfb-go/
 
 **Hile koruması:** Arkadaş arası oyun, ağır anti-cheat yok. Host sadece bariz tutarsızlıkları reddeder:
 - **Aşırı hız:** `_is_plausible_move` host saatinde token bucket (bhop tavanı × 1,5, 1 sn tampon). Işınlanan paket atılır; hileci herkeste yerinde donar, atışları origin kontrolüne takılır. Her doğuşta sıfırlanır.
-- **Ateş hızı:** Bütçe tabanlı (`get_average_shot_interval() × 0,95`, 0,25 sn birikme payı): ağ dalgalanmasında toplu gelen atışlar kaybolmaz, sürekli fazla hız reddedilir. Seri silahta tetik aralığı seriye, çift tabancada ikiye bölünür; Adrenaline aktifken host kendi saatindeki çarpanla böler.
+- **Ateş hızı:** Silah slotu başına bütçe (`get_average_shot_interval() × 0,95`, 0,25 sn birikme payı; hızlı silah değiştirmede diğer silahın aralığı beklenmez): ağ dalgalanmasında toplu gelen atışlar kaybolmaz, sürekli fazla hız reddedilir. Seri silahta tetik aralığı seriye, çift tabancada ikiye bölünür; Adrenaline aktifken host kendi saatindeki çarpanla böler.
+- Host'un reddettiği fırlatma bıçağı sahibine geri verilir (bıçak sahibinde düşülür, sadece host geri verir).
+- **Hayat sayacı:** host sadece kendi `life` değerindeki hareket paketlerini kabul eder; client sayacı ileri itemez.
 - **Hız:** token bucket, sınıf hızı × host'taki Adrenaline hız çarpanı × bhop tavanı × 1,5. Dash (18 m/s × 0,15 sn ≈ 2,7 m) bu 1 sn'lik bütçeye sığar.
 - **Ölüyken ateş**, geçersiz slot, origin'i bilinen gözden 3 m'den uzak atış reddedilir.
 - Host mermi/şarjör takibi yapmaz (bilinçli; arkadaş arası).
@@ -197,7 +199,7 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 
 ### Yakın dövüş ve güçler
 
-- `V`: `MeleeWeapon.swing()` (sahibi: bekleme + animasyon, silah bu sürede ateş edemez) → `_request_melee` → host bütçe kontrolü + lag compensation ile `server_fire`: 5 ışınlık yelpaze, en yakın hitbox; `take_hit(..., is_melee=true)` (knife ödülü).
+- `V`: `MeleeWeapon.swing()` (sahibi: bekleme + animasyon, silah bu sürede ateş edemez) → `_request_melee` → host bütçe kontrolü + lag compensation ile `server_fire`: 5 ışınlık yelpaze, en yakın hitbox; `take_hit(..., is_melee = def.counts_as_knife)` (knife ödülü; Bear'ın tekmesi sayılmaz).
 - `Q`: `Ability.try_use` (sahibi: yerel bekleme, HUD) → `_request_ability` → host kendi saatinde `server_try_use` (bekleme × 0,9 tolerans) → `server_use`. Hareket güçleri (aşama 5) `_use_local` ile sahibinde çalışır.
 - Bombalar: `GrenadeAbility.server_use` → `Game.server_spawn_grenade` → `ProjectileSpawner` (spawn_function, `Sync` görünürlüğü oyuncularla aynı desen). Fizik sadece host'ta; client kopyası donuk, `Sync` ile pozisyon/rotasyon alır. Zeminde sürtünme (`GROUND_DRAG`) kaymayı keser. Fitil bitince `Game.server_explode`: frag = yarıçap içinde görüş hattı olanlara doğrusal azalan hasar (kendine de, mankenlere de); flash = görüş hattı olan oyunculara bakış açısı ve mesafeye göre `Player.flash(sn)` → HUD beyaz ekran. Efekt `Game._explosion_fx` ile herkeste.
 

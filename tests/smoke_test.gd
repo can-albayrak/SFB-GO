@@ -58,6 +58,8 @@ func _run() -> void:
 	await _test_weapons()
 	await _test_abilities()
 	await _test_kill_reward()
+	await _test_quick_switch()
+	await _test_swap_rules()
 	await _test_held_weapon()
 	await _test_respawn()
 	await _test_ui()
@@ -139,6 +141,52 @@ func _test_kill_reward() -> void:
 	_player.health = _player.class_def.max_health
 
 
+## Hawk: Heavy Rifle, then the pistol at once. Each slot has its own host fire budget.
+func _test_quick_switch() -> void:
+	await _set_loadout(_code_for(&"hawk"))
+	await _place(HITSCAN_DISTANCE)
+	_player.requests.reset_fire_budgets()
+	for slot: int in 2:
+		_dummy.health = DUMMY_HEALTH
+		var origin: Vector3 = _player.get_aim_origin()
+		_player.requests._request_fire(origin, (_dummy_target() - origin).normalized(), slot, _player.weapons[slot].def.id)
+		await _frames(1)
+		_check(_dummy.health < DUMMY_HEALTH, "quick switch: slot %d shot accepted right after the other" % slot)
+
+
+## Inside the swap window: hurt players never refill by swapping, and a swap drops the Shield.
+func _test_swap_rules() -> void:
+	var bear: PackedInt32Array = _code_for(&"bear")
+	await _set_loadout(bear)
+	_player._spawned_at = Time.get_ticks_usec() / 1_000_000.0
+	_player._hurt_since_spawn = false
+	_player.is_protected = false
+	_player.health = _player.class_def.max_health
+	_player.ability.host_ready_at = -INF
+	_player.ability.server_try_use(_player.get_aim_origin(), Vector3.FORWARD)
+	_player.server_choose_loadout(_code_for(&"cheetah"))
+	await _frames(1)
+	_check(not _player.shield_up, "loadout swap drops the Shield")
+	_player.server_choose_loadout(bear)
+	await _frames(1)
+	_check(_player.health == _player.class_def.max_health, "unhurt swap gives full health (%d)" % _player.health)
+	_player.take_hit(55.0, Hitbox.Zone.BODY, 0, "Test")
+	_player.server_choose_loadout(_code_for(&"cheetah"))
+	_player.server_choose_loadout(bear)
+	await _frames(1)
+	_check(_player.health < _player.class_def.max_health, "hurt swap does not refill (%d)" % _player.health)
+	_player.status.reset_host()
+	_player.health = _player.class_def.max_health
+
+
+func _code_for(class_id: StringName) -> PackedInt32Array:
+	var classes: Array[ClassDef] = Loadout.roster().classes
+	for i: int in classes.size():
+		if classes[i].id == class_id:
+			return Loadout.make(i, 0, 0)
+	return Loadout.default_code()
+
+
 func _test_held_weapon() -> void:
 	_player.held_slot = 1
 	await _frames(1)
@@ -179,7 +227,7 @@ func _fire_slot(slot: int, label: String) -> void:
 		distance = LAUNCH_DISTANCE
 	await _place(distance)
 	_dummy.health = DUMMY_HEALTH
-	_player.requests._next_fire_time = -INF
+	_player.requests.reset_fire_budgets()
 	var origin: Vector3 = _player.get_aim_origin()
 	_player.requests._request_fire(origin, (_dummy_target() - origin).normalized(), slot, def.id)
 	var instant: bool = def.fire_type == WeaponDef.FireType.HITSCAN or def.fire_type == WeaponDef.FireType.MELEE

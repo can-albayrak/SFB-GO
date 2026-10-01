@@ -67,7 +67,7 @@ func _hit_player(hitbox: Hitbox, point: Vector3) -> void:
 	if receiver != null and receiver.has_method(&"take_hit") \
 			and not (receiver.has_method(&"can_take_damage") and not receiver.call(&"can_take_damage")):
 		var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
-		var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, thrower_id, def.display_name, false)
+		var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, thrower_id, def.display_name, def.counts_as_knife)
 		var dealt: float = receiver.get(&"last_damage_dealt")
 		var thrower: Player = _get_thrower()
 		if thrower != null and (dealt > 0.0 or killed):

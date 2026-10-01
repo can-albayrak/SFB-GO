@@ -74,7 +74,7 @@ func _physics_process(delta: float) -> void:
 		else:
 			linear_velocity *= maxf(1.0 - GROUND_DRAG * delta, 0.0)
 
-	if def.trigger_radius > 0.0 and _age >= def.arm_time:
+	if def.trigger_radius > 0.0 and _stuck and _age >= def.arm_time: # Never while still flying.
 		var victim: Player = _find_trigger_victim()
 		if victim != null:
 			_hit_trigger_victim(victim)

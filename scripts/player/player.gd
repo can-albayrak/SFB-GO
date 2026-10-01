@@ -67,6 +67,8 @@ var _last_hit_weapon: String = ""
 var _last_hit_melee: bool = false
 var _last_hit_zone: Hitbox.Zone = Hitbox.Zone.BODY
 var _pending_loadout: PackedInt32Array = PackedInt32Array()
+## Host: took damage this life (a loadout swap then never refills health).
+var _hurt_since_spawn: bool = false
 var _spawned_at: float = 0.0
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
@@ -258,6 +260,7 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 	health = maxi(health - roundi(amount), 0)
 	last_damage_dealt = before - health
 	if health < before:
+		_hurt_since_spawn = true
 		_on_hurt.rpc_id(get_multiplayer_authority(), before - health)
 	if health > 0:
 		return false
@@ -277,6 +280,7 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 		loadout = _pending_loadout
 		_pending_loadout = PackedInt32Array()
 	_spawned_at = _now()
+	_hurt_since_spawn = false
 	status.reset_host()
 	health = class_def.max_health
 	is_alive = true
@@ -290,11 +294,11 @@ func server_choose_loadout(code: PackedInt32Array) -> void:
 	assert(multiplayer.is_server(), "server_choose_loadout is host-only")
 	var in_window: bool = _now() - _spawned_at <= Match.rules.loadout_swap_window
 	if is_alive and in_window and Match.state == Match.State.PLAYING:
-		# Only an unhurt player gets the new class's full health (no heal-by-swapping).
-		var was_full: bool = health >= class_def.max_health
+		# Only a player unhurt this life gets the new class's full health (no heal-by-swapping,
+		# also not by passing through a class whose maximum is the current health).
 		_pending_loadout = PackedInt32Array()
 		loadout = code
-		health = class_def.max_health if was_full else mini(health, class_def.max_health)
+		health = class_def.max_health if not _hurt_since_spawn else mini(health, class_def.max_health)
 	else:
 		_pending_loadout = code
 
