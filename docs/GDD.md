@@ -10,7 +10,8 @@ Arkadaşlar arasında oynanacak, en fazla 10 kişilik, sınıf tabanlı bir FPS.
 - **Oyuncu sayısı:** 2–10 (genelde 4–6 kişi oynanır; haritalar 4–6 kişiye göre ölçeklenir, 10 kişiyi de kaldırır)
 - **İlk mod:** Free-for-all deathmatch (takım yok)
 - **Hedef donanım:** GTX 1050 Ti'da 1080p, 100+ FPS
-- **Tarz:** Distopik, 2000'lerin başı estetiği, hafif tuhaf (freaky) ama temiz görüntü
+- **Tarz:** Distopik, 2000'lerin başı estetiği, hafif tuhaf (freaky) ama temiz görüntü. Referans his: 2000'ler PlayStation oyunu, Buckshot Roulette distopikliği.
+- **Dünya:** Şirket devleti. Çok diktatör bir devletin AVM'si (detaylar sonra; reklam, poster ve anons metinlerini bu belirler).
 
 ## Oyun modu ve maç kuralları
 
@@ -18,8 +19,9 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 
 | Kural | Değer |
 | --- | --- |
-| Kill hedefi | Host seçer, önerilen 30–40 |
-| Süre limiti | 15 dk (host seçer) |
+| Kill hedefi | Host seçer, varsayılan 20 (4–6 kişiye göre) |
+| Süre limiti | Host seçer, varsayılan 10 dk |
+| Kill ödülü | Her kill'de **+20 can** (maksimumu geçmez) ve elindeki silaha **+15 mermi** (şarjörü geçmez). Airdrop silahlarına (Railgun vb.) mermi eklenmez. |
 | Respawn | Otomatik, 3 sn sonra, düşmanlara en uzak spawn noktasında |
 | Spawn koruması | 2 sn hasar almaz, ateş edince biter |
 | Geç katılma | Maç ortasında katılınabilir, sıfır kill ile başlanır |
@@ -32,12 +34,13 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 - Lider oyuncunun üstünde taç ikonu
 - Ölüm ekranı (3 sn): öldüren, silahı ve kalan canı görünür; sınıf menüsü açık
 - Maç sonu ödülleri: en çok ölen, en çok bıçak kill'i, en uzun kafa vuruşu, en çok kendini patlatan
-- Anonslar: distopik hoparlör sesi ("Double Kill", "Killing Spree", "Airdrop Incoming")
+- Anonslar: distopik hoparlör sesi ("Double Kill", "Killing Spree", "Airdrop Incoming"). **Anons metinleri ve sesleri Can hazırlar**; silah ve animasyon sesleri ayrı iş.
 
 **Lobi:** Host kill hedefi, süre ve haritayı seçer. Oyuncular kendi isimlerini girer.
 
 - **Bağlanma:** Host'un Tailscale IP'si bir kez girilir ve kaydedilir; sonraki açılışlarda "Last host" ile tek tıkla bağlanılır.
 - **Basit lobi:** Oyuncu listesi, her oyuncunun adı, yüz seçimi ve "hazır" durumu görünür; host ayarları yapar ve "Start" der. Maç ortasında katılma (geç katılma) yine mümkün. Sohbet, takım/renk seçimi gibi ek özellikler yoktur.
+- **Yüz ve sınıf seçimi:** Her oyuncu lobide ilk doğuşu için **yüzünü ve sınıfını** (loadout) seçer. Ölünce ikisini de değiştirebilir (ölüm ekranındaki menü). Geç katılan oyuncuya katılma sırasında yüz + sınıf sorulur, seçince maça girer.
 
 ## Temel oynanış
 
@@ -96,7 +99,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Hit-stop | Kullanılmaz (ağ senkronunu ve nişan hissini bozmasın). Gerekirse sadece yakın dövüşte kamera sarsıntısı. |
 | Vurulan oyuncunun ekranı | Hasar alınca **hafif kamera sarsıntısı** (nişanı bozmaz, sadece görsel). Hasar yönü göstergesi sonra karar verilecek. |
 
-**Açık sorular:** Silah başına ses/kamera tekmesi farkı, hasar yönü göstergesi.
+**Açık sorular:** Silah başına ses/kamera tekmesi farkı. Hasar yönü göstergesi yerine **minimap** düşünülüyor; ayrıca detaylı konuşulacak.
 
 ### Düello ve silah dengesi (hedef)
 
@@ -158,7 +161,8 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Marksman Rifle | Kafa 1, gövde 2, bacak 3 atış | Hızlı atış ve şarjör, belirgin geri tepme |
 
 - **Güçler (15 sn):** Grapple (yüksek noktaya çekilme) · Decoy (yerinde hologram bırakma)
-- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması (rakip görür), dürbünsüz düşük isabet
+- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz düşük isabet
+- **Namlu parlaması:** Sadece dürbün açıkken. Haritanın her yerinden görünür (mesafe sınırı yok), yeri net belli olur.
 - **Yedek:** Tabanca
 
 ### Bear
@@ -202,6 +206,8 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Grenade Launcher | Alan hasarı | Kavisli atış, kendine de hasar verir |
 
 - **Güçler (20 sn):** Sticky Bomb (duvara veya oyuncuya yapışır) · Landmine (üstüne basanı patlatır)
+- **Landmine:** Herkese görünür, kırmızı ışığı yanıp söner. Tetik alanı küçük ama basanı **öldürür** (her sınıfı, Bear dahil).
+- **Kendine hasar:** Volcano'nun patlayıcıları (Grenade Launcher, Sticky Bomb, Landmine) Volcano'nun kendisine **yarı hasar** verir.
 - **Yedek:** Tabanca
 
 ## Sınıf değiştirme ve loadout
@@ -216,10 +222,11 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 
 | Pickup | Etki | Etki süresi | Yeniden çıkma |
 | --- | --- | --- | --- |
-| Health | +50 can, maksimumu geçmez | Anında | 20 sn |
-| Speed | %30 hız | 8 sn | 30 sn |
-| Double Jump | Havada ikinci zıplama | 10 sn | 40 sn |
+| Health | +50 can, maksimumu geçmez | Anında | 45 sn |
+| Speed | %30 hız | 8 sn | 45 sn |
+| Double Jump | Havada ikinci zıplama | 10 sn | 45 sn |
 
+- Haritada **5–6 pickup noktası**; tam yerleri harita bitince belirlenir.
 - Yerleri sabit; alındığında yerinde geri sayım hologramı kalır.
 - Health güvenli ve dar yerlerde, Speed ve Double Jump açık ve riskli yerlerde.
 - Renkler: Health yeşil, Speed sarı, Double Jump mavi. Etkisi altındaki oyuncu parlar.
@@ -231,9 +238,15 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 2. 3–4 olası noktadan biri seçilir (host); ışık hüzmesi iner, kasa 10–15 sn'de paraşütle düşer.
 3. Kasayı açmak için `E` 3 sn basılı tutulur; hasar alınırsa iptal olur.
 
-**Kurallar:** Mermi sınırlı (5–8 atış), bitince silah yok olur. Taşıyan haritada herkese görünür ve yavaşlar. Ölünce silah kalan mermisiyle yere düşer.
+**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür ve yavaşlar. Ölünce silah kalan mermisiyle yere düşer. Kill ödülü bu silahlara mermi eklemez.
 
-**Silah:** Her airdrop'ta rastgele biri, kasa açılana kadar bilinmez: Railgun (duvar delen tek atış) · Minigun (ısınma süreli yüksek hasar) · Rocket Launcher (alan hasarı, rocket jump)
+**Silah:** Her airdrop'ta rastgele biri, kasa açılana kadar bilinmez. Hasarlar oynadıkça ayarlanır.
+
+| Silah | Mermi | Davranış |
+| --- | --- | --- |
+| Railgun | 8 | Işın. **Sınırsız menzil, bütün duvarları deler**, haritanın her yerinden vurabilir. Her yerden tek atış, atış sıklığı düşük. |
+| Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli. |
+| Rocket Launcher | 6 | Fiziksel roket. Merkezde 200 hasar, merkezden uzaklaştıkça azalır; alanı Frag'den büyük. Sıkanı geri iter (recoil, rocket jump). |
 
 ## Harita tasarım kuralları
 
@@ -283,7 +296,7 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 
 **Karakter yüzleri:** Her karakterin kafası **açık** olur (maske, kask yok; yüz hep görünür). Gerçek yüz fotoğraflarından üretilen kafalar kullanılır (~10 kişi, izinler alındı).
 
-- **Yöntem:** Yüzler **oyunla birlikte gelir**. Kafalar Blender'da önceden hazırlanır (Avaturn GLB → sadece kafa → poligon azaltma → 512 px doku), oyuna gömülür. Oyuncu ana menüden/loadout'ta "Face" seçer; ağda sadece yüz ID'si (örn. `face_can`) senkronlanır. Kozmetiktir, oynanışı etkilemez.
+- **Yöntem:** Yüzler **oyunla birlikte gelir**. Kafalar Blender'da önceden hazırlanır (Avaturn GLB → sadece kafa → poligon azaltma → 512 px doku), oyuna gömülür. Oyuncu lobide, ölüm ekranında ve geç katılırken "Face" seçer; ağda sadece yüz ID'si (örn. `face_can`) senkronlanır. Kozmetiktir, oynanışı etkilemez.
 - **Plan:** Önce 2 yüzle deneme (aşama 8). Tarz tutarsa kalan yüzler eklenir.
 - **Kapsam dışı:** Oyuncunun oyun içinden kendi model/fotoğrafını yüklemesi yoktur.
 - Ham fotoğraflar ve indirilen avatar dosyaları repoya girmez (`private_assets/`, `.gitignore`'da).

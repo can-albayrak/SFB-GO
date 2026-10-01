@@ -12,7 +12,13 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 1. **Can: `cloud/design-pass` testi** ([PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açıklamasındaki test listesi). İlk iş: projeyi editörde aç, Output'taki kırmızı hataları Claude'a yapıştır; yeni `.uid` dosyalarını commit et. Godot MCP evde çalışıyorsa Claude headless doğrulamayı da yapar.
 2. **Claude + Blender: karakter yüzü.** Can'ın verdiği Avaturn GLB'den sadece kafayı çıkar, poligonu azalt, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` altında, repoya girmez (`.gitignore`'da). 2 yüzle deneme.
 3. **Claude + Blender: AVM adayı.** [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod) indirilip `private_assets/` altında açılır: iç mekân var mı, ölçek, parçalar. Sonuç `docs/ASSETS.md`'ye işlenir.
-4. Test hatalarına göre düzeltmeler; ayrıca bekleyen: Hawk namlu parlaması (GDD dengeleyici, kodda yok).
+4. Test hatalarına göre düzeltmeler, sonra 2026-10-01 kararlarının kodu (GDD'de yazılı, kodda yok):
+   - Hawk namlu parlaması: sadece dürbün açıkken, her yerden görünür.
+   - Kill ödülü: +20 can, elindeki silaha +15 mermi (airdrop silahlarına değil).
+   - Landmine: küçük alan ama basanı öldürür, yanıp sönen kırmızı ışık.
+   - Volcano patlayıcıları kendine yarı hasar.
+   - Lobide yüz + sınıf seçimi, ölünce ikisi de değişebilir, geç katılana katılırken sorulur (yüzler aşama 8'de gelince).
+   - Airdrop silahları aşama 6'da: Railgun (8, duvar deler, sınırsız menzil, tek atış), Minigun (200 × 15), Rocket (6, merkez 200, geri itme). Pickup'lar 45 sn'de yeniden çıkar, haritada 5–6 nokta.
 
 Not: Harita blockout'u aşama 7; şimdilik sadece model incelemesi ve hazırlık.
 
@@ -193,3 +199,4 @@ _Henüz yok._
 | 2026-10-01 | 5 | `cloud/design-pass` (iş bilgisayarı, Godot yok, **çalıştırılmadı**): hareket hissi, kamera hissi + Settings paneli, vuruş hissi, denge (.tres), Cheetah, Volcano, lobi + last host. gdparse + statik kontrol + bağımsız inceleme. Can'ın toplu testi ve Godot'ta doğrulama bekliyor. |
 | 2026-10-01 | – | Sadece tasarım: harita ölçeği 4–6 oyuncuya göre (GDD: bina ~64×48 m, uçtan uca 15–20 sn, 10–12 spawn, 3 airdrop). `docs/ASSETS.md`: AVM prop/doku ihtiyaç listesi ve lisans takibi. Eksik bulundu: Hawk namlu parlaması (GDD dengeleyici) kodda yok. |
 | 2026-10-01 | – | AVM adayı bulundu: Suburban Mall 1980 (Sketchfab, CC-BY) → ASSETS.md "Adaylar". Evdeki oturum planı PROGRESS başına yazıldı (test + Blender: yüz modeli ve AVM kontrolü). |
+| 2026-10-01 | – | Sadece tasarım: maç varsayılanı 20 kill / 10 dk (`default.tres`), kill ödülü, airdrop silah detayları, pickup 45 sn / 5–6 nokta, şirket devleti AVM'si, Hawk parlaması, mayın + Volcano yarı öz-hasar, lobide yüz + sınıf seçimi. GDD'ye işlendi; kodu evdeki oturumda. |
