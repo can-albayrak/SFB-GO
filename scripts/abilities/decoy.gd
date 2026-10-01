@@ -15,10 +15,11 @@ static func create(source: Node3D, at: Vector3, yaw: float, seconds: float) -> D
 	decoy._left = seconds
 	var body: Node3D = source.duplicate()
 	body.visible = true
-	var crown: Node = body.get_node_or_null("Crown")
-	if crown != null:
-		body.remove_child(crown)
-		crown.queue_free()
+	for extra: String in ["Crown", "Glint"]: # Leader crown and scope glint stay on the player.
+		var node: Node = body.get_node_or_null(extra)
+		if node != null:
+			body.remove_child(node)
+			node.queue_free()
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA

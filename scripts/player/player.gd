@@ -32,6 +32,10 @@ const SHIELD_BLOCK_COS: float = 0.26 ## Hits from within ~75 degrees of the faci
 const SHIELD_SIZE: Vector3 = Vector3(1.3, 1.7, 0.06)
 const SHIELD_OFFSET: Vector3 = Vector3(0.0, 1.0, -0.8)
 const SHIELD_COLOR: Color = Color(0.35, 0.8, 1.0, 0.4)
+## Scope glint (GDD Hawk): shown to others while scoped, same screen size at any distance.
+const GLINT_OFFSET: Vector3 = Vector3(0.15, 1.5, -0.45)
+const GLINT_SIZE: float = 0.06
+const GLINT_COLOR: Color = Color(1.0, 0.95, 0.8)
 
 # Hitbox poses: x = centre height above feet, y = box height (0 = keep shape).
 const HEAD_POSE_STAND: Vector2 = Vector2(1.62, 0.0)
@@ -104,6 +108,8 @@ var _host_buff_fire_mult: float = 1.0
 var _shield_visual: MeshInstance3D
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
+var _glint: MeshInstance3D
+var _sent_scoped: bool = false ## Owner: scope state last told to the host.
 ## Host: health removed by the last take_hit (0 when blocked by a shield or not allowed).
 var last_damage_dealt: float = 0.0
 
@@ -149,6 +155,7 @@ func _ready() -> void:
 		# Remote players are placed in _process from snapshots.
 		physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_build_shield_visual()
+	_build_glint()
 	_apply_alive_state()
 
 
@@ -172,6 +179,9 @@ func _physics_process(delta: float) -> void:
 	weapon_holder.visible = not is_scoped
 	if is_scoped:
 		cmd.sprint = false
+	if is_scoped != _sent_scoped:
+		_sent_scoped = is_scoped
+		_request_scope.rpc_id(1, is_scoped) # Others see the glint.
 	_buff_left = maxf(_buff_left - delta, 0.0)
 	var scope_mult: float = current_weapon.def.scope_move_mult if is_scoped else 1.0
 	movement.base_speed = class_def.move_speed * current_weapon.def.move_speed_mult * get_speed_mult() * scope_mult
@@ -458,6 +468,8 @@ func _apply_alive_state() -> void:
 		hitbox.set_enabled(is_alive)
 	model.visible = is_alive and not is_local
 	weapon_holder.visible = is_alive and is_local
+	if not is_alive and _glint != null:
+		_glint.visible = false
 
 
 func _set_health(value: int) -> void:
@@ -781,6 +793,29 @@ func _clear_shield() -> void:
 		Net.broadcast(self, &"_set_shield", [false])
 
 
+## Bright dot on the remote body's scope; a fixed-size billboard, so it reads at any distance
+## (walls still hide it).
+func _build_glint() -> void:
+	var quad := QuadMesh.new()
+	quad.size = Vector2(GLINT_SIZE, GLINT_SIZE)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	material.fixed_size = true
+	material.albedo_color = GLINT_COLOR
+	material.albedo_texture = ShotEffects.get_glow_texture()
+	quad.material = material
+	_glint = MeshInstance3D.new()
+	_glint.name = "Glint"
+	_glint.mesh = quad
+	_glint.position = GLINT_OFFSET
+	_glint.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_glint.visible = false
+	model.add_child(_glint) # Hidden with the body (dead, own view).
+
+
 func _build_shield_visual() -> void:
 	_shield_visual = MeshInstance3D.new()
 	var box := BoxMesh.new()
@@ -802,6 +837,21 @@ func _set_shield(active: bool) -> void:
 	if not _sender_is_host():
 		return
 	_shield_visual.visible = active and not is_local # The owner looks through their own shield.
+
+
+## Owner -> host: scoped in or out. The host tells everyone (scope glint).
+@rpc("any_peer", "call_local", "reliable")
+func _request_scope(scoped: bool) -> void:
+	if not multiplayer.is_server() or _sender_id() != get_multiplayer_authority():
+		return
+	Net.broadcast(self, &"_on_scope_changed", [scoped and is_alive])
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _on_scope_changed(scoped: bool) -> void:
+	if not _sender_is_host():
+		return
+	_glint.visible = scoped and not is_local and is_alive
 
 
 @rpc("any_peer", "call_local", "reliable")

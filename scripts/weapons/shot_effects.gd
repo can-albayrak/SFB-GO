@@ -17,6 +17,7 @@ const IMPACT_RADIUS: float = 0.025
 const IMPACT_LIFETIME: float = 8.0
 
 static var _flash_mesh: QuadMesh
+static var _glow_texture: GradientTexture2D
 static var _impact_mesh: SphereMesh
 
 
@@ -51,6 +52,13 @@ static func spawn_muzzle_flash(muzzle: Node3D) -> void:
 	flash.add_child(light)
 	muzzle.add_child(flash)
 	muzzle.get_tree().create_timer(FLASH_TIME).timeout.connect(flash.queue_free)
+
+
+## Shared soft round glow texture (muzzle flash, scope glint).
+static func get_glow_texture() -> GradientTexture2D:
+	if _glow_texture == null:
+		_glow_texture = _make_flash_texture()
+	return _glow_texture
 
 
 ## Soft round glow: bright core fading to transparent edges.
