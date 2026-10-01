@@ -31,6 +31,7 @@ static func find(tree: SceneTree) -> LagCompensator:
 
 func _ready() -> void:
 	add_to_group(GROUP)
+	_players_root.child_exiting_tree.connect(_on_player_exiting)
 
 
 func _physics_process(_delta: float) -> void:
@@ -50,10 +51,13 @@ func _physics_process(_delta: float) -> void:
 		samples.append(sample)
 		while not samples.is_empty() and (samples[0] as Sample).time < now - HISTORY_SECONDS:
 			samples.pop_front()
-	# Untyped loop: a freed Player key must not be assigned to a typed variable.
-	for key: Variant in _history.keys():
-		if not is_instance_valid(key):
-			_history.erase(key)
+
+
+## A typed dictionary cannot erase a freed key, so a leaving player is dropped while still valid.
+func _on_player_exiting(node: Node) -> void:
+	var player := node as Player
+	if player != null:
+		_history.erase(player)
 
 
 ## Drops a player's history (on respawn), so shots never rewind into a previous life.

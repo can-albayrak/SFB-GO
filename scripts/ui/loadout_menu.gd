@@ -80,9 +80,9 @@ func _add_column(parent: Container, title: String) -> VBoxContainer:
 
 
 func _rebuild() -> void:
-	var class_def: ClassDef = Loadout.ROSTER.classes[_class_index]
+	var class_def: ClassDef = Loadout.roster().classes[_class_index]
 	var class_names: Array[String] = []
-	for def: ClassDef in Loadout.ROSTER.classes:
+	for def: ClassDef in Loadout.roster().classes:
 		class_names.append(def.display_name)
 	var weapon_names: Array[String] = []
 	for def: WeaponDef in class_def.primary_weapons:

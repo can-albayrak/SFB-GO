@@ -67,7 +67,7 @@ func _run() -> void:
 # --- Tests -------------------------------------------------------------------
 
 func _test_loadouts() -> void:
-	var roster: ClassRoster = Loadout.ROSTER
+	var roster: ClassRoster = Loadout.roster()
 	for ci: int in roster.classes.size():
 		var class_def: ClassDef = roster.classes[ci]
 		for wi: int in class_def.primary_weapons.size():
@@ -81,7 +81,7 @@ func _test_loadouts() -> void:
 
 
 func _test_weapons() -> void:
-	var roster: ClassRoster = Loadout.ROSTER
+	var roster: ClassRoster = Loadout.roster()
 	for ci: int in roster.classes.size():
 		var class_def: ClassDef = roster.classes[ci]
 		for wi: int in class_def.primary_weapons.size():
@@ -94,7 +94,7 @@ func _test_weapons() -> void:
 
 
 func _test_abilities() -> void:
-	var roster: ClassRoster = Loadout.ROSTER
+	var roster: ClassRoster = Loadout.roster()
 	for ci: int in roster.classes.size():
 		var class_def: ClassDef = roster.classes[ci]
 		for ai: int in class_def.abilities.size():

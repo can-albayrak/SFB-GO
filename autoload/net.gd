@@ -143,7 +143,7 @@ func server_set_lobby_settings(kill_target: int, minutes: float, map_index: int)
 
 
 ## Client, lobby: toggle our "ready" flag (shown to everyone; the host decides when to start).
-func request_ready(is_ready: bool) -> void:
+func request_lobby_ready(is_ready: bool) -> void:
 	_request_ready.rpc_id(1, is_ready)
 
 

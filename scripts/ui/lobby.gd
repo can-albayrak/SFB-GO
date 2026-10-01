@@ -190,7 +190,7 @@ func _on_rules_changed() -> void:
 
 
 func _on_ready_toggled(on: bool) -> void:
-	Net.request_ready(on)
+	Net.request_lobby_ready(on)
 
 
 func _on_start_pressed() -> void:
