@@ -24,6 +24,7 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var equip_time: float = 0.4
 @export var move_speed_mult: float = 1.0
 @export var uses_ammo: bool = true ## False = never runs dry (melee weapons).
+@export var kill_ammo_reward: bool = true ## False: kills never add rounds (airdrop weapons, throwing knives).
 ## Two guns sharing the magazine: left click fires the left, right click the right,
 ## each with its own fire_interval (Dual Pistols).
 @export var dual_wield: bool = false

@@ -145,6 +145,9 @@ func _on_player_died(killer_id: int, weapon_name: String, headshot: bool, is_mel
 	var killer := players_root.get_node_or_null(str(killer_id)) as Player
 	if killer != null:
 		distance = killer.global_position.distance_to(player.global_position)
+	# GDD kill reward: some health now, ammo for the weapon in hand (never for self-kills).
+	if killer != null and killer != player and Match.state == Match.State.PLAYING:
+		killer.server_kill_reward(Match.rules.kill_heal, Match.rules.kill_ammo)
 	Match.server_register_kill(killer_id, player.get_multiplayer_authority(), weapon_name, headshot, distance, is_melee)
 	get_tree().create_timer(Match.rules.respawn_delay).timeout.connect(_respawn.bind(player, player.get_life()))
 

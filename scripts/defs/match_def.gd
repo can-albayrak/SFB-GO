@@ -9,3 +9,5 @@ extends Resource
 @export var spawn_protection: float = 2.0 ## Seconds of no damage after spawning; firing ends it.
 @export var end_screen_time: float = 10.0 ## Seconds the results stay up before the next match.
 @export var loadout_swap_window: float = 3.0 ## A loadout picked this soon after spawning applies at once.
+@export var kill_heal: int = 20 ## Health back for every kill (never above the class maximum).
+@export var kill_ammo: int = 15 ## Rounds added to the weapon in hand for every kill (not above the magazine).

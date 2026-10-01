@@ -683,6 +683,16 @@ func flash(seconds: float) -> void:
 	Events.local_flashed.emit(seconds)
 
 
+## Host: kill reward. Health is host-owned; ammo lives on the owner, so the owner adds it.
+func server_kill_reward(heal: int, ammo: int) -> void:
+	assert(multiplayer.is_server(), "server_kill_reward is host-only")
+	if not is_alive:
+		return
+	health = mini(health + heal, class_def.max_health)
+	if ammo > 0:
+		_receive_kill_ammo.rpc_id(get_multiplayer_authority(), ammo)
+
+
 ## Host: Shield ability. Frontal hits are blocked for `seconds`; everyone sees the panel.
 func server_activate_shield(seconds: float) -> void:
 	assert(multiplayer.is_server(), "server_activate_shield is host-only")
@@ -815,6 +825,16 @@ func _receive_knockback(impulse: Vector3) -> void:
 	if not _sender_is_host() or not is_local or not is_alive:
 		return
 	velocity += impulse
+
+
+## Host -> owner: kill reward rounds for the weapon in hand (a reload in progress fills it anyway).
+@rpc("any_peer", "call_local", "reliable")
+func _receive_kill_ammo(amount: int) -> void:
+	if not _sender_is_host() or not is_local or not is_alive:
+		return
+	var weapon: Weapon = current_weapon
+	if weapon.def.uses_ammo and weapon.def.kill_ammo_reward and not weapon.is_reloading:
+		weapon.add_ammo(amount)
 
 
 @rpc("any_peer", "call_local", "reliable")

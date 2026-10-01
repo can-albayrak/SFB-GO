@@ -16,6 +16,7 @@ max_range = 60.0
 fire_interval = 0.5
 automatic = false
 magazine_size = 3
+kill_ammo_reward = false
 reload_time = 0.0
 equip_time = 0.35
 throw_speed = 24.0
