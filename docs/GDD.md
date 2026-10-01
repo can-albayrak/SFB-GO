@@ -11,7 +11,7 @@ Arkadaşlar arasında oynanacak, en fazla 10 kişilik, sınıf tabanlı bir FPS.
 - **İlk mod:** Free-for-all deathmatch (takım yok)
 - **Hedef donanım:** GTX 1050 Ti'da 1080p, 100+ FPS
 - **Tarz:** Distopik, 2000'lerin başı estetiği, hafif tuhaf (freaky) ama temiz görüntü. Referans his: 2000'ler PlayStation oyunu, Buckshot Roulette distopikliği.
-- **Görsel referans (2026-10-01):** "Lanetli PS2" tuhaflığı: gündüz ışığı, parlak doygun renkler, ucuz-cilalı düşük poligon, tel çitler, polis çakarları, fast-food reklam kaplamaları, yerlere/arabalara yapıştırılmış yüz fotoğrafları. Devlet/propaganda teması **yok**. Arayüz: siyah konturlu krom başlıklar, kalın gölgeli eğik butonlar, fast-food sarısı / ketçap kırmızısı / polis mavisi, düz HP/AMMO etiketleri. Taslak: Claude Design "SFB:GO HUD ve Menü" (ana menü, HUD, lobi, ölüm ekranı); ana menüde isim alanı "SFB CITIZEN ID".
+- **Görsel referans (2026-10-01):** "Lanetli PS2": düşük poligon ama gerçekçi oranlar, soluk/kapalı hava renkleri, beton ve mavi-gri tel çit, uzakta ateş turuncusu, gerilmiş gri tonlu yüz dokuları. **Karanlık ve tuhaf, çocuksu değil** (kalın kontur, sticker, parlak çizgi film renkleri yok). Devlet/propaganda teması yok. Arayüz: dar ciddi fontlar (Oswald / Barlow Condensed), yarı saydam koyu PS2 menü barları, tek vurgu rengi turuncu, düz HP/AMMO. Taslak: Claude Design "SFB:GO HUD ve Menü"; ana menüde isim alanı "SFB CITIZEN ID".
 
 ## Oyun modu ve maç kuralları
 
