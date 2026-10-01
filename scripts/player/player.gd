@@ -800,11 +800,13 @@ func _show_shot(_from: Vector3, to: Vector3) -> void:
 	ShotEffects.spawn_tracer(get_parent(), remote_muzzle.global_position, to)
 
 
+## Host -> shooter only: a hit landed. Hit marker + damage number at `point` (shooter's screen only).
 @rpc("any_peer", "call_local", "reliable")
-func confirm_hit(zone: Hitbox.Zone, killed: bool) -> void:
+func confirm_hit(zone: Hitbox.Zone, killed: bool, amount: float, point: Vector3) -> void:
 	if not _sender_is_host():
 		return
-	Events.hit_confirmed.emit(zone, killed)
+	Events.hit_confirmed.emit(zone, killed, amount)
+	DamageNumber.spawn(get_parent(), point, amount, zone)
 
 
 @rpc("any_peer", "call_local", "reliable")

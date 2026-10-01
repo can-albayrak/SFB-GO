@@ -40,7 +40,7 @@ func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 		return origin + dir * def.max_range
 	var collider: Object = hit["collider"]
 	if collider is Hitbox:
-		_apply_hit(collider as Hitbox)
+		_apply_hit(collider as Hitbox, hit["position"])
 	return hit["position"]
 
 
@@ -50,7 +50,7 @@ func _trace(origin: Vector3, dir: Vector3) -> Dictionary:
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 
-func _apply_hit(hitbox: Hitbox) -> void:
+func _apply_hit(hitbox: Hitbox, point: Vector3) -> void:
 	var receiver: Node = hitbox.get_receiver()
 	if receiver == null or not receiver.has_method(&"take_hit"):
 		return
@@ -59,4 +59,4 @@ func _apply_hit(hitbox: Hitbox) -> void:
 	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
 	var shooter_id: int = player.get_multiplayer_authority()
 	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name)
-	player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed)
+	player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed, amount, point)

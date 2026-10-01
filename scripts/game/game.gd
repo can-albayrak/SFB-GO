@@ -265,7 +265,7 @@ func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, point: Vector3) -> vo
 		var amount: float = grenade_def.damage * (1.0 - distance / grenade_def.radius)
 		var killed: bool = receiver.call(&"take_hit", amount, Hitbox.Zone.BODY, thrower_id, grenade_def.display_name, false)
 		if thrower != null and receiver != thrower:
-			thrower.confirm_hit.rpc_id(thrower_id, Hitbox.Zone.BODY, killed)
+			thrower.confirm_hit.rpc_id(thrower_id, Hitbox.Zone.BODY, killed, amount, center)
 
 
 func _apply_flash(grenade_def: GrenadeDef, point: Vector3) -> void:

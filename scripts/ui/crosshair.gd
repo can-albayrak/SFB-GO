@@ -1,21 +1,28 @@
 class_name Crosshair
 extends Control
-## Crosshair drawn from Settings, plus the hit marker (white = hit, red = kill).
+## Crosshair drawn from Settings, plus the hit marker: a classic X shown once the host
+## confirms a hit. Body / leg hits are white, headshots red (GDD "Vuruş hissi").
 
 const HIT_MARKER_TIME: float = 0.2
 const HIT_MARKER_INNER: float = 6.0
 const HIT_MARKER_OUTER: float = 13.0
 const HIT_MARKER_WIDTH: float = 2.0
 const HIT_COLOR: Color = Color(1.0, 1.0, 1.0)
-const KILL_COLOR: Color = Color(1.0, 0.2, 0.15)
+const HEAD_COLOR: Color = Color(1.0, 0.2, 0.15)
 
 var _hit_left: float = 0.0
 var _hit_color: Color = HIT_COLOR
 
 
-func show_hit(_zone: Hitbox.Zone, killed: bool) -> void:
+func _ready() -> void:
+	Settings.changed.connect(queue_redraw)
+
+
+func show_hit(zone: Hitbox.Zone, _killed: bool, _amount: float) -> void:
+	if not Settings.hit_marker_enabled:
+		return
 	_hit_left = HIT_MARKER_TIME
-	_hit_color = KILL_COLOR if killed else HIT_COLOR
+	_hit_color = HEAD_COLOR if zone == Hitbox.Zone.HEAD else HIT_COLOR
 	queue_redraw()
 
 

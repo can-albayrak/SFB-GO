@@ -26,6 +26,8 @@ var crosshair_length: float = 8.0
 var crosshair_gap: float = 4.0
 var crosshair_thickness: float = 2.0
 var crosshair_dot: bool = false
+## Show the X hit marker when the host confirms a hit.
+var hit_marker_enabled: bool = true
 
 ## Camera feel, each 0 (off) .. 1 (full, as tuned in data/camera/default.tres).
 var camera_fov_shift: float = 1.0
@@ -64,6 +66,7 @@ func load_settings() -> void:
 	crosshair_gap = _read(config, "crosshair", "gap", crosshair_gap)
 	crosshair_thickness = _read(config, "crosshair", "thickness", crosshair_thickness)
 	crosshair_dot = _read(config, "crosshair", "dot", crosshair_dot)
+	hit_marker_enabled = _read(config, "crosshair", "hit_marker", hit_marker_enabled)
 	camera_fov_shift = _read(config, "camera", "fov_shift", camera_fov_shift)
 	camera_head_bob = _read(config, "camera", "head_bob", camera_head_bob)
 	camera_landing = _read(config, "camera", "landing", camera_landing)
@@ -94,6 +97,7 @@ func save_settings() -> void:
 	config.set_value("crosshair", "gap", crosshair_gap)
 	config.set_value("crosshair", "thickness", crosshair_thickness)
 	config.set_value("crosshair", "dot", crosshair_dot)
+	config.set_value("crosshair", "hit_marker", hit_marker_enabled)
 	config.set_value("camera", "fov_shift", camera_fov_shift)
 	config.set_value("camera", "head_bob", camera_head_bob)
 	config.set_value("camera", "landing", camera_landing)

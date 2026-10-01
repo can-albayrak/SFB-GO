@@ -93,6 +93,7 @@ func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var best_hitbox: Hitbox = null
 	var best_distance: float = INF
+	var best_point: Vector3 = Vector3.ZERO
 	for offset: Vector2 in RAY_SPREAD:
 		var scaled: Vector2 = offset * def.melee_spread_scale
 		var end: Vector3 = origin + dir * def.max_range + aim_basis.x * scaled.x + aim_basis.y * scaled.y
@@ -105,12 +106,13 @@ func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 		if distance < best_distance:
 			best_distance = distance
 			best_hitbox = hit["collider"]
+			best_point = hit["position"]
 	if best_hitbox != null:
-		_apply_melee_hit(best_hitbox, dir)
+		_apply_melee_hit(best_hitbox, dir, best_point)
 	return origin + dir * def.max_range
 
 
-func _apply_melee_hit(hitbox: Hitbox, dir: Vector3) -> void:
+func _apply_melee_hit(hitbox: Hitbox, dir: Vector3, point: Vector3) -> void:
 	var receiver: Node = hitbox.get_receiver()
 	if receiver == null or not receiver.has_method(&"take_hit"):
 		return
@@ -119,7 +121,7 @@ func _apply_melee_hit(hitbox: Hitbox, dir: Vector3) -> void:
 	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
 	var shooter_id: int = player.get_multiplayer_authority()
 	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name, true)
-	player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed)
+	player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed, amount, point)
 	if def.knockback > 0.0 and not killed and receiver is Player:
 		var flat := Vector3(dir.x, 0.0, dir.z).normalized()
 		(receiver as Player).server_knockback(flat * def.knockback + Vector3.UP * KNOCKBACK_LIFT)

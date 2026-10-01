@@ -82,6 +82,20 @@ func _rebuild() -> void:
 	_add_slider("Mouse sensitivity", 0.1, 8.0, 0.05, Settings.mouse_sensitivity, "%.2f",
 		func(v: float) -> void: Settings.mouse_sensitivity = v)
 
+	_add_section("CROSSHAIR")
+	_add_color("Color", Settings.crosshair_color,
+		func(c: Color) -> void: Settings.crosshair_color = c)
+	_add_slider("Length", 2.0, 20.0, 1.0, Settings.crosshair_length, "%.0f",
+		func(v: float) -> void: Settings.crosshair_length = v)
+	_add_slider("Gap", 0.0, 15.0, 1.0, Settings.crosshair_gap, "%.0f",
+		func(v: float) -> void: Settings.crosshair_gap = v)
+	_add_slider("Thickness", 1.0, 6.0, 1.0, Settings.crosshair_thickness, "%.0f",
+		func(v: float) -> void: Settings.crosshair_thickness = v)
+	_add_toggle("Center dot", Settings.crosshair_dot,
+		func(on: bool) -> void: Settings.crosshair_dot = on)
+	_add_toggle("Hit marker", Settings.hit_marker_enabled,
+		func(on: bool) -> void: Settings.hit_marker_enabled = on)
+
 	_add_section("CAMERA")
 	_add_percent("Speed FOV shift", Settings.camera_fov_shift,
 		func(v: float) -> void: Settings.camera_fov_shift = v)

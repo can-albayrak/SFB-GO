@@ -5,8 +5,9 @@ extends Node
 signal local_player_spawned(player: Player)
 
 ## A shot from the local player landed (confirmed by the host). Drives the hit marker.
+## `amount` is the damage dealt (0 for hits without damage, e.g. a Charge stun).
 @warning_ignore("unused_signal")
-signal hit_confirmed(zone: Hitbox.Zone, killed: bool)
+signal hit_confirmed(zone: Hitbox.Zone, killed: bool, amount: float)
 
 ## Fired on every peer when the host announces a death. killer_id == victim id for self-kills.
 @warning_ignore("unused_signal")
