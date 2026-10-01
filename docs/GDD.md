@@ -36,6 +36,9 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 
 **Lobi:** Host kill hedefi, süre ve haritayı seçer. Oyuncular kendi isimlerini girer.
 
+- **Bağlanma:** Host'un Tailscale IP'si bir kez girilir ve kaydedilir; sonraki açılışlarda "Last host" ile tek tıkla bağlanılır.
+- **Basit lobi:** Oyuncu listesi, her oyuncunun adı, yüz seçimi ve "hazır" durumu görünür; host ayarları yapar ve "Start" der. Maç ortasında katılma (geç katılma) yine mümkün. Sohbet, takım/renk seçimi gibi ek özellikler yoktur.
+
 ## Temel oynanış
 
 | Konu | Karar |
