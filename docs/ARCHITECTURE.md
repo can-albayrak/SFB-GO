@@ -37,7 +37,7 @@ sfb-go/
 ├── scripts/
 │   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd, camera_feel_def.gd
 │   ├── game/                # game.gd (maç sahnesi: harita, spawn, respawn), lag_compensator.gd
-│   ├── player/              # player.gd, movement.gd, camera_feel.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd
+│   ├── player/              # player.gd + bileşenler (player_net_sync, player_requests, player_status, player_effects), movement.gd, camera_feel.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, shotgun_weapon.gd, dual_pistols_weapon.gd, launcher_weapon.gd, melee_weapon.gd, throwing_knife_weapon.gd
 │   ├── abilities/           # ability.gd (taban), grenade_ability.gd, grenade.gd (bomba/mermi), grapple, decoy, shield, charge, dash, adrenaline
@@ -221,8 +221,14 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 ├── Model (Node3D)                                  – başkalarının gördüğü gövde (sahibinde gizli)
 ├── Movement (Node)                 movement.gd     – Quake tarzı ivme, bhop, slide, crouch
 ├── PlayerInput (Node)              player_input.gd – sadece sahip client'ta aktif
-├── StateSync (MultiplayerSynchronizer)             – health, is_alive; authority host (1)
-└── AbilitySlot (Node)                              – aktif güç (aşama 4)
+├── NetSync (Node)                  player_net_sync.gd – hareket senkronu (sahip → host → diğerleri), interpolasyon, host hız kontrolü
+├── Requests (Node)                 player_requests.gd – sahip → host istekleri (ateş, V, Q, loadout, düşme) + host kontrolleri
+├── Status (Node)                   player_status.gd – kalkan, stun, itme, Adrenaline, kill ödülü, bıçak iadesi (host saati + sahibe RPC)
+├── Effects (Node)                  player_effects.gd – herkesin gördüğü görseller: kalkan paneli, dürbün parlaması, ip, decoy, uzak tracer
+├── StateSync (MultiplayerSynchronizer)             – health, is_alive, is_protected, loadout; authority host (1)
+└── (Ability)                                       – aktif güç, loadout'tan kurulur
+
+Bileşenler sahnede sabit düğümler: RPC'leri her peer'da aynı yolda (`Players/<id>/Requests` vb.). Dışarıdan erişim `player.status.server_stun(...)`, `player.effects.show_grapple(...)` gibi; silahlar `player.send_fire(...)` ile atar. Bileşenlerin `_ready`'si oyuncununkinden önce çalıştığı için oyuncuya düğüm ekleyen kurulum (`Effects.setup`) `Player._ready`'den çağrılır.
 ```
 
 ### Girdi, bakış ve kamera

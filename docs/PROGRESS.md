@@ -12,7 +12,7 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 1. **Can: `cloud/design-pass` testi** ([PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açıklamasındaki test listesi). İlk iş: projeyi editörde aç, Output'taki kırmızı hataları Claude'a yapıştır; yeni `.uid` dosyalarını commit et. Godot MCP evde çalışıyorsa Claude headless doğrulamayı da yapar.
 2. **Claude + Blender: karakter yüzü.** Can'ın verdiği Avaturn GLB'den sadece kafayı çıkar, poligonu azalt, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` altında, repoya girmez (`.gitignore`'da). 2 yüzle deneme.
 3. **Claude + Blender: AVM adayı.** [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod) indirilip `private_assets/` altında açılır: iç mekân var mı, ölçek, parçalar. Sonuç `docs/ASSETS.md`'ye işlenir.
-4. Test hatalarına göre düzeltmeler, sonra 2026-10-01 kararlarının kodu (GDD'de yazılı, kodda yok):
+4. Test hatalarına göre düzeltmeler. 2026-10-01 kararlarından parlama, kill ödülü, mayın, yarı öz-hasar ve lobi/geç katılma sınıf seçimi **yazıldı (çalıştırılmadı, test listesine eklendi)**; yüz seçimi aşama 8'de, airdrop/pickup aşama 6'da:
    - Hawk namlu parlaması: sadece dürbün açıkken, her yerden görünür.
    - Kill ödülü: +20 can, elindeki silaha +15 mermi (airdrop silahlarına değil).
    - Landmine: küçük alan ama basanı öldürür, yanıp sönen kırmızı ışık.
@@ -200,3 +200,4 @@ _Henüz yok._
 | 2026-10-01 | – | Sadece tasarım: harita ölçeği 4–6 oyuncuya göre (GDD: bina ~64×48 m, uçtan uca 15–20 sn, 10–12 spawn, 3 airdrop). `docs/ASSETS.md`: AVM prop/doku ihtiyaç listesi ve lisans takibi. Eksik bulundu: Hawk namlu parlaması (GDD dengeleyici) kodda yok. |
 | 2026-10-01 | – | AVM adayı bulundu: Suburban Mall 1980 (Sketchfab, CC-BY) → ASSETS.md "Adaylar". Evdeki oturum planı PROGRESS başına yazıldı (test + Blender: yüz modeli ve AVM kontrolü). |
 | 2026-10-01 | – | Sadece tasarım: maç varsayılanı 20 kill / 10 dk (`default.tres`), kill ödülü, airdrop silah detayları, pickup 45 sn / 5–6 nokta, şirket devleti AVM'si, Hawk parlaması, mayın + Volcano yarı öz-hasar, lobide yüz + sınıf seçimi. GDD'ye işlendi; kodu evdeki oturumda. |
+| 2026-10-01 | 5 | (çalıştırılmadı) Kill ödülü (+20 can, +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi. `player.gd` 992 → 527 satır: NetSync / Requests / Status / Effects bileşenlerine bölündü (ayrı commit, sorun çıkarsa tek başına geri alınabilir). |
