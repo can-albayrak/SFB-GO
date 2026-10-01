@@ -10,8 +10,8 @@ const SHIELD_OFFSET: Vector3 = Vector3(0.0, 1.0, -0.8)
 const SHIELD_COLOR: Color = Color(0.35, 0.8, 1.0, 0.4)
 ## Scope glint (GDD Hawk): shown to others while scoped, same screen size at any distance.
 const GLINT_OFFSET: Vector3 = Vector3(0.15, 1.5, -0.45)
-const GLINT_SIZE: float = 0.06
-const GLINT_COLOR: Color = Color(1.0, 0.95, 0.8)
+const GLINT_SIZE: float = 0.04
+const GLINT_COLOR: Color = Color(0.6, 0.57, 0.48) ## Additive: lower = dimmer.
 
 var _shield_visual: MeshInstance3D
 var _glint: MeshInstance3D
