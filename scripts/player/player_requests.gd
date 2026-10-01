@@ -35,6 +35,10 @@ func send_fall_death() -> void:
 	_request_fall_death.rpc_id(1)
 
 
+func send_equip(slot: int) -> void:
+	_request_equip.rpc_id(1, slot)
+
+
 ## Host: the sender owns this player (the host's own calls count as from peer 1).
 func _from_owner() -> bool:
 	var sender: int = multiplayer.get_remote_sender_id()
@@ -113,6 +117,14 @@ func _request_loadout(code: PackedInt32Array) -> void:
 	if not _from_owner() or not Loadout.is_valid(code):
 		return
 	player.server_choose_loadout(code)
+
+
+## Owner -> host: switched weapons. The host sets the replicated Player.held_slot.
+@rpc("any_peer", "call_local", "reliable")
+func _request_equip(slot: int) -> void:
+	if not _from_owner() or slot < 0 or slot >= player.weapons.size():
+		return
+	player.held_slot = slot
 
 
 @rpc("any_peer", "call_local", "reliable")

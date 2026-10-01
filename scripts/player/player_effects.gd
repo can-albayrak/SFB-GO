@@ -16,6 +16,7 @@ const GLINT_COLOR: Color = Color(1.0, 0.95, 0.8)
 var _shield_visual: MeshInstance3D
 var _glint: MeshInstance3D
 var _sent_scoped: bool = false ## Owner: scope state last told to the host.
+var _held_model: Node3D
 
 @onready var player: Player = get_parent()
 
@@ -45,6 +46,23 @@ func show_glint(scoped: bool) -> void:
 func show_shield(active: bool) -> void:
 	if _shield_visual != null:
 		_shield_visual.visible = active and not player.is_local
+
+
+## Player.held_slot or the loadout changed (every peer): the world model in the body's hand.
+## Hidden on the owner with the rest of the body.
+func show_held_weapon(slot: int) -> void:
+	if _held_model != null:
+		_held_model.queue_free()
+		_held_model = null
+	if slot < 0 or slot >= player.weapons.size():
+		return
+	var def: WeaponDef = player.weapons[slot].def
+	if def.world_model == null:
+		return
+	_held_model = def.world_model.instantiate() as Node3D
+	_held_model.scale = Vector3.ONE * def.world_model_scale
+	player.hand.add_child(_held_model)
+	player.remote_muzzle.position = def.world_muzzle * def.world_model_scale
 
 
 ## Host: other peers draw this player's tracer.

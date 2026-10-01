@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/burst_rifle.tscn" id="2_scene"]
 
+[ext_resource type="PackedScene" path="res://assets/models/weapons/burst_rifle.glb" id="3_world"]
 [resource]
 script = ExtResource("1_def")
 id = &"burst_rifle"
@@ -24,3 +25,6 @@ recoil_pattern = PackedVector2Array(0, 0.56, 0.05, 0.64, -0.05, 0.72)
 recoil_recovery = 10.0
 recoil_recovery_delay = 0.08
 scene = ExtResource("2_scene")
+world_model = ExtResource("3_world")
+world_model_scale = 1.0
+world_muzzle = Vector3(0, 0.04, -0.6)

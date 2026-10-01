@@ -41,6 +41,8 @@ var is_protected: bool = false: set = _set_protected
 var scope_glint: bool = false: set = _set_scope_glint
 ## Host-owned, replicated: Bear's shield panel is up.
 var shield_up: bool = false: set = _set_shield_up
+## Host-owned, replicated: weapon slot in hand, so everyone sees the right model.
+var held_slot: int = 0: set = _set_held_slot
 ## Vertical look angle in radians. Yaw is the body's own rotation.y.
 var look_pitch: float = 0.0
 var weapons: Array[Weapon] = []
@@ -77,7 +79,8 @@ var _camera_feel: CameraFeel
 @onready var leg_hitbox: Hitbox = $Hitboxes/LegHitbox
 @onready var model: Node3D = $Model
 @onready var crown: Node3D = $Model/Crown
-@onready var remote_muzzle: Marker3D = $Model/Rifle/Muzzle
+@onready var hand: Node3D = $Model/Hand
+@onready var remote_muzzle: Marker3D = $Model/Hand/Muzzle
 @onready var collision: CollisionShape3D = $CollisionShape3D
 @onready var movement: Movement = $Movement
 @onready var player_input: PlayerInput = $PlayerInput
@@ -191,6 +194,8 @@ func equip(slot: int) -> void:
 	current_weapon = weapons[slot]
 	current_weapon.draw()
 	weapon_changed.emit(current_weapon)
+	if is_local and requests != null:
+		requests.send_equip(slot) # Others see the weapon in hand.
 
 
 ## Eye position at the current physics tick (not interpolated). Shots start here.
@@ -428,6 +433,9 @@ func _apply_loadout() -> void:
 		add_child(ability)
 
 	equip(0)
+	if multiplayer.is_server():
+		held_slot = 0
+	effects.show_held_weapon(held_slot)
 	loadout_changed.emit()
 
 
@@ -481,6 +489,12 @@ func _set_shield_up(value: bool) -> void:
 	shield_up = value
 	if is_node_ready():
 		effects.show_shield(value)
+
+
+func _set_held_slot(value: int) -> void:
+	held_slot = value
+	if is_node_ready():
+		effects.show_held_weapon(value)
 
 
 func _set_protected(value: bool) -> void:

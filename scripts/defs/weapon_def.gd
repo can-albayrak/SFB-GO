@@ -77,6 +77,13 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export_group("Scene")
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).
 
+@export_group("World Model")
+## What other players see in this player's hand (a model, no script). Null = empty hand.
+@export var world_model: PackedScene
+@export var world_model_scale: float = 1.0
+## Muzzle position on the unscaled world model (remote tracers start here).
+@export var world_muzzle: Vector3 = Vector3(0.0, 0.035, -0.62)
+
 
 ## Average seconds per shot over sustained fire (host rate check). For bursts the
 ## trigger interval is shared by all shots of the burst.
