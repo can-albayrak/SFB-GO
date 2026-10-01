@@ -1,13 +1,13 @@
 # SFB:GO – Game Design Document
 
-Son güncelleme: 2026-09-30
+Son güncelleme: 2026-10-01
 
 ## Genel bakış
 
 Arkadaşlar arasında oynanacak, en fazla 10 kişilik, sınıf tabanlı bir FPS. His olarak CS 1.6'nın cilalı ve biraz daha akıcı hali; Straftat kadar hızlı değil. **Oyun içindeki her şey İngilizce.**
 
 - **Motor:** Godot 4.4+ (GDScript)
-- **Oyuncu sayısı:** 2–10
+- **Oyuncu sayısı:** 2–10 (genelde 4–6 kişi oynanır; haritalar 4–6 kişiye göre ölçeklenir, 10 kişiyi de kaldırır)
 - **İlk mod:** Free-for-all deathmatch (takım yok)
 - **Hedef donanım:** GTX 1050 Ti'da 1080p, 100+ FPS
 - **Tarz:** Distopik, 2000'lerin başı estetiği, hafif tuhaf (freaky) ama temiz görüntü
@@ -261,11 +261,13 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 
 **Boyut ve yerleşim:**
 
-- Bir uçtan diğerine koşarak 25–30 sn
-- 12–16 spawn noktası, tüm bölgelere dağılmış
-- 3–4 airdrop noktası, bölgelerin kesiştiği yerlerde
+Ölçek **4–6 oyuncuya** göredir (genelde bu kadar kişi oynar). Daha büyük harita bu sayıda boş hissettirir.
 
-**İlk harita:** Terk edilmiş alışveriş merkezi. Dar koridorlu mağazalar (Bear, Volcano), ortada açık atrium (Wolf), üst katlar ve yürüyen merdivenler (Hawk, Cheetah), dışarıda otopark ve çatı.
+- Bir uçtan diğerine koşarak 15–20 sn (koşu 6,6 m/s)
+- 10–12 spawn noktası, tüm bölgelere dağılmış (10 kişide de yeterli)
+- 3 airdrop noktası, bölgelerin kesiştiği yerlerde
+
+**İlk harita:** Terk edilmiş alışveriş merkezi. Dar koridorlu mağazalar (Bear, Volcano), ortada açık atrium (Wolf), üst katlar ve yürüyen merdivenler (Hawk, Cheetah), dışarıda otopark ve çatı. Bina yaklaşık **64 × 48 m**, iki kat (0 m ve 5 m) ve çatı (10 m); 5–6 dükkân, bir uzun yemek katı koridoru, dükkân arkalarında dar servis koridoru, dışarıda otopark ve yükleme alanı.
 
 **Yerleşim kararları:**
 
@@ -273,7 +275,7 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 - **Dikey geçiş:** Yürüyen merdiven, normal merdiven, zıplanabilir çıkıntılar ve atlama noktaları gibi birden fazla hızlı yol. Kat değiştirmek 5–10 sn sürer.
 - Dışarıda otopark ve çatı, atrium ve üst katlarla bağlanır; çatı grapple noktalarıyla güçlenir.
 
-**Süreç:** Önce basit bloklarla kurulur (blockout), birkaç maç test edilir, akış oturunca modellenir.
+**Süreç:** Önce basit bloklarla kurulur (blockout), birkaç maç test edilir, akış oturunca modellenir. Binanın kendisi (duvar, zemin, merdiven) bizim tarafımızdan yapılır; hazır modeller sadece prop için, dokular CC0 fotoğraf dokuları. İhtiyaç listesi ve lisans takibi: `docs/ASSETS.md`.
 
 ## Görsel tarz ve performans
 

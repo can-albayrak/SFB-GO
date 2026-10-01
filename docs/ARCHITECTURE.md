@@ -21,7 +21,7 @@ sfb-go/
 ├── project.godot
 ├── CLAUDE.md
 ├── .mcp.json                # Godot MCP ayarı
-├── docs/                    # GDD, ARCHITECTURE, PROGRESS (.gdignore: Godot import etmez)
+├── docs/                    # GDD, ARCHITECTURE, PROGRESS, ASSETS (.gdignore: Godot import etmez)
 ├── addons/                  # Godot eklentileri (şimdilik boş)
 ├── autoload/                # Global singleton'lar
 │   ├── events.gd            # Sinyal otobüsü
