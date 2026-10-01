@@ -32,6 +32,8 @@ var is_crouched: bool = false
 var is_sliding: bool = false
 
 var _jump_buffer: float = 0.0
+var _coyote_left: float = 0.0
+var _coyote_from_slide: bool = false ## Was sliding on the last tick on the ground.
 var _slide_left: float = 0.0
 var _slide_cooldown_left: float = 0.0
 var _eye_height: float = STAND_EYE
@@ -52,6 +54,11 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	var on_floor: bool = body.is_on_floor()
 	_jump_buffer = def.jump_buffer_time if cmd.jump else maxf(_jump_buffer - delta, 0.0)
 	_slide_cooldown_left = maxf(_slide_cooldown_left - delta, 0.0)
+	if on_floor:
+		_coyote_left = def.coyote_time
+		_coyote_from_slide = is_sliding
+	else:
+		_coyote_left = maxf(_coyote_left - delta, 0.0)
 
 	if _grappling and _step_grapple(delta, cmd):
 		return
@@ -62,17 +69,25 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	var vel: Vector3 = body.velocity
 	var hvel := Vector3(vel.x, 0.0, vel.z)
 
+	# A slide started on this very tick does not count: slide + jump together gains nothing.
+	var was_sliding: bool = is_sliding
 	hvel = _update_slide(delta, cmd, on_floor, hvel)
 	_update_crouch(cmd.crouch or is_sliding, on_floor)
 
 	var wish_dir: Vector3 = _get_wish_dir(cmd.move)
 	var wish_speed: float = _get_wish_speed(cmd) if wish_dir != Vector3.ZERO else 0.0
 
-	if on_floor and _jump_buffer > 0.0:
+	if (on_floor or _coyote_left > 0.0) and _jump_buffer > 0.0:
 		# Jumping on the landing tick skips friction, which preserves speed (bunny hop).
+		# Off a ledge, coyote time still accepts the jump for a moment.
+		var from_slide: bool = was_sliding if on_floor else _coyote_from_slide
 		_jump_buffer = 0.0
+		_coyote_left = 0.0
 		is_sliding = false
-		hvel = hvel.limit_length(base_speed * def.bhop_cap_mult)
+		var cap: float = base_speed * def.bhop_cap_mult
+		if def.slide_jump_keeps_speed and from_slide:
+			cap = maxf(cap, hvel.length()) # Slide speed is kept, never raised.
+		hvel = hvel.limit_length(cap)
 		vel.y = def.jump_velocity
 		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
 	elif on_floor:
@@ -122,6 +137,8 @@ func reset() -> void:
 	_charge_left = 0.0
 	is_sliding = false
 	_jump_buffer = 0.0
+	_coyote_left = 0.0
+	_coyote_from_slide = false
 	_slide_left = 0.0
 	set_crouch_shape(false)
 	_eye_height = STAND_EYE
@@ -238,10 +255,15 @@ func _accelerate(hvel: Vector3, wish_dir: Vector3, wish_speed: float, accel: flo
 
 
 func _air_accelerate(hvel: Vector3, wish_dir: Vector3, wish_speed: float, delta: float) -> Vector3:
-	var add_speed: float = minf(wish_speed, def.air_speed_cap) - hvel.dot(wish_dir)
+	var free_air: bool = def.air_speed_cap <= 0.0
+	var add_speed: float = (wish_speed if free_air else minf(wish_speed, def.air_speed_cap)) - hvel.dot(wish_dir)
 	if add_speed <= 0.0:
 		return hvel
-	return hvel + wish_dir * minf(def.air_accel * wish_speed * delta, add_speed)
+	var result: Vector3 = hvel + wish_dir * minf(def.air_accel * wish_speed * delta, add_speed)
+	if not free_air:
+		return result # Quake strafing: the jump clamp limits the gain.
+	# Free air control may steer but never pushes past the horizontal cap (or the speed we already had).
+	return result.limit_length(maxf(hvel.length(), base_speed * def.bhop_cap_mult))
 
 
 func _apply_friction(hvel: Vector3, fric: float, delta: float) -> Vector3:

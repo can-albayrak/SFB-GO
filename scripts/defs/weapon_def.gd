@@ -33,6 +33,13 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 ## Recovery starts this long after the next shot would have been ready.
 @export var recoil_recovery_delay: float = 0.08
 
+@export_group("Movement Spread")
+## Degrees of random cone when firing at move_spread_ref_speed. No threshold: the cone
+## follows a curve, (speed / ref) ^ exponent, so walking is a little off and running more.
+@export var move_spread: float = 0.0
+@export var move_spread_ref_speed: float = 6.6 ## m/s where the cone equals move_spread.
+@export var move_spread_exponent: float = 1.5 ## > 1: slow movement is barely punished.
+
 @export_group("Melee")
 @export var melee_spread_scale: float = 1.0 ## Widens the fan of hit rays (Sledgehammer).
 @export var melee_swing_angle: float = 70.0 ## View sweep per swing in degrees; 0 = no sweep (Chainsaw).
@@ -58,6 +65,13 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 ## trigger interval is shared by all shots of the burst.
 func get_average_shot_interval() -> float:
 	return fire_interval / maxi(burst_count, 1)
+
+
+## Degrees of cone added by moving at `speed` m/s (gradual speed penalty).
+func get_move_spread(speed: float) -> float:
+	if move_spread <= 0.0 or move_spread_ref_speed <= 0.0 or speed <= 0.0:
+		return 0.0
+	return move_spread * pow(speed / move_spread_ref_speed, move_spread_exponent)
 
 
 func zone_multiplier(zone: Hitbox.Zone) -> float:

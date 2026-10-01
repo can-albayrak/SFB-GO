@@ -19,11 +19,15 @@ func _fire() -> void:
 	player.send_fire(origin, dir, player.weapons.find(self))
 
 
-## Scoped weapons fired from the hip scatter inside a cone (Hawk balance rule).
+## Random cone: scoped weapons fired from the hip (Hawk balance rule) plus the gradual
+## speed penalty. The owner picks the direction; the host traces what it is sent.
 func _apply_spread(dir: Vector3) -> Vector3:
-	if def.unscoped_spread <= 0.0 or player.is_scoped:
+	var cone: float = def.get_move_spread(player.movement.get_horizontal_speed())
+	if not player.is_scoped:
+		cone += def.unscoped_spread
+	if cone <= 0.0:
 		return dir
-	var angle: float = deg_to_rad(def.unscoped_spread) * sqrt(randf())
+	var angle: float = deg_to_rad(cone) * sqrt(randf())
 	var around: float = randf() * TAU
 	var local := Vector3(sin(angle) * cos(around), sin(angle) * sin(around), -cos(angle))
 	return (Basis.looking_at(dir) * local).normalized()

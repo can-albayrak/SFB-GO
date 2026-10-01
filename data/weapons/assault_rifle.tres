@@ -17,6 +17,7 @@ magazine_size = 30
 reload_time = 2.2
 equip_time = 0.45
 move_speed_mult = 1.0
+move_spread = 1.5
 recoil_pattern = PackedVector2Array(0, 0.56, 0.05, 0.64, -0.05, 0.72, 0.1, 0.72, 0.15, 0.64, 0.1, 0.56, -0.1, 0.48, -0.25, 0.4, -0.3, 0.32, -0.2, 0.24, 0.2, 0.24, 0.3, 0.16, 0.25, 0.16, -0.1, 0.16, -0.3, 0.16)
 recoil_recovery = 12.0
 recoil_recovery_delay = 0.08
