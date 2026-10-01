@@ -17,4 +17,5 @@ throw_lift = 3.0
 fuse_time = 2.0
 radius = 4.5
 damage = 105.0
+self_damage_mult = 0.5
 sticky = true

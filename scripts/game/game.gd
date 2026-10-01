@@ -281,6 +281,8 @@ func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, point: Vector3) -> vo
 		if receiver.has_method(&"can_take_damage") and not receiver.call(&"can_take_damage"):
 			continue
 		var amount: float = grenade_def.damage * (1.0 - distance / grenade_def.radius)
+		if receiver == thrower:
+			amount *= grenade_def.self_damage_mult
 		var killed: bool = receiver.call(&"take_hit", amount, Hitbox.Zone.BODY, thrower_id, grenade_def.display_name, false)
 		var dealt: float = receiver.get(&"last_damage_dealt")
 		if thrower != null and receiver != thrower and (dealt > 0.0 or killed):

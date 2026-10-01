@@ -13,6 +13,7 @@ enum Kind { FRAG, FLASH }
 @export var fuse_time: float = 2.5
 @export var radius: float = 5.0 ## Frag: damage radius. Flash: max blind distance.
 @export var damage: float = 100.0 ## Frag: damage at the centre, linear falloff to 0 at radius.
+@export var self_damage_mult: float = 1.0 ## Blast damage to the thrower is multiplied by this.
 @export var flash_duration: float = 3.0 ## Flash: seconds when looking straight at it up close.
 
 @export_group("Behaviour")
@@ -22,5 +23,6 @@ enum Kind { FRAG, FLASH }
 @export var arm_time: float = 0.0 ## Mine: seconds after it is thrown before it can trigger.
 @export var trigger_height: float = 1.2 ## Mine: a player's feet up to this far above it set it off.
 @export var trigger_depth: float = 0.5 ## Mine: ... or this far below it (mine on a step).
+@export var trigger_victim_damage: float = 0.0 ## Mine: dealt straight to whoever set it off, before the blast.
 @export var explode_on_fuse: bool = true ## False: when fuse_time runs out it just disappears.
 @export var max_per_thrower: int = 0 ## > 0: older ones of the same kind are removed (mines).

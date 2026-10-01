@@ -11,6 +11,8 @@ const GROUND_DRAG: float = 5.0 ## Per-second velocity loss while touching someth
 const SETTLE_SPEED: float = 0.4 ## Mine: frozen in place once it rests slower than this...
 const GROUND_PROBE: float = 0.25 ## ... on ground found this far below its centre (not on a wall).
 const WORLD_MASK: int = 1
+const BLINK_PERIOD: float = 0.8 ## Mine light: seconds per blink cycle (cosmetic).
+const BLINK_ON_SHARE: float = 0.35 ## Share of the cycle the light is on.
 
 var def: GrenadeDef
 var thrower_id: int = 0
@@ -20,6 +22,9 @@ var _age: float = 0.0
 var _stuck: bool = false
 var _stuck_player: Player = null
 var _stuck_local: Vector3 = Vector3.ZERO
+
+## Optional blinking light (Landmine scene), on every peer.
+@onready var _blink: Node3D = get_node_or_null(^"Blink") as Node3D
 
 
 ## Called on every peer by Game's spawn function, before the node enters the tree.
@@ -46,6 +51,11 @@ func _ready() -> void:
 		add_collision_exception_with(thrower)
 
 
+func _process(_delta: float) -> void:
+	if _blink != null:
+		_blink.visible = fmod(Time.get_ticks_msec() / 1000.0, BLINK_PERIOD) < BLINK_PERIOD * BLINK_ON_SHARE
+
+
 func _physics_process(delta: float) -> void:
 	if not multiplayer.is_server():
 		return
@@ -64,9 +74,12 @@ func _physics_process(delta: float) -> void:
 		else:
 			linear_velocity *= maxf(1.0 - GROUND_DRAG * delta, 0.0)
 
-	if def.trigger_radius > 0.0 and _age >= def.arm_time and _enemy_on_top():
-		_explode()
-		return
+	if def.trigger_radius > 0.0 and _age >= def.arm_time:
+		var victim: Player = _find_trigger_victim()
+		if victim != null:
+			_hit_trigger_victim(victim)
+			_explode()
+			return
 	_fuse_left -= delta
 	if _fuse_left <= 0.0:
 		if def.explode_on_fuse:
@@ -104,11 +117,11 @@ func _follow_anchor() -> void:
 	global_position = _stuck_player.to_global(_stuck_local)
 
 
-## Mine: is a living enemy (not the one who placed it) standing on or right next to it?
-func _enemy_on_top() -> bool:
+## Mine: the living enemy (not the one who placed it) standing on or right next to it, or null.
+func _find_trigger_victim() -> Player:
 	var game: Game = Game.find(get_tree())
 	if game == null:
-		return false
+		return null
 	for node: Node in game.players_root.get_children():
 		var target := node as Player
 		if target == null or target.get_multiplayer_authority() == thrower_id or not target.can_take_damage():
@@ -117,8 +130,18 @@ func _enemy_on_top() -> bool:
 		if offset.y < -def.trigger_depth or offset.y > def.trigger_height:
 			continue
 		if Vector2(offset.x, offset.z).length() <= def.trigger_radius:
-			return true
-	return false
+			return target
+	return null
+
+
+## Mine (GDD): whoever steps on it dies; the blast then hits everyone around.
+func _hit_trigger_victim(victim: Player) -> void:
+	if def.trigger_victim_damage <= 0.0:
+		return
+	var killed: bool = victim.take_hit(def.trigger_victim_damage, Hitbox.Zone.LEG, thrower_id, def.display_name)
+	var thrower: Player = _get_thrower()
+	if thrower != null and (victim.last_damage_dealt > 0.0 or killed):
+		thrower.confirm_hit.rpc_id(thrower_id, Hitbox.Zone.LEG, killed, victim.last_damage_dealt, victim.global_position)
 
 
 func _has_ground_below() -> bool:
