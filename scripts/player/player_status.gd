@@ -75,7 +75,7 @@ func server_kill_reward(heal: int, ammo: int) -> void:
 func server_activate_shield(seconds: float) -> void:
 	assert(multiplayer.is_server(), "server_activate_shield is host-only")
 	_shield_until = _now() + seconds
-	player.effects.server_set_shield(true)
+	player.shield_up = true # Replicated: everyone (late joiners too) sees the panel.
 
 
 func clear_shield() -> void:
@@ -83,7 +83,7 @@ func clear_shield() -> void:
 		return
 	_shield_until = 0.0
 	if multiplayer.is_server():
-		player.effects.server_set_shield(false)
+		player.shield_up = false
 
 
 ## Host: is a hit from `attacker_id` stopped by the raised shield?

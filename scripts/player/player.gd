@@ -37,6 +37,10 @@ var health: int = 0: set = _set_health
 var is_alive: bool = true: set = _set_alive
 ## Spawn protection (host-owned, replicated): no damage taken; firing ends it.
 var is_protected: bool = false: set = _set_protected
+## Host-owned, replicated (late joiners get it too): scope up -> others see the glint.
+var scope_glint: bool = false: set = _set_scope_glint
+## Host-owned, replicated: Bear's shield panel is up.
+var shield_up: bool = false: set = _set_shield_up
 ## Vertical look angle in radians. Yaw is the body's own rotation.y.
 var look_pitch: float = 0.0
 var weapons: Array[Weapon] = []
@@ -93,6 +97,8 @@ func _ready() -> void:
 	is_local = is_multiplayer_authority()
 	crown.visible = false
 	effects.setup()
+	effects.show_glint(scope_glint)
+	effects.show_shield(shield_up)
 	_apply_loadout()
 	if multiplayer.is_server():
 		health = class_def.max_health # Clients already got the real value from StateSync's spawn state.
@@ -349,6 +355,7 @@ func _grant_protection() -> void:
 func _die(killer_id: int) -> void:
 	is_alive = false
 	is_protected = false
+	scope_glint = false
 	status.reset_host()
 	var killer_health: int = 0
 	var killer := get_parent().get_node_or_null(str(killer_id)) as Player
@@ -446,8 +453,7 @@ func _apply_alive_state() -> void:
 		hitbox.set_enabled(is_alive)
 	model.visible = is_alive and not is_local
 	weapon_holder.visible = is_alive and is_local
-	if not is_alive:
-		effects.hide_glint()
+	effects.show_glint(scope_glint)
 
 
 func _set_health(value: int) -> void:
@@ -463,6 +469,18 @@ func _set_alive(value: bool) -> void:
 			status.reset_local()
 		_apply_alive_state()
 	alive_changed.emit(value)
+
+
+func _set_scope_glint(value: bool) -> void:
+	scope_glint = value
+	if is_node_ready():
+		effects.show_glint(value)
+
+
+func _set_shield_up(value: bool) -> void:
+	shield_up = value
+	if is_node_ready():
+		effects.show_shield(value)
 
 
 func _set_protected(value: bool) -> void:

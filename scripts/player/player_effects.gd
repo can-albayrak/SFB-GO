@@ -1,7 +1,8 @@
 class_name PlayerEffects
 extends Node
-## Host-announced visuals of one Player that everyone sees: Bear's shield panel, Hawk's
-## scope glint, grapple rope, decoy hologram and remote tracers. Never affects gameplay.
+## Visuals of one Player that everyone sees: Bear's shield panel and Hawk's scope glint
+## (both driven by replicated Player state, so late joiners see them too), grapple rope,
+## decoy hologram and remote tracers (host broadcasts). Never affects gameplay.
 ## Child node "Effects" of the player scene, so its RPC path is the same everywhere.
 
 const SHIELD_SIZE: Vector3 = Vector3(1.3, 1.7, 0.06)
@@ -34,15 +35,16 @@ func report_scoped(scoped: bool) -> void:
 	_request_scope.rpc_id(1, scoped)
 
 
-func hide_glint() -> void:
+## Player.scope_glint changed (every peer). Never on your own view or a dead body.
+func show_glint(scoped: bool) -> void:
 	if _glint != null:
-		_glint.visible = false
+		_glint.visible = scoped and not player.is_local and player.is_alive
 
 
-## Host: raises or lowers the shield panel on every peer.
-func server_set_shield(active: bool) -> void:
-	assert(multiplayer.is_server(), "server_set_shield is host-only")
-	Net.broadcast(self, &"_set_shield", [active])
+## Player.shield_up changed (every peer). The owner looks through their own shield.
+func show_shield(active: bool) -> void:
+	if _shield_visual != null:
+		_shield_visual.visible = active and not player.is_local
 
 
 ## Host: other peers draw this player's tracer.
@@ -113,26 +115,12 @@ func _sender_id() -> int:
 	return sender if sender != 0 else multiplayer.get_unique_id()
 
 
-## Owner -> host: scoped in or out. The host tells everyone (scope glint).
+## Owner -> host: scoped in or out. The host sets the replicated Player.scope_glint.
 @rpc("any_peer", "call_local", "reliable")
 func _request_scope(scoped: bool) -> void:
 	if not multiplayer.is_server() or _sender_id() != player.get_multiplayer_authority():
 		return
-	Net.broadcast(self, &"_on_scope_changed", [scoped and player.is_alive])
-
-
-@rpc("any_peer", "call_local", "reliable")
-func _on_scope_changed(scoped: bool) -> void:
-	if _sender_id() != 1:
-		return
-	_glint.visible = scoped and not player.is_local and player.is_alive
-
-
-@rpc("any_peer", "call_local", "reliable")
-func _set_shield(active: bool) -> void:
-	if _sender_id() != 1:
-		return
-	_shield_visual.visible = active and not player.is_local # The owner looks through their own shield.
+	player.scope_glint = scoped and player.is_alive
 
 
 @rpc("any_peer", "call_local", "reliable")
