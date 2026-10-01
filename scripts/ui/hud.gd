@@ -120,6 +120,8 @@ func _update_ability_label() -> void:
 	var ability: Ability = _player.ability
 	if ability == null:
 		ability_label.text = ""
+	elif _player.get_buff_left() > 0.0:
+		ability_label.text = "Q  %s  ACTIVE %.1f" % [ability.def.display_name, _player.get_buff_left()]
 	elif ability.is_ready():
 		ability_label.text = "Q  %s  READY" % ability.def.display_name
 	else:

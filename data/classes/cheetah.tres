@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ClassDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
+[ext_resource type="Resource" path="res://data/weapons/smg.tres" id="3_smg"]
+[ext_resource type="Resource" path="res://data/weapons/dual_pistols.tres" id="4_dual"]
+[ext_resource type="Resource" path="res://data/weapons/pistol.tres" id="5_pistol"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="6_move"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="7_knife"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="8_adef"]
+[ext_resource type="Resource" path="res://data/abilities/dash.tres" id="9_dash"]
+[ext_resource type="Resource" path="res://data/abilities/adrenaline.tres" id="10_adrenaline"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"cheetah"
+display_name = "Cheetah"
+max_health = 70
+move_speed = 7.6
+movement = ExtResource("6_move")
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_smg"), ExtResource("4_dual")])
+secondary_weapon = ExtResource("5_pistol")
+abilities = Array[ExtResource("8_adef")]([ExtResource("9_dash"), ExtResource("10_adrenaline")])
+quick_melee = ExtResource("7_knife")

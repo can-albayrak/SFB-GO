@@ -90,9 +90,14 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 		_start_reload()
 		return
 
-	_cooldown = def.fire_interval # Burst weapons: time between burst starts.
+	_cooldown = get_fire_interval() # Burst weapons: time between burst starts.
 	_burst_left = maxi(def.burst_count, 1)
 	_shoot_once()
+
+
+## Seconds between trigger pulls right now (Adrenaline shortens it).
+func get_fire_interval() -> float:
+	return def.fire_interval / player.get_fire_rate_mult()
 
 
 ## Owner: one more round in the magazine (a thrown knife came back).
@@ -113,7 +118,7 @@ func _shoot_once() -> void:
 	if def.uses_ammo:
 		ammo -= 1
 	_burst_left -= 1
-	_burst_timer = def.burst_interval
+	_burst_timer = def.burst_interval / player.get_fire_rate_mult()
 	_since_shot = 0.0
 	_fire() # Aim is read before the kick, so the first shot is always accurate.
 	_apply_recoil_kick()

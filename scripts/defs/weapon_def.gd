@@ -24,6 +24,9 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 @export var equip_time: float = 0.4
 @export var move_speed_mult: float = 1.0
 @export var uses_ammo: bool = true ## False = never runs dry (melee weapons).
+## Two guns sharing the magazine: left click fires the left, right click the right,
+## each with its own fire_interval (Dual Pistols).
+@export var dual_wield: bool = false
 
 @export_group("Recoil")
 ## Per-shot view kick in degrees: x = right, y = up. Shots past the end reuse the last entry.
@@ -64,7 +67,7 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 ## Average seconds per shot over sustained fire (host rate check). For bursts the
 ## trigger interval is shared by all shots of the burst.
 func get_average_shot_interval() -> float:
-	return fire_interval / maxi(burst_count, 1)
+	return fire_interval / maxi(burst_count, 1) / (2.0 if dual_wield else 1.0)
 
 
 ## Degrees of cone added by moving at `speed` m/s (gradual speed penalty).

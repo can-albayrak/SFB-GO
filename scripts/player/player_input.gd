@@ -6,6 +6,7 @@ extends Node
 const MAX_PITCH: float = deg_to_rad(89.0)
 
 var _suppress_fire: bool = false
+var _suppress_secondary: bool = false
 
 @onready var player: Player = get_parent()
 
@@ -35,6 +36,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# The click that recaptures the mouse must not also fire.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_suppress_fire = true
+		_suppress_secondary = true
 		get_viewport().set_input_as_handled()
 
 
@@ -48,7 +50,6 @@ func gather() -> PlayerCommand:
 	cmd.crouch = Input.is_action_pressed(&"crouch")
 	cmd.crouch_pressed = Input.is_action_just_pressed(&"crouch")
 	cmd.sprint = Input.is_action_pressed(&"sprint")
-	cmd.secondary = Input.is_action_pressed(&"secondary")
 	cmd.reload = Input.is_action_just_pressed(&"reload")
 	cmd.melee = Input.is_action_just_pressed(&"melee")
 	cmd.ability = Input.is_action_just_pressed(&"ability")
@@ -58,6 +59,11 @@ func gather() -> PlayerCommand:
 	if not _suppress_fire:
 		cmd.fire = Input.is_action_pressed(&"fire")
 		cmd.fire_pressed = Input.is_action_just_pressed(&"fire")
+	if _suppress_secondary and not Input.is_action_pressed(&"secondary"):
+		_suppress_secondary = false
+	if not _suppress_secondary:
+		cmd.secondary = Input.is_action_pressed(&"secondary")
+		cmd.secondary_pressed = Input.is_action_just_pressed(&"secondary")
 
 	if Input.is_action_just_pressed(&"weapon_primary"):
 		cmd.weapon_slot = 0

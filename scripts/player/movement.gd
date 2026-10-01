@@ -19,6 +19,8 @@ const GRAPPLE_STUCK_SPEED: float = 2.0 ## Pull ends when a wall stops us below t
 const GRAPPLE_STUCK_GRACE: float = 0.25
 const CHARGE_STUCK_SPEED: float = 2.0 ## Charge ends early when a wall stops us below this speed.
 const CHARGE_STUCK_GRACE: float = 0.15
+const DASH_STUCK_SPEED: float = 2.0 ## Dash ends early when a wall stops us below this speed.
+const DASH_STUCK_GRACE: float = 0.05
 const GRAPPLE_ACCEL: float = 40.0 ## m/s^2 toward the pull speed, so the start is not a hard snap.
 
 ## Touched the ground after being in the air (camera landing dip).
@@ -33,6 +35,8 @@ var def: MovementDef
 var base_speed: float = 6.0
 var is_crouched: bool = false
 var is_sliding: bool = false
+## Input direction of the last tick (world, flat); zero when no movement key is held.
+var last_wish_dir: Vector3 = Vector3.ZERO
 
 var _jump_buffer: float = 0.0
 var _coyote_left: float = 0.0
@@ -50,6 +54,10 @@ var _charge_dir: Vector3 = Vector3.ZERO
 var _charge_speed: float = 0.0
 var _charge_left: float = 0.0
 var _charge_time: float = 0.0
+var _dash_velocity: Vector3 = Vector3.ZERO
+var _dash_left: float = 0.0
+var _dash_time: float = 0.0
+var _dash_exit_speed: float = 0.0
 
 @onready var body: CharacterBody3D = get_parent()
 @onready var _capsule: CapsuleShape3D = collision.shape
@@ -63,6 +71,7 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	_fall_speed = 0.0 if on_floor else maxf(-body.velocity.y, 0.0)
 	_jump_buffer = def.jump_buffer_time if cmd.jump else maxf(_jump_buffer - delta, 0.0)
 	_slide_cooldown_left = maxf(_slide_cooldown_left - delta, 0.0)
+	last_wish_dir = _get_wish_dir(cmd.move)
 	if on_floor:
 		_coyote_left = def.coyote_time
 		_coyote_from_slide = is_sliding
@@ -74,6 +83,9 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	if _charge_left > 0.0:
 		_step_charge(delta)
 		return
+	if _dash_left > 0.0:
+		_step_dash(delta)
+		return
 
 	var vel: Vector3 = body.velocity
 	var hvel := Vector3(vel.x, 0.0, vel.z)
@@ -83,7 +95,7 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	hvel = _update_slide(delta, cmd, on_floor, hvel)
 	_update_crouch(cmd.crouch or is_sliding, on_floor)
 
-	var wish_dir: Vector3 = _get_wish_dir(cmd.move)
+	var wish_dir: Vector3 = last_wish_dir
 	var wish_speed: float = _get_wish_speed(cmd) if wish_dir != Vector3.ZERO else 0.0
 
 	if (on_floor or _coyote_left > 0.0) and _jump_buffer > 0.0:
@@ -133,6 +145,24 @@ func start_charge(dir: Vector3, speed: float, seconds: float) -> void:
 	is_sliding = false
 
 
+## Owner: Cheetah's Dash. A short flat burst along `dir` (also in the air, no gravity
+## during it); afterwards the horizontal speed is limited to `exit_speed` (0 = keep it).
+func start_dash(dir: Vector3, speed: float, seconds: float, exit_speed: float) -> void:
+	var flat := Vector3(dir.x, 0.0, dir.z)
+	if flat.length_squared() < 0.0001:
+		return
+	_dash_velocity = flat.normalized() * speed
+	_dash_left = seconds
+	_dash_time = 0.0
+	_dash_exit_speed = exit_speed
+	_grappling = false
+	is_sliding = false
+
+
+func is_dashing() -> bool:
+	return _dash_left > 0.0
+
+
 func is_grappling() -> bool:
 	return _grappling
 
@@ -144,6 +174,7 @@ func get_horizontal_speed() -> float:
 func reset() -> void:
 	_grappling = false
 	_charge_left = 0.0
+	_dash_left = 0.0
 	is_sliding = false
 	_jump_buffer = 0.0
 	_coyote_left = 0.0
@@ -177,6 +208,22 @@ func _step_charge(delta: float) -> void:
 	body.move_and_slide()
 	if _charge_time > CHARGE_STUCK_GRACE and Vector2(body.get_real_velocity().x, body.get_real_velocity().z).length() < CHARGE_STUCK_SPEED:
 		_charge_left = 0.0 # Ran into a wall.
+	_update_eye(delta)
+
+
+func _step_dash(delta: float) -> void:
+	_dash_left -= delta
+	_dash_time += delta
+	body.velocity = _dash_velocity
+	body.move_and_slide()
+	var real: Vector3 = body.get_real_velocity()
+	if _dash_time > DASH_STUCK_GRACE and Vector2(real.x, real.z).length() < DASH_STUCK_SPEED:
+		_dash_left = 0.0 # Ran into a wall.
+	if _dash_left <= 0.0:
+		var hvel := Vector3(body.velocity.x, 0.0, body.velocity.z)
+		if _dash_exit_speed > 0.0:
+			hvel = hvel.limit_length(_dash_exit_speed)
+		body.velocity = Vector3(hvel.x, 0.0, hvel.z)
 	_update_eye(delta)
 
 

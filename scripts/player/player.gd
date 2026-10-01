@@ -93,6 +93,14 @@ var _spawned_at: float = 0.0
 var _shield_until: float = 0.0 ## Host clock.
 var _stun_until: float = 0.0 ## Host clock.
 var _stun_left: float = 0.0 ## Owner: input is ignored while > 0.
+# Timed speed / fire rate boost (Adrenaline). The owner applies it to handling; the host
+# keeps its own copy on its clock for the speed and fire rate checks.
+var _buff_left: float = 0.0 ## Owner.
+var _buff_speed_mult: float = 1.0
+var _buff_fire_mult: float = 1.0
+var _host_buff_until: float = 0.0 ## Host clock.
+var _host_buff_speed_mult: float = 1.0
+var _host_buff_fire_mult: float = 1.0
 var _shield_visual: MeshInstance3D
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
@@ -162,7 +170,9 @@ func _physics_process(delta: float) -> void:
 	weapon_holder.visible = not is_scoped
 	if is_scoped:
 		cmd.sprint = false
-	movement.base_speed = class_def.move_speed * current_weapon.def.move_speed_mult 		* (current_weapon.def.scope_move_mult if is_scoped else 1.0)
+	_buff_left = maxf(_buff_left - delta, 0.0)
+	var scope_mult: float = current_weapon.def.scope_move_mult if is_scoped else 1.0
+	movement.base_speed = class_def.move_speed * current_weapon.def.move_speed_mult * get_speed_mult() * scope_mult
 	movement.physics_step(delta, cmd)
 
 	if melee_weapon != null:
@@ -293,6 +303,7 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	_spawned_at = _now()
 	_clear_shield()
 	_stun_until = 0.0
+	_host_buff_until = 0.0
 	health = class_def.max_health
 	is_alive = true
 	_grant_protection()
@@ -331,6 +342,7 @@ func _grant_protection() -> void:
 func _die(killer_id: int) -> void:
 	is_alive = false
 	is_protected = false
+	_host_buff_until = 0.0
 	_clear_shield()
 	var killer_health: int = 0
 	var killer := get_parent().get_node_or_null(str(killer_id)) as Player
@@ -495,7 +507,7 @@ func _submit_state(time: float, pos: Vector3, yaw: float, pitch: float, crouched
 ## cheating client freezes in place for everyone and its shots fail the origin check.
 func _is_plausible_move(pos: Vector3, life: int) -> bool:
 	var now: float = Time.get_ticks_usec() / 1_000_000.0
-	var max_speed: float = class_def.move_speed * class_def.movement.bhop_cap_mult * MOVE_SPEED_TOLERANCE
+	var max_speed: float = class_def.move_speed * _host_speed_mult() * class_def.movement.bhop_cap_mult * MOVE_SPEED_TOLERANCE
 	if life < _life:
 		return false
 	if not _has_valid_position:
@@ -589,7 +601,7 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 		return
 	if origin.distance_to(head.global_position) > MAX_FIRE_ORIGIN_ERROR:
 		return
-	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + weapon.def.get_average_shot_interval() * FIRE_RATE_TOLERANCE
+	_next_fire_time = maxf(_next_fire_time, now - FIRE_BURST_SLACK) + weapon.def.get_average_shot_interval() * FIRE_RATE_TOLERANCE / _host_fire_rate_mult()
 	if Match.state == Match.State.PLAYING:
 		is_protected = false # GDD: firing ends spawn protection.
 	var end_point: Vector3
@@ -685,6 +697,44 @@ func server_knockback(impulse: Vector3) -> void:
 func server_return_throwable() -> void:
 	assert(multiplayer.is_server(), "server_return_throwable is host-only")
 	_return_throwable.rpc_id(get_multiplayer_authority())
+
+
+## Owner: timed speed / fire rate boost (Adrenaline), applied to movement and weapons.
+func start_buff_local(seconds: float, speed_mult: float, fire_mult: float) -> void:
+	_buff_left = seconds
+	_buff_speed_mult = speed_mult
+	_buff_fire_mult = fire_mult
+
+
+## Host: the same boost on the host clock, so its speed and fire rate checks allow it.
+func server_start_buff(seconds: float, speed_mult: float, fire_mult: float) -> void:
+	assert(multiplayer.is_server(), "server_start_buff is host-only")
+	_host_buff_until = _now() + seconds
+	_host_buff_speed_mult = speed_mult
+	_host_buff_fire_mult = fire_mult
+
+
+## Owner: movement speed multiplier from an active boost.
+func get_speed_mult() -> float:
+	return _buff_speed_mult if _buff_left > 0.0 else 1.0
+
+
+## Owner: fire rate multiplier from an active boost (weapons divide their intervals by it).
+func get_fire_rate_mult() -> float:
+	return _buff_fire_mult if _buff_left > 0.0 else 1.0
+
+
+## Owner: seconds left on the boost (HUD).
+func get_buff_left() -> float:
+	return _buff_left
+
+
+func _host_speed_mult() -> float:
+	return _host_buff_speed_mult if _now() < _host_buff_until else 1.0
+
+
+func _host_fire_rate_mult() -> float:
+	return _host_buff_fire_mult if _now() < _host_buff_until else 1.0
 
 
 ## Host: is a hit from `attacker_id` stopped by the raised shield?
@@ -844,6 +894,7 @@ func _respawn_at(spawn_position: Vector3, yaw: float, life: int) -> void:
 		movement.reset()
 		_fall_reported = false
 		_stun_left = 0.0
+		_buff_left = 0.0
 		for weapon: Weapon in weapons:
 			weapon.refill()
 	_apply_pose(false)

@@ -9,4 +9,7 @@ extends Resource
 @export var max_range: float = 0.0 ## Grapple reach.
 @export var speed: float = 0.0 ## Grapple pull speed (m/s).
 @export var stun_time: float = 0.0 ## Charge: seconds the victim is stunned.
+@export var exit_speed: float = 0.0 ## Dash: horizontal m/s kept when the dash ends (0 = keep all).
+@export var speed_mult: float = 1.0 ## Adrenaline: movement speed multiplier while active.
+@export var fire_rate_mult: float = 1.0 ## Adrenaline: fire rate multiplier while active.
 @export var scene: PackedScene
