@@ -7,20 +7,25 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 ## Evde sıradaki oturum ("kaldığımız yerden devam")
 
-İki iş paralel yürür: Can oyunu test eder, Claude Blender'da çalışır (Blender MCP: Blender'da BlenderMCP → Connect).
+**Durum (2026-10-01 akşamı):** Her şey `cloud/design-pass` dalında, [PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açık, main'e merge edilmedi. Bu dalın kodu iş bilgisayarında yazıldı ve **Godot'ta hiç açılmadı** (sadece gdparse + statik kontrol + iki bağımsız inceleme). İlk iş doğrulama.
 
-1. **Can: `cloud/design-pass` testi** ([PR #1](https://github.com/can-albayrak/SFB-GO/pull/1) açıklamasındaki test listesi). İlk iş: projeyi editörde aç, Output'taki kırmızı hataları Claude'a yapıştır; yeni `.uid` dosyalarını commit et. Godot MCP evde çalışıyorsa Claude headless doğrulamayı da yapar.
-2. **Claude + Blender: karakter yüzü.** Can'ın verdiği Avaturn GLB'den sadece kafayı çıkar, poligonu azalt, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` altında, repoya girmez (`.gitignore`'da). 2 yüzle deneme.
-3. **Claude + Blender: AVM adayı.** [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod) indirilip `private_assets/` altında açılır: iç mekân var mı, ölçek, parçalar. Sonuç `docs/ASSETS.md`'ye işlenir.
-4. Test hatalarına göre düzeltmeler. 2026-10-01 kararlarından parlama, kill ödülü, mayın, yarı öz-hasar ve lobi/geç katılma sınıf seçimi **yazıldı (çalıştırılmadı, test listesine eklendi)**; yüz seçimi aşama 8'de, airdrop/pickup aşama 6'da:
-   - Hawk namlu parlaması: sadece dürbün açıkken, her yerden görünür.
-   - Kill ödülü: +20 can, elindeki silaha +15 mermi (airdrop silahlarına değil).
-   - Landmine: küçük alan ama basanı öldürür, yanıp sönen kırmızı ışık.
-   - Volcano patlayıcıları kendine yarı hasar.
-   - Lobide yüz + sınıf seçimi, ölünce ikisi de değişebilir, geç katılana katılırken sorulur (yüzler aşama 8'de gelince).
-   - Airdrop silahları aşama 6'da: Railgun (8, duvar deler, sınırsız menzil, tek atış), Minigun (200 × 15), Rocket (6, merkez 200, geri itme). Pickup'lar 45 sn'de yeniden çıkar, haritada 5–6 nokta.
+1. **Dalı al:** `git fetch` → `git checkout cloud/design-pass` → `git pull`.
+2. **Godot doğrulaması (Claude, Godot MCP ile ya da headless):**
+   - `godot --headless --path . --import` → Output'taki her `SCRIPT ERROR` / parse hatasını düzelt.
+   - **Otomatik test:** `godot --headless --path . res://tests/smoke_test.tscn` → `PASS` / `FAIL` satırları + `SMOKE TEST: x passed, y failed`. Her sınıfın her silahı mankene, yedek silah, V, Q güçleri, mayın, kill ödülü, elindeki silah, respawn, ayarlar ve lobi paneli. Test dosyasının kendisi de hiç çalışmadı; önce onun hatası çıkarsa onu düzelt.
+   - İki instance ağ testi: `--host` (lobiyi atlar) ve `--join=127.0.0.1` (loadout sormadan girer).
+   - Yeni `.gd.uid` dosyalarını commit et.
+3. **Can'ın oynama testi:** PR #1 açıklamasındaki madde madde test listesi (önce tek başına Test Range, sonra iki bilgisayar). Bölme commit'i `92f6d7b` (player.gd → NetSync / Requests / Status / Effects) sorun çıkarırsa tek başına geri alınabilir.
+4. **Paralelde Claude + Blender** (Blender'da BlenderMCP → Connect):
+   - Karakter yüzü: Can'ın Avaturn GLB'sinden sadece kafa, poligon azaltma, 512 px doku (GDD "Karakter yüzleri"). Ham dosyalar `private_assets/` (gitignore'da). 2 yüzle deneme.
+   - AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) (CC-BY, novusod): iç mekân var mı, ölçek, parçalar → `docs/ASSETS.md`.
+5. **Testler geçince:** PR #1'i merge et, aşama 5'i kapat (aşama sonu inceleme bu sefer Godot'ta doğrulanmış kodla), aşama 6'ya (pickup + airdrop) geç.
 
-Not: Harita blockout'u aşama 7; şimdilik sadece model incelemesi ve hazırlık.
+**Bu oturumda yazılanlar (hepsi çalıştırılmadı):** hareket hissi, kamera hissi + Settings paneli, vuruş hissi, denge, Cheetah, Volcano, lobi + last host, kill ödülü (+20 can / +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi, player.gd bölünmesi, geç katılana parlama/kalkan senkronu, başkalarının elinde doğru silah modeli, otomatik smoke test.
+
+**Henüz yazılmayan kararlar:** yüz seçimi (aşama 8, yüzler gelince), airdrop silahları ve pickup'lar (aşama 6; GDD'de değerler yazılı), HUD/menü yeni tasarımı (aşama 9; Claude Design taslağı "SFB:GO HUD ve Menü": HUD beğenildi, menüler sade nötr gri; GDD "Görsel referans").
+
+**Notlar:** Harita blockout'u aşama 7 (4–6 kişi ölçeği GDD'de). Dosya başına ~500–560 satır yeterli; `player.gd` 563.
 
 ## Aşamalar
 
@@ -150,7 +155,6 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Hız cezası dürbündeyken de geçerli (dürbünle yürürken Heavy/Marksman artık tam isabetli değil).
 - Serbest hava kontrolü `standard.tres` ile tüm sınıflara geçerli (Wolf/Hawk/Bear da Quake tarzı air strafe yerine serbest yön değiştirme alıyor).
 - Maç bitince lobiye dönülmez; eskisi gibi 10 sn sonra yeni maç başlar.
-- Geç katılan, o anda zaten dürbünü açık olan Hawk'ın parlamasını Hawk dürbünü kapatıp açana kadar görmez (yeni peer'a durum gönderilmiyor; oyuncu düğümü henüz o peer'da doğmamış olabileceği için ertelendi). Kalkan paneli için de aynısı.
 - Ölüm ekranındaki "öldürenin kalan canı" kill ödülünden önceki can.
 - Aşama 6 notu: airdrop silahlarının `.tres`'inde `kill_ammo_reward = false` olmalı (varsayılan true).
 - Geç katılma loadout ekranında Esc oyundan çıkar (henüz oyuncu yok, pause menüsü yok).
@@ -163,9 +167,9 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Shield hasar yönünü saldıranın konumundan hesaplıyor (bomba dahil), bu yüzden arkadan patlayan bomba önden sayılabilir.
 
 - Silah modeli duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
-- Uzak oyuncunun elindeki silah hep AR (silah değişimi senkronlanmıyor); tracer gözden çıkar. Model animasyonsuz, eğilince y'de basılır (aşama 8).
+- Uzak oyuncu modeli animasyonsuz, eğilince y'de basılır; elindeki silah artık doğru model (`held_slot`) ama tutuş pozu yok (aşama 8).
 - Lag compensation 400 ms'den yüksek gecikmede tam telafi etmez (bilinçli üst sınır).
-- Uzak oyuncunun elindeki model hep AR; bıçak savurma ve bomba atma başkalarına animasyon olarak görünmüyor (aşama 8).
+- Bıçak savurma ve bomba atma başkalarına animasyon olarak görünmüyor (aşama 8).
 
 - Anonslar (Double Kill vb.) yok: aşama 9 (ses).
 - Host mermi/şarjör takibi yapmıyor: hileli client şarjör değiştirmeden ateş edebilir (arkadaş arası, bilinçli olarak ertelendi).
@@ -206,3 +210,4 @@ _Henüz yok._
 | 2026-10-01 | – | Sadece tasarım: maç varsayılanı 20 kill / 10 dk (`default.tres`), kill ödülü, airdrop silah detayları, pickup 45 sn / 5–6 nokta, şirket devleti AVM'si, Hawk parlaması, mayın + Volcano yarı öz-hasar, lobide yüz + sınıf seçimi. GDD'ye işlendi; kodu evdeki oturumda. |
 | 2026-10-01 | 5 | (çalıştırılmadı) Kill ödülü (+20 can, +15 mermi), ölümcül mayın + yanıp sönen ışık, Volcano yarı öz-hasar, Hawk dürbün parlaması, lobide ve geç katılmada sınıf seçimi. `player.gd` 992 → 527 satır: NetSync / Requests / Status / Effects bileşenlerine bölündü (ayrı commit, sorun çıkarsa tek başına geri alınabilir). |
 | 2026-10-01 | – | Sadece tasarım: HUD/menü taslağı (ana menü, HUD, lobi, ölüm + loadout). Tema "lanetli PS2" (gündüz, parlak, fast-food, tel çit, yapıştırma yüzler); devlet teması kaldırıldı. Uygulama aşama 9. |
+| 2026-10-01 | 5 | (çalıştırılmadı) Geç katılana parlama/kalkan (StateSync `scope_glint`, `shield_up`), başkalarının elinde doğru silah (`held_slot` + WeaponDef `world_model`), `tests/smoke_test.tscn` otomatik testi. Evde devir planı bu dosyanın başında. |

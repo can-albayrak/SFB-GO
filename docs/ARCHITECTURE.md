@@ -55,6 +55,7 @@ sfb-go/
 │   └── maps/
 │       ├── test_range.tscn  # Test haritası + hedef mankenleri
 │       └── mall/            # İlk gerçek harita
+├── tests/                   # smoke_test.tscn: headless otomatik test (godot --headless --path . res://tests/smoke_test.tscn)
 ├── tools/                   # .gdignore; oyun dışı araçlar
 │   └── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
 └── assets/
@@ -113,7 +114,7 @@ sfb-go/
 | Oyuncu pozisyonu, bakış yönü, crouch, `life` | Sahibi `_submit_state` → host `_relay_state` → diğerleri `_receive_state`; `unreliable_ordered` RPC, sahibin saat damgasıyla | 30 Hz |
 | Diğer oyuncuların görüntüsü | Snapshot tamponu, ~100 ms geriden interpolasyon (`Player._interpolate_remote`) | Her frame |
 | Ateş etme | Sahibi `_request_fire(origin, dir, slot)` → host doğrular (hayatta mı, ateş hızı, origin ≤ 3 m sapma) → `server_fire` | Olay bazlı, reliable |
-| `health`, `is_alive` | `StateSync` (ON_CHANGE, spawn'da da gönderilir) | Değişince |
+| `health`, `is_alive`, `is_protected`, `loadout`, `scope_glint`, `shield_up`, `held_slot` | `StateSync` (ON_CHANGE, spawn'da da gönderilir; geç katılan da alır). Parlama ve elindeki silah sahibinin isteğiyle (`Requests._request_equip`, `Effects._request_scope`) host'ta değişir | Değişince |
 | Ölüm, yeniden doğma, hit onayı, uzak tracer | Host → `Net.broadcast` (`_announce_death`, `_respawn_at`, `_show_shot`, shotgun için `_on_pellets_fired`) / `confirm_hit(zone, killed, amount, point)` sadece atana (hit marker + hasar sayısı) / `_on_hurt(amount)` sadece vurulanın sahibine (kamera sarsıntısı) | Olay bazlı |
 
 - `life` sayacı her doğuşta artar; önceki hayattan geç gelen state paketleri atılır.
@@ -224,7 +225,7 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 ├── NetSync (Node)                  player_net_sync.gd – hareket senkronu (sahip → host → diğerleri), interpolasyon, host hız kontrolü
 ├── Requests (Node)                 player_requests.gd – sahip → host istekleri (ateş, V, Q, loadout, düşme) + host kontrolleri
 ├── Status (Node)                   player_status.gd – kalkan, stun, itme, Adrenaline, kill ödülü, bıçak iadesi (host saati + sahibe RPC)
-├── Effects (Node)                  player_effects.gd – herkesin gördüğü görseller: kalkan paneli, dürbün parlaması, ip, decoy, uzak tracer
+├── Effects (Node)                  player_effects.gd – herkesin gördüğü görseller: kalkan paneli, dürbün parlaması, eldeki silah modeli (`Model/Hand`, WeaponDef `world_model`), ip, decoy, uzak tracer
 ├── StateSync (MultiplayerSynchronizer)             – health, is_alive, is_protected, loadout; authority host (1)
 └── (Ability)                                       – aktif güç, loadout'tan kurulur
 
