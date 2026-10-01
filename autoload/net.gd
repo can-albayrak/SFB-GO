@@ -44,6 +44,8 @@ var lobby_map_index: int = 0
 
 var _local_name: String = ""
 var _join_address: String = ""
+## Bumped on every session change, so a pending lobby start from an old session gives up.
+var _session_serial: int = 0
 
 
 func _ready() -> void:
@@ -107,6 +109,12 @@ func server_start_match(kill_target: int, minutes: float, map_index: int) -> voi
 	if not in_lobby:
 		return
 	in_lobby = false
+	var serial: int = _session_serial
+	# Only these get welcomed below; anyone registering from now on takes the late-join path.
+	var lobby_peers: Array[int] = []
+	for peer_id: int in player_names:
+		if peer_id != 1:
+			lobby_peers.append(peer_id)
 	Match.configure(kill_target, minutes)
 	map_path = MAP_PATHS[clampi(map_index, 0, MAP_PATHS.size() - 1)]
 	get_tree().change_scene_to_file(GAME_PATH)
@@ -114,10 +122,10 @@ func server_start_match(kill_target: int, minutes: float, map_index: int) -> voi
 		if Game.find(get_tree()) != null:
 			break
 		await get_tree().process_frame
-	if not multiplayer.multiplayer_peer is ENetMultiplayerPeer or Game.find(get_tree()) == null:
-		return # Left (or the match failed to load) while waiting.
-	for peer_id: int in player_names:
-		if peer_id != 1 and peer_id not in ingame_peers:
+	if serial != _session_serial or Game.find(get_tree()) == null:
+		return # Left / re-hosted (or the match failed to load) while waiting.
+	for peer_id: int in lobby_peers:
+		if player_names.has(peer_id) and peer_id not in ingame_peers:
 			_welcome.rpc_id(peer_id, map_path)
 
 
@@ -154,6 +162,7 @@ func _reset_state() -> void:
 	map_path = DEFAULT_MAP_PATH
 	last_message = ""
 	in_lobby = false
+	_session_serial += 1
 	ready_peers.clear()
 	lobby_kill_target = 0
 	lobby_minutes = 0.0

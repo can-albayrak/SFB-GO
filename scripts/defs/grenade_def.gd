@@ -20,5 +20,7 @@ enum Kind { FRAG, FLASH }
 @export var sticky: bool = false ## Sticks to the first wall or player it touches (Sticky Bomb).
 @export var trigger_radius: float = 0.0 ## > 0: a mine; an enemy this close to it sets it off.
 @export var arm_time: float = 0.0 ## Mine: seconds after it is thrown before it can trigger.
+@export var trigger_height: float = 1.2 ## Mine: a player's feet up to this far above it set it off.
+@export var trigger_depth: float = 0.5 ## Mine: ... or this far below it (mine on a step).
 @export var explode_on_fuse: bool = true ## False: when fuse_time runs out it just disappears.
 @export var max_per_thrower: int = 0 ## > 0: older ones of the same kind are removed (mines).

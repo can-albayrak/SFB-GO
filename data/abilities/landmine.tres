@@ -19,5 +19,7 @@ radius = 4.0
 damage = 125.0
 trigger_radius = 1.0
 arm_time = 1.0
+trigger_height = 1.2
+trigger_depth = 0.5
 explode_on_fuse = false
 max_per_thrower = 1

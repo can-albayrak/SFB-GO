@@ -5,8 +5,8 @@ extends Resource
 
 @export_group("FOV Shift")
 @export var fov_shift_max: float = 4.0 ## Degrees (horizontal FOV, 4:3) added at full speed.
-@export var fov_shift_start_speed: float = 6.0 ## m/s; no shift at or below this.
-@export var fov_shift_full_speed: float = 10.0 ## m/s; the full shift at and above this.
+@export var fov_shift_start_speed: float = 7.0 ## m/s; no shift at or below this.
+@export var fov_shift_full_speed: float = 11.0 ## m/s; the full shift at and above this.
 @export var fov_shift_smoothing: float = 6.0 ## Per second.
 
 @export_group("Head Bob")

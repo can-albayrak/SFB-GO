@@ -104,6 +104,8 @@ var _host_buff_fire_mult: float = 1.0
 var _shield_visual: MeshInstance3D
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
+## Host: health removed by the last take_hit (0 when blocked by a shield or not allowed).
+var last_damage_dealt: float = 0.0
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -272,6 +274,7 @@ func can_take_damage() -> bool:
 ## Host only. Returns true if this hit killed.
 func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: String, is_melee: bool = false) -> bool:
 	assert(multiplayer.is_server(), "take_hit is host-only")
+	last_damage_dealt = 0.0
 	if not can_take_damage():
 		return false
 	if _shield_blocks(attacker_id):
@@ -281,6 +284,7 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 	_last_hit_zone = zone
 	var before: int = health
 	health = maxi(health - roundi(amount), 0)
+	last_damage_dealt = before - health
 	if health < before:
 		_on_hurt.rpc_id(get_multiplayer_authority(), before - health)
 	if health > 0:
@@ -381,6 +385,8 @@ func get_look_forward() -> Vector3:
 ## so the host (damage), the owner (handling) and viewers agree.
 func _apply_loadout() -> void:
 	class_def = Loadout.get_class_def(loadout)
+	_buff_left = 0.0 # A boost belongs to the class that used it.
+	_host_buff_until = 0.0
 	movement.def = class_def.movement
 
 	for weapon: Weapon in weapons:
@@ -462,6 +468,8 @@ func _set_health(value: int) -> void:
 
 func _set_alive(value: bool) -> void:
 	is_alive = value
+	if not value:
+		_buff_left = 0.0
 	if is_node_ready():
 		_apply_alive_state()
 	alive_changed.emit(value)

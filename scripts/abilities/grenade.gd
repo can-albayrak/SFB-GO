@@ -8,9 +8,9 @@ extends RigidBody3D
 
 const SPIN: float = 8.0
 const GROUND_DRAG: float = 5.0 ## Per-second velocity loss while touching something, so it does not skate.
-const SETTLE_SPEED: float = 0.4 ## Mine: frozen in place once it rests slower than this.
-const TRIGGER_HEIGHT: float = 1.2 ## Mine: a player's feet up to this far above it set it off.
-const TRIGGER_DEPTH: float = 0.5 ## ... or this far below it (mine on a step).
+const SETTLE_SPEED: float = 0.4 ## Mine: frozen in place once it rests slower than this...
+const GROUND_PROBE: float = 0.25 ## ... on ground found this far below its centre (not on a wall).
+const WORLD_MASK: int = 1
 
 var def: GrenadeDef
 var thrower_id: int = 0
@@ -27,7 +27,8 @@ func setup(grenade_def: GrenadeDef, thrower: int, velocity: Vector3) -> void:
 	def = grenade_def
 	thrower_id = thrower
 	linear_velocity = velocity
-	angular_velocity = Vector3(randf_range(-SPIN, SPIN), randf_range(-SPIN, SPIN), randf_range(-SPIN, SPIN))
+	if def.trigger_radius <= 0.0: # Mines fly flat so they land the right way up.
+		angular_velocity = Vector3(randf_range(-SPIN, SPIN), randf_range(-SPIN, SPIN), randf_range(-SPIN, SPIN))
 	_fuse_left = def.fuse_time
 	$Sync.set_multiplayer_authority(1)
 
@@ -57,7 +58,7 @@ func _physics_process(delta: float) -> void:
 			return
 		if def.sticky:
 			_stick()
-		elif def.trigger_radius > 0.0 and linear_velocity.length() < SETTLE_SPEED:
+		elif def.trigger_radius > 0.0 and linear_velocity.length() < SETTLE_SPEED and _has_ground_below():
 			_stuck = true # A mine stays where it came to rest.
 			freeze = true
 		else:
@@ -113,11 +114,16 @@ func _enemy_on_top() -> bool:
 		if target == null or target.get_multiplayer_authority() == thrower_id or not target.can_take_damage():
 			continue
 		var offset: Vector3 = target.global_position - global_position
-		if offset.y < -TRIGGER_DEPTH or offset.y > TRIGGER_HEIGHT:
+		if offset.y < -def.trigger_depth or offset.y > def.trigger_height:
 			continue
 		if Vector2(offset.x, offset.z).length() <= def.trigger_radius:
 			return true
 	return false
+
+
+func _has_ground_below() -> bool:
+	var query := PhysicsRayQueryParameters3D.create(global_position, global_position + Vector3.DOWN * GROUND_PROBE, WORLD_MASK)
+	return not get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 
 func _get_thrower() -> Player:

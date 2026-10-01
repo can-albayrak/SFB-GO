@@ -12,6 +12,8 @@ const DEAD_COLOR: Color = Color(0.55, 0.08, 0.08)
 @export var max_health: int = 100
 
 var health: float = 0.0
+## Host: damage taken by the last take_hit (same contract as Player.last_damage_dealt).
+var last_damage_dealt: float = 0.0
 
 var _material := StandardMaterial3D.new()
 
@@ -33,8 +35,10 @@ func sync_to_peer(peer_id: int) -> void:
 ## Host only. Returns true if this hit killed.
 func take_hit(amount: float, zone: Hitbox.Zone, _attacker_id: int, _weapon_name: String, _is_melee: bool = false) -> bool:
 	assert(multiplayer.is_server(), "take_hit is host-only")
+	last_damage_dealt = 0.0
 	if health <= 0.0:
 		return false
+	last_damage_dealt = amount
 	health -= amount
 	var killed: bool = health <= 0.0
 	Net.broadcast(self, &"_show_hit", [amount, zone, health])

@@ -68,9 +68,10 @@ func _hit_player(hitbox: Hitbox, point: Vector3) -> void:
 			and not (receiver.has_method(&"can_take_damage") and not receiver.call(&"can_take_damage")):
 		var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
 		var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, thrower_id, def.display_name, false)
+		var dealt: float = receiver.get(&"last_damage_dealt")
 		var thrower: Player = _get_thrower()
-		if thrower != null:
-			thrower.confirm_hit.rpc_id(thrower_id, hitbox.zone, killed, amount, point)
+		if thrower != null and (dealt > 0.0 or killed):
+			thrower.confirm_hit.rpc_id(thrower_id, hitbox.zone, killed, dealt, point)
 	# The knife is gone; it still returns when its timer would have run out.
 	var game: Game = Game.find(get_tree())
 	if game != null:

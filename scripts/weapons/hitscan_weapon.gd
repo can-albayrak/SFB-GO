@@ -59,4 +59,6 @@ func _apply_hit(hitbox: Hitbox, point: Vector3) -> void:
 	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
 	var shooter_id: int = player.get_multiplayer_authority()
 	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name)
-	player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed, amount, point)
+	var dealt: float = receiver.get(&"last_damage_dealt")
+	if dealt > 0.0 or killed: # A raised shield blocked it: no marker, no number.
+		player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed, dealt, point)

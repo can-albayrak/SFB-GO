@@ -27,7 +27,7 @@ func _fire() -> void:
 func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 	assert(multiplayer.is_server(), "server_fire is host-only")
 	last_pellet_ends = PackedVector3Array()
-	# Per target: [summed damage, best zone (HEAD < BODY < LEG), first hit point].
+	# Per target: [summed damage, damage per zone (indexed by Hitbox.Zone), first hit point].
 	var targets: Dictionary[Node, Array] = {}
 	for offset: Vector2 in def.pellet_pattern:
 		var pellet_dir: Vector3 = pellet_direction(dir, offset)
@@ -45,11 +45,12 @@ func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 			continue
 		var amount: float = def.damage * def.zone_multiplier(hitbox.zone) * def.get_falloff_mult(origin.distance_to(point))
 		if not targets.has(receiver):
-			targets[receiver] = [0.0, hitbox.zone, point]
+			targets[receiver] = [0.0, PackedFloat32Array([0.0, 0.0, 0.0]), point]
 		var entry: Array = targets[receiver]
 		entry[0] = float(entry[0]) + amount
-		if int(hitbox.zone) < int(entry[1]):
-			entry[1] = hitbox.zone
+		var by_zone: PackedFloat32Array = entry[1]
+		by_zone[int(hitbox.zone)] += amount
+		entry[1] = by_zone
 
 	var shooter_id: int = player.get_multiplayer_authority()
 	for receiver: Node in targets:
@@ -57,11 +58,22 @@ func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 			continue # Protected / dead / between matches: no damage, so no hit marker.
 		var entry: Array = targets[receiver]
 		var total: float = entry[0]
-		var zone: Hitbox.Zone = entry[1]
+		var zone: Hitbox.Zone = _main_zone(entry[1])
 		var point: Vector3 = entry[2]
 		var killed: bool = receiver.call(&"take_hit", total, zone, shooter_id, def.display_name)
-		player.confirm_hit.rpc_id(shooter_id, zone, killed, total, point)
+		var dealt: float = receiver.get(&"last_damage_dealt")
+		if dealt > 0.0 or killed: # A raised shield blocked it: no marker, no number.
+			player.confirm_hit.rpc_id(shooter_id, zone, killed, dealt, point)
 	return origin + dir * def.max_range
+
+
+## The zone that took the most damage: one stray head pellet does not make a headshot.
+static func _main_zone(by_zone: PackedFloat32Array) -> Hitbox.Zone:
+	var best: Hitbox.Zone = Hitbox.Zone.BODY
+	for zone: Hitbox.Zone in [Hitbox.Zone.HEAD, Hitbox.Zone.BODY, Hitbox.Zone.LEG]:
+		if by_zone[int(zone)] > by_zone[int(best)]:
+			best = zone
+	return best
 
 
 ## The direction of a pellet offset by (right, up) degrees from `dir`. Same math on every peer.

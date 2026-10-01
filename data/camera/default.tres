@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_def")
 fov_shift_max = 4.0
-fov_shift_start_speed = 6.0
-fov_shift_full_speed = 10.0
+fov_shift_start_speed = 7.0
+fov_shift_full_speed = 11.0
 fov_shift_smoothing = 6.0
 bob_height = 0.012
 bob_sway = 0.008
