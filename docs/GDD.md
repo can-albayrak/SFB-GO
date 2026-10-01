@@ -65,7 +65,17 @@ Hedef: **Apex gibi akıcı, CS gibi kesin**; savaş hiç durmasın. Aşağıdaki
 | Affedicilik | Coyote time (kenardan düştükten kısa süre sonra zıplama kabul edilir) ve jump buffer (yere değmeden hemen önce basılan zıplama saklanır) |
 | Kapsam dışı | Apex'in tap-strafe, wall-bounce, superglide gibi öğrenmesi zor teknikleri alınmaz |
 
-**Açık sorular (oynadıkça karar verilecek):** hız cezası eğrisi, hava ivmesi miktarı, coyote/buffer süreleri, kamera tepkileri (FOV kayması, iniş sarsıntısı, slide'da kamera alçalması).
+**Kamera ve his:** Hepsi hafif tutulur ve ayarlardan kapatılabilir/azaltılabilir; nişan tutarlılığı bozulmaz.
+
+| Konu | Karar |
+| --- | --- |
+| FOV kayması | Hızlandıkça FOV birkaç derece açılır (başlangıç ~+3–5°), slide ve tırmanışta belirgin. Ayarlardan kapatılır. |
+| Head bob | Çok az; ayarlardan kapatılır veya azaltılır. |
+| İniş | Zıplayıp inince küçük bir kamera çökmesi (iniş hissi). |
+| Slide kamerası | Kamera alçalır ve çok hafif yana yatar; yatma miktarı düşük. |
+| Hasar alınca | Hafif kamera sarsıntısı (bkz. Vuruş hissi). |
+
+**Açık sorular (oynadıkça karar verilecek):** hız cezası eğrisi, hava ivmesi miktarı, coyote/buffer süreleri, kamera değerlerinin tam miktarları.
 
 ### Vuruş hissi (hedef)
 
