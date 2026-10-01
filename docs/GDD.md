@@ -108,11 +108,11 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 | Sınıf | Can | Hız | Rol | Görünüm |
 | --- | --- | --- | --- | --- |
-| Hawk | 80 | Normal | Uzak mesafe, yüksek nokta | Uzun palto, gaz maskesi |
-| Bear | 175 | Biraz yavaş | Yakın dövüş tankı | Kaynaklı ev yapımı zırh, çevik kuvvet kaskı |
+| Hawk | 80 | Normal | Uzak mesafe, yüksek nokta | Uzun palto, boyun atkısı |
+| Bear | 175 | Biraz yavaş | Yakın dövüş tankı | Kaynaklı ev yapımı zırh, omuz ve kol koruyucuları |
 | Cheetah | 70 | Çok hızlı | Vur-kaç, hareket | Eşofman, kapüşon, koşu ayakkabısı |
 | Wolf | 100 | Normal | Dengeli, başlangıç sınıfı | Askeri yelek, bere |
-| Volcano | 110 | Biraz yavaş | Patlayıcı, alan kontrolü | Kirli koruyucu tulum, madenci kaskı |
+| Volcano | 110 | Biraz yavaş | Patlayıcı, alan kontrolü | Kirli koruyucu tulum, madenci kafa lambası (kask yok) |
 
 ### Hawk
 
@@ -236,6 +236,8 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 ## Görsel tarz ve performans
 
 Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku, sert ışık, hafif tuhaf detaylar. Karakterler normal insanlar.
+
+**Karakter yüzleri:** Her karakterin kafası **açık** olur (maske, kask yok; yüz hep görünür). Oyuncuların gerçek yüz fotoğraflarından üretilen kafalar kullanılacak (~10 kişi, izinler alındı). Önce 2 yüzle deneme; aşama 8. Ham fotoğraflar repoya girmez.
 
 - **Modeller:** Karakterler ~3–5 bin poligon, dokular ~512px fotoğraf tabanlı
 - **Atmosfer:** Turuncu-kırmızı gökyüzü, yoğun sis, baked ışık
