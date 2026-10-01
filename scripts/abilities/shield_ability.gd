@@ -4,4 +4,4 @@ extends Ability
 
 
 func server_use(_origin: Vector3, _dir: Vector3) -> void:
-	player.server_activate_shield(def.duration)
+	player.status.server_activate_shield(def.duration)

@@ -36,7 +36,7 @@ func _physics_process(delta: float) -> void:
 		var flat := Vector2(offset.x, offset.z)
 		if flat.length() > HIT_RADIUS or offset.normalized().dot(_dir) < BEHIND_TOLERANCE:
 			continue
-		target.server_stun(def.stun_time)
+		target.status.server_stun(def.stun_time)
 		player.confirm_hit.rpc_id(player.get_multiplayer_authority(), Hitbox.Zone.BODY, false, 0.0, me + offset)
 		_active_left = 0.0
 		return

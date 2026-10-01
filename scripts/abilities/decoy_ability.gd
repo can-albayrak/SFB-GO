@@ -4,4 +4,4 @@ extends Ability
 
 
 func server_use(_origin: Vector3, _dir: Vector3) -> void:
-	player.show_decoy(def.duration)
+	player.effects.show_decoy(def.duration)

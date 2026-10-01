@@ -5,8 +5,8 @@ extends Ability
 
 
 func _use_local(_origin: Vector3, _dir: Vector3) -> void:
-	player.start_buff_local(def.duration, def.speed_mult, def.fire_rate_mult)
+	player.status.start_buff_local(def.duration, def.speed_mult, def.fire_rate_mult)
 
 
 func server_use(_origin: Vector3, _dir: Vector3) -> void:
-	player.server_start_buff(def.duration, def.speed_mult, def.fire_rate_mult)
+	player.status.server_start_buff(def.duration, def.speed_mult, def.fire_rate_mult)

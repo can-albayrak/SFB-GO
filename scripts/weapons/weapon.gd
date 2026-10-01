@@ -97,7 +97,7 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 
 ## Seconds between trigger pulls right now (Adrenaline shortens it).
 func get_fire_interval() -> float:
-	return def.fire_interval / player.get_fire_rate_mult()
+	return def.fire_interval / player.status.get_fire_rate_mult()
 
 
 ## Owner: one more round in the magazine (a thrown knife came back).
@@ -118,7 +118,7 @@ func _shoot_once() -> void:
 	if def.uses_ammo:
 		ammo -= 1
 	_burst_left -= 1
-	_burst_timer = def.burst_interval / player.get_fire_rate_mult()
+	_burst_timer = def.burst_interval / player.status.get_fire_rate_mult()
 	_since_shot = 0.0
 	_fire() # Aim is read before the kick, so the first shot is always accurate.
 	_apply_recoil_kick()

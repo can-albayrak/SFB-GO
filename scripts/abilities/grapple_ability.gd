@@ -29,7 +29,7 @@ func server_use(origin: Vector3, dir: Vector3) -> void:
 	if hit.is_empty():
 		return
 	var point: Vector3 = hit["position"]
-	player.show_grapple(point, origin.distance_to(point) / maxf(def.speed, 0.1) + BEAM_EXTRA_TIME)
+	player.effects.show_grapple(point, origin.distance_to(point) / maxf(def.speed, 0.1) + BEAM_EXTRA_TIME)
 
 
 func _raycast(origin: Vector3, dir: Vector3) -> Dictionary:

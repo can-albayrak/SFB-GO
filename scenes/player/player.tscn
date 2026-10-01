@@ -6,6 +6,10 @@
 [ext_resource type="Script" path="res://scripts/player/player_input.gd" id="5_input"]
 [ext_resource type="PackedScene" path="res://assets/models/characters/soldier.glb" id="6_soldier"]
 [ext_resource type="PackedScene" path="res://assets/models/weapons/assault_rifle.glb" id="7_ar"]
+[ext_resource type="Script" path="res://scripts/player/player_net_sync.gd" id="8_netsync"]
+[ext_resource type="Script" path="res://scripts/player/player_requests.gd" id="9_requests"]
+[ext_resource type="Script" path="res://scripts/player/player_status.gd" id="10_status"]
+[ext_resource type="Script" path="res://scripts/player/player_effects.gd" id="11_effects"]
 
 [sub_resource type="CapsuleShape3D" id="Capsule_move"]
 resource_local_to_scene = true
@@ -129,6 +133,18 @@ head = NodePath("../Head")
 
 [node name="PlayerInput" type="Node" parent="."]
 script = ExtResource("5_input")
+
+[node name="NetSync" type="Node" parent="."]
+script = ExtResource("8_netsync")
+
+[node name="Requests" type="Node" parent="."]
+script = ExtResource("9_requests")
+
+[node name="Status" type="Node" parent="."]
+script = ExtResource("10_status")
+
+[node name="Effects" type="Node" parent="."]
+script = ExtResource("11_effects")
 
 [node name="StateSync" type="MultiplayerSynchronizer" parent="."]
 root_path = NodePath("..")

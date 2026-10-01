@@ -127,4 +127,4 @@ func _apply_melee_hit(hitbox: Hitbox, dir: Vector3, point: Vector3) -> void:
 	player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed, dealt, point)
 	if def.knockback > 0.0 and not killed and receiver is Player:
 		var flat := Vector3(dir.x, 0.0, dir.z).normalized()
-		(receiver as Player).server_knockback(flat * def.knockback + Vector3.UP * KNOCKBACK_LIFT)
+		(receiver as Player).status.server_knockback(flat * def.knockback + Vector3.UP * KNOCKBACK_LIFT)

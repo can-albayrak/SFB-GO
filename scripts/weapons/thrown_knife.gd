@@ -92,14 +92,14 @@ func _check_pickup() -> void:
 		return
 	var center: Vector3 = thrower.global_position + Vector3.UP * PICKUP_CENTER_HEIGHT
 	if center.distance_to(global_position) <= PICKUP_RADIUS:
-		thrower.server_return_throwable()
+		thrower.status.server_return_throwable()
 		queue_free()
 
 
 func _give_back() -> void:
 	var thrower: Player = _get_thrower()
 	if thrower != null:
-		thrower.server_return_throwable()
+		thrower.status.server_return_throwable()
 
 
 func _face(dir: Vector3) -> void:
