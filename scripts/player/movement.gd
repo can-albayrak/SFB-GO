@@ -317,7 +317,8 @@ func _air_accelerate(hvel: Vector3, wish_dir: Vector3, wish_speed: float, delta:
 	var add_speed: float = (wish_speed if free_air else minf(wish_speed, def.air_speed_cap)) - hvel.dot(wish_dir)
 	if add_speed <= 0.0:
 		return hvel
-	var result: Vector3 = hvel + wish_dir * minf(def.air_accel * wish_speed * delta, add_speed)
+	var accel: float = def.air_control_accel if free_air else def.air_accel
+	var result: Vector3 = hvel + wish_dir * minf(accel * wish_speed * delta, add_speed)
 	if not free_air:
 		return result # Quake strafing: the jump clamp limits the gain.
 	# Free air control may steer but never pushes past the horizontal cap (or the speed we already had).

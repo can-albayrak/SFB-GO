@@ -67,7 +67,7 @@ Hedef: **Apex gibi akıcı, CS gibi kesin**; savaş hiç durmasın. Aşağıdaki
 | Yerde frenleme | CS tarzı: hızlı ve sert durma (counter-strafe), kaygan değil |
 | Hız cezası | **Kademeli:** hız arttıkça isabet düşer. Net bir eşik yok; koşarken ateş imkânsız değil, sadece daha dağınık. Sınıfa göre ölçeklenir (Cheetah SMG koşarken isabetli kalır). |
 | Slide sonrası zıplama | Hız **korunur** (kazanç yok). Zamanlı slide + zıplama sürtünmeye hız kaybettirmez. |
-| Hava kontrolü | Şimdilik **serbest** hava ivmesi (strafe ile yön değiştirme), yatay hız tavanı (`max_speed * 1.3`) kalır. Oynadıkça güncellenecek. |
+| Hava kontrolü | Şimdilik **serbest** hava ivmesi (strafe ile yön değiştirme), yatay hız tavanı (`max_speed * 1.3`) kalır. İlk testte (Cheetah) havada fazla yön değişiyordu: hava ivmesi 10 → 3 (`air_control_accel`). Oynadıkça güncellenecek. |
 | Affedicilik | Coyote time (kenardan düştükten kısa süre sonra zıplama kabul edilir) ve jump buffer (yere değmeden hemen önce basılan zıplama saklanır) |
 | Kapsam dışı | Apex'in tap-strafe, wall-bounce, superglide gibi öğrenmesi zor teknikleri alınmaz |
 

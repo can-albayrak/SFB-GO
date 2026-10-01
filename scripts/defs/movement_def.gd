@@ -17,6 +17,9 @@ extends Resource
 ## Limits air gain per direction (Quake strafing). 0 = free air control: steer toward the
 ## full wish speed; the horizontal cap (base * bhop_cap_mult) still applies in the air.
 @export var air_speed_cap: float = 0.8
+## Free air control only (air_speed_cap = 0): air acceleration, used instead of air_accel.
+## Lower = heavier jumps, less steering mid-air (at 3 a fast class turns ~130 deg/s at full speed).
+@export var air_control_accel: float = 3.0
 @export var bhop_cap_mult: float = 1.3 ## Horizontal speed is clamped to base * this on every jump.
 @export var jump_buffer_time: float = 0.08 ## Jump pressed this early before landing still counts.
 @export var coyote_time: float = 0.0 ## Jump still allowed this long after running off a ledge.
