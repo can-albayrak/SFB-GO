@@ -315,7 +315,7 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 
 ## Test ve dağıtım
 
-- **Test:** Hasar sayısı gösteren hedef mankenleri. Bot yok.
+- **Test:** Hasar sayısı gösteren hedef mankenleri. Bot yok. Test Range'de güçlerin bekleme süresi yok ve şarjör bitmez (`data/match/test_range.tres`); airdrop gelince 5 sn'de bir iner (haritada her airdrop silahı zaten varsa inmez).
 - **Sesli iletişim:** Discord (oyun içi ses yok)
 - **Dağıtım:** GitHub gizli repo (kod) + Releases (oyun zip'i). Arkadaşlar collaborator olarak eklenir.
 - **Bağlantı:** Tailscale ile sanal LAN, host'un portu dışarı açmasına gerek yok.

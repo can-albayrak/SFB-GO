@@ -32,7 +32,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			game.test_respawn(player)
 	elif event.is_action_pressed(&"pause_menu") and captured:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	elif event is InputEventMouseButton and event.is_pressed() and not captured:
+	elif event is InputEventMouseButton and event.is_pressed() and not captured \
+			and (event as InputEventMouseButton).button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
 		# The click that recaptures the mouse must not also fire.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_suppress_fire = true

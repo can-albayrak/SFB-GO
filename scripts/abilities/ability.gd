@@ -26,6 +26,11 @@ func tick(delta: float) -> void:
 	cooldown_left = maxf(cooldown_left - delta, 0.0)
 
 
+## Seconds between uses under the current match rules (0 on the Test Range).
+func get_cooldown() -> float:
+	return def.cooldown if Match.rules.ability_cooldowns else 0.0
+
+
 func is_ready() -> bool:
 	return cooldown_left <= 0.0
 
@@ -34,7 +39,7 @@ func is_ready() -> bool:
 func try_use(origin: Vector3, dir: Vector3) -> bool:
 	if cooldown_left > 0.0:
 		return false
-	cooldown_left = def.cooldown
+	cooldown_left = get_cooldown()
 	_use_local(origin, dir)
 	return true
 
@@ -45,7 +50,7 @@ func server_try_use(origin: Vector3, dir: Vector3) -> bool:
 	var now: float = Time.get_ticks_msec() / 1000.0
 	if now < host_ready_at:
 		return false
-	host_ready_at = now + def.cooldown * HOST_COOLDOWN_TOLERANCE
+	host_ready_at = now + get_cooldown() * HOST_COOLDOWN_TOLERANCE
 	server_use(origin, dir)
 	return true
 

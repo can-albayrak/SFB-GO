@@ -115,7 +115,7 @@ func _on_last_host_pressed() -> void:
 
 func _on_test_range_pressed() -> void:
 	_save_name()
-	Match.configure(0, 0.0) # Practice: no kill or time limit.
+	Match.configure_test_range() # Practice: no limits, endless ammo, no cooldowns.
 	Net.start_offline(Settings.player_name)
 
 

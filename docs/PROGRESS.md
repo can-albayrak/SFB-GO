@@ -10,7 +10,7 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 **Durum:** Tek dal `main`. Aşama 5 kapandı: Godot'ta headless doğrulandı, Can oynadı (Cheetah, hareket, lobi iki pencere, Hawk parlaması), aşama sonu bağımsız inceleme yapıldı ve bulgular düzeltildi. Smoke test 88/0, ağ testi lobi + geç katılma 0 hata.
 
 0. **Görsel geçiş (sürüyor):** Can'ın oyunda bakıp yorumlaması: menüler, HUD, ekran filtresi, atmosfer, kollar/bacaklar. Sonra karakter ve silah modelleri (Blender), yüzler.
-1. **Aşama 6 – Pickup'lar ve airdrop:** GDD'deki değerlerle (pickup 45 sn / 5–6 nokta, airdrop 3. dakikadan sonra her 2–3 dk, airdrop silahları). Host-authoritative: pickup/airdrop kararları sadece host. Airdrop silahlarının `.tres`'inde `kill_ammo_reward = false`. Test haritasına geçici pickup / airdrop noktaları; yeni testler `smoke_test` ve `net_test`'e.
+1. **Aşama 6 – Pickup'lar ve airdrop:** Can'ın isteği: Test Range'de airdrop 5 sn'de bir insin, haritada her silah zaten varsa inmesin. GDD'deki değerlerle (pickup 45 sn / 5–6 nokta, airdrop 3. dakikadan sonra her 2–3 dk, airdrop silahları). Host-authoritative: pickup/airdrop kararları sadece host. Airdrop silahlarının `.tres`'inde `kill_ammo_reward = false`. Test haritasına geçici pickup / airdrop noktaları; yeni testler `smoke_test` ve `net_test`'e.
 2. **Paralelde (Can hazır olunca) Blender:** karakter yüzü denemesi (Avaturn GLB → sadece kafa, poligon azaltma, 512 px doku; ham dosyalar `private_assets/`), AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) kontrolü → `docs/ASSETS.md`.
 3. **Can'da bekleyen:** Bear ve Volcano'nun ayrıntılı oynanışı.
 
@@ -173,6 +173,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 - Silah modeli ve birinci şahıs kollar duvarlara girebiliyor (viewmodel ayrı render katmanı aşama 8/9'da).
 - Birinci şahıs kollar/bacaklar kutu yer tutucu; silah sallanması ve şarjör animasyonu yok, eller silaha sabit. Bacaklar yan yürürken de ileri-geri adım atar.
+- Dürbün katmanı ve ayarlar paneli 0×0 boyutta kalıyordu (dürbünde sadece zoom vardı): `set_anchors_and_offsets_preset` ile düzeldi. Ayarlarda listenin sonunda tekerlek oyuna dönüyordu: tekerlek artık fareyi yakalamaz.
 - Ekran filtresi HUD ve menüleri de etkiler (bilinçli: PS2 hissi); yazılar okunmazsa filtre ayarlardan kapatılır.
 - Uzak oyuncu modeli animasyonsuz, eğilince y'de basılır; elindeki silah artık doğru model (`held_slot`) ama tutuş pozu yok (aşama 8).
 - Lag compensation 400 ms'den yüksek gecikmede tam telafi etmez (bilinçli üst sınır).
@@ -193,6 +194,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya.
 
 - 2026-10-01 (Can, ilk test): Cheetah zor kontrol ediliyor, zıplarken akıyor, havada çok yön değişiyor. Serbest hava ivmesi 10 → 3 (`MovementDef.air_control_accel`, `standard.tres`, tüm sınıflar). Can: "daha iyi, gayet iyi".
+- 2026-10-01 (Can, ikinci tur): Dash 0,15 sn × 18 m/s → 0,25 sn × 22 m/s (2,7 → 5,5 m). Shotgun şarjörü 6 → 8. Grenade Launcher hasarı 95 → 81 (−%15). Mayın tetik yarıçapı 0,8 → 1,3 m, modeli ~1,7× büyüdü. Dürbünde hareket isabetsizliği: Heavy Rifle `move_spread` 3 → 6, Marksman 2 → 3,5 (CS gibi; dürbünde yürürken görüntü de bulanıklaşır).
 - 2026-10-01 (Can): Dual Pistols ateş aralığı 0,3 → 0,2 sn (tabanca başına; Cheetah'a TTK ~0,8 sn). SMG recoil deseni ×1,5.
 
 ## Oturum günlüğü
@@ -224,3 +226,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 5 | Hava ivmesi onaylandı. Dual Pistols daha hızlı (0,2 sn), SMG recoil ×1,5. |
 | 2026-10-01 | 5 → 6 | Parlama küçültüldü/kısıldı. Aşama sonu bağımsız inceleme: 11 bulgu düzeltildi (slot başına ateş bütçesi, bıçak iadesi, can doldurma açığı, knife ödülü, kalkan/loadout, mayın kurulması, stun, Start sonrası katılma, ölüm sonrası kalıntılar, hayat sayacı), Charge penceresi bilinen sorun. Smoke 88/0, ağ testi 0 hata. **Aşama 5 kapandı.** Sırada aşama 6. |
 | 2026-10-01 | görsel | İki PC testi geçti (aşama 2 bitti). Can'ın kararıyla görsel geçiş öne alındı: `Style` teması, taslağa göre ana menü / lobi / loadout / ayarlar / Esc / HUD / ölüm ekranı, soğuk atmosfer + kirli beton dokusu, PS2 ekran filtresi (ayarlardan kapanır, render ölçeği), birinci şahıs kollar ve bacaklar. `tests/ui_preview.tscn` ile ekran yakalama. Smoke 88/0, ağ testi 0 hata. |
+| 2026-10-01 | görsel | Can'ın ikinci turu: dürbün maskesi/nişangahı görünmüyordu (boyut 0) → düzeldi + hareket ederken bulanıklık ve daha fazla isabetsizlik; ayarlarda tekerlek menüyü kapatıyordu → düzeldi; Dash uzadı, shotgun 8 mermi, GL −%15, mayın büyüdü; Test Range: güç bekleme süresi yok, sınırsız mermi (`data/match/test_range.tres`). Airdrop aşama 6'da. |

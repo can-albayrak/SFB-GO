@@ -142,6 +142,8 @@ func _process(delta: float) -> void:
 	_pause_panel.visible = not captured and not loadout_menu.visible and not _settings_panel.visible
 	_speed_label.text = "%.1f m/s" % _player.movement.get_horizontal_speed()
 	_scope_overlay.active = _player.is_scoped
+	if _player.is_scoped:
+		_scope_overlay.set_motion(_player.velocity.length())
 	crosshair.visible = _player.is_alive and not _player.is_scoped
 	_update_health()
 	_update_ability()

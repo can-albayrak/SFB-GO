@@ -17,7 +17,7 @@ func try_use(origin: Vector3, dir: Vector3) -> bool:
 	var hit: Dictionary = _raycast(origin, dir)
 	if hit.is_empty():
 		return false
-	cooldown_left = def.cooldown
+	cooldown_left = get_cooldown()
 	var point: Vector3 = hit["position"]
 	var normal: Vector3 = hit["normal"]
 	player.movement.start_grapple(point + normal * ANCHOR_OUT + Vector3.UP * ANCHOR_UP, def.speed)

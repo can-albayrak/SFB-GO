@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MatchDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/match_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+kill_target = 0
+time_limit = 0.0
+respawn_delay = 3.0
+spawn_protection = 2.0
+end_screen_time = 10.0
+loadout_swap_window = 3.0
+kill_heal = 20
+kill_ammo = 15
+infinite_ammo = true
+ability_cooldowns = false

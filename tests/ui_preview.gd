@@ -42,7 +42,7 @@ func _open(screen: String) -> void:
 			root.add_child(center)
 			center.add_child(menu)
 			menu.open(Loadout.make(2, 0, 0))
-		"range", "death", "scoreboard", "down", "slide", "walk":
+		"range", "death", "scoreboard", "down", "slide", "walk", "scope":
 			Match.configure(20, 10.0)
 			Net.player_names.assign({1: "Can"})
 			Net.map_path = Net.DEFAULT_MAP_PATH
@@ -54,7 +54,7 @@ func _open(screen: String) -> void:
 				player.server_fall_death()
 			elif screen == "scoreboard":
 				Input.action_press(&"scoreboard")
-			elif player != null and screen in ["down", "slide", "walk"]:
+			elif player != null and screen in ["down", "slide", "walk", "scope"]:
 				_pose_body(player, screen)
 
 
@@ -68,6 +68,11 @@ func _pose_body(player: Player, screen: String) -> void:
 		"walk":
 			player.look_pitch = deg_to_rad(-45.0)
 			player.velocity = forward * 6.6
+		"scope":
+			player.loadout = Loadout.make(1, 0, 0)
+			player.is_scoped = true
+			player.weapon_holder.visible = false
+			player.velocity = forward * 2.5 # Walking while scoped: the view blurs.
 		"slide":
 			player.look_pitch = deg_to_rad(-5.0)
 			player.movement.is_sliding = true

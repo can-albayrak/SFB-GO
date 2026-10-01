@@ -13,6 +13,6 @@ throw_speed = 24.0
 throw_lift = 2.0
 fuse_time = 3.0
 radius = 4.0
-damage = 95.0
+damage = 81.0
 self_damage_mult = 0.5
 explode_on_impact = true

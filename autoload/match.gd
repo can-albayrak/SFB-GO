@@ -6,6 +6,7 @@ extends Node
 enum State { PLAYING, ENDED }
 
 const DEFAULT_RULES: MatchDef = preload("res://data/match/default.tres")
+const TEST_RANGE_RULES: MatchDef = preload("res://data/match/test_range.tres")
 
 var rules: MatchDef = DEFAULT_RULES.duplicate()
 var state: State = State.PLAYING
@@ -33,6 +34,11 @@ func configure(kill_target: int, time_limit_minutes: float) -> void:
 	rules = DEFAULT_RULES.duplicate()
 	rules.kill_target = kill_target
 	rules.time_limit = time_limit_minutes * 60.0
+
+
+## Offline Test Range: no limits, endless magazines, abilities always ready.
+func configure_test_range() -> void:
+	rules = TEST_RANGE_RULES.duplicate()
 
 
 func has_time_limit() -> bool:
