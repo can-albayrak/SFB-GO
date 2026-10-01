@@ -42,7 +42,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 | --- | --- |
 | Hareket | Hafif bunny hop (zamanlı zıplamada hız korunur, sonsuz hızlanma yok), crouch, slide (koşarken crouch). Düşme hasarı yok. |
 | Nişan | Nişan (ADS) modu yok, yalnızca Hawk'ın dürbünü |
-| Hasar | Kafa 2x, bacak 0,75x. Hawk Heavy Rifle her yerden tek atış. |
+| Hasar | Kafa 2x, bacak 0,75x. Hawk Heavy Rifle kafa ve gövdeden tek atış (bacak hariç). |
 | Mermi tipi | Mermili silahlar hitscan; bomba, roket, grenade launcher ve fırlatma bıçağı fiziksel mermi |
 | Geri tepme | Her silahta sabit, öğrenilebilir desen; CS'ten belirgin şekilde hafif |
 | Can | Yenilenme yok, yalnızca Health pickup |
@@ -94,6 +94,8 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Mevcut durum | Wolf Assault Rifle şu an ~0,4 sn gövde TTK (20 hasar, 0,1 sn aralık); hedefin altında hızlı. Değerler `data/weapons/` içinde ayarlanacak, kod değişmez. |
 | Silah kimliği | Silahlar en çok **ateş ritmi ve sesle** ayrılır: SMG sık ve ince, Heavy Rifle yavaş ve tok, Shotgun tek patlama. Hasar/TTK birbirine yakın tutulur, fark his ve ritimdedir (menzil rolü dar tutulur, istisna: Shotgun yakın, Marksman/Heavy uzak). |
 | Geri tepme | Mevcut karar korunur: her silahta sabit, öğrenilebilir desen; CS'ten hafif. |
+| Heavy Rifle | Tek atış kafa/gövdede kalır, **bacakta öldürmez** (bacak vuruşu yüksek hasar verir ama can bırakır). Uygulama: `heavy_rifle.tres` içinde bacak çarpanı. |
+| Bear | Her mesafede orta güçlü; hız cezası az. Dar alanlarda güçlü kalır ama açıkta tamamen çaresiz değildir. Yakın dövüş kimliği korunur, ağır silahlar (Chainsaw) hâlâ yavaşlatır. |
 
 **Not:** Kafa vuruşu (2x) TTK'yı yarıya indirir; bu, nişan becerisinin ödülü olarak kalır. Hawk Heavy Rifle'ın tek atışı bu TTK hedefinin dışındadır (kasıtlı istisna).
 
@@ -121,7 +123,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Sınıf | Can | Hız | Rol | Görünüm |
 | --- | --- | --- | --- | --- |
 | Hawk | 80 | Normal | Uzak mesafe, yüksek nokta | Uzun palto, boyun atkısı |
-| Bear | 175 | Biraz yavaş | Yakın dövüş tankı | Kaynaklı ev yapımı zırh, omuz ve kol koruyucuları |
+| Bear | 175 | Hafif yavaş (hız cezası az) | Yakın dövüş tankı, her mesafede orta güçlü | Kaynaklı ev yapımı zırh, omuz ve kol koruyucuları |
 | Cheetah | 70 | Çok hızlı | Vur-kaç, hareket | Eşofman, kapüşon, koşu ayakkabısı |
 | Wolf | 100 | Normal | Dengeli, başlangıç sınıfı | Askeri yelek, bere |
 | Volcano | 110 | Biraz yavaş | Patlayıcı, alan kontrolü | Kirli koruyucu tulum, madenci kafa lambası (kask yok) |
@@ -130,7 +132,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 | Silah | Hasar | Not |
 | --- | --- | --- |
-| Heavy Rifle | Her yerden tek atış | 1,5 sn kurma, yavaş şarjör |
+| Heavy Rifle | Kafa ve gövdeden tek atış, bacak vuruşu öldürmez | 1,5 sn kurma, yavaş şarjör |
 | Marksman Rifle | Kafa 1, gövde 2, bacak 3 atış | Hızlı atış ve şarjör, belirgin geri tepme |
 
 - **Güçler (15 sn):** Grapple (yüksek noktaya çekilme) · Decoy (yerinde hologram bırakma)
