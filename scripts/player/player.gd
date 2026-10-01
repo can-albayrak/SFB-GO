@@ -94,6 +94,8 @@ var _shield_until: float = 0.0 ## Host clock.
 var _stun_until: float = 0.0 ## Host clock.
 var _stun_left: float = 0.0 ## Owner: input is ignored while > 0.
 var _shield_visual: MeshInstance3D
+## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
+var _camera_feel: CameraFeel
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -130,6 +132,8 @@ func _ready() -> void:
 		camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 		camera.fov = Settings.get_vertical_fov()
 		camera.current = true
+		_camera_feel = CameraFeel.new()
+		movement.landed.connect(_camera_feel.on_landed)
 		Events.local_player_spawned.emit(self)
 	else:
 		# Remote players are placed in _process from snapshots.
@@ -188,8 +192,11 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	if is_local:
+		_camera_feel.update(delta, movement, is_scoped)
 		var eye: Vector3 = head.get_global_transform_interpolated().origin
-		camera.global_transform = Transform3D(_look_basis(current_weapon.get_view_recoil() + _get_scope_sway()), eye)
+		eye += Vector3.UP * _camera_feel.vertical + global_basis.x * _camera_feel.lateral
+		var view: Basis = _look_basis(current_weapon.get_view_recoil() + _get_scope_sway() + _camera_feel.shake)
+		camera.global_transform = Transform3D(view * Basis(Vector3.BACK, _camera_feel.roll), eye)
 		camera.fov = lerpf(camera.fov, _get_target_fov(), minf(SCOPE_FOV_LERP * delta, 1.0))
 	else:
 		_interpolate_remote(delta)
@@ -232,10 +239,9 @@ func _get_scope_sway() -> Vector2:
 
 
 func _get_target_fov() -> float:
-	var fov: float = Settings.get_vertical_fov()
 	if not is_scoped:
-		return fov
-	return rad_to_deg(2.0 * atan(tan(deg_to_rad(fov) * 0.5) / get_zoom()))
+		return Settings.get_vertical_fov(_camera_feel.fov_extra if _camera_feel != null else 0.0)
+	return rad_to_deg(2.0 * atan(tan(deg_to_rad(Settings.get_vertical_fov()) * 0.5) / get_zoom()))
 
 
 ## Own body and hitboxes, so our rays never hit ourselves.
@@ -263,7 +269,10 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 	_last_hit_weapon = weapon_name
 	_last_hit_melee = is_melee
 	_last_hit_zone = zone
+	var before: int = health
 	health = maxi(health - roundi(amount), 0)
+	if health < before:
+		_on_hurt.rpc_id(get_multiplayer_authority(), before - health)
 	if health > 0:
 		return false
 	_die(attacker_id)
@@ -731,6 +740,14 @@ func _receive_stun(seconds: float) -> void:
 		return
 	_stun_left = seconds
 	Events.local_stunned.emit(seconds)
+
+
+## Host -> victim's owner: damage taken. Drives the camera shake (visual only, aim unchanged).
+@rpc("any_peer", "call_local", "unreliable")
+func _on_hurt(amount: int) -> void:
+	if not _sender_is_host() or not is_local or _camera_feel == null:
+		return
+	_camera_feel.add_shake(amount)
 
 
 @rpc("any_peer", "call_local", "reliable")

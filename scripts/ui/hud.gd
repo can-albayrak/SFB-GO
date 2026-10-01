@@ -2,7 +2,7 @@ extends CanvasLayer
 ## In-game HUD for the local player: health, ammo, weapon, crosshair, hit marker,
 ## match timer, kill feed, Tab scoreboard, spawn protection, death and end-of-match
 ## screens, loadout menu (B / on death), ability cooldown, flashbang white-out,
-## and the Esc panel (resume / leave).
+## and the Esc panel (resume / settings / leave).
 ## The speed readout is a tuning aid for bunny hop / slide.
 
 ## Flash white-out stays solid for this share of its duration, then fades.
@@ -17,6 +17,7 @@ var _flash_total: float = 0.0
 var _scope_overlay: ScopeOverlay
 var _stun_label: Label
 var _stun_left: float = 0.0
+var _settings_panel: SettingsPanel
 
 @onready var crosshair: Crosshair = $Crosshair
 @onready var health_label: Label = $HealthLabel
@@ -34,6 +35,7 @@ var _stun_left: float = 0.0
 @onready var pause_panel: Control = $PausePanel
 @onready var resume_button: Button = %ResumeButton
 @onready var leave_button: Button = %LeaveButton
+@onready var settings_button: Button = %SettingsButton
 @onready var loadout_menu: LoadoutMenu = $LoadoutMenu
 @onready var ability_label: Label = $AbilityLabel
 @onready var next_spawn_label: Label = $NextSpawnLabel
@@ -62,6 +64,9 @@ func _ready() -> void:
 	Events.local_flashed.connect(_on_local_flashed)
 	resume_button.pressed.connect(_on_resume_pressed)
 	leave_button.pressed.connect(_on_leave_pressed)
+	_settings_panel = SettingsPanel.new()
+	add_child(_settings_panel) # Last child: drawn over the pause panel.
+	settings_button.pressed.connect(_settings_panel.open)
 	loadout_menu.confirmed.connect(_on_loadout_confirmed)
 	death_label.visible = false
 	protected_label.visible = false
@@ -72,6 +77,10 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _settings_panel.visible and event.is_action_pressed(&"pause_menu"):
+		_settings_panel.close()
+		get_viewport().set_input_as_handled()
+		return
 	if not is_instance_valid(_player):
 		return
 	if event.is_action_pressed(&"class_menu"):
@@ -97,7 +106,9 @@ func _process(delta: float) -> void:
 	var captured: bool = Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	if loadout_menu.visible and captured:
 		_close_loadout_menu() # Mouse was recaptured by clicking the game.
-	pause_panel.visible = not captured and not loadout_menu.visible
+	if _settings_panel.visible and captured:
+		_settings_panel.close()
+	pause_panel.visible = not captured and not loadout_menu.visible and not _settings_panel.visible
 	speed_label.text = "%.1f m/s" % _player.movement.get_horizontal_speed()
 	_scope_overlay.active = _player.is_scoped
 	crosshair.visible = _player.is_alive and not _player.is_scoped

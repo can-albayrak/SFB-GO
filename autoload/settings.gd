@@ -1,6 +1,10 @@
 extends Node
 ## Local user settings: name, last loadout, FOV, sensitivity, crosshair (graphics/keys later).
-## Persisted to user://settings.cfg; a settings menu comes in stage 9.
+## Persisted to user://settings.cfg; edited in SettingsPanel (main menu and Esc menu).
+
+## A value changed in the settings panel (crosshair redraws, etc.).
+@warning_ignore("unused_signal")
+signal changed
 
 const CS_DEG_PER_COUNT: float = 0.022
 const PATH: String = "user://settings.cfg"
@@ -23,13 +27,21 @@ var crosshair_gap: float = 4.0
 var crosshair_thickness: float = 2.0
 var crosshair_dot: bool = false
 
+## Camera feel, each 0 (off) .. 1 (full, as tuned in data/camera/default.tres).
+var camera_fov_shift: float = 1.0
+var camera_head_bob: float = 1.0
+var camera_landing: float = 1.0
+var camera_slide: float = 1.0
+var camera_damage_shake: float = 1.0
+
 
 func _ready() -> void:
 	load_settings()
 
 
-func get_vertical_fov() -> float:
-	var half_h: float = deg_to_rad(fov) * 0.5
+## `extra` = degrees added to the horizontal FOV first (camera speed shift).
+func get_vertical_fov(extra: float = 0.0) -> float:
+	var half_h: float = deg_to_rad(clampf(fov + extra, 1.0, 170.0)) * 0.5
 	return rad_to_deg(2.0 * atan(tan(half_h) * 0.75))
 
 
@@ -52,6 +64,11 @@ func load_settings() -> void:
 	crosshair_gap = _read(config, "crosshair", "gap", crosshair_gap)
 	crosshair_thickness = _read(config, "crosshair", "thickness", crosshair_thickness)
 	crosshair_dot = _read(config, "crosshair", "dot", crosshair_dot)
+	camera_fov_shift = _read(config, "camera", "fov_shift", camera_fov_shift)
+	camera_head_bob = _read(config, "camera", "head_bob", camera_head_bob)
+	camera_landing = _read(config, "camera", "landing", camera_landing)
+	camera_slide = _read(config, "camera", "slide", camera_slide)
+	camera_damage_shake = _read(config, "camera", "damage_shake", camera_damage_shake)
 
 
 ## A hand-edited file with a wrong type falls back to the current value instead of erroring.
@@ -77,4 +94,9 @@ func save_settings() -> void:
 	config.set_value("crosshair", "gap", crosshair_gap)
 	config.set_value("crosshair", "thickness", crosshair_thickness)
 	config.set_value("crosshair", "dot", crosshair_dot)
+	config.set_value("camera", "fov_shift", camera_fov_shift)
+	config.set_value("camera", "head_bob", camera_head_bob)
+	config.set_value("camera", "landing", camera_landing)
+	config.set_value("camera", "slide", camera_slide)
+	config.set_value("camera", "damage_shake", camera_damage_shake)
 	config.save(PATH)

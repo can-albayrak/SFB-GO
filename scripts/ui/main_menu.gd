@@ -12,6 +12,7 @@ static var _command_line_handled: bool = false
 @onready var join_button: Button = %JoinButton
 @onready var test_range_button: Button = %TestRangeButton
 @onready var quit_button: Button = %QuitButton
+@onready var settings_button: Button = %SettingsButton
 @onready var status_label: Label = %StatusLabel
 @onready var kill_target_spin: SpinBox = %KillTargetSpin
 @onready var time_limit_spin: SpinBox = %TimeLimitSpin
@@ -29,6 +30,9 @@ func _ready() -> void:
 	join_button.pressed.connect(_on_join_pressed)
 	test_range_button.pressed.connect(_on_test_range_pressed)
 	quit_button.pressed.connect(get_tree().quit)
+	var settings_panel := SettingsPanel.new()
+	add_child(settings_panel)
+	settings_button.pressed.connect(settings_panel.open)
 	_handle_command_line()
 
 

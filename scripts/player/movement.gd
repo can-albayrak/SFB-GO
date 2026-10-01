@@ -21,6 +21,9 @@ const CHARGE_STUCK_SPEED: float = 2.0 ## Charge ends early when a wall stops us 
 const CHARGE_STUCK_GRACE: float = 0.15
 const GRAPPLE_ACCEL: float = 40.0 ## m/s^2 toward the pull speed, so the start is not a hard snap.
 
+## Touched the ground after being in the air (camera landing dip).
+signal landed(fall_speed: float)
+
 @export var collision: CollisionShape3D
 @export var head: Node3D
 
@@ -34,6 +37,8 @@ var is_sliding: bool = false
 var _jump_buffer: float = 0.0
 var _coyote_left: float = 0.0
 var _coyote_from_slide: bool = false ## Was sliding on the last tick on the ground.
+var _was_on_floor: bool = true
+var _fall_speed: float = 0.0
 var _slide_left: float = 0.0
 var _slide_cooldown_left: float = 0.0
 var _eye_height: float = STAND_EYE
@@ -52,6 +57,10 @@ var _charge_time: float = 0.0
 
 func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	var on_floor: bool = body.is_on_floor()
+	if on_floor and not _was_on_floor:
+		landed.emit(_fall_speed)
+	_was_on_floor = on_floor
+	_fall_speed = 0.0 if on_floor else maxf(-body.velocity.y, 0.0)
 	_jump_buffer = def.jump_buffer_time if cmd.jump else maxf(_jump_buffer - delta, 0.0)
 	_slide_cooldown_left = maxf(_slide_cooldown_left - delta, 0.0)
 	if on_floor:
@@ -139,6 +148,8 @@ func reset() -> void:
 	_jump_buffer = 0.0
 	_coyote_left = 0.0
 	_coyote_from_slide = false
+	_was_on_floor = true
+	_fall_speed = 0.0
 	_slide_left = 0.0
 	set_crouch_shape(false)
 	_eye_height = STAND_EYE

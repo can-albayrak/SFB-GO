@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="CameraFeelDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/camera_feel_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+fov_shift_max = 4.0
+fov_shift_start_speed = 6.0
+fov_shift_full_speed = 10.0
+fov_shift_smoothing = 6.0
+bob_height = 0.012
+bob_sway = 0.008
+bob_cycles_per_metre = 0.28
+bob_ref_speed = 6.6
+bob_blend = 8.0
+landing_dip = 0.07
+landing_min_fall_speed = 3.0
+landing_full_fall_speed = 10.0
+landing_recover = 9.0
+landing_follow = 25.0
+slide_drop = 0.08
+slide_tilt = 2.5
+slide_smoothing = 10.0
+shake_angle = 0.7
+shake_full_damage = 40.0
+shake_min_share = 0.35
+shake_time = 0.18
+shake_frequency = 30.0
