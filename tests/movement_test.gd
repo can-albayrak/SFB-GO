@@ -57,6 +57,7 @@ func _load_map(path: String) -> bool:
 	if _player == null:
 		return false
 	_player.set_physics_process(false) # The test feeds the commands.
+	_player.loadout = Loadout.default_code() # Not the tester's saved class: results must not depend on it.
 	return true
 
 
@@ -89,9 +90,15 @@ func _test_stairs_down() -> void:
 
 
 func _test_too_high() -> void:
-	# The 0.6 m block at x -31, z -21 .. -23.
-	var stats: Dictionary = await _walk(Vector3(-31.0, 0.05, -18.0), 0.0, Vector3(-31.0, 0.0, -22.0), 2.0)
-	_check(not stats.reached and _player.global_position.y < 0.3, "does not step onto a 0.6 m block")
+	# The 0.6 m block at x -31, z -21 .. -23. Every class: a fast run (Cheetah) once climbed
+	# it in two steps, resting the capsule's rounded bottom on the edge first.
+	var classes: Array[ClassDef] = Loadout.roster().classes
+	for i: int in classes.size():
+		_player.loadout = Loadout.make(i, 0, 0)
+		var stats: Dictionary = await _walk(Vector3(-31.0, 0.05, -18.0), 0.0, Vector3(-31.0, 0.0, -22.0), 2.0)
+		_check(not stats.reached and _player.global_position.y < 0.3,
+			"%s does not step onto a 0.6 m block" % classes[i].display_name)
+	_player.loadout = Loadout.default_code()
 
 
 func _test_mall_ramps() -> void:

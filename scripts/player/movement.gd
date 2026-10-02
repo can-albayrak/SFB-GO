@@ -30,6 +30,7 @@ const STEP_PROBE_INSET: float = 0.03 ## Metres past the step's edge where its to
 const STEP_PROBE_HEIGHT: float = 0.05
 ## Metres: a step moves at least this far forward, so the capsule ends over the step
 ## instead of perched on its edge (a tilted contact that is not floor).
+const STEP_TOP_TOLERANCE: float = 0.03 ## Metres a step top may sit above step_height (contact rounding).
 const STEP_MIN_FORWARD: float = 0.15
 
 ## Touched the ground after being in the air (camera landing dip).
@@ -193,6 +194,11 @@ func _find_step(start: Transform3D, motion: Vector3) -> Vector3:
 	if not body.test_move(ahead, Vector3.DOWN * up.y, hit):
 		return Vector3.INF
 	if not _is_walkable_top(hit.get_position(), motion.normalized()):
+		return Vector3.INF
+	# The rounded capsule bottom can also come to rest on the edge of a taller block (the
+	# down probe stops at once). Its top must be within step height of the feet, or a fast
+	# run would climb it in two steps.
+	if hit.get_position().y - start.origin.y > def.step_height + STEP_TOP_TOLERANCE:
 		return Vector3.INF
 	var offset: Vector3 = up + motion + hit.get_travel()
 	if offset.y < STEP_MIN_RISE:

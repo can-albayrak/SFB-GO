@@ -8,13 +8,13 @@
 script = ExtResource("1_def")
 id = &"musket"
 display_name = "Musket"
-damage = 95.0
+damage = 75.0
 headshot_mult = 2.0
 leg_mult = 0.75
 max_range = 300.0
 fire_interval = 1.0
 automatic = false
-magazine_size = 1
+magazine_size = 3
 reload_time = 2.8
 equip_time = 0.7
 move_speed_mult = 0.95

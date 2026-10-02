@@ -215,7 +215,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 | Silah | Hasar | Not |
 | --- | --- | --- |
-| Musket | Çok yüksek (gövde 95, kafa 190) | GTA 5 musket gibi: tek mermi, dürbünsüz ama çok isabetli, uzun doldurma |
+| Musket | Yüksek (gövde 75, kafa 150) | GTA 5 musket gibi: 3 mermi, dürbünsüz ama çok isabetli, uzun doldurma |
 | Revolver (yedek) | Deagle gibi (45, kafa 90) | 6 mermi, ağır tepme |
 
 - **Güç: Smoke Break (18 sn):** Sigara yakar; 6 sn boyunca saniyede 5 can dolar (toplam 30), ateş hızı ve doldurma hızı artar.

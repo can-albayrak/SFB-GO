@@ -28,11 +28,22 @@ WALL = 0.4
 DOOR_H = 3.0  # Door openings; a lintel fills the rest up to the slab.
 RAIL_H = 1.1  # Railings and parapets are half cover.
 
+# Ceiling lights inside the building (both floors): a grid of shadowless omni lights so the
+# interior is readable without being bright. Few, wide lights: the Mobile renderer lights a
+# mesh with at most 8 of them.
+LAMP_XS = (-26.0, -13.0, 0.0, 13.0, 26.0)
+LAMP_ZS = (-18.0, -6.0, 6.0, 18.0)
+LAMP_BELOW_CEILING = 0.5
+LAMP_ENERGY = 1.5
+LAMP_RANGE = 13.0
+LAMP_COLOR = (0.9, 0.94, 1.0)  # Cool fluorescent, matches the cold atmosphere.
+
 CLIP_H = 60.0  # Invisible site walls: higher than a grapple can reach from the roof (40 m).
 
 boxes = []  # (name, parent, center, size, material, rotation)
 clips = []  # (name, center, size): invisible StaticBody3D walls
 markers = []  # (group, name, position, yaw, extra)
+lamps = []  # (name, position): ceiling OmniLight3D
 
 
 def add_box(parent, name, x0, x1, y0, y1, z0, z1, mat="Mat_concrete"):
@@ -339,6 +350,12 @@ def build():
     prop(X, "BarrierS1", 14, 28, 3, 0.9, 0.6, mat="Mat_concrete")
     prop(X, "CarS", 24, 28, 4.4, 1.4, 1.9)
 
+    # Ceiling lights --------------------------------------------------------------
+    for level, ceiling in (("Ground", g_top), ("Upper", u_top)):
+        for ix, x in enumerate(LAMP_XS):
+            for iz, z in enumerate(LAMP_ZS):
+                lamps.append((f"{level}Lamp{ix}{iz}", (x, ceiling - LAMP_BELOW_CEILING, z)))
+
     # Gameplay markers ----------------------------------------------------------
     # Spawns: spread over every zone and level (GDD: 10-12), facing the building centre.
     for i, (x, y, z) in enumerate([
@@ -383,7 +400,7 @@ sky_material = SubResource("SkyMat")
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
-ambient_light_energy = 0.7
+ambient_light_energy = 1.0
 tonemap_mode = 2
 fog_enabled = true
 fog_light_color = Color(0.33, 0.37, 0.43, 1)
@@ -491,6 +508,13 @@ def write_scene():
         out.append(f"position = Vector3({f(c[0])}, {f(c[1])}, {f(c[2])})")
         out.append(f'\n[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/{name}"]')
         out.append(f'shape = SubResource("Shape_{name}")')
+    out.append('\n[node name="Lights" type="Node3D" parent="."]')
+    for name, p in lamps:
+        out.append(f'\n[node name="{name}" type="OmniLight3D" parent="Lights"]')
+        out.append(f"position = Vector3({f(p[0])}, {f(p[1])}, {f(p[2])})")
+        out.append(f"light_color = Color({f(LAMP_COLOR[0])}, {f(LAMP_COLOR[1])}, {f(LAMP_COLOR[2])}, 1)")
+        out.append(f"light_energy = {f(LAMP_ENERGY)}")
+        out.append(f"omni_range = {f(LAMP_RANGE)}")
     for group in ["SpawnPoints", "Pickups", "AirdropPoints"]:
         out.append(f'\n[node name="{group}" type="Node3D" parent="."]\n')
         for g, name, p, yaw, extra in markers:
@@ -562,4 +586,4 @@ if __name__ == "__main__":
     write_scene()
     if "--preview" in sys.argv:
         write_preview(sys.argv[sys.argv.index("--preview") + 1])
-    print(f"wrote {os.path.relpath(OUT, ROOT)}: {len(boxes)} boxes, {len(markers)} markers")
+    print(f"wrote {os.path.relpath(OUT, ROOT)}: {len(boxes)} boxes, {len(lamps)} lamps, {len(markers)} markers")

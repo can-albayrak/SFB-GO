@@ -243,6 +243,9 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya.
 
+- 2026-10-02 (Can): Musket hasarı 95 → 75 (kafa 150), şarjör 1 → 3.
+- 2026-10-02 (Can): AVM iç mekânı çok karanlıktı: her kata 5 × 4 tavan lambası (gölgesiz OmniLight, 1,5 enerji, 13 m menzil, soğuk floresan rengi), ortam ışığı 0,7 → 1,0 (`tools/maps/build_mall_blockout.py`, `LAMP_*`).
+
 - 2026-10-02 (Can): Tabancanın tepmesi SMG ve LMG'den fazla geliyordu (mermi başına 0,9° vs ~0,45°). SMG ve LMG desenleri ~1,7× (mermi başına ~0,7–0,8°), tabanca 0,9 → 0,6°. Hawk Grapple menzili 40 → 28 m.
 - 2026-10-02 (Can): Yeni sınıf **Cowboy** (GDD'de): Musket 95 (kafa 190), 1 mermi, 2,8 sn doldurma, dürbünsüz, `move_spread` 0,4; Revolver 45, 6 mermi; Smoke Break 18 sn bekleme, 6 sn, 5 can/sn, ateş hızı ×1,3, doldurma ×1,6. İlk tahmin; oynanınca ayarlanacak. GDD'deki "can yenilenmesi yok" kuralının tek istisnası Smoke Break.
 
@@ -292,3 +295,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-02 | 7 | Evde pull + doğrulama: import temiz, smoke 113/0, map 143/0, ağ testi (lobi + geç katılma) 0 hata. movement_test merdiven-iniş kontrolü kaldırımın kenarından düşmeyi de sayıyordu (bilinen ~0,1 sn düşüş, tek basamak testinde ayrıca var); hedef kaldırımın üstüne çekildi, 45/0. Oyun Can'ın denemesi için açıldı. |
 | 2026-10-02 | 7 | Can'ın isteği: Bear güçlendirildi (yukarıda), fırlatmalar elden + nişangaha + koşu hızı taşıyor, Test Range'de her an sınıf değişimi ve Esc'te kalıcı "UNLIMITED ABILITIES" anahtarı (varsayılan kapalı). Smoke 113/0, movement 45/0, map 143/0, ağ testi 0 hata; fırlatma/sınıf değişimi ayrıca headless doğrulandı. |
 | 2026-10-02 | 7 | Can'ın isteği: SMG/LMG tepmesi arttı, tabanca azaldı, Grapple 28 m. Yeni sınıf Cowboy (Musket, Revolver, Smoke Break: can yenileme + ateş/doldurma hızı; buff sistemine doldurma çarpanı ve host'ta can yenileme eklendi), yer tutucu modeller, GDD'ye eklendi, sigara animasyonu aşama 8 notu. Smoke 125/0 (Smoke Break testi dahil), movement 45/0, map 143/0, ağ testi 0 hata. Silah modelleri İndirilenler'de (ASSETS.md). |
+| 2026-10-02 | 7 | Musket 75 hasar / 3 mermi. AVM'ye tavan lambaları (40 OmniLight) + ortam ışığı. Hata: Cheetah'ın hızında kapsülün yuvarlak altı 0,6 m'lik bloğun kenarına oturup iki basamakta üstüne çıkıyordu (movement_test oyuncunun kayıtlı sınıfıyla koştuğu için ortaya çıktı); basamak üstü artık ayaktan en fazla step_height yukarıda olabilir. movement_test her zaman Wolf ile başlar, blok kontrolü her sınıf için (50/0). Smoke 125/0, map 143/0, ağ testi 0 hata. |

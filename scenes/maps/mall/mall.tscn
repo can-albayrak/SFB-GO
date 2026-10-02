@@ -18,7 +18,7 @@ sky_material = SubResource("SkyMat")
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
-ambient_light_energy = 0.7
+ambient_light_energy = 1.0
 tonemap_mode = 2
 fog_enabled = true
 fog_light_color = Color(0.33, 0.37, 0.43, 1)
@@ -2171,6 +2171,248 @@ position = Vector3(62.4, 30, 0)
 
 [node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/ClipE"]
 shape = SubResource("Shape_ClipE")
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="GroundLamp00" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 4.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp01" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 4.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp02" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 4.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp03" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 4.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp10" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 4.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp11" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 4.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp12" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 4.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp13" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 4.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp20" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 4.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp21" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 4.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp22" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 4.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp23" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 4.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp30" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 4.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp31" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 4.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp32" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 4.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp33" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 4.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp40" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 4.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp41" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 4.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp42" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 4.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="GroundLamp43" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 4.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp00" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 9.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp01" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 9.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp02" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 9.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp03" type="OmniLight3D" parent="Lights"]
+position = Vector3(-26, 9.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp10" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 9.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp11" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 9.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp12" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 9.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp13" type="OmniLight3D" parent="Lights"]
+position = Vector3(-13, 9.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp20" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 9.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp21" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 9.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp22" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 9.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp23" type="OmniLight3D" parent="Lights"]
+position = Vector3(0, 9.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp30" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 9.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp31" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 9.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp32" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 9.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp33" type="OmniLight3D" parent="Lights"]
+position = Vector3(13, 9.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp40" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 9.1, -18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp41" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 9.1, -6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp42" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 9.1, 6)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
+
+[node name="UpperLamp43" type="OmniLight3D" parent="Lights"]
+position = Vector3(26, 9.1, 18)
+light_color = Color(0.9, 0.94, 1, 1)
+light_energy = 1.5
+omni_range = 13
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 
