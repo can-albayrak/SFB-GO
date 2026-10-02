@@ -197,7 +197,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 - Bear ve Volcano ayrıntılı oynanmadı; gerçek iki bilgisayar testi henüz yok (sadece aynı PC'de iki pencere).
 - Charge'ın host'taki çarpma penceresi istek gelince başlar ve host'un çizdiği (~100 ms geriden) konumu kullanır: charge'ın son ~100–150 ms'si hedeflere karşı denenmez; duvara erken çarpan charge'da pencere bitene kadar 1,3 m'ye giren yine stunlanır.
-- Placeholder modeller: SMG = küçültülmüş AR, Dual Pistols = iki tabanca, Grenade Launcher = gerilmiş shotgun + silindir, mayın = silindir (aşama 8).
+- Silah modelleri (2026-10-02): Sketchfab'den 21 model oyunda (`assets/models/weapons/real/`). Kalan yer tutucular: Claws (bıçak), Sticky Bomb ve launcher mermisi (frag modeli), mayın, Grapple, kalkan. Railgun'un dokusu yok (düz koyu metal). Roketatarın ön/arka yönü modelden tam anlaşılmıyor, oyunda bakılacak. Beretta modelinde sürgü geri çekili duruyor (modelin kendisi).
 - Hız cezası ve shotgun'ın merkez yönü sahibinde seçilir, host gelen yönü izler (unscoped spread ile aynı model; hileli client sapmasız ateş edebilir).
 - Hasar sayısı gerçekten düşen canı gösterir (kalan candan fazla vuruşta düşük sayı çıkar); kalkanın engellediği vuruşta marker/sayı yok.
 - Adrenaline sahibinde host onayından önce başlar; host reddederse (stun, maç arası) 4 sn boyunca fazladan atışlar sessizce düşer.
@@ -213,8 +213,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - `map_test` navmesh'i CSG'nin render mesh'inden çıkarır (Godot uyarısı: "had to parse RenderingServer meshes"); sadece testte, oyunda navmesh yok.
 - Bear'ın yakın dövüş silahlarıyla Bear'a karşı TTK hedefin üstünde (1,5–2,4 sn); sadece hız cezası istendiği için hasarlara dokunulmadı.
 - Decoy sadece görsel: vurulamaz, kurşun içinden geçer (GDD "hologram" diyor; istenirse hitbox eklenir).
-- Marksman Rifle şimdilik Burst Rifle modelini kullanıyor (yer tutucu, aşama 8).
-- Bear'ın Sledgehammer/Claws/Chainsaw modelleri bıçak modelinin büyütülmüş hali; tekme görünmez (aşama 8).
+- Bear'ın Claws'u hâlâ büyütülmüş bıçak; tekme görünmez (aşama 8).
 - Cowboy: Musket ve Revolver Blender yer tutucusu (`build_placeholders.py -- . musket revolver`); karakter asker modeliyle aynı, şapka/palto yok. **Not (aşama 8): Smoke Break'te sigara içme animasyonu** (birinci şahıs elde sigara + duman, üçüncü şahısta ağza götürme). Şu an güç kullanınca görsel bir şey olmuyor, sadece HUD.
 - Stun ve knockback client tarafında uygulanıyor; host sadece stunlu oyuncunun ateş/güç isteklerini reddediyor (hareketi değil).
 - Shield hasar yönünü saldıranın konumundan hesaplıyor (bomba dahil), bu yüzden arkadan patlayan bomba önden sayılabilir.
@@ -296,3 +295,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-02 | 7 | Can'ın isteği: Bear güçlendirildi (yukarıda), fırlatmalar elden + nişangaha + koşu hızı taşıyor, Test Range'de her an sınıf değişimi ve Esc'te kalıcı "UNLIMITED ABILITIES" anahtarı (varsayılan kapalı). Smoke 113/0, movement 45/0, map 143/0, ağ testi 0 hata; fırlatma/sınıf değişimi ayrıca headless doğrulandı. |
 | 2026-10-02 | 7 | Can'ın isteği: SMG/LMG tepmesi arttı, tabanca azaldı, Grapple 28 m. Yeni sınıf Cowboy (Musket, Revolver, Smoke Break: can yenileme + ateş/doldurma hızı; buff sistemine doldurma çarpanı ve host'ta can yenileme eklendi), yer tutucu modeller, GDD'ye eklendi, sigara animasyonu aşama 8 notu. Smoke 125/0 (Smoke Break testi dahil), movement 45/0, map 143/0, ağ testi 0 hata. Silah modelleri İndirilenler'de (ASSETS.md). |
 | 2026-10-02 | 7 | Musket 75 hasar / 3 mermi. AVM'ye tavan lambaları (40 OmniLight) + ortam ışığı. Hata: Cheetah'ın hızında kapsülün yuvarlak altı 0,6 m'lik bloğun kenarına oturup iki basamakta üstüne çıkıyordu (movement_test oyuncunun kayıtlı sınıfıyla koştuğu için ortaya çıktı); basamak üstü artık ayaktan en fazla step_height yukarıda olabilir. movement_test her zaman Wolf ile başlar, blok kontrolü her sınıf için (50/0). Smoke 125/0, map 143/0, ağ testi 0 hata. |
+| 2026-10-02 | 7/8 | Silah modelleri: 21 Sketchfab modeli `process_weapon_models.py` ile işlendi (yön, gerçek boy, el noktası, poligon ≤ 2500, doku ≤ 512, renk tonu) ve `apply_weapon_models.py` ile birinci/üçüncü şahıs sahnelerine bağlandı; Marksman Rifle kendi sahnesine (SVD) kavuştu. Krediler ASSETS.md'de (PSX Revolver Sketchfab Standard lisanslı). `private_assets/.gdignore`. Testler 125/0, 50/0, 143/0, ağ 0 hata. |

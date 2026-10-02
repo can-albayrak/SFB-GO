@@ -1,15 +1,14 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/melee_weapon.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/knife.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/chainsaw.glb" id="2_model"]
 
 [node name="Chainsaw" type="Node3D"]
 position = Vector3(0.22, -0.28, -0.5)
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-rotation = Vector3(0.61, 0.8, 0.2)
-scale = Vector3(1.8, 1.8, 1.8)
+scale = Vector3(0.55, 0.55, 0.55)
 
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(0, 0, -0.3)

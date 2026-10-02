@@ -2,35 +2,14 @@
 
 [ext_resource type="Script" path="res://scripts/weapons/launcher_weapon.gd" id="1_script"]
 
-[sub_resource type="CylinderMesh" id="Mesh_tube"]
-top_radius = 0.07
-bottom_radius = 0.07
-height = 0.95
-radial_segments = 12
-
-[sub_resource type="StandardMaterial3D" id="Mat_tube"]
-albedo_color = Color(0.25, 0.28, 0.2, 1)
-roughness = 0.8
-
-[sub_resource type="BoxMesh" id="Mesh_grip"]
-size = Vector3(0.04, 0.12, 0.05)
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/rocket_launcher.glb" id="9_real"]
 
 [node name="RocketLauncher" type="Node3D"]
 position = Vector3(0.22, -0.18, -0.35)
 script = ExtResource("1_script")
 
-[node name="Tube" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.03, -0.15)
-rotation = Vector3(1.5708, 0, 0)
-cast_shadow = 0
-mesh = SubResource("Mesh_tube")
-surface_material_override/0 = SubResource("Mat_tube")
-
-[node name="Grip" type="MeshInstance3D" parent="."]
-position = Vector3(0, -0.07, 0.02)
-cast_shadow = 0
-mesh = SubResource("Mesh_grip")
-surface_material_override/0 = SubResource("Mat_tube")
+[node name="Model" parent="." instance=ExtResource("9_real")]
+scale = Vector3(0.65, 0.65, 0.65)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.03, -0.63)
+position = Vector3(0, 0.0146, -0.4576)

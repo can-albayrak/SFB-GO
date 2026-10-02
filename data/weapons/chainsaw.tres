@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/chainsaw.tscn" id="2_scene"]
 
-[ext_resource type="PackedScene" path="res://assets/models/weapons/knife.glb" id="3_world"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/chainsaw.glb" id="3_world"]
 [resource]
 script = ExtResource("1_def")
 id = &"chainsaw"
@@ -24,5 +24,5 @@ reload_time = 0.0
 uses_ammo = false
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
-world_model_scale = 1.7
-world_muzzle = Vector3(0, 0, -0.2)
+world_model_scale = 1.0
+world_muzzle = Vector3(0.0419, -0.0021, -0.68)

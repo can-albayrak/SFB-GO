@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/thrown_knife.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/knife.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/throwing_knife.glb" id="2_model"]
 
 [sub_resource type="SceneReplicationConfig" id="Repl"]
 properties/0/path = NodePath(".:position")
@@ -15,7 +15,7 @@ properties/1/replication_mode = 1
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-scale = Vector3(1.7, 1.7, 1.7)
+scale = Vector3(1.35, 1.35, 1.35)
 
 [node name="Sync" type="MultiplayerSynchronizer" parent="."]
 root_path = NodePath("..")

@@ -65,9 +65,11 @@ sfb-go/
 │   └── ui_preview.tscn      # Sahte veriyle tek ekran (--screen=lobby|loadout|range|death|scoreboard|down|walk|slide); --write-movie ile kare yakalanır
 ├── tools/                   # .gdignore; oyun dışı araçlar
 │   ├── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
+│   ├── blender/process_weapon_models.py # private_assets/weapons/*.glb → assets/models/weapons/real/<id>.glb (yön, ölçek, el noktası, poligon, doku 512, muzzles.json)
+│   ├── apply_weapon_models.py          # real/ modelleri silah sahnelerine ve WeaponDef'lere bağlar (ölçek, namlu, üçüncü şahıs)
 │   └── maps/build_mall_blockout.py     # AVM blockout sahnesini üretir (Python; --preview ile kat PNG'leri)
 └── assets/
-    ├── models/              # characters/soldier.glb, weapons/*.glb (Blender'da +Y ileri = Godot -Z)
+    ├── models/              # characters/soldier.glb, weapons/*.glb yer tutucular, weapons/real/*.glb indirilen modeller (Blender'da +Y ileri = Godot -Z)
     ├── textures/
     ├── audio/
     └── shaders/             # ps2_screen.gdshader + ps2_screen.tres (ekran filtresi değerleri)

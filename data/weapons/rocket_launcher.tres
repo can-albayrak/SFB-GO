@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="2_scene"]
 [ext_resource type="Resource" path="res://data/weapons/rocket_round.tres" id="3_round"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/shotgun.glb" id="4_world"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/rocket_launcher.glb" id="4_world"]
 
 [resource]
 script = ExtResource("1_def")
@@ -27,5 +27,5 @@ recoil_recovery_delay = 0.1
 grenade = ExtResource("3_round")
 scene = ExtResource("2_scene")
 world_model = ExtResource("4_world")
-world_model_scale = 1.2
-world_muzzle = Vector3(0, 0.046, -0.69)
+world_model_scale = 1.0
+world_muzzle = Vector3(-0, 0.0224, -0.704)

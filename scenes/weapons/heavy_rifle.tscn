@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/hitscan_weapon.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/heavy_rifle.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/heavy_rifle.glb" id="2_model"]
 
 [node name="HeavyRifle" type="Node3D"]
 position = Vector3(0.2, -0.22, -0.48)
@@ -11,4 +11,4 @@ script = ExtResource("1_script")
 scale = Vector3(0.6, 0.6, 0.6)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.021, -0.5)
+position = Vector3(0, -0.0031, -0.4608)

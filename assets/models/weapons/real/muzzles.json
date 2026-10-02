@@ -1,0 +1,191 @@
+{
+  "assault_rifle": {
+    "muzzle": [
+      -0.0019,
+      0.0743,
+      -0.5632
+    ],
+    "length": 0.88,
+    "tris": 656
+  },
+  "burst_rifle": {
+    "muzzle": [
+      0.0092,
+      0.0271,
+      -0.5056
+    ],
+    "length": 0.79,
+    "tris": 419
+  },
+  "chainsaw": {
+    "muzzle": [
+      0.0419,
+      -0.0021,
+      -0.68
+    ],
+    "length": 0.8,
+    "tris": 122
+  },
+  "dual_pistols": {
+    "muzzle": [
+      0.0,
+      0.0325,
+      -0.154
+    ],
+    "length": 0.22,
+    "tris": 646
+  },
+  "flashbang": {
+    "muzzle": [
+      0.0094,
+      -0.0096,
+      -0.0664
+    ],
+    "length": 0.1317,
+    "tris": 899
+  },
+  "frag_grenade": {
+    "muzzle": [
+      -0.0002,
+      0.004,
+      -0.0545
+    ],
+    "length": 0.1095,
+    "tris": 900
+  },
+  "grenade_launcher": {
+    "muzzle": [
+      -0.0,
+      0.029,
+      -0.512
+    ],
+    "length": 0.8,
+    "tris": 772
+  },
+  "heavy_rifle": {
+    "muzzle": [
+      -0.0,
+      -0.0051,
+      -0.768
+    ],
+    "length": 1.2,
+    "tris": 618
+  },
+  "knife": {
+    "muzzle": [
+      0.0,
+      0.0084,
+      -0.255
+    ],
+    "length": 0.3,
+    "tris": 750
+  },
+  "lmg": {
+    "muzzle": [
+      -0.0034,
+      0.0223,
+      -0.64
+    ],
+    "length": 1.0,
+    "tris": 2500
+  },
+  "marksman_rifle": {
+    "muzzle": [
+      -0.0038,
+      -0.0094,
+      -0.7808
+    ],
+    "length": 1.22,
+    "tris": 2500
+  },
+  "minigun": {
+    "muzzle": [
+      0.0134,
+      -0.0488,
+      -0.64
+    ],
+    "length": 1.0,
+    "tris": 2500
+  },
+  "musket": {
+    "muzzle": [
+      -0.0074,
+      0.0805,
+      -0.832
+    ],
+    "length": 1.3,
+    "tris": 1319
+  },
+  "pistol": {
+    "muzzle": [
+      -0.0002,
+      0.0395,
+      -0.133
+    ],
+    "length": 0.19,
+    "tris": 456
+  },
+  "railgun": {
+    "muzzle": [
+      -0.0,
+      0.0584,
+      -0.704
+    ],
+    "length": 1.1,
+    "tris": 622
+  },
+  "revolver": {
+    "muzzle": [
+      0.0,
+      0.0415,
+      -0.21
+    ],
+    "length": 0.3,
+    "tris": 290
+  },
+  "rocket_launcher": {
+    "muzzle": [
+      -0.0,
+      0.0224,
+      -0.704
+    ],
+    "length": 1.1,
+    "tris": 448
+  },
+  "shotgun": {
+    "muzzle": [
+      0.0,
+      0.0609,
+      -0.64
+    ],
+    "length": 1.0,
+    "tris": 342
+  },
+  "sledgehammer": {
+    "muzzle": [
+      0.0002,
+      0.0002,
+      -0.765
+    ],
+    "length": 0.9,
+    "tris": 702
+  },
+  "smg": {
+    "muzzle": [
+      -0.0,
+      0.0807,
+      -0.224
+    ],
+    "length": 0.32,
+    "tris": 1036
+  },
+  "throwing_knife": {
+    "muzzle": [
+      0.0,
+      0.0,
+      -0.255
+    ],
+    "length": 0.3,
+    "tris": 506
+  }
+}

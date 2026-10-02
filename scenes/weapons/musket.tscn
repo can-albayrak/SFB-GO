@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/hitscan_weapon.gd" id="1_hitscan"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/musket.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/musket.glb" id="2_model"]
 
 [node name="Musket" type="Node3D"]
 position = Vector3(0.19, -0.21, -0.48)
@@ -11,4 +11,4 @@ script = ExtResource("1_hitscan")
 scale = Vector3(0.55, 0.55, 0.55)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.019, -0.52)
+position = Vector3(-0.0041, 0.0443, -0.4576)

@@ -158,7 +158,7 @@ Hepsi indirilebilir ve **CC-BY** (kredi zorunlu, krediler "Kullanılanlar" tablo
 | Frag Grenade | [Grenade](https://sketchfab.com/models/8d6b63e11b464bb2a10cdbb0a082b5e7) (poligon azaltılır) | Chpndl | 5610 | Mevcut Blender modeli |
 | Flashbang | [Flashbang](https://sketchfab.com/models/f4a48db9bd54420696ed282af9574dd9) (poligon azaltılır) | Chpndl | 7178 | Mevcut Blender modeli |
 
-**İndirilenler (2026-10-02, Can):** `C:\Users\Administrator\Downloads\` içinde, `private_assets/weapons/`'a taşınıp Blender'da düzenlenecek: ps1_style_ak-47, ps1-style_steyr_aug, low-poly_m249_saw, ps1_style_awp_sniper, svd, mac10_psx, ps1-style_beretta_m9, glock_psx, lowpoly_-_remington_shotgun_-_ps1__psx_style, ps1_style_grenade_launcher, ps1_style_railgun, low-poly_m134_minigun, sledge_hammer, ps1_low-poly_chainsaw, throwing_knife, grenade, flashbang (`.glb`). Henüz yok: Rocket Launcher, Combat Knife (V), Cowboy'un Musket ve Revolver'ı (aday aranacak).
+**İşlendi (2026-10-02):** 21 model oyunda (krediler aşağıda). Kalan yer tutucular: Claws, Sticky Bomb, Landmine, Grapple, kalkan, launcher mermisi; Railgun modelinin dokusu yok (koyu metal renk verildi).
 
 **Bulunamayan, Blender'da biz yaparız:** Claws (Bear), Sticky Bomb, Landmine, Grapple, Bear'ın kalkanı, birinci şahıs kollar.
 
@@ -179,4 +179,26 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 
 | Asset | Dosya | Kaynak (link) | Yazar | Lisans |
 | --- | --- | --- | --- | --- |
-| – | – | – | – | – |
+| PS1 style AK-47 | `assets/models/weapons/real/assault_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-ak-47-c05cea3e51484331bfb4c75348d659ef) | Falxxx | CC-BY-4.0 |
+| PS1-style Steyr AUG | `assets/models/weapons/real/burst_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-steyr-aug-0d5f437f7193404ea0f030651421434f) | andrewwhiskin | CC-BY-4.0 |
+| Low-Poly M249 SAW | `assets/models/weapons/real/lmg.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m249-saw-76011c365636451c90a8e3a46c2d8ca5) | TastyTony | CC-BY-4.0 |
+| PS1 Style AWP Sniper | `assets/models/weapons/real/heavy_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-awp-sniper-da7f6dcaa2b2477f97ccdc641e6fc3b6) | Falxxx | CC-BY-4.0 |
+| SVD | `assets/models/weapons/real/marksman_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/svd-1ac10d61438844a9a69d46baa4dcd72b) | thebradqq | CC-BY-4.0 |
+| Mac10 [psx] | `assets/models/weapons/real/smg.glb` | [Sketchfab](https://sketchfab.com/3d-models/mac10-psx-266c6fcda29546fd8de6201295c23695) | Radint | CC-BY-4.0 |
+| PS1-style Beretta M9 | `assets/models/weapons/real/dual_pistols.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-beretta-m9-78e8295933594a6a9b5db4ec72b54211) | andrewwhiskin | CC-BY-4.0 |
+| Glock [psx] | `assets/models/weapons/real/pistol.glb` | [Sketchfab](https://sketchfab.com/3d-models/glock-psx-e72e230edbfe40d9ba249584bf1f836b) | Radint | CC-BY-4.0 |
+| LOWPOLY - REMINGTON SHOTGUN - PS1 / PSX STYLE | `assets/models/weapons/real/shotgun.glb` | [Sketchfab](https://sketchfab.com/3d-models/lowpoly-remington-shotgun-ps1-psx-style-89afc8d893ba479b9dcf1ee39e049bcd) | Colin.Greenall | CC-BY-4.0 |
+| PS1 Style Grenade Launcher | `assets/models/weapons/real/grenade_launcher.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-grenade-launcher-0532a58572124fe1b31ecec7a9aff462) | Falxxx | CC-BY-4.0 |
+| PS1 Style Railgun | `assets/models/weapons/real/railgun.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-railgun-057d8e6263df484dbcc767ff0aa26be7) | Falxxx | CC-BY-4.0 |
+| Low-Poly M134 Minigun | `assets/models/weapons/real/minigun.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m134-minigun-eed0c95de51b4895a48c5729582732cc) | TastyTony | CC-BY-4.0 |
+| PS1 Style Rocket Launcher | `assets/models/weapons/real/rocket_launcher.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-rocket-launcher-a95a9d11c2904f38918507e77df11dc3) | Falxxx | CC-BY-4.0 |
+| Hunting Rifle | `assets/models/weapons/real/musket.glb` | [Sketchfab](https://sketchfab.com/3d-models/hunting-rifle-31add96fe16e48eebadc78368db3305f) | Hikimore | CC-BY-4.0 |
+| PSX Revolver | `assets/models/weapons/real/revolver.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-revolver-e7799f60b2f240a2aceaf973a4367015) | Timnuts | SKETCHFAB Standard |
+| Combat Knife | `assets/models/weapons/real/knife.glb` | [Sketchfab](https://sketchfab.com/3d-models/combat-knife-7671043e9e8848379391a5fd03f112f7) | Hikimore | CC-BY-4.0 |
+| Throwing Knife | `assets/models/weapons/real/throwing_knife.glb` | [Sketchfab](https://sketchfab.com/3d-models/throwing-knife-f13c505160e34193a98fb9a092489e0a) | _NotyGuy_ | CC-BY-4.0 |
+| Sledge Hammer | `assets/models/weapons/real/sledgehammer.glb` | [Sketchfab](https://sketchfab.com/3d-models/sledge-hammer-1ba18e262c054f8687502f2ef98da9c3) | MaX3Dd | CC-BY-4.0 |
+| Ps1 low-poly chainsaw | `assets/models/weapons/real/chainsaw.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-low-poly-chainsaw-507b09788e6c403690274a32d1ffe023) | Madeleinone | CC-BY-4.0 |
+| Grenade | `assets/models/weapons/real/frag_grenade.glb` | [Sketchfab](https://sketchfab.com/3d-models/grenade-8d6b63e11b464bb2a10cdbb0a082b5e7) | Chpndl | CC-BY-4.0 |
+| Flashbang | `assets/models/weapons/real/flashbang.glb` | [Sketchfab](https://sketchfab.com/3d-models/flashbang-f4a48db9bd54420696ed282af9574dd9) | Chpndl | CC-BY-4.0 |
+
+PSX Revolver (Timnuts) **Sketchfab Standard** lisanslı, CC-BY değil: oyunda kullanılabilir, model tek başına dağıtılamaz (repo ve Release gizli kalmalı; açık paylaşımda değiştirilmeli). Ham dosyalar `private_assets/weapons/` (git dışı); işlenmiş halleri `tools/blender/process_weapon_models.py` ile üretilir, sahnelere `tools/apply_weapon_models.py` ile bağlanır.

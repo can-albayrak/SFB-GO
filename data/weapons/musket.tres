@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/musket.tscn" id="2_scene"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/musket.glb" id="3_world"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/musket.glb" id="3_world"]
 
 [resource]
 script = ExtResource("1_def")
@@ -25,4 +25,4 @@ recoil_recovery_delay = 0.1
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(0, 0.035, -0.945)
+world_muzzle = Vector3(-0.0074, 0.0805, -0.832)
