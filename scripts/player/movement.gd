@@ -23,6 +23,7 @@ const DASH_STUCK_SPEED: float = 2.0 ## Dash ends early when a wall stops us belo
 const DASH_STUCK_GRACE: float = 0.05
 const FLOOR_PROBE_MIN: float = 0.15 ## Metres: a floor this close below always counts as landing.
 const GRAPPLE_ACCEL: float = 40.0 ## m/s^2 toward the pull speed, so the start is not a hard snap.
+const SLOPE_MIN_SINE: float = 0.05 ## Floors flatter than ~3 degrees do not speed up a slide.
 const STEP_WALL_NORMAL_Y: float = 0.7 ## Contacts steeper than this (walls, stair faces) may be stepped over.
 const STEP_MIN_RISE: float = 0.02 ## Metres: smaller rises are left to the capsule sliding.
 const STEP_MIN_GAIN: float = 0.01 ## Metres: the step must get further than sliding along the wall did.
@@ -133,7 +134,9 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
 	elif on_floor:
 		hvel = _apply_friction(hvel, def.slide_friction if is_sliding else def.friction, delta)
-		if not is_sliding:
+		if is_sliding:
+			hvel = _apply_slope_slide(hvel, delta)
+		else:
 			hvel = _accelerate(hvel, wish_dir, wish_speed, def.ground_accel, delta)
 	else:
 		vel.y -= def.gravity * delta
@@ -362,7 +365,8 @@ func _step_grapple(delta: float, cmd: PlayerCommand) -> bool:
 func _update_slide(delta: float, cmd: PlayerCommand, on_floor: bool, hvel: Vector3) -> Vector3:
 	var speed: float = hvel.length()
 	if is_sliding:
-		_slide_left -= delta
+		if not _is_sliding_downhill(hvel):
+			_slide_left -= delta # Down a slope the slide lasts as long as the slope.
 		if _slide_left <= 0.0 or not cmd.crouch or not on_floor or speed < base_speed * def.crouch_mult:
 			is_sliding = false
 		return hvel
@@ -378,6 +382,28 @@ func _update_slide(delta: float, cmd: PlayerCommand, on_floor: bool, hvel: Vecto
 	_slide_left = def.slide_duration
 	_slide_cooldown_left = def.slide_cooldown
 	return (hvel * def.slide_boost_mult).limit_length(base_speed * def.slide_max_speed_mult)
+
+
+## Sliding down a slope: gravity pulls along it, the steeper the harder, up to the slope cap.
+func _apply_slope_slide(hvel: Vector3, delta: float) -> Vector3:
+	var downhill: Vector3 = _get_downhill()
+	if downhill == Vector3.ZERO or def.slide_slope_accel <= 0.0:
+		return hvel
+	var cap: float = maxf(hvel.length(), base_speed * def.slide_slope_max_speed_mult)
+	return (hvel + downhill * def.gravity * def.slide_slope_accel * delta).limit_length(cap)
+
+
+## Flat downhill direction of the floor, as long as the sine of its slope (zero on flat ground).
+func _get_downhill() -> Vector3:
+	if not body.is_on_floor():
+		return Vector3.ZERO
+	var normal: Vector3 = body.get_floor_normal()
+	var downhill := Vector3(normal.x, 0.0, normal.z)
+	return downhill if downhill.length() >= SLOPE_MIN_SINE else Vector3.ZERO
+
+
+func _is_sliding_downhill(hvel: Vector3) -> bool:
+	return def.slide_slope_accel > 0.0 and _get_downhill().dot(hvel) > 0.0
 
 
 func _update_crouch(want: bool, on_floor: bool) -> void:

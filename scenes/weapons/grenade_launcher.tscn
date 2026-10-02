@@ -6,9 +6,16 @@
 [node name="GrenadeLauncher" type="Node3D"]
 position = Vector3(0.2, -0.21, -0.42)
 script = ExtResource("1_script")
+metadata/arms_twist = 22
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
 scale = Vector3(0.84, 0.84, 0.84)
 
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(0, 0.0244, -0.4301)
+
+[node name="RightHand" type="Marker3D" parent="."]
+position = Vector3(0, -0.08, 0.081)
+
+[node name="LeftHand" type="Marker3D" parent="."]
+position = Vector3(0, -0.09, -0.324)

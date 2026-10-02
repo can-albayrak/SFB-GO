@@ -91,7 +91,13 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var scope_zoom: float = 0.0 ## 0 = no scope; otherwise right mouse zooms by this factor.
 @export var scope_move_mult: float = 0.5 ## Speed multiplier while scoped (no sprint).
 @export var scope_sway: float = 0.0 ## Degrees of view sway while scoped (halved when crouched).
-@export var unscoped_spread: float = 0.0 ## Degrees of random cone when firing without the scope.
+## Degrees of random cone when firing without the scope (every shot for a gun without one).
+@export var unscoped_spread: float = 0.0
+## Seconds from right click to full zoom. The unscoped cone fades out over the same time,
+## so a shot fired mid-zoom is still inaccurate (no instant quick scopes).
+@export var scope_in_time: float = 0.0
+## False: no crosshair while this gun is in hand and not scoped (snipers, CS style).
+@export var hip_crosshair: bool = true
 
 @export_group("Scene")
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).

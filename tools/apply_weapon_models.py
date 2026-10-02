@@ -37,7 +37,7 @@ SCENES = {
     "rocket_launcher": ("rocket_launcher", 0.65, None, ("Tube", "Grip"), True),
     "musket": ("musket", 0.55, None, (), True),
     "knife": ("knife", 0.85, None, (), False),
-    "throwing_knife": ("throwing_knife", 1.15, None, (), False),
+    "throwing_knife": ("throwing_knife", 0.75, None, (), False),
     "sledgehammer": ("sledgehammer", 0.5, None, (), False),
     "chainsaw": ("chainsaw", 0.55, (0.0, 0.0, 0.0), (), False),
 }

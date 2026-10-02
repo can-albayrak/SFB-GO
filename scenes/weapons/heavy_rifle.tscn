@@ -6,9 +6,17 @@
 [node name="HeavyRifle" type="Node3D"]
 position = Vector3(0.2, -0.22, -0.48)
 script = ExtResource("1_script")
+metadata/arms_twist = 20
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
 scale = Vector3(0.72, 0.72, 0.72)
 
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(-0.0043, 0.0271, -0.553)
+
+[node name="RightHand" type="Marker3D" parent="."]
+position = Vector3(0, -0.03, 0.08)
+
+[node name="LeftHand" type="Marker3D" parent="."]
+position = Vector3(0, 0, -0.17)
+rotation = Vector3(-1.5708, 0, 0.8727)

@@ -6,8 +6,10 @@ extends Node
 ## death (killed by a fall), scoreboard (Tab board shown), and frozen body poses for the
 ## first-person legs: down (look at your feet), walk, slide; drops (Test Range rules: pickups
 ## and a falling airdrop crate).
-## range also takes --class=N --slot=N (roster index, weapon slot in hand: view model and arms),
-## --map=res://...tscn (another map) and --at=x,y,z --yaw=deg --pitch=deg (camera placement).
+## range also takes --class=N --primary=N --slot=N (roster index, primary choice, weapon slot in
+## hand: view model and arms), --special=N (airdrop weapon in slot 3 = key 4),
+## --map=res://...tscn (another map), --at=x,y,z --yaw=deg --pitch=deg (camera placement) and
+## --hud=off (view model only), --fire=seconds (one shot, swing or throw after that long).
 ## Nothing is saved: the settings file is left alone.
 
 const FAKE_NAMES: Dictionary[int, String] = {1: "Can", 2: "Grizz", 3: "Volt"}
@@ -106,7 +108,9 @@ func _pose_body(player: Player, screen: String) -> void:
 ## Range screen options: class, weapon in hand, camera placement.
 func _place_view(player: Player) -> void:
 	if _args.has("class"):
-		player.loadout = Loadout.make(_args["class"].to_int(), 0, 0)
+		player.loadout = Loadout.make(_args["class"].to_int(), _args.get("primary", "0").to_int(), 0)
+	if _args.has("special"):
+		player.special_weapon = _args["special"].to_int()
 	if _args.has("slot"):
 		player.equip(_args["slot"].to_int())
 	if _args.has("at"):
@@ -117,3 +121,11 @@ func _place_view(player: Player) -> void:
 		player.rotation.y = deg_to_rad(_args["yaw"].to_float())
 	if _args.has("pitch"):
 		player.look_pitch = deg_to_rad(_args["pitch"].to_float())
+	if _args.get("hud", "on") == "off":
+		var hud := Game.find(get_tree()).get_node_or_null(^"HUD") as CanvasLayer
+		if hud != null:
+			hud.visible = false # View model shots: no pause panel when the window is not focused.
+	if _args.has("fire"):
+		# One shot / swing / throw this many seconds after opening (frames of the animation).
+		await get_tree().create_timer(_args["fire"].to_float()).timeout
+		player.current_weapon.call(&"_shoot_once")

@@ -72,6 +72,8 @@ var ability: Ability = null
 var is_local: bool = false
 ## Owner: right mouse held with a scoped weapon (zoom, slow, sway, no sprint).
 var is_scoped: bool = false
+## Owner: 0 -> 1 over the gun's scope_in_time while scoped (zoom and accuracy), 0 when not.
+var scope_blend: float = 0.0
 ## Owner: the loadout last sent to the host (drives "Next spawn" on the HUD).
 var requested_loadout: PackedInt32Array = PackedInt32Array()
 ## Host: health removed by the last take_hit (0 when blocked by a shield or not allowed).
@@ -156,6 +158,7 @@ func _physics_process(delta: float) -> void:
 		status.server_tick()
 	if not is_local or not is_alive:
 		is_scoped = false
+		scope_blend = 0.0
 		if is_local:
 			effects.report_scoped(false) # Re-sends on the next scope after a respawn.
 		return
@@ -172,6 +175,10 @@ func _physics_process(delta: float) -> void:
 	weapon_holder.visible = not is_scoped
 	if is_scoped:
 		cmd.sprint = false
+		var scope_rate: float = 1.0 / weapon_def.scope_in_time if weapon_def.scope_in_time > 0.0 else INF
+		scope_blend = minf(scope_blend + delta * scope_rate, 1.0)
+	else:
+		scope_blend = 0.0
 	effects.report_scoped(is_scoped) # Others see the glint.
 	var scope_mult: float = weapon_def.scope_move_mult if is_scoped else 1.0
 	# GDD: carrying an airdrop weapon slows you down, in hand or not.
@@ -250,9 +257,13 @@ func get_facing() -> Vector3:
 	return Vector3(-sin(rotation.y), 0.0, -cos(rotation.y))
 
 
-## Zoom factor of the active scope (1 when not scoped). Mouse sensitivity is divided by it.
+## Zoom factor of the active scope (1 when not scoped, rising while it comes up).
+## Mouse sensitivity is divided by it.
 func get_zoom() -> float:
-	return current_weapon.def.scope_zoom if is_scoped and current_weapon != null else 1.0
+	if not is_scoped or current_weapon == null:
+		return 1.0
+	var eased: float = scope_blend * scope_blend * (3.0 - 2.0 * scope_blend)
+	return lerpf(1.0, current_weapon.def.scope_zoom, eased)
 
 
 ## Host: start point and velocity of a throw (grenades, sticky bombs, throwing knives).

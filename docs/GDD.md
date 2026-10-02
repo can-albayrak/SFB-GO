@@ -47,7 +47,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 
 | Konu | Karar |
 | --- | --- |
-| Hareket | Hafif bunny hop (zamanlı zıplamada hız korunur, sonsuz hızlanma yok), crouch, slide (koşarken crouch). Düşme hasarı yok. |
+| Hareket | Hafif bunny hop (zamanlı zıplamada hız korunur, sonsuz hızlanma yok), crouch, slide (koşarken crouch). Eğimden aşağı slide hızlanır ve eğim bitene kadar sürer (üst sınırlı). Slide sırasında atışlar çok dağılır. Düşme hasarı yok. |
 | Nişan | Nişan (ADS) modu yok, yalnızca Hawk'ın dürbünü |
 | Hasar | Kafa 2x, bacak 0,75x. Hawk Heavy Rifle kafa ve gövdeden tek atış (bacak hariç). |
 | Mermi tipi | Mermili silahlar hitscan; bomba, roket, grenade launcher ve fırlatma bıçağı fiziksel mermi |
@@ -56,7 +56,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 | Mermi | Yedek mermi sınırsız, sadece şarjör değiştirilir (airdrop silahı hariç) |
 | Ayak sesi | Yön ve konum anlaşılacak kadar belirgin (aşırı vurgulanmaz). **Ctrl ile eğilip yürürken** ses çok az çıkar. |
 | Hızlı yakın dövüş | Herkese `V` ile bıçak: 25 hasar, ~1,5 m menzil, 0,8 sn bekleme. Bear'da `V` = kısa tekme (az hasar, geri itme). |
-| Bıçak slotu (CS gibi) | Her sınıfta (Bear dahil) bıçak **3** tuşunda elde tutulur, sol tıkla vurur (25 hasar). **Arkadan vuruş tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). `V` ile hızlı bıçak arkadan öldürmez. |
+| Bıçak slotu (CS gibi) | Her sınıfta (Bear dahil) bıçak **3** tuşunda elde tutulur, sol tıkla vurur (25 hasar). Bıçak elde iken sınıf hızının %15 fazlasıyla koşulur. **Arkadan vuruş tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). `V` ile hızlı bıçak arkadan öldürmez. |
 | Yedek silah | Bear hariç herkese tek tip tabanca. Bear'a 3 Throwing Knife. |
 | FOV ve fare | Varsayılan FOV 90 (80–110), fare hassasiyeti, crosshair özelleştirme (renk, boyut, boşluk) |
 
@@ -164,7 +164,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Marksman Rifle | Kafa 1, gövde 2, bacak 3 atış | Hızlı atış ve şarjör, belirgin geri tepme |
 
 - **Güçler (15 sn):** Grapple (yüksek noktaya çekilme) · Decoy (yerinde hologram bırakma)
-- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz düşük isabet
+- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz çok düşük isabet ve nişangah yok (CS keskin nişancıları gibi). Dürbün sağ tıkla yavaşça açılır (~0,3 sn); tam açılana kadar isabet düşük kalır (anında quick scope yok).
 - **Namlu parlaması:** Sadece dürbün açıkken. Haritanın her yerinden görünür (mesafe sınırı yok), yeri net belli olur.
 - **Yedek:** Tabanca
 
@@ -257,8 +257,8 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 
 | Silah | Mermi | Davranış |
 | --- | --- | --- |
-| Railgun | 8 | Işın. **Sınırsız menzil, bütün duvarları deler**, haritanın her yerinden vurabilir. Her yerden tek atış, atış sıklığı düşük. |
-| Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli. |
+| Railgun | 4 | Işın. **Sınırsız menzil, bütün duvarları deler**, haritanın her yerinden vurabilir. Her yerden tek atış, atış sıklığı düşük. |
+| Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli, mermiler dağılır. |
 | Rocket Launcher | 6 | Fiziksel roket. Merkezde 200 hasar, merkezden uzaklaştıkça azalır; alanı Frag'den büyük. Sıkanı geri iter (recoil, rocket jump). |
 
 ## Harita tasarım kuralları

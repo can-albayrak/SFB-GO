@@ -6,9 +6,13 @@
 [node name="Pistol" type="Node3D"]
 position = Vector3(0.16, -0.17, -0.36)
 script = ExtResource("1_hitscan")
+metadata/arms_twist = 0
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
 scale = Vector3(1.08, 1.08, 1.08)
 
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(0, 0.0401, -0.1436)
+
+[node name="RightHand" type="Marker3D" parent="."]
+position = Vector3(-0.015, -0.03, 0.026)

@@ -161,7 +161,9 @@ func _process(delta: float) -> void:
 	_scope_overlay.active = _player.is_scoped
 	if _player.is_scoped:
 		_scope_overlay.set_motion(_player.velocity.length())
-	crosshair.visible = _player.is_alive and not _player.is_scoped
+	var weapon: Weapon = _player.current_weapon
+	var hip_crosshair: bool = weapon == null or weapon.def.hip_crosshair
+	crosshair.visible = _player.is_alive and not _player.is_scoped and hip_crosshair
 	_update_health()
 	_update_ability()
 	_update_weapons()

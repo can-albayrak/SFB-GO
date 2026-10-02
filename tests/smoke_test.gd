@@ -60,6 +60,8 @@ func _run() -> void:
 	await _test_smoke_break()
 	await _test_kill_reward()
 	await _test_quick_switch()
+	await _test_scope_and_spread()
+	await _test_knife_speed()
 	await _test_knife_radius()
 	await _test_backstab()
 	await _test_swap_rules()
@@ -185,6 +187,46 @@ func _test_quick_switch() -> void:
 		_player.requests._request_fire(origin, (_dummy_target() - origin).normalized(), slot, _player.weapons[slot].def.id)
 		await _frames(1)
 		_check(_dummy.health < DUMMY_HEALTH, "quick switch: slot %d shot accepted right after the other" % slot)
+
+
+## Hawk's rifles: no crosshair from the hip, a wide cone until the scope is fully up, zoom
+## easing in over scope_in_time; any gun gets the slide cone while sliding.
+func _test_scope_and_spread() -> void:
+	await _set_loadout(_code_for(&"hawk"))
+	_player.equip(0)
+	await _frames(2)
+	var rifle := _player.current_weapon as HitscanWeapon
+	var def: WeaponDef = rifle.def
+	_check(not def.hip_crosshair and def.scope_in_time > 0.0, "%s: no hip crosshair, zoom takes time" % def.display_name)
+	_check(is_equal_approx(rifle.get_spread_cone(), def.unscoped_spread), "%s from the hip: %.1f degree cone" % [def.display_name, rifle.get_spread_cone()])
+	_player.is_scoped = true # Read synchronously: the player's next tick sets it back from input.
+	_player.scope_blend = 0.0
+	var mid_zoom_cone: float = rifle.get_spread_cone()
+	var start_zoom: float = _player.get_zoom()
+	_player.scope_blend = 1.0
+	_check(is_equal_approx(mid_zoom_cone, def.unscoped_spread) and is_zero_approx(rifle.get_spread_cone()),
+		"scope just raised is still wide, fully up is exact")
+	_check(is_equal_approx(start_zoom, 1.0) and is_equal_approx(_player.get_zoom(), def.scope_zoom), "zoom eases from 1x to %.1fx" % def.scope_zoom)
+	_player.is_scoped = false
+	_player.scope_blend = 0.0
+	_player.movement.is_sliding = true
+	var slide_cone: float = rifle.get_spread_cone() - def.unscoped_spread
+	_player.movement.is_sliding = false
+	_check(is_equal_approx(slide_cone, _player.class_def.movement.slide_spread) and slide_cone > 0.0,
+		"sliding adds a %.1f degree cone" % slide_cone)
+
+
+## Knife out (slot 3): faster than with a gun in hand (WeaponDef.move_speed_mult).
+func _test_knife_speed() -> void:
+	await _set_loadout(_code_for(&"wolf"))
+	_player.equip(0)
+	await _frames(2)
+	var gun_speed: float = _player.movement.base_speed
+	_player.equip(Player.KNIFE_SLOT)
+	await _frames(2)
+	var knife_speed: float = _player.movement.base_speed
+	_player.equip(0)
+	_check(knife_speed > gun_speed, "knife out runs faster (%.2f vs %.2f m/s)" % [knife_speed, gun_speed])
 
 
 ## Bear's thrown knife has a hit radius: a throw 30 cm beside the body still lands.

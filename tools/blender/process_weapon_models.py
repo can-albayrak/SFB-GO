@@ -56,7 +56,7 @@ MODELS = {
     "rocket_launcher": {"raw": "ps1_style_rocket_launcher.glb", "kind": "rifle", "length": 1.1},
     "musket": {"raw": "hunting_rifle.glb", "kind": "rifle", "length": 1.3},
     "revolver": {"raw": REVOLVER_PACK + "Colt Python/ColtPyton.obj", "kind": "pistol", "length": 0.3,
-                 "drop_exact": ("CPBullet", "CPCyilnder")},
+                 "drop_exact": ("CPBullet", "CPCyilnderFull")},  # Full = the swung-out copy.
     "knife": {"raw": "combat_knife.glb", "kind": "melee", "length": 0.3},
     "throwing_knife": {"raw": "throwing_knife.glb", "kind": "melee", "length": 0.3, "flip": True},
     "sledgehammer": {"raw": "sledge_hammer.glb", "kind": "melee", "length": 0.9, "flip": True},

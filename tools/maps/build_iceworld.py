@@ -6,7 +6,9 @@ Writes scenes/maps/ice_yard/ice_yard.tscn: CSG boxes with collision (layer 1), S
 Pickups and AirdropPoints. Edit the layout here and re-run (it overwrites the scene).
 --preview DIR draws a top-down PNG (needs Pillow).
 
-Axes: x east, z south (north = -z), y up. Walled yard 56 x 56 m (x, z -28..28), open sky.
+Axes: x east, z south (north = -z), y up. Walled yard 67 x 67 m: the layout below is written
+for 56 x 56 m (x, z -28..28) and every horizontal coordinate is scaled by SCALE (heights are
+not), so all contacts and ramps stay flush. Overcast late-afternoon light, open sky.
 Four-way rotational symmetry (every quarter is the previous one turned 90 degrees), so no
 side is better in free-for-all:
 - Centre: ice plaza 14 x 14 behind 3.5 m ice walls with a 4 m gap in every side; an ice pillar
@@ -26,7 +28,8 @@ import sys
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT = os.path.join(ROOT, "scenes", "maps", "ice_yard", "ice_yard.tscn")
 
-HALF = 28.0  # Yard half size (inside of the walls).
+SCALE = 1.2  # Horizontal scale of the whole layout (Can: 20% bigger than the first version).
+HALF = 28.0  # Yard half size (inside of the walls), before SCALE.
 WALL_H = 6.0
 WALL_T = 1.0
 PLAZA = 7.0  # Plaza half size.
@@ -42,7 +45,8 @@ markers = []  # (group, name, position, yaw, extra)
 
 
 def add_box(parent, name, x0, x1, y0, y1, z0, z1, mat="Mat_wall"):
-    x0, x1 = sorted((x0, x1))
+    x0, x1 = sorted((x0 * SCALE, x1 * SCALE))
+    z0, z1 = z0 * SCALE, z1 * SCALE
     y0, y1 = sorted((y0, y1))
     z0, z1 = sorted((z0, z1))
     if x1 - x0 < 0.01 or y1 - y0 < 0.01 or z1 - z0 < 0.01:
@@ -60,6 +64,7 @@ RAMP_TUCK = 0.3  # The low end runs on under the floor, so there is no lip.
 def ramp(parent, name, axis, a0, a1, w0, w1, y_low, y_high, thick=0.3, mat="Mat_snow"):
     """Walkable ramp along `axis` from coordinate a0 (y_low) to a1 (y_high); a1 must be exactly
     the edge of the floor it reaches (flush top, see build_mall_blockout.py)."""
+    a0, a1, w0, w1 = a0 * SCALE, a1 * SCALE, w0 * SCALE, w1 * SCALE
     run, rise = a1 - a0, y_high - y_low
     slope = math.hypot(run, rise)
     a0 -= RAMP_TUCK * run / slope
@@ -87,6 +92,7 @@ def ramp(parent, name, axis, a0, a1, w0, w1, y_low, y_high, thick=0.3, mat="Mat_
 
 
 def marker(group, name, x, y, z, face=(0.0, 0.0), extra=None):
+    x, z, face = x * SCALE, z * SCALE, (face[0] * SCALE, face[1] * SCALE)
     yaw = math.atan2(-(face[0] - x), -(face[1] - z))
     markers.append((group, name, (x, y, z), yaw, extra))
 
@@ -117,7 +123,7 @@ def build():
         add_box(g, f"YardWall{i}", x0, x1, 0.0, WALL_H, z0, z1, "Mat_wall")
         add_box(g, f"YardWallCap{i}", x0 - 0.15, x1 + 0.15, WALL_H, WALL_H + 0.3, z0 - 0.15, z1 + 0.15, "Mat_trim")
         cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
-        clips.append((f"Clip{i}", (cx, WALL_H + CLIP_H / 2, cz), (x1 - x0, CLIP_H, z1 - z0)))
+        clips.append((f"Clip{i}", (cx * SCALE, WALL_H + CLIP_H / 2, cz * SCALE), ((x1 - x0) * SCALE, CLIP_H, (z1 - z0) * SCALE)))
 
     # Plaza: ice walls, a gap in the middle of every side, pillar and crates inside.
     for q in range(4):
@@ -213,10 +219,10 @@ HEADER = """[gd_scene format=3]
 [ext_resource type="Resource" path="res://data/pickups/double_jump.tres" id="4_double_jump"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
-sky_top_color = Color(0.36, 0.47, 0.62, 1)
-sky_horizon_color = Color(0.72, 0.78, 0.86, 1)
-ground_bottom_color = Color(0.5, 0.54, 0.6, 1)
-ground_horizon_color = Color(0.72, 0.78, 0.86, 1)
+sky_top_color = Color(0.1, 0.13, 0.2, 1)
+sky_horizon_color = Color(0.34, 0.36, 0.42, 1)
+ground_bottom_color = Color(0.16, 0.17, 0.2, 1)
+ground_horizon_color = Color(0.34, 0.36, 0.42, 1)
 
 [sub_resource type="Sky" id="Sky"]
 sky_material = SubResource("SkyMat")
@@ -225,11 +231,11 @@ sky_material = SubResource("SkyMat")
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
-ambient_light_energy = 0.75
+ambient_light_energy = 0.42
 tonemap_mode = 2
 fog_enabled = true
-fog_light_color = Color(0.75, 0.8, 0.88, 1)
-fog_density = 0.006
+fog_light_color = Color(0.3, 0.33, 0.4, 1)
+fog_density = 0.011
 fog_sky_affect = 0.4
 
 [sub_resource type="FastNoiseLite" id="GritNoise"]
@@ -310,8 +316,8 @@ environment = SubResource("Env")
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation = Vector3(-0.7, 0.9, 0)
 position = Vector3(0, 30, 0)
-light_color = Color(1, 0.97, 0.92, 1)
-light_energy = 0.85
+light_color = Color(0.86, 0.88, 1, 1)
+light_energy = 0.5
 shadow_enabled = true
 
 [node name="Geometry" type="Node3D" parent="."]
@@ -375,7 +381,7 @@ def write_preview(folder):
     from PIL import Image, ImageDraw
 
     scale = 10
-    lo, size = -HALF - 2, int(2 * HALF + 4)
+    lo, size = -HALF * SCALE - 2, int(2 * HALF * SCALE + 4)
     img = Image.new("RGB", (size * scale, size * scale), (20, 20, 24))
     d = ImageDraw.Draw(img)
 
