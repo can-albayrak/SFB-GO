@@ -211,8 +211,12 @@ func _on_peer_disconnected(peer_id: int) -> void:
 		if (grenade is Grenade and (grenade as Grenade).thrower_id == peer_id) \
 				or (grenade is ThrownKnife and (grenade as ThrownKnife).thrower_id == peer_id):
 			grenade.queue_free()
-	var player: Node = players_root.get_node_or_null(str(peer_id))
+	var player := players_root.get_node_or_null(str(peer_id)) as Player
 	if player != null:
+		# Leaving with an airdrop weapon drops it like dying does, so it stays in the match.
+		var airdrops: AirdropManager = AirdropManager.find(get_tree())
+		if player.is_alive and player.special_weapon >= 0 and airdrops != null:
+			airdrops.server_drop_weapon(player.special_weapon, player.special_ammo, player.global_position)
 		player.queue_free()
 
 

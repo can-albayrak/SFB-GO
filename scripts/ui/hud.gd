@@ -112,10 +112,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if not is_instance_valid(_player):
-		# Late joiner still picking a loadout (no player yet): Esc leaves the game.
-		if event.is_action_pressed(&"pause_menu") and loadout_menu.visible:
+		# Late joiner still picking a loadout (no player yet): Esc swaps the loadout menu and
+		# the pause panel (Resume goes back to the loadout, Leave Game leaves).
+		if event.is_action_pressed(&"pause_menu") and (loadout_menu.visible or _pause_panel.visible):
 			get_viewport().set_input_as_handled()
-			Net.leave()
+			set_join_paused(loadout_menu.visible)
 		return
 	if event.is_action_pressed(&"class_menu"):
 		if loadout_menu.visible:
@@ -397,7 +398,7 @@ func _build_pause_panel() -> void:
 	title.custom_minimum_size.y = 28.0
 	box.add_child(title)
 	var resume := Style.menu_button("RESUME")
-	resume.pressed.connect(func() -> void: Input.mouse_mode = Input.MOUSE_MODE_CAPTURED)
+	resume.pressed.connect(_on_resume_pressed)
 	box.add_child(resume)
 	var settings := Style.menu_button("SETTINGS")
 	settings.pressed.connect(func() -> void: _settings_panel.open())
@@ -406,6 +407,23 @@ func _build_pause_panel() -> void:
 	leave.add_theme_color_override(&"font_color", Style.TEXT_DIM)
 	leave.pressed.connect(func() -> void: Net.leave())
 	box.add_child(leave)
+
+
+func _on_resume_pressed() -> void:
+	if not is_instance_valid(_player):
+		set_join_paused(false) # Late joiner: back to picking a loadout.
+		return
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+## Late joiner without a player yet: the pause panel stands in for the loadout menu.
+func set_join_paused(paused: bool) -> void:
+	loadout_menu.visible = not paused
+	_pause_panel.visible = paused
+
+
+func is_join_paused() -> bool:
+	return _pause_panel.visible and not is_instance_valid(_player)
 
 
 func _centered(label: Label) -> Label:

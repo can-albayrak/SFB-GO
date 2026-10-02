@@ -164,7 +164,10 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
   - `movement_test` 45/0.
   - `map_test` 143/0: en uzun yürüme Spawn3 → Spawn12 127 m = 19,2 sn; çatıya 2, üst kata 6 yol var ve her biri tek tek kaldırılınca bile oralara ulaşılıyor.
   - Smoke 113/0.
-  - Ağ testi: lobi 29 + 26 (AVM'de), geç katılma 28 + 27.
+  - Ağ testi: lobi 30 + 26 (AVM'de), geç katılma 29 + 29.
+- [x] İki bilinen sorun kapandı:
+  - Oyundan airdrop silahıyla çıkan oyuncunun silahı artık yere düşer (ölmekle aynı). Ağ testi bunu kontrol ediyor; düzeltme olmadan test başarısız oluyordu.
+  - Geç katılırken loadout ekranında Esc artık oyundan atmıyor: pause paneli açılır, RESUME loadout'a döner, LEAVE GAME çıkar.
 - [ ] **Can'ın oynama testi** (yukarıdaki liste)
 - [ ] Aşama sonu bağımsız kod incelemesi
 
@@ -204,7 +207,6 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Maç bitince lobiye dönülmez; eskisi gibi 10 sn sonra yeni maç başlar.
 - Ölüm ekranındaki "öldürenin kalan canı" kill ödülünden önceki can.
 - Aşama 6 notu: airdrop silahlarının `.tres`'inde `kill_ammo_reward = false` olmalı (varsayılan true).
-- Geç katılma loadout ekranında Esc oyundan çıkar (henüz oyuncu yok, pause menüsü yok).
 - AVM blockout oynanmadı: akış, siper yoğunluğu ve görüş hatları sadece kâğıt üstünde (navmesh testi yürünebilirliği doğrular, oynanışı değil). Işık yok (ortam ışığı + güneş); iç mekân karanlık görünebilir (aşama 8: LightmapGI).
 - Basamak çıkma: tek basamaktan inerken kenardan kısa bir düşüş olur (~0,1 sn, iniş çökmesi). Yavaş yürürken basamağa değince en az 0,15 m ileri atılır; eğilerek kaldırıma yürürken küçük bir sıçrama hissedilebilir.
 - AVM'nin görünmez site duvarı mermi ve bombaları da durdurur (site dışında kimse yok); kanca da ona takılabilir (çit hattında, 40 m menzil içindeyse).
@@ -221,7 +223,6 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Dürbün katmanı ve ayarlar paneli 0×0 boyutta kalıyordu (dürbünde sadece zoom vardı): `set_anchors_and_offsets_preset` ile düzeldi. Ayarlarda listenin sonunda tekerlek oyuna dönüyordu: tekerlek artık fareyi yakalamaz.
 - Aşama 6: Airdrop silah modelleri yer tutucu (Railgun = Heavy Rifle + mavi bobin, Minigun = LMG + namlu, Rocket = tüp). Minigun'un dönmesi başkalarına görünmüyor. Pickup alma host'un gördüğü konuma göre (~100 ms geriden). Speed pickup Adrenaline ile çarpılarak birleşir. Anons sesleri aşama 9.
 - Minigun ısınması sadece sahibinde kontrol ediliyor (host ateş hızını kontrol ediyor ama ısınmayı değil; hileli client anında ateş edebilir, mermi takibi gibi bilinçli olarak ertelendi).
-- Aşama 6: oyuncu oyundan çıkarken taşıdığı airdrop silahı kaybolur (yere düşmez).
 - Ekran filtresi HUD ve menüleri de etkiler (bilinçli: PS2 hissi); yazılar okunmazsa filtre ayarlardan kapatılır.
 - Uzak oyuncu modeli animasyonsuz, eğilince y'de basılır; elindeki silah artık doğru model (`held_slot`) ama tutuş pozu yok (aşama 8).
 - Lag compensation 400 ms'den yüksek gecikmede tam telafi etmez (bilinçli üst sınır).
@@ -280,4 +281,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 6 | Can'ın testi olumlu. Kasa katı oldu; dürbünde gecikmeli geri tepme inişi (görüş kendiliğinden aşağı kayma) düzeldi. |
 | 2026-10-01 | 6 → 7 | Aşama 6 sonu bağımsız inceleme: 5 düzeltme (havada ölen taşıyıcının silahı zemine iner, Minigun sayacı, pickup'lar maç başında sıfırlanır, Double Jump bunny hop'u yemez, maç sonunda kasa açılmaz). **Aşama 6 kapandı.** |
 | 2026-10-02 | 7 | Bıçak: büyük model, 0,2 m isabet yarıçapı, daha hızlı ve düz atış. Smoke 113/0. Yarın/bugün: aşama 7 (AVM) ve modeller. |
-| 2026-10-02 | 7 | (iş bilgisayarı, Godot 4.7.2 headless, oynanmadı) Silah modeli adayları `ASSETS.md`'ye (Sketchfab, Falxxx PS1 serisi; söküm modeller arkadaş sürümünde serbest). Basamak çıkma + floor snap, merdiven = görsel basamak + rampa, harita listesi (`MapDef`), AVM blockout üreteci ve sahnesi, görünmez site duvarı. `movement_test` 45/0, `map_test` 143/0, smoke 113/0, ağ testi 0 hata. Can'ın evde oynama testi bekliyor. |
+| 2026-10-02 | 7 | (iş bilgisayarı, Godot 4.7.2 headless, oynanmadı) Silah modeli adayları `ASSETS.md`'ye (Sketchfab, Falxxx PS1 serisi; söküm modeller arkadaş sürümünde serbest). Basamak çıkma + floor snap, merdiven = görsel basamak + rampa, harita listesi (`MapDef`), AVM blockout üreteci ve sahnesi, görünmez site duvarı. `movement_test` 45/0, `map_test` 143/0, smoke 113/0, ağ testi 0 hata. Çıkışta airdrop silahı düşer, geç katılmada Esc pause açar. Can'ın evde oynama testi bekliyor. |

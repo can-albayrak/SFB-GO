@@ -141,6 +141,7 @@ func _run_host() -> void:
 	_check(await _wait_until(func() -> bool: return them.held_slot == Player.SPECIAL_SLOT), "client took the airdrop weapon in hand")
 
 	_check(await _wait_until(func() -> bool: return _find_player(_peer) == null, STEP_TIMEOUT * 2.0), "client's player removed after it left")
+	_check(airdrops != null and not airdrops._drop_left.is_empty(), "the airdrop weapon it carried was dropped on leaving")
 
 
 ## A standing spot SHOT_DISTANCE from `target` with floor under it and a clear view from its eye.
@@ -178,6 +179,19 @@ func _run_client() -> void:
 		var menu := game.get_node("HUD/LoadoutMenu") as LoadoutMenu
 		_check(await _wait_until(func() -> bool: return menu.visible), "join loadout menu shown before spawning")
 		_check(_find_player(multiplayer.get_unique_id()) == null, "no player before the loadout is picked")
+		# Esc while picking pauses instead of leaving; Resume goes back to the loadout.
+		var hud: Node = game.get_node("HUD")
+		var esc := InputEventAction.new()
+		esc.action = &"pause_menu"
+		esc.pressed = true
+		get_viewport().push_input(esc)
+		await get_tree().process_frame
+		_check(Game.find(get_tree()) != null and hud.call(&"is_join_paused") and not menu.visible,
+			"Esc on the join loadout opens the pause panel (still in the match)")
+		var resume: Button = _find_button(hud, "RESUME")
+		if resume != null:
+			resume.pressed.emit()
+		_check(menu.visible and not hud.call(&"is_join_paused"), "Resume goes back to the join loadout")
 		menu.open(bear)
 		var deploy: Button = _find_button(menu, "DEPLOY")
 		_check(deploy != null, "loadout menu has DEPLOY")
