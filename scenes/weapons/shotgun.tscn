@@ -8,7 +8,7 @@ position = Vector3(0.2, -0.21, -0.45)
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-scale = Vector3(0.68, 0.68, 0.68)
+scale = Vector3(0.816, 0.816, 0.816)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.0414, -0.4352)
+position = Vector3(0, 0.0497, -0.5222)

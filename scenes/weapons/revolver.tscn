@@ -8,7 +8,7 @@ position = Vector3(0.16, -0.17, -0.36)
 script = ExtResource("1_hitscan")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-scale = Vector3(0.8, 0.8, 0.8)
+scale = Vector3(0.96, 0.96, 0.96)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.0332, -0.168)
+position = Vector3(0, 0.0398, -0.2016)

@@ -9,14 +9,14 @@ script = ExtResource("1_script")
 
 [node name="RightModel" parent="." instance=ExtResource("2_model")]
 position = Vector3(0.16, 0, 0)
-scale = Vector3(0.8, 0.8, 0.8)
+scale = Vector3(0.96, 0.96, 0.96)
 
 [node name="LeftModel" parent="." instance=ExtResource("2_model")]
 position = Vector3(-0.16, 0, 0)
-scale = Vector3(0.8, 0.8, 0.8)
+scale = Vector3(0.96, 0.96, 0.96)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0.16, 0.026, -0.1232)
+position = Vector3(0.16, 0.0305, -0.1478)
 
 [node name="LeftMuzzle" type="Marker3D" parent="."]
-position = Vector3(-0.16, 0.026, -0.1232)
+position = Vector3(-0.16, 0.0305, -0.1478)

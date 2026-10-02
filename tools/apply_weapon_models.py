@@ -17,7 +17,9 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 REAL = "res://assets/models/weapons/real"
 
 # scene -> model id, view model scale, rotation (None keeps the scene's), placeholder nodes to drop,
-# whether the Muzzle marker follows the model (guns) or stays (melee).
+# whether the Muzzle marker follows the model (guns) or stays (melee). Every scale is multiplied
+# by VIEW_SCALE (Can: "a bit small", 2026-10-02).
+VIEW_SCALE = 1.2
 SCENES = {
     "assault_rifle": ("assault_rifle", 0.78, None, (), True),
     "burst_rifle": ("burst_rifle", 0.65, None, (), True),
@@ -115,6 +117,7 @@ def model_ext(parts, model_id):
 
 def apply_scene(name, cfg, muzzles):
     model_id, scale, rotation, drop, follow_muzzle = cfg
+    scale *= VIEW_SCALE
     path = os.path.join(ROOT, "scenes", "weapons", name + ".tscn")
     if not os.path.exists(path):
         src = os.path.join(ROOT, "scenes", "weapons", "burst_rifle.tscn")  # Same structure.
