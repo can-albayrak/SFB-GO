@@ -143,15 +143,16 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 ## Sınıflar
 
-5 sınıf, her birinde 2–3 silah ve 2 özel güç seçeneği. **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
+6 sınıf, çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy: tek ana silah, tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
 
 | Sınıf | Can | Hız | Rol | Görünüm |
 | --- | --- | --- | --- | --- |
 | Hawk | 80 | Normal | Uzak mesafe, yüksek nokta | Uzun palto, boyun atkısı |
-| Bear | 175 | Hafif yavaş (hız cezası az) | Yakın dövüş tankı, her mesafede orta güçlü | Kaynaklı ev yapımı zırh, omuz ve kol koruyucuları |
+| Bear | 200 | Hafif yavaş (hız cezası az) | Yakın dövüş tankı, her mesafede orta güçlü | Kaynaklı ev yapımı zırh, omuz ve kol koruyucuları |
 | Cheetah | 70 | Çok hızlı | Vur-kaç, hareket | Eşofman, kapüşon, koşu ayakkabısı |
 | Wolf | 100 | Normal | Dengeli, başlangıç sınıfı | Askeri yelek, bere |
 | Volcano | 110 | Biraz yavaş | Patlayıcı, alan kontrolü | Kirli koruyucu tulum, madenci kafa lambası (kask yok) |
+| Cowboy | 100 | Normal | Tek atışlık uzun menzil + ağır tabanca, kendi kendini toparlar | Kovboy şapkası, uzun palto (sigara içer) |
 
 ### Hawk
 
@@ -210,7 +211,17 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 - **Kendine hasar:** Volcano'nun patlayıcıları (Grenade Launcher, Sticky Bomb, Landmine) Volcano'nun kendisine **yarı hasar** verir.
 - **Yedek:** Tabanca
 
-## Sınıf değiştirme ve loadout
+### Cowboy (2026-10-02, Can'ın isteği)
+
+| Silah | Hasar | Not |
+| --- | --- | --- |
+| Musket | Çok yüksek (gövde 95, kafa 190) | GTA 5 musket gibi: tek mermi, dürbünsüz ama çok isabetli, uzun doldurma |
+| Revolver (yedek) | Deagle gibi (45, kafa 90) | 6 mermi, ağır tepme |
+
+- **Güç: Smoke Break (18 sn):** Sigara yakar; 6 sn boyunca saniyede 5 can dolar (toplam 30), ateş hızı ve doldurma hızı artar.
+- **Animasyon (aşama 8):** Smoke Break sırasında birinci ve üçüncü şahısta sigara içme.
+
+## Sınıf değiştirme ve loadout)
 
 Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek tıkla aynısıyla doğulur.
 

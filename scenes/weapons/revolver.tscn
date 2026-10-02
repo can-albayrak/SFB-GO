@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/hitscan_weapon.gd" id="1_hitscan"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/revolver.glb" id="2_model"]
+
+[node name="Revolver" type="Node3D"]
+position = Vector3(0.16, -0.17, -0.36)
+script = ExtResource("1_hitscan")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+scale = Vector3(0.85, 0.85, 0.85)
+
+[node name="Muzzle" type="Marker3D" parent="."]
+position = Vector3(0, 0.041, -0.187)

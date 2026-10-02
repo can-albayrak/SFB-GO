@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="AbilityDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/adrenaline_ability.tscn" id="2_ability"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"smoke_break"
+display_name = "Smoke Break"
+cooldown = 18.0
+duration = 6.0
+speed_mult = 1.0
+fire_rate_mult = 1.3
+reload_speed_mult = 1.6
+heal_per_second = 5.0
+scene = ExtResource("2_ability")

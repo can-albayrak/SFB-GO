@@ -7,7 +7,8 @@
 [ext_resource type="Resource" path="res://data/classes/bear.tres" id="5_bear"]
 [ext_resource type="Resource" path="res://data/classes/cheetah.tres" id="6_cheetah"]
 [ext_resource type="Resource" path="res://data/classes/volcano.tres" id="7_volcano"]
+[ext_resource type="Resource" path="res://data/classes/cowboy.tres" id="8_cowboy"]
 
 [resource]
 script = ExtResource("1_roster")
-classes = Array[ExtResource("2_cdef")]([ExtResource("3_wolf"), ExtResource("4_hawk"), ExtResource("5_bear"), ExtResource("6_cheetah"), ExtResource("7_volcano")])
+classes = Array[ExtResource("2_cdef")]([ExtResource("3_wolf"), ExtResource("4_hawk"), ExtResource("5_bear"), ExtResource("6_cheetah"), ExtResource("7_volcano"), ExtResource("8_cowboy")])

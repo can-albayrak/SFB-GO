@@ -158,6 +158,8 @@ Hepsi indirilebilir ve **CC-BY** (kredi zorunlu, krediler "Kullanılanlar" tablo
 | Frag Grenade | [Grenade](https://sketchfab.com/models/8d6b63e11b464bb2a10cdbb0a082b5e7) (poligon azaltılır) | Chpndl | 5610 | Mevcut Blender modeli |
 | Flashbang | [Flashbang](https://sketchfab.com/models/f4a48db9bd54420696ed282af9574dd9) (poligon azaltılır) | Chpndl | 7178 | Mevcut Blender modeli |
 
+**İndirilenler (2026-10-02, Can):** `C:\Users\Administrator\Downloads\` içinde, `private_assets/weapons/`'a taşınıp Blender'da düzenlenecek: ps1_style_ak-47, ps1-style_steyr_aug, low-poly_m249_saw, ps1_style_awp_sniper, svd, mac10_psx, ps1-style_beretta_m9, glock_psx, lowpoly_-_remington_shotgun_-_ps1__psx_style, ps1_style_grenade_launcher, ps1_style_railgun, low-poly_m134_minigun, sledge_hammer, ps1_low-poly_chainsaw, throwing_knife, grenade, flashbang (`.glb`). Henüz yok: Rocket Launcher, Combat Knife (V), Cowboy'un Musket ve Revolver'ı (aday aranacak).
+
 **Bulunamayan, Blender'da biz yaparız:** Claws (Bear), Sticky Bomb, Landmine, Grapple, Bear'ın kalkanı, birinci şahıs kollar.
 
 **Oyunlardan sökülmüş modeller (Can'ın kararı, 2026-10-02):** Oyun sadece 4–5 arkadaş arasında oynandığı için kullanılabilir. Şartlar: repo ve Release'ler gizli kalır, oyun hiçbir yerde herkese açık paylaşılmaz, "Kullanılanlar" tablosunda `ripped` diye işaretlenir (ileride açık paylaşım olursa hangilerinin değişeceği belli olsun).

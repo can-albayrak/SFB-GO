@@ -57,6 +57,7 @@ func _run() -> void:
 	await _test_loadouts()
 	await _test_weapons()
 	await _test_abilities()
+	await _test_smoke_break()
 	await _test_kill_reward()
 	await _test_quick_switch()
 	await _test_knife_radius()
@@ -124,7 +125,8 @@ func _test_abilities() -> void:
 			elif ability is ShieldAbility:
 				_check(_player.shield_up, label + " raises the shield")
 			elif ability is AdrenalineAbility:
-				_check(_player.status.get_host_speed_mult() > 1.0, label + " boosts on the host")
+				_check(_player.status.get_host_speed_mult() > 1.0 or _player.status.get_host_fire_rate_mult() > 1.0,
+					label + " boosts on the host")
 			elif ability is DashAbility:
 				ability.cooldown_left = 0.0
 				ability.try_use(origin, dir)
@@ -132,6 +134,30 @@ func _test_abilities() -> void:
 			_clear_projectiles()
 			_player.status.reset_host()
 			_player.status.reset_local()
+
+
+## Cowboy's Smoke Break: health comes back over time (host) and reloads run faster (owner).
+func _test_smoke_break() -> void:
+	await _set_loadout(_code_for(&"cowboy"))
+	var ability: Ability = _player.ability
+	_check(ability != null and ability.def.heal_per_second > 0.0, "Cowboy has Smoke Break")
+	if ability == null:
+		return
+	_player.health = 40
+	ability.host_ready_at = -INF
+	ability.cooldown_left = 0.0
+	var origin: Vector3 = _player.get_aim_origin()
+	var dir: Vector3 = -_player.get_aim_basis().z
+	ability.try_use(origin, dir)
+	ability.server_try_use(origin, dir)
+	await _frames(Engine.physics_ticks_per_second) # One second.
+	var healed: int = _player.health - 40
+	_check(healed >= 4 and healed <= 6, "Smoke Break heals ~%d HP per second (healed %d)" % [roundi(ability.def.heal_per_second), healed])
+	_check(_player.status.get_reload_speed_mult() > 1.0, "Smoke Break speeds up reloads on the owner")
+	_player.status.reset_host()
+	_player.status.reset_local()
+	_check(_player.status.get_reload_speed_mult() == 1.0, "reload boost ends with the buff")
+	_player.health = _player.class_def.max_health
 
 
 func _test_kill_reward() -> void:

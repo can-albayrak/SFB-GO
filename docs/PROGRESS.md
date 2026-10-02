@@ -215,6 +215,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Decoy sadece görsel: vurulamaz, kurşun içinden geçer (GDD "hologram" diyor; istenirse hitbox eklenir).
 - Marksman Rifle şimdilik Burst Rifle modelini kullanıyor (yer tutucu, aşama 8).
 - Bear'ın Sledgehammer/Claws/Chainsaw modelleri bıçak modelinin büyütülmüş hali; tekme görünmez (aşama 8).
+- Cowboy: Musket ve Revolver Blender yer tutucusu (`build_placeholders.py -- . musket revolver`); karakter asker modeliyle aynı, şapka/palto yok. **Not (aşama 8): Smoke Break'te sigara içme animasyonu** (birinci şahıs elde sigara + duman, üçüncü şahısta ağza götürme). Şu an güç kullanınca görsel bir şey olmuyor, sadece HUD.
 - Stun ve knockback client tarafında uygulanıyor; host sadece stunlu oyuncunun ateş/güç isteklerini reddediyor (hareketi değil).
 - Shield hasar yönünü saldıranın konumundan hesaplıyor (bomba dahil), bu yüzden arkadan patlayan bomba önden sayılabilir.
 
@@ -241,6 +242,9 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 ## Denge notları
 
 Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya.
+
+- 2026-10-02 (Can): Tabancanın tepmesi SMG ve LMG'den fazla geliyordu (mermi başına 0,9° vs ~0,45°). SMG ve LMG desenleri ~1,7× (mermi başına ~0,7–0,8°), tabanca 0,9 → 0,6°. Hawk Grapple menzili 40 → 28 m.
+- 2026-10-02 (Can): Yeni sınıf **Cowboy** (GDD'de): Musket 95 (kafa 190), 1 mermi, 2,8 sn doldurma, dürbünsüz, `move_spread` 0,4; Revolver 45, 6 mermi; Smoke Break 18 sn bekleme, 6 sn, 5 can/sn, ateş hızı ×1,3, doldurma ×1,6. İlk tahmin; oynanınca ayarlanacak. GDD'deki "can yenilenmesi yok" kuralının tek istisnası Smoke Break.
 
 - 2026-10-02 (Can): Bear çok zayıf. Can 175 → 200; Chainsaw hasar 7 → 11 (70 → 110 DPS), taşırken hız %75 → %85; Claws erişim 1,7 → 2,0 m; Sledgehammer erişim 2,3 → 2,6 m, aralık 1,1 → 0,95 sn; Charge bekleme 12 → 8 sn; Shield 12 → 10 sn. Can'la birlikte oynanıp tekrar bakılacak.
 - 2026-10-02 (Can): Q bombaları ve fırlatma bıçağı "düzgün gitmiyor": artık sağ elden çıkıp nişangah noktasına gidiyor ve koşu hızını taşıyor (testte 10 m'ye nişanlı frag dururken 12,3 m'de, koşarken 17,4 m'de patladı; bıçak 15 m'de mankene isabet). Değer değişmedi, sadece fırlatma yolu.
@@ -287,3 +291,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-02 | 7 | (iş bilgisayarı, Godot 4.7.2 headless, oynanmadı) Silah modeli adayları `ASSETS.md`'ye (Sketchfab, Falxxx PS1 serisi; söküm modeller arkadaş sürümünde serbest). Basamak çıkma + floor snap, merdiven = görsel basamak + rampa, harita listesi (`MapDef`), AVM blockout üreteci ve sahnesi, görünmez site duvarı. `movement_test` 45/0, `map_test` 143/0, smoke 113/0, ağ testi 0 hata. Çıkışta airdrop silahı düşer, geç katılmada Esc pause açar. Can'ın evde oynama testi bekliyor. |
 | 2026-10-02 | 7 | Evde pull + doğrulama: import temiz, smoke 113/0, map 143/0, ağ testi (lobi + geç katılma) 0 hata. movement_test merdiven-iniş kontrolü kaldırımın kenarından düşmeyi de sayıyordu (bilinen ~0,1 sn düşüş, tek basamak testinde ayrıca var); hedef kaldırımın üstüne çekildi, 45/0. Oyun Can'ın denemesi için açıldı. |
 | 2026-10-02 | 7 | Can'ın isteği: Bear güçlendirildi (yukarıda), fırlatmalar elden + nişangaha + koşu hızı taşıyor, Test Range'de her an sınıf değişimi ve Esc'te kalıcı "UNLIMITED ABILITIES" anahtarı (varsayılan kapalı). Smoke 113/0, movement 45/0, map 143/0, ağ testi 0 hata; fırlatma/sınıf değişimi ayrıca headless doğrulandı. |
+| 2026-10-02 | 7 | Can'ın isteği: SMG/LMG tepmesi arttı, tabanca azaldı, Grapple 28 m. Yeni sınıf Cowboy (Musket, Revolver, Smoke Break: can yenileme + ateş/doldurma hızı; buff sistemine doldurma çarpanı ve host'ta can yenileme eklendi), yer tutucu modeller, GDD'ye eklendi, sigara animasyonu aşama 8 notu. Smoke 125/0 (Smoke Break testi dahil), movement 45/0, map 143/0, ağ testi 0 hata. Silah modelleri İndirilenler'de (ASSETS.md). |

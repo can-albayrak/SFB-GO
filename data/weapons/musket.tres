@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/musket.tscn" id="2_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/musket.glb" id="3_world"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"musket"
+display_name = "Musket"
+damage = 95.0
+headshot_mult = 2.0
+leg_mult = 0.75
+max_range = 300.0
+fire_interval = 1.0
+automatic = false
+magazine_size = 1
+reload_time = 2.8
+equip_time = 0.7
+move_speed_mult = 0.95
+move_spread = 0.4
+recoil_pattern = PackedVector2Array(0, 3.0)
+recoil_recovery = 9.0
+recoil_recovery_delay = 0.1
+scene = ExtResource("2_scene")
+world_model = ExtResource("3_world")
+world_model_scale = 1.0
+world_muzzle = Vector3(0, 0.035, -0.945)

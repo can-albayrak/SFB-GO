@@ -70,7 +70,7 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 	_update_recoil(delta)
 
 	if is_reloading:
-		_reload_left -= delta
+		_reload_left -= delta * player.status.get_reload_speed_mult()
 		if _reload_left <= 0.0:
 			ammo = def.magazine_size
 			_set_reloading(false)

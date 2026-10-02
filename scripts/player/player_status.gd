@@ -15,9 +15,12 @@ var _stun_left: float = 0.0 ## Owner: input is ignored while > 0.
 var _buff_left: float = 0.0 ## Owner.
 var _buff_speed_mult: float = 1.0
 var _buff_fire_mult: float = 1.0
+var _buff_reload_mult: float = 1.0
 var _host_buff_until: float = 0.0 ## Host clock.
 var _host_buff_speed_mult: float = 1.0
 var _host_buff_fire_mult: float = 1.0
+var _host_heal_per_second: float = 0.0 ## Smoke Break: health per second while the boost lasts.
+var _host_heal_carry: float = 0.0 ## Fractional health not yet added (health is an int).
 # Pickup boosts (Speed, Double Jump): owner copy for handling, host copy for checks and the glow.
 var _speed_pickup_left: float = 0.0 ## Owner.
 var _speed_pickup_mult: float = 1.0
@@ -39,6 +42,7 @@ func tick_local(delta: float) -> void:
 
 ## Host, every physics tick.
 func server_tick() -> void:
+	_tick_heal()
 	if _shield_until > 0.0 and _now() >= _shield_until:
 		clear_shield()
 	if not _host_powerup_until.is_empty():
@@ -65,6 +69,7 @@ func reset_local() -> void:
 func reset_host() -> void:
 	_stun_until = 0.0
 	_host_buff_until = 0.0
+	_host_heal_per_second = 0.0
 	_host_speed_pickup_until = 0.0
 	_host_powerup_until.clear()
 	clear_shield()
@@ -76,6 +81,7 @@ func reset_host() -> void:
 func clear_buffs() -> void:
 	_buff_left = 0.0
 	_host_buff_until = 0.0
+	_host_heal_per_second = 0.0
 	clear_shield()
 
 
@@ -183,19 +189,23 @@ func server_return_throwable() -> void:
 	_return_throwable.rpc_id(player.get_multiplayer_authority())
 
 
-## Owner: timed speed / fire rate boost (Adrenaline), applied to movement and weapons.
-func start_buff_local(seconds: float, speed_mult: float, fire_mult: float) -> void:
+## Owner: timed speed / fire rate / reload boost (Adrenaline, Smoke Break), applied to movement and weapons.
+func start_buff_local(seconds: float, speed_mult: float, fire_mult: float, reload_mult: float = 1.0) -> void:
 	_buff_left = seconds
 	_buff_speed_mult = speed_mult
 	_buff_fire_mult = fire_mult
+	_buff_reload_mult = reload_mult
 
 
 ## Host: the same boost on the host clock, so its speed and fire rate checks allow it.
-func server_start_buff(seconds: float, speed_mult: float, fire_mult: float) -> void:
+## heal_per_second > 0 also restores health while it lasts (Smoke Break; host-owned health).
+func server_start_buff(seconds: float, speed_mult: float, fire_mult: float, heal_per_second: float = 0.0) -> void:
 	assert(multiplayer.is_server(), "server_start_buff is host-only")
 	_host_buff_until = _now() + seconds
 	_host_buff_speed_mult = speed_mult
 	_host_buff_fire_mult = fire_mult
+	_host_heal_per_second = heal_per_second
+	_host_heal_carry = 0.0
 
 
 ## Owner: movement speed multiplier from an active boost.
@@ -207,6 +217,11 @@ func get_speed_mult() -> float:
 ## Owner: fire rate multiplier from an active boost (weapons divide their intervals by it).
 func get_fire_rate_mult() -> float:
 	return _buff_fire_mult if _buff_left > 0.0 else 1.0
+
+
+## Owner: reload speed multiplier from an active boost (reload timers run this much faster).
+func get_reload_speed_mult() -> float:
+	return _buff_reload_mult if _buff_left > 0.0 else 1.0
 
 
 ## Owner: seconds left on the boost (HUD).
@@ -222,6 +237,18 @@ func get_host_speed_mult() -> float:
 
 func get_host_fire_rate_mult() -> float:
 	return _host_buff_fire_mult if _now() < _host_buff_until else 1.0
+
+
+## Host: health over time from an active Smoke Break, never above the class maximum.
+func _tick_heal() -> void:
+	if _host_heal_per_second <= 0.0 or _now() >= _host_buff_until or not player.is_alive:
+		return
+	_host_heal_carry += _host_heal_per_second * get_physics_process_delta_time()
+	var whole: int = floori(_host_heal_carry)
+	if whole <= 0:
+		return
+	_host_heal_carry -= whole
+	player.health = mini(player.health + whole, player.class_def.max_health)
 
 
 func _now() -> float:

@@ -1,7 +1,7 @@
 """Builds low-poly placeholder models (soldier + weapons) and exports them as .glb.
 
 Run headless (does not touch any open Blender window):
-    blender --background --factory-startup --python tools/blender/build_placeholders.py -- <project_root>
+    blender --background --factory-startup --python tools/blender/build_placeholders.py -- <project_root> [names...]
 
 Conventions (Blender space): Z up, models face +Y (becomes Godot -Z forward after glTF export).
 Soldier origin = between the feet. Weapon origin = trigger / firing-hand position.
@@ -22,6 +22,8 @@ MUZZLES = {
     "shotgun": (0.0, 0.58, 0.055),
     "burst_rifle": (0.0, 0.60, 0.04),
     "lmg": (0.0, 0.70, 0.04),
+    "musket": (0.0, 0.945, 0.035),
+    "revolver": (0.0, 0.22, 0.048),
 }
 
 _materials: dict = {}
@@ -225,6 +227,39 @@ def build_lmg() -> None:
     export("LMG", os.path.join(OUT, "assets/models/weapons/lmg.glb"))
 
 
+def build_musket() -> None:
+    """Cowboy primary: long single-shot musket, walnut stock, iron barrel, flintlock."""
+    metal, _ = gun_materials()
+    wood = mat("Walnut", (0.30, 0.17, 0.08), 0.7)
+    brass = mat("Brass", (0.62, 0.48, 0.20), 0.4, 0.8)
+    box((0.045, 0.62, 0.05), (0.0, 0.20, 0.0), wood)                         # forestock
+    box((0.045, 0.30, 0.10), (0.0, -0.22, -0.035), wood, rot=(-8, 0, 0))     # butt stock
+    box((0.05, 0.02, 0.12), (0.0, -0.375, -0.055), brass)                    # butt plate
+    box((0.035, 0.05, 0.10), (0.0, -0.04, -0.05), wood, rot=(-20, 0, 0))     # wrist / grip
+    along_y(0.011, 0.92, (0.0, 0.48, 0.035), metal)                          # barrel
+    along_y(0.015, 0.03, (0.0, 0.93, 0.035), brass)                          # muzzle band
+    for y in (0.25, 0.45):
+        along_y(0.016, 0.02, (0.0, y, 0.03), brass)                          # barrel bands
+    box((0.012, 0.06, 0.03), (0.022, 0.02, 0.045), metal)                    # lock plate
+    box((0.008, 0.02, 0.035), (0.022, 0.0, 0.07), metal, rot=(30, 0, 0))     # hammer
+    box((0.006, 0.015, 0.015), (0.0, 0.92, 0.055), metal)                    # front sight
+    export("Musket", os.path.join(OUT, "assets/models/weapons/musket.glb"))
+
+
+def build_revolver() -> None:
+    """Cowboy secondary: heavy six-shooter with a long barrel and wooden grip."""
+    metal, _ = gun_materials()
+    wood = mat("Walnut", (0.30, 0.17, 0.08), 0.7)
+    box((0.03, 0.09, 0.05), (0.0, 0.02, 0.035), metal)                       # frame
+    cyl(0.026, 0.05, (0.0, 0.03, 0.04), metal, rot=(90, 0, 0), verts=6)      # cylinder (hex)
+    along_y(0.009, 0.16, (0.0, 0.14, 0.048), metal)                          # barrel
+    box((0.012, 0.16, 0.012), (0.0, 0.14, 0.034), metal)                     # ejector rod housing
+    box((0.028, 0.045, 0.10), (0.0, -0.035, -0.035), wood, rot=(-25, 0, 0))  # grip
+    box((0.008, 0.03, 0.02), (0.0, -0.025, 0.07), metal, rot=(-30, 0, 0))    # hammer
+    box((0.008, 0.012, 0.012), (0.0, 0.215, 0.06), metal)                    # front sight
+    export("Revolver", os.path.join(OUT, "assets/models/weapons/revolver.glb"))
+
+
 def build_knife() -> None:
     """Combat knife, blade forward (+Y), origin at the grip."""
     metal = mat("Blade", (0.55, 0.56, 0.58), 0.3, 0.9)
@@ -258,7 +293,13 @@ def build_flashbang() -> None:
 if __name__ == "__main__":
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     OUT = os.path.abspath(argv[0]) if argv else os.getcwd()
+    # Optional names after the root build only those (e.g. `-- . musket revolver`), so models
+    # tuned by hand after an earlier run are not overwritten.
+    only = set(argv[1:])
     for build in (build_soldier, build_assault_rifle, build_pistol, build_heavy_rifle, build_shotgun,
-                  build_burst_rifle, build_lmg, build_knife, build_frag, build_flashbang):
+                  build_burst_rifle, build_lmg, build_knife, build_frag, build_flashbang,
+                  build_musket, build_revolver):
+        if only and build.__name__.removeprefix("build_") not in only:
+            continue
         reset_scene()
         build()

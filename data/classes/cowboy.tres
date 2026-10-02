@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ClassDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
+[ext_resource type="Resource" path="res://data/weapons/musket.tres" id="3_musket"]
+[ext_resource type="Resource" path="res://data/weapons/revolver.tres" id="4_revolver"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="5_move"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="6_knife"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="7_adef"]
+[ext_resource type="Resource" path="res://data/abilities/smoke_break.tres" id="8_smoke"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"cowboy"
+display_name = "Cowboy"
+max_health = 100
+move_speed = 6.6
+movement = ExtResource("5_move")
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_musket")])
+secondary_weapon = ExtResource("4_revolver")
+abilities = Array[ExtResource("7_adef")]([ExtResource("8_smoke")])
+quick_melee = ExtResource("6_knife")
