@@ -42,8 +42,14 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var spin_up_time: float = 0.0 ## Minigun: seconds of holding fire before it shoots.
 
 @export_group("Recoil")
-## Per-shot view kick in degrees: x = right, y = up. Shots past the end reuse the last entry.
+## Per-shot kick of the aim in degrees: x = right, y = up (CS spray: climb first, then sway).
+## Shots past the end loop back to recoil_loop_start, so a long spray sways side to side
+## instead of climbing forever.
 @export var recoil_pattern: PackedVector2Array
+## Index the pattern loops back to; -1 = the last entry only.
+@export var recoil_loop_start: int = -1
+## The kick never takes the aim more than this many degrees above where it started.
+@export var recoil_max_up: float = 8.0
 ## Degrees per second the view returns once firing stops.
 @export var recoil_recovery: float = 12.0
 ## Recovery starts this long after the next shot would have been ready.
@@ -78,6 +84,10 @@ enum ViewHands { NONE, RIGHT, BOTH }
 ## How far behind counts: dot of the victim's facing and the attacker-to-victim direction
 ## (CS: 0.475, about 60 degrees either side of straight behind).
 @export var backstab_dot: float = 0.475
+## Held knife right click (CS:GO): a slower, heavier stab. 0 = no heavy attack.
+@export var heavy_damage: float = 0.0
+@export var heavy_interval: float = 1.0 ## Seconds after a heavy stab before the knife is ready again.
+@export var heavy_backstab_damage: float = 0.0 ## A heavy stab from behind.
 
 @export_group("Thrown")
 @export var throw_speed: float = 22.0

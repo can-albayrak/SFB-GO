@@ -62,6 +62,7 @@ func _run() -> void:
 	await _test_quick_switch()
 	await _test_scope_and_spread()
 	await _test_knife_speed()
+	await _test_spray()
 	await _test_backstab()
 	await _test_swap_rules()
 	await _test_pickups()
@@ -241,6 +242,10 @@ func _test_backstab() -> void:
 	var side: Vector3 = _away.cross(Vector3.UP).normalized()
 	var flank: float = await _knife_hit_from(side)
 	_check(is_equal_approx(flank, knife.damage), "knife from the side deals %.0f (no backstab)" % flank)
+	var heavy_front: float = await _knife_hit_from(_away, true)
+	_check(is_equal_approx(heavy_front, knife.heavy_damage), "right click stab from the front deals %.0f" % heavy_front)
+	var heavy_behind: float = await _knife_hit_from(-_away, true)
+	_check(is_equal_approx(heavy_behind, knife.heavy_backstab_damage), "right click stab from behind deals %.0f (kill)" % heavy_behind)
 	_player.global_position = _dummy.global_position - _away * MELEE_DISTANCE + Vector3.UP * 0.05
 	await _frames(2)
 	_dummy.health = DUMMY_HEALTH
@@ -256,15 +261,40 @@ func _test_backstab() -> void:
 	_check(_player.get_facing().dot(look.normalized()) > 0.999, "player facing follows the yaw")
 
 
-## Held knife swing from `direction` (flat, from the dummy) at melee range; returns the damage.
-func _knife_hit_from(direction: Vector3) -> float:
+## A long spray (CS style) climbs, then sways: it stays under recoil_max_up and does not drift
+## sideways for good, for every automatic gun.
+func _test_spray() -> void:
+	for class_def: ClassDef in Loadout.roster().classes:
+		for gun_def: WeaponDef in class_def.primary_weapons:
+			if not gun_def.automatic or gun_def.recoil_pattern.is_empty():
+				continue
+			var gun: Weapon = (gun_def.scene.instantiate() as Weapon)
+			gun.def = gun_def
+			var offset := Vector2.ZERO
+			var widest: float = 0.0
+			for shot: int in 300:
+				offset += gun_def.recoil_pattern[gun.recoil_index(shot)]
+				offset.y = minf(offset.y, gun_def.recoil_max_up)
+				widest = maxf(widest, absf(offset.x))
+			gun.free()
+			_check(offset.y <= gun_def.recoil_max_up and widest < 4.0,
+				"%s: 300-shot spray stays bounded (up %.1f, widest %.1f)" % [gun_def.display_name, offset.y, widest])
+
+
+## Held knife swing (or right click stab) from `direction` (flat, from the dummy) at melee
+## range; returns the damage.
+func _knife_hit_from(direction: Vector3, heavy: bool = false) -> float:
 	_player.global_position = _dummy.global_position + direction * MELEE_DISTANCE + Vector3.UP * 0.05
 	_player.velocity = Vector3.ZERO
 	await _frames(2)
 	_dummy.health = DUMMY_HEALTH
 	_player.requests.reset_fire_budgets()
 	var origin: Vector3 = _player.get_aim_origin()
-	_player.requests._request_fire(origin, (_dummy_target() - origin).normalized(), Player.KNIFE_SLOT, &"knife")
+	var dir: Vector3 = (_dummy_target() - origin).normalized()
+	if heavy:
+		_player.requests._request_stab(origin, dir, Player.KNIFE_SLOT, &"knife")
+	else:
+		_player.requests._request_fire(origin, dir, Player.KNIFE_SLOT, &"knife")
 	await _frames(1)
 	return DUMMY_HEALTH - _dummy.health
 

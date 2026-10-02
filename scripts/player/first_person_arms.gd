@@ -26,8 +26,12 @@ const LEFT_HOLD: Vector3 = Vector3(0.0, 0.1, -0.515)
 ## turned away from the sun is not a black shape.
 const SELF_LIGHT: float = 0.5
 
-## Fist turned about a blade's handle (degrees), so the forearm comes up from below the view.
-const BLADE_TURN: float = -90.0
+## Blades: the fist is turned about the handle so the forearm points this way (holder space:
+## back, down and to the right, out of the lower right corner) whatever angle the blade is at.
+const BLADE_FOREARM: Vector3 = Vector3(0.45, -0.55, 0.7)
+## The right forearm's direction from the hold point toward the elbow, in hold space (measured).
+const RIGHT_FOREARM: Vector3 = Vector3(0.37, -0.32, 0.87)
+const BLADE_TURN_STEPS: int = 72
 
 const LONG_GUN_REACH: float = 0.25 ## |muzzle z| above this: support hand on the handguard.
 const RIGHT_GRIP: Vector3 = Vector3(0.0, -0.05, 0.05)
@@ -44,6 +48,8 @@ var _left_pistol: Node3D ## Mirrored right hand for the left gun of the dual pis
 var _right_from_hold: Transform3D
 var _left_from_hold: Transform3D
 var _mirror_from_hold: Transform3D
+## Blade turn (radians about the handle) per weapon, found once at its rest pose.
+var _blade_turns: Dictionary[Weapon, float] = {}
 
 
 static func create(player: Player) -> FirstPersonArms:
@@ -128,10 +134,27 @@ func _hold(weapon: Weapon, right: bool) -> Transform3D:
 	var marker := weapon.get_node_or_null(^"RightHand" if right else ^"LeftHand") as Node3D
 	if _held_by_handle(weapon) and model != null:
 		# Blades and hammers: the fist round the handle, the blade out past the thumb and index.
-		hold = hold * model.transform.basis.orthonormalized() * Basis(Vector3.RIGHT, -PI * 0.5) 			* Basis(Vector3.UP, deg_to_rad(BLADE_TURN))
+		hold = hold * model.transform.basis.orthonormalized() * Basis(Vector3.RIGHT, -PI * 0.5)
+		if not _blade_turns.has(weapon):
+			_blade_turns[weapon] = _best_blade_turn(hold)
+		hold = hold * Basis(Vector3.UP, _blade_turns[weapon])
 	elif marker != null:
 		hold = hold * marker.transform.basis.orthonormalized()
 	return Transform3D(hold, grip)
+
+
+## Turn about the handle (the hold's Y) that points the forearm closest to BLADE_FOREARM.
+func _best_blade_turn(hold: Basis) -> float:
+	var wanted: Vector3 = BLADE_FOREARM.normalized()
+	var best: float = 0.0
+	var best_dot: float = -INF
+	for i: int in BLADE_TURN_STEPS:
+		var turn: float = TAU * i / BLADE_TURN_STEPS
+		var dot: float = (hold * Basis(Vector3.UP, turn) * RIGHT_FOREARM.normalized()).dot(wanted)
+		if dot > best_dot:
+			best_dot = dot
+			best = turn
+	return best
 
 
 ## Melee weapons and throwing knives: the model's own axis is the handle.

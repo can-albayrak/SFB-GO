@@ -1,9 +1,12 @@
 class_name HudWeaponIcon
 extends Control
-## Placeholder weapon silhouette for the HUD (GDD: replaced by icons rendered from the
-## weapon models once they exist). Light fill with a black outline, PS2 style.
+## HUD weapon icon: the silhouette rendered from the weapon's model
+## (assets/ui/weapon_icons/<id>.png, tests/render_weapon_icons.tscn), drawn right-aligned and
+## kept in proportion. A weapon without one falls back to a drawn placeholder shape.
 
 enum Shape { RIFLE, PISTOL, BLADE }
+
+const ICON_PATH: String = "res://assets/ui/weapon_icons/%s.png"
 
 const FILL: Color = Color("dfe4ea")
 const OUTLINE: Color = Color(0.0, 0.0, 0.0, 1.0)
@@ -29,6 +32,25 @@ var shape: Shape = Shape.RIFLE:
 	set(v):
 		shape = v
 		queue_redraw()
+## Rendered icon; null = draw `shape`.
+var icon: Texture2D = null:
+	set(v):
+		icon = v
+		queue_redraw()
+
+
+var _shown: WeaponDef = null
+
+
+## Shows `def` (in loadout slot `slot`): its rendered icon, or the placeholder shape.
+## Called every frame by the HUD; only a different weapon reloads anything.
+func show_weapon(def: WeaponDef, slot: int) -> void:
+	if def == _shown:
+		return
+	_shown = def
+	var path: String = ICON_PATH % def.id
+	icon = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	shape = shape_for(def, slot)
 
 
 ## A silhouette that fits the weapon (until real icons exist).
@@ -39,6 +61,11 @@ static func shape_for(def: WeaponDef, slot: int) -> Shape:
 
 
 func _draw() -> void:
+	if icon != null:
+		var fit: float = minf(size.x / icon.get_width(), size.y / icon.get_height())
+		var drawn: Vector2 = icon.get_size() * fit
+		draw_texture_rect(icon, Rect2(Vector2(size.x - drawn.x, (size.y - drawn.y) * 0.5), drawn), false)
+		return
 	var points: PackedVector2Array = RIFLE_POINTS
 	var source: Vector2 = RIFLE_SIZE
 	match shape:

@@ -7,7 +7,14 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 ## Sıradaki oturum
 
-**En yeni (2026-10-03 gece, evde, Can test edecek):**
+**En yeni (2026-10-03, evde, Can test edecek, ikinci tur):**
+- **Tabanca/revolver** iki elli (CS:GO), biraz ileride. **Bıçak** sağ altta, ucu ileri; el sap etrafında kendini çeviriyor, önkol hep sağ alttan.
+- **Bıçak sol/sağ tık (CS:GO):** sol 30 hasar / 0,45 sn / arkadan 90; sağ 65 / 1 sn / arkadan tek atar. Sağ tıkta öne saplama animasyonu.
+- **Sprey:** desen tırmanıp sonra sağa sola salınıyor (döngü, net kayma yok), tırmanma sınırlı (AR 7°, SMG 5°, LMG 7,5°). Önceden son satır sonsuza kadar tekrarlanıyordu.
+- **HUD silahları:** modellerden üretilen ikonlar; satırlar sabit sırada, elde olan büyük ve parlak.
+- **Tam ekran:** varsayılan açık, Alt+Enter / F11, Ayarlar'da da var (menünün sığmaması 1280×720 pencereden).
+
+**Önceki (2026-10-03 gece):**
 - **Yeni eller:** hvarley'in "Rigged Low Poly FPS Hands" modeli (CC-BY). Eski PSX kolları ve IK kaldırıldı. İki önkol, modelin kendi tüfek tutuşuyla, her silahın kabza/kundak noktasına oturuyor; parmaklar hep gerçek tutuşta. Çift tabancada sol el aynalı sağ el. Bear'ın silahlarına (balyoz, pençe, testere, fırlatma bıçağı) bakılmadı: Can'ın kararıyla Bear kaldırılacak.
 - **Tarama:** kamera artık tepmeyle kaymıyor (`recoil_view_share = 0`): nişangah sabit, mermiler desene göre tırmanıyor, eldeki silah yukarı/geri vuruyor.
 - **Oyuncu gövdesi:** jonniemadeit'in "PSX Base Male" modeli (CC-BY, 1,8 m). İskeletsiz, kollar aşağıda; eldeki silah göğüs önünde duruyor (poz/rig sonra).
@@ -335,3 +342,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-02 | 7/8 | (evde, Godot 4.7.2 + Blender 5.2) Can'ın listesi: silah tutuşları (`RightHand`/`LeftHand` dönüşlü işaretler, `arms_twist`, omuzlar aşağı, tabanca/revolver tek el, `apply_view_grips.py`), revolver silindiri, bıçak/balyoz savurma anahtarları, fırlatma bıçağı animasyonu, sniper (nişangah yok, `scope_in_time`, kalça dağılması), tepme ×1,2, Railgun 4, Minigun dağılma, bıçakta +%15 hız, eğimde slide + slide dağılması, Ice Yard %20 büyük ve karanlık. `ui_preview`'e `--primary --special --hud=off --fire`. Smoke 143/0, movement 54/0, map 202/0, ağ testi lobi 30 + 26, geç katılma 29 + 29. |
 | 2026-10-03 | 7/8 | (evde) Yeni FPS elleri (her önkol tutuş noktasına oturur, IK yok; `apply_view_grips.py` yeni ellere göre, kundakta −25° dönüş, bıçakta `BLADE_TURN`), gölge tarafı için wrap + backlight. Tepme kamerayı kaydırmıyor, silah modeli vuruyor (`CameraFeelDef` recoil grubu). Oyuncu gövdesi PSX Base Male. Eski `fp_arms`, `soldier.glb`, `arms_ik.gd` silindi. Smoke 143/0, movement 54/0, map 202/0, ağ testi 30 + 26, 29 + 29. |
 | 2026-10-03 | 7/8 | Bear sınıf listesinden ve GDD'den çıkarıldı (dosyaları ve kodu temizlik bekliyor); ağ testi Adrenaline ile. Smoke 127/0, movement 53/0, map 202/0, ağ testi 29 + 25, 28 + 28. Steam exe derlendi. |
+| 2026-10-03 | 7/8 | Tabanca/revolver iki elli, bıçak duruşu + otomatik sap dönüşü, bıçak sağ tık ağır saplama (host `_request_stab`), sprey döngüsü + `recoil_max_up`, HUD ikonları modellerden (`render_weapon_icons`), sabit silah satırları, tam ekran ayarı. Smoke 132/0, movement 53/0, map 202/0, ağ testi 29 + 25, 28 + 28. |

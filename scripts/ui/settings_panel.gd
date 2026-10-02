@@ -107,6 +107,10 @@ func _rebuild() -> void:
 		func(v: float) -> void: Settings.camera_damage_shake = v)
 
 	_add_section("GRAPHICS")
+	_add_toggle("Fullscreen (Alt+Enter)", Settings.fullscreen,
+		func(on: bool) -> void:
+			Settings.fullscreen = on
+			Settings.apply_window_mode())
 	_add_toggle("Screen filter (grain, PS2 colour)", Settings.post_process,
 		func(on: bool) -> void: Settings.post_process = on)
 	_add_slider("Render scale %", 50.0, 100.0, 5.0, Settings.render_scale * 100.0, "%.0f",

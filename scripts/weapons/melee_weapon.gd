@@ -5,6 +5,8 @@ extends Weapon
 ## - Equipped like a gun, fired through tick(): Bear's Sledgehammer / Claws / Chainsaw and every
 ##   class's knife in slot 3 (CS style; a hit from behind kills, WeaponDef.backstab_damage).
 ## def.fire_interval = cooldown, def.max_range = reach. Host resolves with a fan of rays.
+## Held knife right click (def.heavy_damage > 0, CS:GO): a slower, heavier stab sent with
+## Player.requests.send_stab; the host resolves it like a swing with the heavy damage.
 
 const SWING_TIME: float = 0.35 ## Owner cannot fire the current weapon during the quick swing.
 const PRIMARY_SWING_MAX_TIME: float = 0.45 ## Longest whole swing (wind-up, stroke, return) of a primary.
@@ -16,12 +18,18 @@ const PRIMARY_SWING_SHARE: float = 0.8 ## A primary's swing takes at most this s
 const SLASH_WINDUP_POS: Vector3 = Vector3(0.1, 0.07, 0.06)
 const SLASH_WINDUP_ROT: Vector3 = Vector3(10.0, 40.0, -25.0)
 const SLASH_END_POS: Vector3 = Vector3(-0.22, -0.07, -0.12)
-const SLASH_END_ROT: Vector3 = Vector3(-20.0, -30.0, 35.0)
+const SLASH_END_ROT: Vector3 = Vector3(-15.0, -5.0, 30.0)
 const CHOP_WINDUP_POS: Vector3 = Vector3(0.03, 0.14, 0.08)
 const CHOP_WINDUP_ROT: Vector3 = Vector3(40.0, 10.0, 0.0)
 const CHOP_END_POS: Vector3 = Vector3(-0.05, -0.14, -0.08)
 const CHOP_END_ROT: Vector3 = Vector3(-60.0, -15.0, 10.0)
 const SWING_KEY_ANGLE: float = 70.0
+## Heavy stab: pulled back, then driven straight ahead.
+const STAB_WINDUP_POS: Vector3 = Vector3(0.04, 0.04, 0.1)
+const STAB_WINDUP_ROT: Vector3 = Vector3(25.0, 10.0, 0.0)
+const STAB_END_POS: Vector3 = Vector3(-0.1, 0.02, -0.28)
+const STAB_END_ROT: Vector3 = Vector3(-30.0, -15.0, 0.0)
+const HEAVY_SWING_TIME: float = 0.6
 const WINDUP_END: float = 0.2 ## Share of the swing spent winding up...
 const STROKE_END: float = 0.5 ## ...and where the stroke ends; the rest goes back to rest.
 ## Offsets (metres at full reach) of the extra rays around the aim, for a forgiving hit.
@@ -32,6 +40,9 @@ const KNOCKBACK_LIFT: float = 2.0 ## Upward share of a knockback push.
 var _swing_left: float = 0.0
 var _rest: Transform3D
 var _tween: Tween
+var _stab_pose: bool = false ## The playing swing is the heavy stab.
+## Host: the hit being resolved is a heavy stab (set around server_fire by the request).
+var server_heavy: bool = false
 
 
 func _ready() -> void:
@@ -75,15 +86,26 @@ func tick_melee(delta: float) -> void:
 			transform = _rest
 
 
+## Owner: left click through the base tick, right click = heavy stab (shares the cooldown).
+func tick(delta: float, cmd: PlayerCommand) -> void:
+	super.tick(delta, cmd)
+	if def.heavy_damage <= 0.0 or not cmd.secondary_pressed or _cooldown > 0.0:
+		return
+	_cooldown = def.heavy_interval / player.status.get_fire_rate_mult()
+	_play_swing(minf(def.heavy_interval * PRIMARY_SWING_SHARE, HEAVY_SWING_TIME), true)
+	player.requests.send_stab(player.get_aim_origin(), -player.get_aim_basis().z, player.weapons.find(self))
+
+
 ## Primary melee, owner: swing animation and the hit request (called by Weapon.tick).
 func _fire() -> void:
 	_play_swing(minf(def.fire_interval * PRIMARY_SWING_SHARE, PRIMARY_SWING_MAX_TIME))
 	player.send_fire(player.get_aim_origin(), -player.get_aim_basis().z, player.weapons.find(self))
 
 
-func _play_swing(duration: float) -> void:
+func _play_swing(duration: float, stab: bool = false) -> void:
 	_stop_tween()
 	transform = _rest
+	_stab_pose = stab
 	if def.melee_swing_angle <= 0.0:
 		return
 	_tween = create_tween()
@@ -97,6 +119,9 @@ func _set_swing_pose(t: float) -> void:
 		CHOP_WINDUP_POS if chop else SLASH_WINDUP_POS)
 	var stroke := Transform3D(Basis.from_euler(_to_radians(CHOP_END_ROT if chop else SLASH_END_ROT)),
 		CHOP_END_POS if chop else SLASH_END_POS)
+	if _stab_pose:
+		windup = Transform3D(Basis.from_euler(_to_radians(STAB_WINDUP_ROT)), STAB_WINDUP_POS)
+		stroke = Transform3D(Basis.from_euler(_to_radians(STAB_END_ROT)), STAB_END_POS)
 	var pose: Transform3D
 	if t < WINDUP_END:
 		pose = Transform3D.IDENTITY.interpolate_with(windup, _ease(t / WINDUP_END))
@@ -152,9 +177,9 @@ func _apply_melee_hit(hitbox: Hitbox, dir: Vector3, point: Vector3) -> void:
 		return
 	if receiver.has_method(&"can_take_damage") and not receiver.call(&"can_take_damage"):
 		return
-	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
+	var amount: float = (def.heavy_damage if server_heavy else def.damage) * def.zone_multiplier(hitbox.zone)
 	if _is_backstab(receiver):
-		amount = def.backstab_damage
+		amount = def.heavy_backstab_damage if server_heavy else def.backstab_damage
 	var shooter_id: int = player.get_multiplayer_authority()
 	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name, def.counts_as_knife)
 	var dealt: float = receiver.get(&"last_damage_dealt")

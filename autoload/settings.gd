@@ -44,10 +44,35 @@ var camera_damage_shake: float = 1.0
 ## Graphics (GDD): PS2-style screen filter (grain, vignette, colour crush) and 3D render scale.
 var post_process: bool = true
 var render_scale: float = 1.0
+## Borderless fullscreen on the current screen; false = a 1280x720 window. Alt+Enter / F11 toggle.
+var fullscreen: bool = true
 
 
 func _ready() -> void:
 	load_settings()
+	apply_window_mode()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	if key.keycode == KEY_F11 or (key.keycode == KEY_ENTER and key.alt_pressed):
+		fullscreen = not fullscreen
+		apply_window_mode()
+		save_settings()
+		changed.emit()
+		get_viewport().set_input_as_handled()
+
+
+## Sets the window to `fullscreen`. Left alone in headless runs and frame captures
+## (--write-movie), so tests and preview shots keep the project's 1280x720.
+func apply_window_mode() -> void:
+	if DisplayServer.get_name() == "headless" or "--write-movie" in OS.get_cmdline_args():
+		return
+	var wanted: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
+	if DisplayServer.window_get_mode() != wanted:
+		DisplayServer.window_set_mode(wanted)
 
 
 ## `extra` = degrees added to the horizontal FOV first (camera speed shift).
@@ -85,6 +110,7 @@ func load_settings() -> void:
 	camera_damage_shake = _read(config, "camera", "damage_shake", camera_damage_shake)
 	post_process = _read(config, "graphics", "post_process", post_process)
 	render_scale = clampf(_read(config, "graphics", "render_scale", render_scale), 0.5, 1.0)
+	fullscreen = _read(config, "graphics", "fullscreen", fullscreen)
 
 
 ## A hand-edited file with a wrong type falls back to the current value instead of erroring.
@@ -120,4 +146,5 @@ func save_settings() -> void:
 	config.set_value("camera", "damage_shake", camera_damage_shake)
 	config.set_value("graphics", "post_process", post_process)
 	config.set_value("graphics", "render_scale", render_scale)
+	config.set_value("graphics", "fullscreen", fullscreen)
 	config.save(PATH)

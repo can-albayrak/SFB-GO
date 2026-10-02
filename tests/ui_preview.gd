@@ -9,7 +9,8 @@ extends Node
 ## range also takes --class=N --primary=N --slot=N (roster index, primary choice, weapon slot in
 ## hand: view model and arms), --special=N (airdrop weapon in slot 3 = key 4),
 ## --map=res://...tscn (another map), --at=x,y,z --yaw=deg --pitch=deg (camera placement) and
-## --hud=off (view model only), --fire=seconds (one shot, swing or throw after that long).
+## --hud=off (view model only), --fire=seconds (one shot, swing or throw after that long;
+## with --alt=1 the right click instead, the knife's heavy stab).
 ## Nothing is saved: the settings file is left alone.
 
 const FAKE_NAMES: Dictionary[int, String] = {1: "Can", 2: "Grizz", 3: "Volt"}
@@ -128,4 +129,9 @@ func _place_view(player: Player) -> void:
 	if _args.has("fire"):
 		# One shot / swing / throw this many seconds after opening (frames of the animation).
 		await get_tree().create_timer(_args["fire"].to_float()).timeout
-		player.current_weapon.call(&"_shoot_once")
+		if _args.get("alt", "0") == "1": # Right click: the knife's heavy stab.
+			var stab := PlayerCommand.new()
+			stab.secondary_pressed = true
+			player.current_weapon.tick(0.0, stab)
+		else:
+			player.current_weapon.call(&"_shoot_once")

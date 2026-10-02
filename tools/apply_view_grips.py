@@ -14,6 +14,7 @@ import os
 import re
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+PISTOL_SUPPORT = (0.0, 0.0, -45.0)  # Left hand round the right one on a pistol grip.
 HANDGUARD = (0.0, 0.0, -25.0)  # Support hand rolled about the barrel: the forearm comes in from the lower left.
 
 # id -> (right grip, left grip or None); a grip is (x, y, z, rotation) with the
@@ -33,8 +34,9 @@ GRIPS = {
     "minigun": ((0.0, -0.141, -0.024, 0.0), (0.0, -0.08, -0.2, HANDGUARD)),
     "rocket_launcher": ((0.0, -0.091, -0.052, 0.0), (0.0, 0.015, -0.29, HANDGUARD)),
     "smg": ((0.0, 0.0, -0.03, 0.0), (0.0, 0.07, -0.15, HANDGUARD)),
-    "pistol": ((0.0, -0.03, 0.026, 0.0), None),  # One-handed (WeaponDef.view_hands).
-    "revolver": ((0.0, -0.041, 0.053, 0.0), None),
+    # Pistols two-handed (CS:GO): the left hand wraps the right one from the lower left.
+    "pistol": ((0.0, -0.03, 0.026, 0.0), (-0.03, -0.075, 0.0, PISTOL_SUPPORT)),
+    "revolver": ((0.0, -0.041, 0.053, 0.0), (-0.03, -0.086, 0.027, PISTOL_SUPPORT)),
     "sledgehammer": (("along", 0.15), ("along", -0.09)),
     "chainsaw": ((0.0, -0.019, 0.037, 0.0), (0.0, 0.048, -0.074, 0.0)),
 }

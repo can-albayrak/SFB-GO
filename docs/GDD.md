@@ -51,12 +51,12 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 | Nişan | Nişan (ADS) modu yok, yalnızca Hawk'ın dürbünü |
 | Hasar | Kafa 2x, bacak 0,75x. Hawk Heavy Rifle kafa ve gövdeden tek atış (bacak hariç). |
 | Mermi tipi | Mermili silahlar hitscan; bomba, roket, grenade launcher ve fırlatma bıçağı fiziksel mermi |
-| Geri tepme | Her silahta sabit, öğrenilebilir desen; CS'ten belirgin şekilde hafif |
+| Geri tepme | Her silahta sabit, öğrenilebilir desen (CS spreyi: önce yukarı tırmanır, sonra tırmanmadan sağa sola salınır; tırmanmanın üst sınırı var). Nişangah yerinde kalır, mermiler desene göre gider; oyuncu fareyi aşağı ve yana çekerek telafi eder. |
 | Can | Yenilenme yok, yalnızca Health pickup |
 | Mermi | Yedek mermi sınırsız, sadece şarjör değiştirilir (airdrop silahı hariç) |
 | Ayak sesi | Yön ve konum anlaşılacak kadar belirgin (aşırı vurgulanmaz). **Ctrl ile eğilip yürürken** ses çok az çıkar. |
-| Hızlı yakın dövüş | Herkese `V` ile bıçak: 25 hasar, ~1,5 m menzil, 0,8 sn bekleme. |
-| Bıçak slotu (CS gibi) | Her sınıfta bıçak **3** tuşunda elde tutulur, sol tıkla vurur (25 hasar). Bıçak elde iken sınıf hızının %15 fazlasıyla koşulur. **Arkadan vuruş tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). `V` ile hızlı bıçak arkadan öldürmez. |
+| Hızlı yakın dövüş | Herkese `V` ile bıçak: bıçağın sol tık vuruşu (30 hasar, ~1,5 m menzil, 0,45 sn bekleme). |
+| Bıçak slotu (CS:GO gibi) | Her sınıfta bıçak **3** tuşunda elde tutulur. **Sol tık** seri ve hafif: 30 hasar, 0,45 sn, arkadan 90. **Sağ tık** yavaş ve ağır: 65 hasar, 1 sn, **arkadan tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). Bıçak elde iken sınıf hızının %15 fazlasıyla koşulur. `V` ile hızlı bıçak arkadan öldürmez. |
 | Yedek silah | Herkese tek tip tabanca (Cowboy'da Revolver). |
 | FOV ve fare | Varsayılan FOV 90 (80–110), fare hassasiyeti, crosshair özelleştirme (renk, boyut, boşluk) |
 
