@@ -62,7 +62,6 @@ func _run() -> void:
 	await _test_quick_switch()
 	await _test_scope_and_spread()
 	await _test_knife_speed()
-	await _test_knife_radius()
 	await _test_backstab()
 	await _test_swap_rules()
 	await _test_pickups()
@@ -229,21 +228,6 @@ func _test_knife_speed() -> void:
 	_check(knife_speed > gun_speed, "knife out runs faster (%.2f vs %.2f m/s)" % [knife_speed, gun_speed])
 
 
-## Bear's thrown knife has a hit radius: a throw 30 cm beside the body still lands.
-func _test_knife_radius() -> void:
-	await _set_loadout(_code_for(&"bear"))
-	await _place(HITSCAN_DISTANCE * 2.0)
-	_dummy.health = DUMMY_HEALTH
-	_player.requests.reset_fire_budgets()
-	var origin: Vector3 = _player.get_aim_origin()
-	var side: Vector3 = _away.cross(Vector3.UP).normalized() * 0.3
-	var target: Vector3 = _dummy_target() + side
-	_player.requests._request_fire(origin, (target - origin).normalized(), 1, &"throwing_knives")
-	await get_tree().create_timer(PROJECTILE_WAIT).timeout
-	_check(_dummy.health < DUMMY_HEALTH, "thrown knife 30 cm off the body still hits")
-	_clear_projectiles()
-
-
 ## Held knife (slot 3): normal damage from the front, backstab_damage from behind (CS rule);
 ## the V quick swing never backstabs.
 func _test_backstab() -> void:
@@ -285,25 +269,25 @@ func _knife_hit_from(direction: Vector3) -> float:
 	return DUMMY_HEALTH - _dummy.health
 
 
-## Inside the swap window: hurt players never refill by swapping, and a swap drops the Shield.
+## Inside the swap window: hurt players never refill by swapping, and a swap ends a boost.
 func _test_swap_rules() -> void:
-	var bear: PackedInt32Array = _code_for(&"bear")
-	await _set_loadout(bear)
+	var cheetah: PackedInt32Array = _code_for(&"cheetah")
+	await _set_loadout(cheetah)
 	_player._spawned_at = Time.get_ticks_usec() / 1_000_000.0
 	_player._hurt_since_spawn = false
 	_player.is_protected = false
 	_player.health = _player.class_def.max_health
 	_player.ability.host_ready_at = -INF
 	_player.ability.server_try_use(_player.get_aim_origin(), Vector3.FORWARD)
-	_player.server_choose_loadout(_code_for(&"cheetah"))
+	_player.server_choose_loadout(_code_for(&"volcano"))
 	await _frames(1)
-	_check(not _player.shield_up, "loadout swap drops the Shield")
-	_player.server_choose_loadout(bear)
+	_check(is_equal_approx(_player.status.get_host_speed_mult(), 1.0), "loadout swap ends the Adrenaline boost")
+	_player.server_choose_loadout(cheetah)
 	await _frames(1)
 	_check(_player.health == _player.class_def.max_health, "unhurt swap gives full health (%d)" % _player.health)
 	_player.take_hit(55.0, Hitbox.Zone.BODY, 0, "Test")
-	_player.server_choose_loadout(_code_for(&"cheetah"))
-	_player.server_choose_loadout(bear)
+	_player.server_choose_loadout(_code_for(&"volcano"))
+	_player.server_choose_loadout(cheetah)
 	await _frames(1)
 	_check(_player.health < _player.class_def.max_health, "hurt swap does not refill (%d)" % _player.health)
 	_player.status.reset_host()

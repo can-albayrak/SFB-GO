@@ -6,7 +6,7 @@ extends Node
 ## through the join loadout menu. Without it the client joins the lobby, readies up and the
 ## host starts the match.
 ## Covers: lobby / late join, spawning on both sides, loadout swap in the window and at the
-## next spawn, held weapon, Shield, host damage, kill + kill reward + respawn, scope glint,
+## next spawn, held weapon, a timed ability (Adrenaline), host damage, kill + kill reward + respawn, scope glint,
 ## a lag-compensated client shot that kills the host's player, and stage 6 state: a pickup
 ## boost, an airdrop weapon and a crate reaching the client.
 ## Each side prints PASS / FAIL lines and quits with exit code 1 when anything failed.
@@ -94,14 +94,13 @@ func _run_host() -> void:
 		return
 	_check(Match.rules.kill_target == MATCH_KILLS, "match uses the host's kill target")
 
-	var bear_label: String = "client spawned with the loadout picked on join" if _late else "client's loadout request applied at once (swap window)"
-	_check(await _wait_until(func() -> bool: return them.class_def.id == &"bear"), bear_label)
-	_check(them.health == them.class_def.max_health, "client has Bear's health on the host (%d)" % them.health)
+	var join_label: String = "client spawned with the loadout picked on join" if _late else "client's loadout request applied at once (swap window)"
+	_check(await _wait_until(func() -> bool: return them.class_def.id == &"cheetah"), join_label)
+	_check(them.health == them.class_def.max_health, "client has Cheetah's health on the host (%d)" % them.health)
 	_check(await _wait_until(func() -> bool: return them.held_slot == 1), "client's weapon switch reached the host (held_slot)")
 
-	_check(await _wait_until(func() -> bool: return them.shield_up), "client's Shield raised on the host")
-	_check(them.effects._shield_visual.visible, "host draws the client's shield panel")
-	_check(await _wait_until(func() -> bool: return not them.shield_up), "Shield drops after its duration")
+	_check(await _wait_until(func() -> bool: return them.status.get_host_speed_mult() > 1.0), "client's Adrenaline runs on the host")
+	_check(await _wait_until(func() -> bool: return is_equal_approx(them.status.get_host_speed_mult(), 1.0)), "Adrenaline ends after its duration")
 
 	_check(await _wait_until(func() -> bool: return them.can_take_damage()), "client can take damage")
 	them.take_hit(TEST_DAMAGE, Hitbox.Zone.BODY, 1, "NetTest")
@@ -168,7 +167,7 @@ func _ray_clear(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3) ->
 func _run_client() -> void:
 	Net.ask_loadout_on_join = _late
 	_check(Net.join_game("NetClient", "127.0.0.1") == OK, "client started")
-	var bear: PackedInt32Array = _code(&"bear", &"sledgehammer", &"shield")
+	var cheetah: PackedInt32Array = _code(&"cheetah", &"smg", &"adrenaline")
 	var hawk: PackedInt32Array = _code(&"hawk", &"heavy_rifle", &"grapple")
 
 	if _late:
@@ -192,7 +191,7 @@ func _run_client() -> void:
 		if resume != null:
 			resume.pressed.emit()
 		_check(menu.visible and not hud.call(&"is_join_paused"), "Resume goes back to the join loadout")
-		menu.open(bear)
+		menu.open(cheetah)
 		var deploy: Button = _find_button(menu, "DEPLOY")
 		_check(deploy != null, "loadout menu has DEPLOY")
 		if deploy == null:
@@ -215,17 +214,16 @@ func _run_client() -> void:
 	Events.hit_confirmed.connect(_on_hit_confirmed)
 
 	if not _late:
-		me.request_loadout(bear) # Inside the swap window: applies at once.
-	_check(await _wait_until(func() -> bool: return me.class_def.id == &"bear"), "Bear loadout came back from the host")
+		me.request_loadout(cheetah) # Inside the swap window: applies at once.
+	_check(await _wait_until(func() -> bool: return me.class_def.id == &"cheetah"), "Cheetah loadout came back from the host")
 
 	me.equip(1)
 	_check(await _wait_until(func() -> bool: return me.held_slot == 1), "held_slot came back from the host")
 
-	_check(me.ability != null and me.ability.try_use(me.get_aim_origin(), -me.get_aim_basis().z), "Shield usable on the owner")
+	_check(me.ability != null and me.ability.try_use(me.get_aim_origin(), -me.get_aim_basis().z), "Adrenaline usable on the owner")
 	me.requests.send_ability(me.get_aim_origin(), -me.get_aim_basis().z)
-	_check(await _wait_until(func() -> bool: return me.shield_up), "own shield_up replicated back")
-	_check(not me.effects._shield_visual.visible, "owner does not draw its own shield panel")
-	_check(await _wait_until(func() -> bool: return not me.shield_up), "own shield drops")
+	_check(await _wait_until(func() -> bool: return me.status.get_speed_mult() > 1.0), "own Adrenaline boost came back from the host")
+	_check(await _wait_until(func() -> bool: return is_equal_approx(me.status.get_speed_mult(), 1.0)), "own boost ends")
 
 	var hurt_health: int = me.class_def.max_health - TEST_DAMAGE
 	_check(await _wait_until(func() -> bool: return me.health == hurt_health), "host damage replicated (%d)" % me.health)

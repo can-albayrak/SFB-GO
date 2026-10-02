@@ -55,9 +55,9 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 | Can | Yenilenme yok, yalnızca Health pickup |
 | Mermi | Yedek mermi sınırsız, sadece şarjör değiştirilir (airdrop silahı hariç) |
 | Ayak sesi | Yön ve konum anlaşılacak kadar belirgin (aşırı vurgulanmaz). **Ctrl ile eğilip yürürken** ses çok az çıkar. |
-| Hızlı yakın dövüş | Herkese `V` ile bıçak: 25 hasar, ~1,5 m menzil, 0,8 sn bekleme. Bear'da `V` = kısa tekme (az hasar, geri itme). |
-| Bıçak slotu (CS gibi) | Her sınıfta (Bear dahil) bıçak **3** tuşunda elde tutulur, sol tıkla vurur (25 hasar). Bıçak elde iken sınıf hızının %15 fazlasıyla koşulur. **Arkadan vuruş tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). `V` ile hızlı bıçak arkadan öldürmez. |
-| Yedek silah | Bear hariç herkese tek tip tabanca. Bear'a 3 Throwing Knife. |
+| Hızlı yakın dövüş | Herkese `V` ile bıçak: 25 hasar, ~1,5 m menzil, 0,8 sn bekleme. |
+| Bıçak slotu (CS gibi) | Her sınıfta bıçak **3** tuşunda elde tutulur, sol tıkla vurur (25 hasar). Bıçak elde iken sınıf hızının %15 fazlasıyla koşulur. **Arkadan vuruş tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). `V` ile hızlı bıçak arkadan öldürmez. |
+| Yedek silah | Herkese tek tip tabanca (Cowboy'da Revolver). |
 | FOV ve fare | Varsayılan FOV 90 (80–110), fare hassasiyeti, crosshair özelleştirme (renk, boyut, boşluk) |
 
 ### Hareket hissi (hedef)
@@ -113,7 +113,6 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Silah kimliği | Silahlar en çok **ateş ritmi ve sesle** ayrılır: SMG sık ve ince, Heavy Rifle yavaş ve tok, Shotgun tek patlama. Hasar/TTK birbirine yakın tutulur, fark his ve ritimdedir (menzil rolü dar tutulur, istisna: Shotgun yakın, Marksman/Heavy uzak). |
 | Geri tepme | Mevcut karar korunur: her silahta sabit, öğrenilebilir desen; CS'ten hafif. |
 | Heavy Rifle | Tek atış kafa/gövdede kalır, **bacakta öldürmez** (bacak vuruşu yüksek hasar verir ama can bırakır). Uygulama: `heavy_rifle.tres` içinde bacak çarpanı. |
-| Bear | Her mesafede orta güçlü; hız cezası az. Dar alanlarda güçlü kalır ama açıkta tamamen çaresiz değildir. Yakın dövüş kimliği korunur, ağır silahlar (Chainsaw) hâlâ yavaşlatır. |
 
 **Not:** Kafa vuruşu (2x) TTK'yı yarıya indirir; bu, nişan becerisinin ödülü olarak kalır. Hawk Heavy Rifle'ın tek atışı bu TTK hedefinin dışındadır (kasıtlı istisna).
 
@@ -145,12 +144,11 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 ## Sınıflar
 
-6 sınıf, çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy: tek ana silah, tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
+5 sınıf (Bear 2026-10-03'te çıkarıldı), çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy: tek ana silah, tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
 
 | Sınıf | Can | Hız | Rol | Görünüm |
 | --- | --- | --- | --- | --- |
 | Hawk | 80 | Normal | Uzak mesafe, yüksek nokta | Uzun palto, boyun atkısı |
-| Bear | 200 | Hafif yavaş (hız cezası az) | Yakın dövüş tankı, her mesafede orta güçlü | Kaynaklı ev yapımı zırh, omuz ve kol koruyucuları |
 | Cheetah | 70 | Çok hızlı | Vur-kaç, hareket | Eşofman, kapüşon, koşu ayakkabısı |
 | Wolf | 100 | Normal | Dengeli, başlangıç sınıfı | Askeri yelek, bere |
 | Volcano | 110 | Biraz yavaş | Patlayıcı, alan kontrolü | Kirli koruyucu tulum, madenci kafa lambası (kask yok) |
@@ -167,18 +165,6 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 - **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz çok düşük isabet ve nişangah yok (CS keskin nişancıları gibi). Dürbün sağ tıkla yavaşça açılır (~0,3 sn); tam açılana kadar isabet düşük kalır (anında quick scope yok).
 - **Namlu parlaması:** Sadece dürbün açıkken. Haritanın her yerinden görünür (mesafe sınırı yok), yeri net belli olur.
 - **Yedek:** Tabanca
-
-### Bear
-
-| Silah | Hasar | Not |
-| --- | --- | --- |
-| Sledgehammer | 2 vuruş (Cheetah'a 1) | Yavaş, geniş alan |
-| Claws | 4 vuruş | Çok hızlı, kısa menzil |
-| Chainsaw | Sürekli hasar | Basılı tutulur, kullanırken yavaşlar |
-
-- **Güçler:** Shield (12 sn; 3 sn önden gelen hasarı engeller, arkadan korumaz) · Charge (ileri hücum, çarptığı rakibi 2 sn stunlar)
-- **Yedek: 3 Throwing Knife.** Kavisli fiziksel atış, 35 hasar (kafaya 70). Iskalarsa duvara veya zemine saplanır (diğer oyuncular da görür), üstünden geçince toplanır. Toplanmazsa ya da hedefe saplanırsa her bıçak 8 sn'de envantere geri döner.
-- **V:** Tekme (az hasar, geri itme)
 
 ### Cheetah
 
@@ -209,7 +195,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Grenade Launcher | Alan hasarı | Kavisli atış, kendine de hasar verir |
 
 - **Güçler (20 sn):** Sticky Bomb (duvara veya oyuncuya yapışır) · Landmine (üstüne basanı patlatır)
-- **Landmine:** Herkese görünür, kırmızı ışığı yanıp söner. Tetik alanı küçük ama basanı **öldürür** (her sınıfı, Bear dahil).
+- **Landmine:** Herkese görünür, kırmızı ışığı yanıp söner. Tetik alanı küçük ama basanı **öldürür** (her sınıfı).
 - **Kendine hasar:** Volcano'nun patlayıcıları (Grenade Launcher, Sticky Bomb, Landmine) Volcano'nun kendisine **yarı hasar** verir.
 - **Yedek:** Tabanca
 
@@ -228,7 +214,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek tıkla aynısıyla doğulur.
 
 - **Ölüyken:** Ölüm ekranında menü açılır, seçilen sınıfla doğulur.
-- **Yaşarken:** `B` menüyü açar; ekranda "Next spawn: Bear" yazar, bir sonraki doğuşta geçilir.
+- **Yaşarken:** `B` menüyü açar; ekranda "Next spawn: Hawk" yazar, bir sonraki doğuşta geçilir.
 - **Spawn koruması sırasında:** Doğduktan sonraki ilk 3 sn içinde seçim yapılırsa anında geçilir.
 
 ## Pickup'lar
@@ -270,7 +256,7 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 | Açık meydan | Geniş, dağınık siper | Wolf, Hawk |
 | Uzun koridor | Uzun görüş hattı, arada kırıcı siperler | Hawk |
 | Yüksek noktalar | Çatı, köprü, kule; grapple noktaları | Hawk, Cheetah |
-| Dar iç mekan | Kısa koridor, köşe, kapı | Bear, Volcano |
+| Dar iç mekan | Kısa koridor, köşe, kapı | Volcano, Cheetah |
 | Dikey kısa yollar | Zıplanabilir çıkıntı, pencereden atlama | Cheetah |
 
 **Denge kuralları:**
@@ -293,7 +279,7 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 - 10–12 spawn noktası, tüm bölgelere dağılmış (10 kişide de yeterli)
 - 3 airdrop noktası, bölgelerin kesiştiği yerlerde
 
-**İlk harita:** Terk edilmiş alışveriş merkezi. Dar koridorlu mağazalar (Bear, Volcano), ortada açık atrium (Wolf), üst katlar ve yürüyen merdivenler (Hawk, Cheetah), dışarıda otopark ve çatı. Bina yaklaşık **64 × 48 m**, iki kat (0 m ve 5 m) ve çatı (10 m); 5–6 dükkân, bir uzun yemek katı koridoru, dükkân arkalarında dar servis koridoru, dışarıda otopark ve yükleme alanı.
+**İlk harita:** Terk edilmiş alışveriş merkezi. Dar koridorlu mağazalar (Volcano), ortada açık atrium (Wolf), üst katlar ve yürüyen merdivenler (Hawk, Cheetah), dışarıda otopark ve çatı. Bina yaklaşık **64 × 48 m**, iki kat (0 m ve 5 m) ve çatı (10 m); 5–6 dükkân, bir uzun yemek katı koridoru, dükkân arkalarında dar servis koridoru, dışarıda otopark ve yükleme alanı.
 
 **Yerleşim kararları:**
 
