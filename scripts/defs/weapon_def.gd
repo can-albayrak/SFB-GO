@@ -73,6 +73,11 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var melee_spread_scale: float = 1.0 ## Widens the fan of hit rays (Sledgehammer).
 @export var melee_swing_angle: float = 70.0 ## View sweep per swing in degrees; 0 = no sweep (Chainsaw).
 @export var knockback: float = 0.0 ## Metres/second pushed onto a player hit (Kick).
+## Held knife only (not the V quick swing): damage of a hit from behind (CS backstab). 0 = none.
+@export var backstab_damage: float = 0.0
+## How far behind counts: dot of the victim's facing and the attacker-to-victim direction
+## (CS: 0.475, about 60 degrees either side of straight behind).
+@export var backstab_dot: float = 0.475
 
 @export_group("Thrown")
 @export var throw_speed: float = 22.0

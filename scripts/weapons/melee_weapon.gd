@@ -2,7 +2,8 @@ class_name MeleeWeapon
 extends Weapon
 ## Melee weapon. Two uses:
 ## - Quick melee (V): not an equipped slot, the owner swings it over the current weapon.
-## - Primary (Bear's Sledgehammer / Claws / Chainsaw): equipped like a gun, fired through tick().
+## - Equipped like a gun, fired through tick(): Bear's Sledgehammer / Claws / Chainsaw and every
+##   class's knife in slot 3 (CS style; a hit from behind kills, WeaponDef.backstab_damage).
 ## def.fire_interval = cooldown, def.max_range = reach. Host resolves with a fan of rays.
 
 const SWING_TIME: float = 0.35 ## Owner cannot fire the current weapon during the quick swing.
@@ -119,6 +120,8 @@ func _apply_melee_hit(hitbox: Hitbox, dir: Vector3, point: Vector3) -> void:
 	if receiver.has_method(&"can_take_damage") and not receiver.call(&"can_take_damage"):
 		return
 	var amount: float = def.damage * def.zone_multiplier(hitbox.zone)
+	if _is_backstab(receiver):
+		amount = def.backstab_damage
 	var shooter_id: int = player.get_multiplayer_authority()
 	var killed: bool = receiver.call(&"take_hit", amount, hitbox.zone, shooter_id, def.display_name, def.counts_as_knife)
 	var dealt: float = receiver.get(&"last_damage_dealt")
@@ -128,3 +131,17 @@ func _apply_melee_hit(hitbox: Hitbox, dir: Vector3, point: Vector3) -> void:
 	if def.knockback > 0.0 and not killed and receiver is Player:
 		var flat := Vector3(dir.x, 0.0, dir.z).normalized()
 		(receiver as Player).status.server_knockback(flat * def.knockback + Vector3.UP * KNOCKBACK_LIFT)
+
+
+## Host: the held knife (not the V quick swing) hit someone facing away from us. CS rule: the
+## victim's facing and the line from us to the victim point the same way (dot > backstab_dot).
+## Players are at their rewound pose here (lag compensation).
+func _is_backstab(receiver: Node) -> bool:
+	if def.backstab_damage <= 0.0 or player.melee_weapon == self or not receiver.has_method(&"get_facing"):
+		return false
+	var to_victim: Vector3 = (receiver as Node3D).global_position - player.global_position
+	to_victim.y = 0.0
+	if to_victim.length_squared() < 0.0001:
+		return false
+	var facing: Vector3 = receiver.call(&"get_facing")
+	return facing.dot(to_victim.normalized()) > def.backstab_dot

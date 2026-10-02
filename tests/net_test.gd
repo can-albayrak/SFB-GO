@@ -259,7 +259,7 @@ func _run_client() -> void:
 
 	_check(await _wait_until(func() -> bool: return me.status.get_speed_mult() > 1.0 and me.powerups != 0),
 		"speed boost reached the owner")
-	_check(await _wait_until(func() -> bool: return me.weapons.size() == 3 and me.special_ammo == 6),
+	_check(await _wait_until(func() -> bool: return me.weapons.size() == 4 and me.special_ammo == 6),
 		"airdrop weapon replicated with its rounds")
 	_check(await _wait_until(func() -> bool: return me.current_weapon == me.weapons[me.weapons.size() - 1]),
 		"airdrop weapon in hand")

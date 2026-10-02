@@ -27,6 +27,14 @@ func _ready() -> void:
 	_show_reset()
 
 
+## Flat direction the dummy faces: +Z, towards the Test Range spawns (knife backstabs come
+## from the far side).
+func get_facing() -> Vector3:
+	var facing: Vector3 = global_basis.z
+	facing.y = 0.0
+	return facing.normalized()
+
+
 ## Host only: tells a late joiner the current health.
 func sync_to_peer(peer_id: int) -> void:
 	_show_state.rpc_id(peer_id, health)

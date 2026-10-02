@@ -96,9 +96,13 @@ weapon_secondary={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":50)]
 }
-weapon_special={
+weapon_knife={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":51)]
+}
+weapon_special={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":52)]
 }
 class_menu={
 "deadzone": 0.2,

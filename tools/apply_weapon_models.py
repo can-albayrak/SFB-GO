@@ -48,7 +48,7 @@ DEFS = {
     "dual_pistols": "dual_pistols", "revolver": "revolver", "shotgun": "shotgun",
     "grenade_launcher": "grenade_launcher", "railgun": "railgun", "minigun": "minigun",
     "rocket_launcher": "rocket_launcher", "musket": "musket", "throwing_knives": "throwing_knife",
-    "sledgehammer": "sledgehammer", "chainsaw": "chainsaw",
+    "sledgehammer": "sledgehammer", "chainsaw": "chainsaw", "knife": "knife",
 }
 # Other scenes that only swap the model file and scale (projectiles).
 PROJECTILES = {

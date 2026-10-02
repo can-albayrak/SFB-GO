@@ -11,4 +11,4 @@ script = ExtResource("1_script")
 scale = Vector3(0.72, 0.72, 0.72)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, -0.0037, -0.553)
+position = Vector3(-0.0043, 0.0271, -0.553)

@@ -29,8 +29,10 @@ const THROW_MIN_AIM_DISTANCE: float = 2.0 ## Closer than this the throw just fol
 const THROW_INHERIT: float = 1.0 ## Share of the thrower's horizontal run speed the throw keeps.
 const THROW_WORLD_MASK: int = 1
 const THROW_AIM_MASK: int = 1 | 2 # world | player bodies
-## Weapon slot of a carried airdrop weapon (key 3); 0 / 1 are the loadout's guns.
-const SPECIAL_SLOT: int = 2
+## Weapon slots: 0 / 1 the loadout's guns, the class's knife (key 3, CS style), then a
+## carried airdrop weapon (key 4).
+const KNIFE_SLOT: int = 2
+const SPECIAL_SLOT: int = 3
 
 # Hitbox poses: x = centre height above feet, y = box height (0 = keep shape).
 const HEAD_POSE_STAND: Vector2 = Vector2(1.62, 0.0)
@@ -241,6 +243,11 @@ func get_aim_basis() -> Basis:
 ## View direction without recoil (host uses it for flashbangs).
 func get_look_forward() -> Vector3:
 	return -_look_basis(Vector2.ZERO).z
+
+
+## Flat direction the body faces (knife backstabs; on the host this is the rewound yaw).
+func get_facing() -> Vector3:
+	return Vector3(-sin(rotation.y), 0.0, -cos(rotation.y))
 
 
 ## Zoom factor of the active scope (1 when not scoped). Mouse sensitivity is divided by it.
@@ -492,7 +499,7 @@ func _apply_loadout() -> void:
 		weapon.queue_free()
 	weapons.clear()
 	current_weapon = null
-	for def: WeaponDef in [Loadout.get_primary(loadout), class_def.secondary_weapon]:
+	for def: WeaponDef in [Loadout.get_primary(loadout), class_def.secondary_weapon, class_def.knife]:
 		weapons.append(_add_weapon(def))
 
 	if melee_weapon != null:

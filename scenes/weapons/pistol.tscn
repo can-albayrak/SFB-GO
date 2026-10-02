@@ -11,4 +11,4 @@ script = ExtResource("1_hitscan")
 scale = Vector3(1.08, 1.08, 1.08)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(-0.0002, 0.0427, -0.1436)
+position = Vector3(0, 0.0401, -0.1436)
