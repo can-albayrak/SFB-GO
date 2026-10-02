@@ -57,13 +57,14 @@ sfb-go/
 │   ├── ui/
 │   └── maps/
 │       ├── test_range.tscn  # Test haritası + hedef mankenleri
-│       └── mall/mall.tscn   # AVM blockout (tools/maps/build_mall_blockout.py üretir)
+│       ├── mall/mall.tscn   # AVM blockout (tools/maps/build_mall_blockout.py üretir)
+│       └── ice_yard/ice_yard.tscn # Ice Yard (fy_iceworld tarzı, tools/maps/build_iceworld.py üretir)
 ├── tests/                   # Headless otomatik testler (komutlar dosyaların başında)
 │   ├── smoke_test.tscn      # Tek process: her sınıf/silah/güç mankene, kill ödülü, UI panelleri
 │   ├── movement_test.tscn   # Gerçek Movement: basamaklar, merdivenler, AVM rampaları, çatıdan atlama
 │   ├── map_test.tscn        # Her harita: spawn/pickup/airdrop noktaları, navmesh ile ulaşılabilirlik, yüksek katlara 2+ yol
 │   ├── net_test.tscn        # İki process, gerçek ENet: --role=host / --role=client (+ --late)
-│   └── ui_preview.tscn      # Sahte veriyle tek ekran (--screen=lobby|loadout|range|death|scoreboard|down|walk|slide); --write-movie ile kare yakalanır
+│   └── ui_preview.tscn      # Sahte veriyle tek ekran (--screen=lobby|loadout|range|death|scoreboard|down|walk|slide); range: --class --slot --map --at --yaw --pitch; --write-movie ile kare yakalanır (bulutta: xvfb-run + --rendering-driver opengl3)
 ├── tools/                   # .gdignore; oyun dışı araçlar
 │   ├── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
 │   ├── blender/process_weapon_models.py # private_assets/weapons/*.glb → assets/models/weapons/real/<id>.glb (yön, ölçek, el noktası, poligon, doku 512, muzzles.json)
@@ -266,7 +267,7 @@ Bileşenler sahnede sabit düğümler: RPC'leri her peer'da aynı yolda (`Player
 - Physics interpolation açık (60 Hz tick, yüksek FPS'te akıcı). Kamera `top_level` ve interpolasyonu kapalı, `_process`'te yerleştirilir, bu yüzden fare gecikmesi olmaz.
 - Atış `get_aim_origin()` (tick anındaki göz) + `get_aim_basis()` (bakış + recoil) ile yapılır, kamera pozisyonuyla değil.
 - **Kamera hissi (`CameraFeel`, sadece sahibinde, sadece görsel):** hızla artan FOV kayması, head bob, iniş çökmesi (`Movement.landed`), slide'da alçalma + yan yatma, hasar sarsıntısı (host `_on_hurt`). Miktarlar `data/camera/default.tres`, her efekt `Settings.camera_*` (0–1) ile ölçeklenir. Nişan bunlardan etkilenmez.
-- **Birinci şahıs gövde (sadece sahibinde, sadece görsel):** `FirstPersonLegs` (Player'ın çocuğu): iki kemikli bacak, ayak hedefi hızla adım atar, çömelince katlanır, havada toplanır, slide'da öne uzanır (kalça gözün önüne geçer, botlar görünür). `FirstPersonArms` (WeaponHolder'ın çocuğu): eldivenler gösterilen silaha (bıçak savurma dahil) her frame yapışır, kollar ekran dışındaki dirseklere uzanır. Tutuş noktası silah sahnesindeki `RightHand`/`LeftHand` Marker3D'den, yoksa namluya göre tahmin; `WeaponDef.view_hands` (NONE/RIGHT/BOTH). Gölge yok.
+- **Birinci şahıs gövde (sadece sahibinde, sadece görsel):** `FirstPersonLegs` (Player'ın çocuğu): iki kemikli bacak, ayak hedefi hızla adım atar, çömelince katlanır, havada toplanır, slide'da öne uzanır (kalça gözün önüne geçer, botlar görünür). `FirstPersonArms` (WeaponHolder'ın çocuğu): rigli PSX kollar (`assets/models/characters/fp_arms/arms_rig.glb`, model +Z'ye bakar, 180° çevrilir, kamera kemiği göze, `ARMS_OFFSET` / `ARMS_SCALE`). Silahta `guard_idle` (yumruklar), bıçakta `knife_idle` animasyonu oynar; `ArmsIK` (Skeleton3D'nin çocuğu, `SkeletonModifier3D`, animasyondan sonra) her kolu iki kemikli IK ile büker: yumruğun ortası (parmak 02 eklemlerinin ortalaması, `guard_idle`'dan ölçülür) tutuş noktasına, el yönü silahın yönüyle döner. Destek eli tüfek önünde `HANDGUARD_ROLL` kadar döner; yakın dövüşte el modelin orijinine (sap), ikinci el sapın aşağısına. Kullanılmayan kol görüş altına iner; `NONE` silahlarda kollar gizli. Tutuş noktası silah sahnesindeki `RightHand`/`LeftHand` Marker3D'den, yoksa namluya göre tahmin; `WeaponDef.view_hands` (NONE/RIGHT/BOTH). Gölge yok.
 - **Ekran filtresi (`ScreenFx`, CanvasLayer 120, her şeyin üstünde):** `assets/shaders/ps2_screen.gdshader` — doygunluk/kontrast/soğuk ton, 5 bit renk + Bayer dither, grain, vignette (değerler `ps2_screen.tres`). `Settings.post_process` kapatır, `Settings.render_scale` root viewport'un `scaling_3d_scale`'i.
 - **UI ölçeği:** taban 1280×720, `canvas_items` stretch + `expand`: UI her çözünürlükte aynı düzende büyür, 3D tam çözünürlükte.
 - **Vuruş hissi:** host onayından sonra (`confirm_hit`) X hit marker (gövde/bacak beyaz, kafa kırmızı; `Settings.hit_marker_enabled`) ve sadece vuranın ekranında hasar sayısı (`DamageNumber`, Label3D). Mankenler artık kendi sayılarını göstermez. Hit-stop yok.
@@ -301,6 +302,7 @@ Bileşenler sahnede sabit düğümler: RPC'leri her peer'da aynı yolda (`Player
   - Tek basamak, kaldırım ve eşik ≤ 0,4 m (basamak çıkma); daha yüksekler zıplama / crouch-jump ister (crouch-jump ~1,4 m).
   - Çatıdan bhop hızıyla atlayan çiti aşmasın: site sınırında yüksek görünmez duvar (StaticBody3D + BoxShape3D, mesh yok; gizli CSG kullanılmaz).
   - Her yüksek noktaya en az iki yol: `map_test.ALTERNATE_ROUTES`'ta harita başına listelenir, her yol tek tek kaldırılıp navmesh yeniden çıkarılır.
+- **Ice Yard:** `tools/maps/build_iceworld.py`; 56×56 m duvarlı kar avlusu, 4 yönlü dönme simetrisi (`turn` / `quarter_box`: çeyrek 0 yazılır, 90°'lik dönüşlerle çoğaltılır). Orta buz plazası (her kenarda boşluk, sütun), orta halka buz duvarları + kasalar, köşelerde 3 m nişancı yuvası (rampa + iki kasa basamağı), duvar üstünde görünmez duvar, dışarıda çam/kar (dekor).
 - **AVM:** `tools/maps/build_mall_blockout.py` yerleşimi koddan üretir (CSGBox3D, `use_collision`). Yerleşim oturana kadar değişiklik orada yapılır ve sahne yeniden üretilir; sonra sahne elle düzenlenip üreteç bırakılabilir. Eksenler: x doğu, z güney; bina x −32..32, z −24..24; katlar 0 / 5 / 10 m.
 
 ## Fizik katmanları

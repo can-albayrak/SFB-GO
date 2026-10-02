@@ -6,17 +6,21 @@ extends Node
 ## death (killed by a fall), scoreboard (Tab board shown), and frozen body poses for the
 ## first-person legs: down (look at your feet), walk, slide; drops (Test Range rules: pickups
 ## and a falling airdrop crate).
+## range also takes --class=N --slot=N (roster index, weapon slot in hand: view model and arms),
+## --map=res://...tscn (another map) and --at=x,y,z --yaw=deg --pitch=deg (camera placement).
 ## Nothing is saved: the settings file is left alone.
 
 const FAKE_NAMES: Dictionary[int, String] = {1: "Can", 2: "Grizz", 3: "Volt"}
 
 
+var _args: Dictionary[String, String] = {}
+
+
 func _ready() -> void:
-	var screen: String = "lobby"
 	for arg: String in OS.get_cmdline_user_args():
-		if arg.begins_with("--screen="):
-			screen = arg.trim_prefix("--screen=")
-	_open.call_deferred(screen)
+		if arg.begins_with("--") and arg.contains("="):
+			_args[arg.substr(2, arg.find("=") - 2)] = arg.substr(arg.find("=") + 1)
+	_open.call_deferred(_args.get("screen", "lobby"))
 
 
 func _open(screen: String) -> void:
@@ -49,11 +53,13 @@ func _open(screen: String) -> void:
 			else:
 				Match.configure(20, 10.0)
 			Net.player_names.assign({1: "Can"})
-			Net.map_path = Net.DEFAULT_MAP_PATH
+			Net.map_path = _args.get("map", Net.DEFAULT_MAP_PATH)
 			get_tree().change_scene_to_file(Net.GAME_PATH)
 			await get_tree().create_timer(0.5).timeout
 			var game: Game = Game.find(get_tree())
 			var player := game.players_root.get_node_or_null("1") as Player
+			if player != null and screen == "range":
+				_place_view(player)
 			if screen == "death" and player != null:
 				player.server_fall_death()
 			elif screen == "drops" and player != null:
@@ -95,3 +101,19 @@ func _pose_body(player: Player, screen: String) -> void:
 			player.movement.is_sliding = true
 			player.head.position.y = Movement.CROUCH_EYE
 			player.velocity = forward * 9.0
+
+
+## Range screen options: class, weapon in hand, camera placement.
+func _place_view(player: Player) -> void:
+	if _args.has("class"):
+		player.loadout = Loadout.make(_args["class"].to_int(), 0, 0)
+	if _args.has("slot"):
+		player.equip(_args["slot"].to_int())
+	if _args.has("at"):
+		player.set_physics_process(false)
+		var parts: PackedStringArray = _args["at"].split(",")
+		player.global_position = Vector3(parts[0].to_float(), parts[1].to_float(), parts[2].to_float())
+	if _args.has("yaw"):
+		player.rotation.y = deg_to_rad(_args["yaw"].to_float())
+	if _args.has("pitch"):
+		player.look_pitch = deg_to_rad(_args["pitch"].to_float())

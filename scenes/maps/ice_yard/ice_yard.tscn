@@ -18,7 +18,7 @@ sky_material = SubResource("SkyMat")
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
-ambient_light_energy = 1.1
+ambient_light_energy = 0.75
 tonemap_mode = 2
 fog_enabled = true
 fog_light_color = Color(0.75, 0.8, 0.88, 1)
@@ -41,7 +41,7 @@ color_ramp = SubResource("GritRamp")
 noise = SubResource("GritNoise")
 
 [sub_resource type="StandardMaterial3D" id="Mat_snow"]
-albedo_color = Color(0.86, 0.9, 0.95, 1)
+albedo_color = Color(0.66, 0.7, 0.76, 1)
 albedo_texture = SubResource("GritTexture")
 roughness = 0.9
 uv1_scale = Vector3(0.4, 0.4, 0.4)
@@ -49,7 +49,7 @@ uv1_triplanar = true
 texture_filter = 0
 
 [sub_resource type="StandardMaterial3D" id="Mat_ice"]
-albedo_color = Color(0.55, 0.78, 0.9, 1)
+albedo_color = Color(0.34, 0.54, 0.68, 1)
 albedo_texture = SubResource("GritTexture")
 roughness = 0.25
 metallic_specular = 0.8
@@ -70,7 +70,7 @@ albedo_color = Color(0.2, 0.22, 0.26, 1)
 roughness = 0.9
 
 [sub_resource type="StandardMaterial3D" id="Mat_crate"]
-albedo_color = Color(0.55, 0.4, 0.24, 1)
+albedo_color = Color(0.42, 0.3, 0.18, 1)
 albedo_texture = SubResource("GritTexture")
 roughness = 0.85
 uv1_scale = Vector3(1.4, 1.4, 1.4)
@@ -116,7 +116,7 @@ environment = SubResource("Env")
 rotation = Vector3(-0.7, 0.9, 0)
 position = Vector3(0, 30, 0)
 light_color = Color(1, 0.97, 0.92, 1)
-light_energy = 1.1
+light_energy = 0.85
 shadow_enabled = true
 
 [node name="Geometry" type="Node3D" parent="."]
