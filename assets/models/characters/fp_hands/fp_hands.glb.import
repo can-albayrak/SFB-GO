@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ks3wruoiwcg3"
-path="res://.godot/imported/soldier.glb-793abc8185216ac54cf97eb388c4497c.scn"
+uid="uid://bjt6tdvs3m511"
+path="res://.godot/imported/fp_hands.glb-f3ee639c707e64654d6ecbc18e5e29df.scn"
 
 [deps]
 
-source_file="res://assets/models/characters/soldier.glb"
-dest_files=["res://.godot/imported/soldier.glb-793abc8185216ac54cf97eb388c4497c.scn"]
+source_file="res://assets/models/characters/fp_hands/fp_hands.glb"
+dest_files=["res://.godot/imported/fp_hands.glb-f3ee639c707e64654d6ecbc18e5e29df.scn"]
 
 [params]
 

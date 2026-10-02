@@ -216,13 +216,23 @@ func _process(delta: float) -> void:
 		_camera_feel.update(delta, movement, is_scoped)
 		var eye: Vector3 = head.get_global_transform_interpolated().origin
 		eye += Vector3.UP * _camera_feel.vertical + global_basis.x * _camera_feel.lateral
-		var view: Basis = _look_basis(current_weapon.get_view_recoil() + _get_scope_sway() + _camera_feel.shake)
+		var recoil: Vector2 = current_weapon.get_view_recoil()
+		var view: Basis = _look_basis(recoil * CameraFeel.DEF.recoil_view_share + _get_scope_sway() + _camera_feel.shake)
 		camera.global_transform = Transform3D(view * Basis(Vector3.BACK, _camera_feel.roll), eye)
+		_kick_view_model(recoil * (1.0 - CameraFeel.DEF.recoil_view_share))
 		camera.fov = lerpf(camera.fov, _get_target_fov(), minf(SCOPE_FOV_LERP * delta, 1.0))
 	else:
 		net_sync.interpolate(delta)
 		if is_alive and is_protected:
 			model.visible = fmod(Time.get_ticks_msec() / 1000.0, PROTECTION_BLINK_PERIOD) < PROTECTION_BLINK_PERIOD * 0.6
+
+
+## Owner: the recoil the view does not follow tips the gun in view up and back instead.
+func _kick_view_model(recoil: Vector2) -> void:
+	var feel: CameraFeelDef = CameraFeel.DEF
+	var back: float = minf(recoil.length() * feel.recoil_model_back, feel.recoil_model_max_back)
+	var tip := Basis.from_euler(Vector3(deg_to_rad(recoil.y * feel.recoil_model_pitch), -deg_to_rad(recoil.x * feel.recoil_model_pitch), 0.0))
+	weapon_holder.transform = Transform3D(tip, Vector3(0.0, 0.0, back))
 
 
 func equip(slot: int) -> void:

@@ -184,7 +184,8 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | Remington 870 (PSX Weapon Pack) | `assets/models/weapons/real/shotgun.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | MAC-11 (PSX Weapon Pack) | `assets/models/weapons/real/smg.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | Glock-18 (PSX Weapon Pack) | `assets/models/weapons/real/pistol.glb`, `dual_pistols.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
-| PSX First Person Arms (arms_rig) | `assets/models/characters/fp_arms/arms_rig.glb` | Can'ın gönderdiği zip ("psx-first-person-arms-free-game-assets") | ? | "Free game assets", lisans dosyası yok |
+| Rigged Low Poly FPS Hands | `assets/models/characters/fp_hands/fp_hands.glb` | [Sketchfab](https://sketchfab.com/3d-models/rigged-low-poly-fps-hands-c0d32b85e1ff4c4aa710d416545104b1) | hvarley | CC-BY-4.0 |
+| PSX Base Male - PlayStation Character - Low Poly | `assets/models/characters/psx_man/psx_man.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-base-male-playstation-character-low-poly-186d173d59044734b908215ecbc88b1f) | jonniemadeit | CC-BY-4.0 |
 | Colt Python (PSX Revolver Pack [FIXED]) | `assets/models/weapons/real/revolver.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | PS1-style Steyr AUG | `assets/models/weapons/real/burst_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-steyr-aug-0d5f437f7193404ea0f030651421434f) | andrewwhiskin | CC-BY-4.0 |
 | Low-Poly M249 SAW | `assets/models/weapons/real/lmg.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m249-saw-76011c365636451c90a8e3a46c2d8ca5) | TastyTony | CC-BY-4.0 |

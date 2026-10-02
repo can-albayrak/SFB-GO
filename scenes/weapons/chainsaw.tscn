@@ -6,7 +6,6 @@
 [node name="Chainsaw" type="Node3D"]
 position = Vector3(0.22, -0.28, -0.5)
 script = ExtResource("1_script")
-metadata/arms_twist = 15
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
 scale = Vector3(0.66, 0.66, 0.66)

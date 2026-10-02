@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://scripts/player/hitbox.gd" id="3_hitbox"]
 [ext_resource type="Script" path="res://scripts/player/movement.gd" id="4_movement"]
 [ext_resource type="Script" path="res://scripts/player/player_input.gd" id="5_input"]
-[ext_resource type="PackedScene" path="res://assets/models/characters/soldier.glb" id="6_soldier"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/psx_man/psx_man.glb" id="6_body"]
 [ext_resource type="Script" path="res://scripts/player/player_net_sync.gd" id="8_netsync"]
 [ext_resource type="Script" path="res://scripts/player/player_requests.gd" id="9_requests"]
 [ext_resource type="Script" path="res://scripts/player/player_status.gd" id="10_status"]
@@ -94,7 +94,8 @@ near = 0.03
 
 [node name="Model" type="Node3D" parent="."]
 
-[node name="Soldier" parent="Model" instance=ExtResource("6_soldier")]
+[node name="Body" parent="Model" instance=ExtResource("6_body")]
+transform = Transform3D(-2.79, 0, 0, 0, 2.79, 0, 0, 0, -2.79, 0, 0.007, 0)
 
 [node name="Hand" type="Node3D" parent="Model"]
 position = Vector3(0.19, 1.12, -0.3)

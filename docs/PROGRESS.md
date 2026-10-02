@@ -7,7 +7,13 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 ## Sıradaki oturum
 
-**En yeni (2026-10-02 akşam, evde, Can test edecek):**
+**En yeni (2026-10-03 gece, evde, Can test edecek):**
+- **Yeni eller:** hvarley'in "Rigged Low Poly FPS Hands" modeli (CC-BY). Eski PSX kolları ve IK kaldırıldı. İki önkol, modelin kendi tüfek tutuşuyla, her silahın kabza/kundak noktasına oturuyor; parmaklar hep gerçek tutuşta. Çift tabancada sol el aynalı sağ el. Bear'ın silahlarına (balyoz, pençe, testere, fırlatma bıçağı) bakılmadı: Can'ın kararıyla Bear kaldırılacak.
+- **Tarama:** kamera artık tepmeyle kaymıyor (`recoil_view_share = 0`): nişangah sabit, mermiler desene göre tırmanıyor, eldeki silah yukarı/geri vuruyor.
+- **Oyuncu gövdesi:** jonniemadeit'in "PSX Base Male" modeli (CC-BY, 1,8 m). İskeletsiz, kollar aşağıda; eldeki silah göğüs önünde duruyor (poz/rig sonra).
+- **Exe:** Steam sürümü için GodotSteam şablonları (~460 MB) indirilecek, Can'ın onayı bekleniyor.
+
+**Önceki (2026-10-02 akşam, evde):**
 - **Silah tutuşları baştan:** her silahın sağ/sol el noktası gerçek kabza ve kundakta (yandan ölçekli görüntülerden okundu, `tools/apply_view_grips.py`). Tüfeklerde kollar ~20° dönüyor (sol omuz öne), sol el kundağı alttan kavrıyor. Omuzlar aşağı alındı (sol alttaki düz üst kol parçası gitti). Tabanca ve revolver tek el. Balyozda iki el sapta. Bıçak ve fırlatma bıçağı sıkı yumrukta, sap avuç içinden geçiyor. Revolverin dışarı sallanan silindiri düzeltildi (Blender ile yeniden işlendi).
 - **Animasyonlar:** bıçak sağ üstten sol alta kesik (bütün kol hareket ediyor), balyoz/iki elli silahlar yukarıdan iniş; fırlatma bıçağı ilk karede elden çıkıyor, el ileri savruluyor, aşağı inip yeni bıçakla dönüyor.
 - **Sniper (Hawk'ın iki tüfeği):** dürbünsüz nişangah yok, kalçadan çok dağınık (Heavy 9°, Marksman 6°), dürbün yavaş açılıyor (0,35 / 0,3 sn) ve tam açılana kadar isabet düşük.
@@ -326,3 +332,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-02 | 7/8 | (bulut) Rigli PSX kollar + `ArmsIK` (iki kemikli IK, yumruk tutuşu, bıçakta bıçak pozu), yeni harita Ice Yard (`build_iceworld.py`), tepme +%15, test kuralı (sadece ilgili testler), `ui_preview` range seçenekleri (sınıf/slot/harita/kamera). Smoke 137/0, map 202/0; movement ve ağ testi koşulmadı (değişiklik yok). |
 | 2026-10-02 | 7/8 | Evde `claude/epic-pascal-u74jyd` dalı çekildi (fast-forward, 6 commit) + doğrulama: import temiz, smoke 137/0, movement 50/0, map 202/0, ağ testi lobi 30 + 26, geç katılma 29 + 29. GodotSteam eklentisi olmadan çalıştırıldı (Steam paneli devre dışı). Oyun Can'ın denemesi için açıldı. |
 | 2026-10-02 | 7/8 | (evde, Godot 4.7.2 + Blender 5.2) Can'ın listesi: silah tutuşları (`RightHand`/`LeftHand` dönüşlü işaretler, `arms_twist`, omuzlar aşağı, tabanca/revolver tek el, `apply_view_grips.py`), revolver silindiri, bıçak/balyoz savurma anahtarları, fırlatma bıçağı animasyonu, sniper (nişangah yok, `scope_in_time`, kalça dağılması), tepme ×1,2, Railgun 4, Minigun dağılma, bıçakta +%15 hız, eğimde slide + slide dağılması, Ice Yard %20 büyük ve karanlık. `ui_preview`'e `--primary --special --hud=off --fire`. Smoke 143/0, movement 54/0, map 202/0, ağ testi lobi 30 + 26, geç katılma 29 + 29. |
+| 2026-10-03 | 7/8 | (evde) Yeni FPS elleri (her önkol tutuş noktasına oturur, IK yok; `apply_view_grips.py` yeni ellere göre, kundakta −25° dönüş, bıçakta `BLADE_TURN`), gölge tarafı için wrap + backlight. Tepme kamerayı kaydırmıyor, silah modeli vuruyor (`CameraFeelDef` recoil grubu). Oyuncu gövdesi PSX Base Male. Eski `fp_arms`, `soldier.glb`, `arms_ik.gd` silindi. Smoke 143/0, movement 54/0, map 202/0, ağ testi 30 + 26, 29 + 29. |

@@ -6,7 +6,6 @@
 [node name="LMG" type="Node3D"]
 position = Vector3(0.2, -0.22, -0.48)
 script = ExtResource("1_script")
-metadata/arms_twist = 20
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
 scale = Vector3(0.756, 0.756, 0.756)
@@ -18,5 +17,5 @@ position = Vector3(-0.0026, 0.0169, -0.4838)
 position = Vector3(0, -0.069, 0.037)
 
 [node name="LeftHand" type="Marker3D" parent="."]
-position = Vector3(0, -0.02, -0.17)
-rotation = Vector3(-1.5708, 0, 0.8727)
+position = Vector3(0, -0.01, -0.17)
+rotation = Vector3(0, 0, -0.4363)

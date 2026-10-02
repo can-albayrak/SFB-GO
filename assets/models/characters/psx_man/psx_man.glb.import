@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dm20x6ks376q4"
-path="res://.godot/imported/arms_rig.glb-69dce0561c0f95ecce82cfba2fe49eb1.scn"
+uid="uid://6fwaaarlpig0"
+path="res://.godot/imported/psx_man.glb-5f4938367679cfb372620a40852cfa55.scn"
 
 [deps]
 
-source_file="res://assets/models/characters/fp_arms/arms_rig.glb"
-dest_files=["res://.godot/imported/arms_rig.glb-69dce0561c0f95ecce82cfba2fe49eb1.scn"]
+source_file="res://assets/models/characters/psx_man/psx_man.glb"
+dest_files=["res://.godot/imported/psx_man.glb-5f4938367679cfb372620a40852cfa55.scn"]
 
 [params]
 
