@@ -21,6 +21,7 @@ Net="*res://autoload/net.gd"
 Match="*res://autoload/match.gd"
 Settings="*res://autoload/settings.gd"
 Style="*res://autoload/style.gd"
+SteamLink="*res://autoload/steam_link.gd"
 
 [display]
 

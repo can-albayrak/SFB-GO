@@ -1,6 +1,7 @@
 extends Node
 ## Connection handling: host/join, lobby, peer registry, player names, disconnects.
-## Host is always peer 1 (ENet listen server). The offline test range uses
+## Host is always peer 1 (listen server). Transport: ENet (IP + port) or Steam (SteamLink hands
+## in a SteamMultiplayerPeer through host_with_peer / join_with_peer). The offline test range uses
 ## OfflineMultiplayerPeer, where we are also peer 1 and is_server() is true,
 ## so the same host-authoritative code runs unchanged.
 ##
@@ -22,6 +23,9 @@ const DEFAULT_MAP_PATH: String = "res://scenes/maps/test_range.tscn"
 ## Maps the host can pick in the lobby (the first is the default).
 const MAP_LIST: MapList = preload("res://data/maps/map_list.tres")
 const GAME_WAIT_FRAMES: int = 600 ## Host: give up sending lobby peers in if the match never loads.
+## Host, non-ENet peers (Steam): seconds between round-trip pings (lag compensation).
+const PING_INTERVAL: float = 1.0
+const PING_SMOOTHING: float = 0.3 ## Weight of a new round-trip sample.
 
 var player_names: Dictionary[int, String] = {}
 var map_path: String = DEFAULT_MAP_PATH
@@ -49,6 +53,9 @@ var _local_name: String = ""
 var _join_address: String = ""
 ## Bumped on every session change, so a pending lobby start from an old session gives up.
 var _session_serial: int = 0
+## Host: measured round trips in seconds by peer, for transports without ENet statistics.
+var _rtt: Dictionary[int, float] = {}
+var _ping_left: float = 0.0
 
 
 func _ready() -> void:
@@ -67,14 +74,20 @@ func start_offline(player_name: String) -> void:
 
 ## `use_lobby` false = straight into the match (command-line --host, headless tests).
 func host_game(player_name: String, port: int = DEFAULT_PORT, use_lobby: bool = true) -> Error:
-	_reset_state()
 	var peer := ENetMultiplayerPeer.new()
 	var err: Error = peer.create_server(port, MAX_PLAYERS - 1)
 	if err != OK:
 		return err
+	print("[Net] Hosting on port %d" % port)
+	host_with_peer(peer, player_name, use_lobby)
+	return OK
+
+
+## Hosts on a peer that is already listening (ENet above, or SteamLink's Steam peer).
+func host_with_peer(peer: MultiplayerPeer, player_name: String, use_lobby: bool = true) -> void:
+	_reset_state()
 	multiplayer.multiplayer_peer = peer
 	player_names[1] = _clean_name(player_name, 1)
-	print("[Net] Hosting on port %d" % port)
 	in_lobby = use_lobby
 	if use_lobby:
 		lobby_kill_target = Match.DEFAULT_RULES.kill_target
@@ -82,24 +95,29 @@ func host_game(player_name: String, port: int = DEFAULT_PORT, use_lobby: bool = 
 		get_tree().change_scene_to_file(LOBBY_PATH)
 	else:
 		get_tree().change_scene_to_file(GAME_PATH)
-	return OK
 
 
 func join_game(player_name: String, address: String, port: int = DEFAULT_PORT) -> Error:
-	_reset_state()
 	var peer := ENetMultiplayerPeer.new()
 	var err: Error = peer.create_client(address, port)
 	if err != OK:
 		return err
-	multiplayer.multiplayer_peer = peer
-	_local_name = player_name
-	_join_address = address
+	join_with_peer(peer, player_name)
+	_join_address = address # Remembered as "last host" once connected.
 	print("[Net] Connecting to %s:%d" % [address, port])
 	return OK
 
 
+## Joins through a peer that is already connecting (ENet above, or SteamLink's Steam peer).
+func join_with_peer(peer: MultiplayerPeer, player_name: String) -> void:
+	_reset_state()
+	multiplayer.multiplayer_peer = peer
+	_local_name = player_name
+
+
 func leave(message: String = "") -> void:
 	multiplayer.multiplayer_peer.close()
+	SteamLink.leave_lobby()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	_reset_state()
 	last_message = message
@@ -146,6 +164,20 @@ func request_lobby_ready(is_ready: bool) -> void:
 	_request_ready.rpc_id(1, is_ready)
 
 
+## Host: round trip to `peer_id` in seconds (lag compensation rewinds by it). ENet keeps its own
+## statistic; other transports (Steam) use our pings.
+func get_rtt(peer_id: int) -> float:
+	if peer_id == 1:
+		return 0.0
+	var enet := multiplayer.multiplayer_peer as ENetMultiplayerPeer
+	if enet == null:
+		return _rtt.get(peer_id, 0.0)
+	var packet_peer: ENetPacketPeer = enet.get_peer(peer_id)
+	if packet_peer == null:
+		return 0.0
+	return packet_peer.get_statistic(ENetPacketPeer.PEER_ROUND_TRIP_TIME) / 1000.0
+
+
 func get_player_name(peer_id: int) -> String:
 	return player_names.get(peer_id, "Player %d" % peer_id)
 
@@ -172,11 +204,26 @@ func _reset_state() -> void:
 	lobby_minutes = 0.0
 	lobby_map_index = 0
 	_join_address = ""
+	_rtt.clear()
+	_ping_left = 0.0
 
 
 func _clean_name(raw: String, peer_id: int) -> String:
 	var cleaned: String = raw.strip_edges().left(MAX_NAME_LENGTH)
 	return cleaned if not cleaned.is_empty() else "Player %d" % peer_id
+
+
+func _process(delta: float) -> void:
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if peer == null or peer is ENetMultiplayerPeer or peer is OfflineMultiplayerPeer or not multiplayer.is_server():
+		return
+	_ping_left -= delta
+	if _ping_left > 0.0:
+		return
+	_ping_left = PING_INTERVAL
+	for peer_id: int in player_names:
+		if peer_id != 1:
+			_ping.rpc_id(peer_id, Time.get_ticks_usec())
 
 
 func _on_connected_to_server() -> void:
@@ -204,6 +251,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	ingame_peers.erase(peer_id)
 	state_peers.erase(peer_id)
 	ready_peers.erase(peer_id)
+	_rtt.erase(peer_id)
 	_sync_names.rpc(player_names)
 	if in_lobby:
 		_broadcast_lobby()
@@ -281,3 +329,20 @@ func _on_lobby_synced(new_ready: Dictionary, kill_target: int, minutes: float, m
 func _sync_names(names: Dictionary) -> void:
 	player_names.assign(names)
 	players_changed.emit()
+
+
+## Host -> client: echo this back (round-trip measurement for non-ENet transports).
+@rpc("authority", "call_remote", "unreliable")
+func _ping(sent_usec: int) -> void:
+	_pong.rpc_id(1, sent_usec)
+
+
+@rpc("any_peer", "call_remote", "unreliable")
+func _pong(sent_usec: int) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id: int = multiplayer.get_remote_sender_id()
+	if not player_names.has(peer_id):
+		return
+	var sample: float = (Time.get_ticks_usec() - sent_usec) / 1_000_000.0
+	_rtt[peer_id] = lerpf(_rtt[peer_id], sample, PING_SMOOTHING) if _rtt.has(peer_id) else sample

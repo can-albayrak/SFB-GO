@@ -39,6 +39,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 **Lobi:** Host kill hedefi, süre ve haritayı seçer. Oyuncular kendi isimlerini girer.
 
 - **Bağlanma:** Host'un Tailscale IP'si bir kez girilir ve kaydedilir; sonraki açılışlarda "Last host" ile tek tıkla bağlanılır.
+- **Steam (2026-10-02, Can):** Steam sürümünde (App ID 480, Spacewar) IP yok: host "HOST ON STEAM" der, arkadaşlar menüdeki listeden ("FIND STEAM GAMES") ya da Steam davetinden / arkadaş listesindeki "Join Game"den girer. Steam bağlantıyı kendi aktarır, port açmak gerekmez. IP ile bağlanma aynen durur.
 - **Basit lobi:** Oyuncu listesi, her oyuncunun adı, yüz seçimi ve "hazır" durumu görünür; host ayarları yapar ve "Start" der. Maç ortasında katılma (geç katılma) yine mümkün. Sohbet, takım/renk seçimi gibi ek özellikler yoktur.
 - **Yüz ve sınıf seçimi:** Her oyuncu lobide ilk doğuşu için **yüzünü ve sınıfını** (loadout) seçer. Ölünce ikisini de değiştirebilir (ölüm ekranındaki menü). Geç katılan oyuncuya katılma sırasında yüz + sınıf sorulur, seçince maça girer.
 
@@ -55,6 +56,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 | Mermi | Yedek mermi sınırsız, sadece şarjör değiştirilir (airdrop silahı hariç) |
 | Ayak sesi | Yön ve konum anlaşılacak kadar belirgin (aşırı vurgulanmaz). **Ctrl ile eğilip yürürken** ses çok az çıkar. |
 | Hızlı yakın dövüş | Herkese `V` ile bıçak: 25 hasar, ~1,5 m menzil, 0,8 sn bekleme. Bear'da `V` = kısa tekme (az hasar, geri itme). |
+| Bıçak slotu (CS gibi) | Her sınıfta (Bear dahil) bıçak **3** tuşunda elde tutulur, sol tıkla vurur (25 hasar). **Arkadan vuruş tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). `V` ile hızlı bıçak arkadan öldürmez. |
 | Yedek silah | Bear hariç herkese tek tip tabanca. Bear'a 3 Throwing Knife. |
 | FOV ve fare | Varsayılan FOV 90 (80–110), fare hassasiyeti, crosshair özelleştirme (renk, boyut, boşluk) |
 
@@ -249,7 +251,7 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 2. 3–4 olası noktadan biri seçilir (host); ışık hüzmesi iner, kasa 10–15 sn'de paraşütle düşer.
 3. Kasayı açmak için `E` 3 sn basılı tutulur; hasar alınırsa iptal olur.
 
-**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür (başının üstünde duvar arkasından da görünen işaret) ve yavaşlar (%15). Ölünce silah kalan mermisiyle yere düşer, üstünden geçen alır (45 sn sonra kaybolur). Kill ödülü bu silahlara mermi eklemez. Airdrop silahı **3** tuşunda; kasadan alınca hemen elde olur. Silah taşırken kasa açılamaz.
+**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür (başının üstünde duvar arkasından da görünen işaret) ve yavaşlar (%15). Ölünce silah kalan mermisiyle yere düşer, üstünden geçen alır (45 sn sonra kaybolur). Kill ödülü bu silahlara mermi eklemez. Airdrop silahı **4** tuşunda (3 = bıçak); kasadan alınca hemen elde olur. Silah taşırken kasa açılamaz.
 
 **Silah:** Her airdrop'ta rastgele biri, kasa açılana kadar bilinmez. Hasarlar oynadıkça ayarlanır.
 
@@ -329,4 +331,4 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 - **Test:** Hasar sayısı gösteren hedef mankenleri. Bot yok. Test Range'de güçlerin bekleme süresi yok ve şarjör bitmez (`data/match/test_range.tres`); airdrop gelince 5 sn'de bir iner (haritada her airdrop silahı zaten varsa inmez).
 - **Sesli iletişim:** Discord (oyun içi ses yok)
 - **Dağıtım:** GitHub gizli repo (kod) + Releases (oyun zip'i). Arkadaşlar collaborator olarak eklenir.
-- **Bağlantı:** Tailscale ile sanal LAN, host'un portu dışarı açmasına gerek yok.
+- **Bağlantı:** Tailscale ile sanal LAN, host'un portu dışarı açmasına gerek yok. Ya da Steam sürümü (App ID 480): lobi + Steam'in P2P aktarımı.

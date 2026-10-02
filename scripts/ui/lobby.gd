@@ -110,6 +110,12 @@ func _build() -> void:
 		_ready_button.toggled.connect(_on_ready_toggled)
 		_ready_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		buttons.add_child(_ready_button)
+	if SteamLink.lobby_id != 0:
+		# Steam game: friends get the invite in Steam (or find it under FIND STEAM GAMES).
+		var invite := _button("INVITE", &"FrameButton", 16)
+		invite.custom_minimum_size.x = 120.0
+		invite.pressed.connect(SteamLink.invite_friends)
+		buttons.add_child(invite)
 	var leave := _button("LEAVE", &"FrameButton", 16)
 	leave.custom_minimum_size.x = 120.0
 	leave.pressed.connect(func() -> void: Net.leave())
@@ -233,7 +239,9 @@ func _refresh() -> void:
 
 	var facts: Array[String] = ["HOST  ·  %s" % Net.get_player_name(1).to_upper(),
 		"%d / %d PLAYERS" % [ids.size(), Net.MAX_PLAYERS]]
-	if multiplayer.is_server():
+	if SteamLink.lobby_id != 0:
+		facts.append("STEAM LOBBY")
+	elif multiplayer.is_server():
 		var addresses: Array[String] = _shareable_addresses()
 		if not addresses.is_empty():
 			facts.append("JOIN  ·  %s" % addresses[0])

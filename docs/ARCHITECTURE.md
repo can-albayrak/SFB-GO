@@ -10,7 +10,7 @@ Kod yapısının ve kuralların referansı. Tasarım için `GDD.md`, durum için
 | Dil | GDScript, **statik tipli** (`var hp: int`, `func f() -> void`) |
 | Renderer | Mobile (Vulkan) |
 | Fizik | Jolt Physics (dahili), physics tick 60 Hz |
-| Ağ | `ENetMultiplayerPeer`, listen server, host = peer 1 |
+| Ağ | `ENetMultiplayerPeer` (IP) veya `SteamMultiplayerPeer` (GodotSteam, App ID 480), listen server, host = peer 1 |
 | Otorite | Server-authoritative oyun durumu, client-side hareket |
 | Veri | Sınıf/silah/güç değerleri `Resource` (`.tres`) dosyalarında |
 
@@ -28,7 +28,8 @@ sfb-go/
 │   ├── net.gd               # Bağlantı, oyuncu kaydı
 │   ├── match.gd             # Maç durumu, skor, spawn (sadece host karar verir)
 │   ├── settings.gd          # Kullanıcı ayarları (user://settings.cfg), `changed` sinyali
-│   └── style.gd             # Görünüm: renk paleti, sistem fontları, Theme (varsayılan temaya birleştirilir), ScreenFx
+│   ├── style.gd             # Görünüm: renk paleti, sistem fontları, Theme (varsayılan temaya birleştirilir), ScreenFx
+│   └── steam_link.gd        # Steam lobileri + SteamMultiplayerPeer (sadece GodotSteam'li sürümde etkin)
 ├── data/
 │   ├── classes/             # ClassDef .tres (wolf, hawk, bear, cheetah, volcano) + roster.tres
 │   ├── camera/              # CameraFeelDef .tres (default.tres: FOV kayması, head bob, iniş, slide, sarsıntı)
@@ -67,6 +68,7 @@ sfb-go/
 │   ├── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
 │   ├── blender/process_weapon_models.py # private_assets/weapons/*.glb → assets/models/weapons/real/<id>.glb (yön, ölçek, el noktası, poligon, doku 512, muzzles.json)
 │   ├── apply_weapon_models.py          # real/ modelleri silah sahnelerine ve WeaponDef'lere bağlar (ölçek, namlu, üçüncü şahıs)
+│   ├── steam/build_steam.py            # Steam sürümü: GodotSteam şablonlarını indirir, export, steam_api + steam_appid.txt, zip
 │   └── maps/build_mall_blockout.py     # AVM blockout sahnesini üretir (Python; --preview ile kat PNG'leri)
 └── assets/
     ├── models/              # characters/soldier.glb, weapons/*.glb yer tutucular, weapons/real/*.glb indirilen modeller (Blender'da +Y ileri = Godot -Z)
@@ -83,6 +85,7 @@ sfb-go/
 | `Net` | Host/join, peer listesi, oyuncu isimleri, bağlantı kopması | Host + client |
 | `Match` | Skor, kill hedefi, süre, spawn seçimi, pickup/airdrop zamanlayıcıları | **Sadece host** değiştirir, client'lara RPC ile yayar |
 | `Settings` | İsim, son host, FOV, hassasiyet, crosshair + hit marker, kamera efekti ölçekleri, grafik (ekran filtresi, render ölçeği). `SettingsPanel` ana menü ve Esc menüsünden açılır. | Yerel |
+| `SteamLink` | Steam (GodotSteam, App ID 480): başlatma, lobi kur / ara / katıl, davet, `join_requested`. Steam API'si `Engine.get_singleton("Steam")` + `call()` ile çağrılır, böylece GodotSteam'siz editörde de derlenir (`available = false`). Lobi kurulunca / katılınca `SteamMultiplayerPeer` yaratıp `Net.host_with_peer` / `Net.join_with_peer`'e verir. | Yerel |
 | `Style` | UI görünümü (GDD "Görsel referans"): palet sabitleri (`Style.PANEL`, `Style.TEXT`...), sistem fontları (Arimo/Arial, Cousine/Courier New; dosya gömülmez), Theme + varyasyonlar (`TitleLabel`, `HeaderLabel`, `MonoLabel`, `DimLabel`, `HudLabel`, `HudSmallLabel`, `RowButton`, `FrameButton`, `PrimaryButton`, `HeaderPanel`, `InsetPanel`). Theme motorun varsayılan temasına birleştirilir (CanvasLayer altındaki HUD dahil her Control alır). Root'a `ScreenFx` ekler. | Yerel |
 
 ## Ağ modeli
@@ -116,6 +119,9 @@ sfb-go/
 - Spawn: `spawner.spawn_function` + `{id, position, yaw}` verisi. `Player.StateSync` (MultiplayerSynchronizer, authority 1, `public_visibility = false`) spawn görünürlüğünü belirler: host yeni peer için `set_visibility_for()` açınca mevcut oyuncular o peer'da da doğar (geç katılma).
 - **Test Range** = `OfflineMultiplayerPeer` ile aynı kod: biz peer 1'iz, `is_server()` true.
 - Host çıkarsa client'lar `server_disconnected` → ana menü ("Host left the game").
+- **Steam (`SteamLink`):** `host_lobby` → `createLobby` (public, `sfb_go = 1` etiketi; App 480'i herkes paylaşıyor) → `lobby_created` → `SteamMultiplayerPeer.create_host(0)` → `Net.host_with_peer` (lobi ekranı, ENet ile aynı yol). Client: `find_lobbies` (etiket filtresi, dünya geneli) → menüde liste; `join_lobby`, Steam daveti / arkadaş listesinde "Join Game" (`join_requested`, maçtaysa önce `Net.leave`) → `lobby_joined` → `create_client(lobi sahibi, 0)` → `Net.join_with_peer`. `Net.leave` lobiden de çıkar. Lobi ekranında INVITE = Steam davet penceresi. Steam başlatılmadan `SteamMultiplayerPeer` yaratılmaz (GodotSteam çöküyor).
+- **RTT:** `Net.get_rtt(peer)`: ENet'te ENet istatistiği; diğer aktarımlarda (Steam) host her saniye `_ping` → `_pong` ile ölçer (yumuşatılmış). Lag compensation bunu kullanır.
+- **Steam sürümü (`tools/steam/build_steam.py`):** GodotSteam 4.22.1'in Godot 4.7.2 şablonları (`private_assets/godotsteam/`, git dışı) özel şablon olarak `export_presets.cfg`'e "Windows Steam" / "Linux Steam" preset'i yazılır (dosya yerel, diğer preset'lere dokunulmaz), export + `steam_api64.dll` / `libsteam_api.so` + `steam_appid.txt` (480) → `builds/SFB-GO_steam_<platform>.zip`. Düz Godot editöründe Steam yok; menü "Steam needs the Steam build" der.
 - Komut satırı (test için): `-- --name=X --host` / `-- --join=IP`.
 
 ### Senkronizasyon
@@ -157,7 +163,7 @@ sfb-go/
 ### Pickup'lar ve airdrop (aşama 6)
 
 - **Pickup** (`scripts/pickups/pickup.gd`, haritada `Pickups/...`, `PickupDef`): host her tick yakındaki canlı oyuncuya bakar (Health sadece canı eksiğe), `PlayerStatus.server_take_pickup` → Health anında; Speed/Double Jump host saatinde + sahibine `_receive_pickup`. `Net.broadcast(_set_state)` ile herkes ikon/hologram; geç katılana `sync_to_peer`. `Player.powerups` bit maskesi → `Effects.show_powerups` ışık.
-- **Airdrop silahı:** `Player.SPECIAL_SLOT` (2). Host `give_special_weapon(index, ammo)` → `special_ammo`, `special_weapon` StateSync → her peer `_apply_special` (silahı ekler/çıkarır; sahibi eline alır). Ateşte host `server_use_special_round` (mermi biter → kaldırılır). `_die`'da `AirdropManager.server_drop_weapon`. `WeaponDef.airdrop / carry_speed_mult / pierce_walls / spin_up_time`; `GrenadeDef.knockback` (patlama itmesi, `status.server_knockback`).
+- **Airdrop silahı:** `Player.SPECIAL_SLOT` (3, tuş 4). Host `give_special_weapon(index, ammo)` → `special_ammo`, `special_weapon` StateSync → her peer `_apply_special` (silahı ekler/çıkarır; sahibi eline alır). Ateşte host `server_use_special_round` (mermi biter → kaldırılır). `_die`'da `AirdropManager.server_drop_weapon`. `WeaponDef.airdrop / carry_speed_mult / pierce_walls / spin_up_time`; `GrenadeDef.knockback` (patlama itmesi, `status.server_knockback`).
 - **AirdropManager** (`Game/Airdrops`, kodla eklenir): host zamanlayıcı (`MatchDef` airdrop alanları) → `_spawn_crate` herkese (kasa iniş zamanı her peer'da yerel), `_remove_crate`, `_spawn_drop` / `_remove_drop`. Açma: sahibi `tick_local(player, cmd.interact)` → `_request_open` / `_request_cancel`; host `_update_openers` (mesafe, canlı, silahsız, `Player.last_hurt_time` başlangıçtan önce) → süre dolunca rastgele silah; iptalde `_open_cancelled` sahibine. Geç katılana `sync_to_peer` (kasalar kalan düşüş süresiyle, yerdeki silahlar).
 
 ### Fiziksel mermiler (bomba, roket, bıçak)
@@ -214,6 +220,7 @@ enum FireType { HITSCAN, PROJECTILE, MELEE, THROWN }
 
 ### Yakın dövüş ve güçler
 
+- **Silah slotları:** 0 birincil, 1 ikincil, 2 = `Player.KNIFE_SLOT` (tuş 3, `ClassDef.knife`, her sınıfta), 3 = `Player.SPECIAL_SLOT` (tuş 4, airdrop silahı). Elde bıçak = `MeleeWeapon` silah gibi (`Weapon.tick` → `send_fire` → host `server_fire`). **Backstab:** `WeaponDef.backstab_damage` (bıçak 999) ve `backstab_dot` (0,475, CS): host'ta `MeleeWeapon._is_backstab` hedefin `get_facing()` yönü ile saldırandan hedefe yatay yönün dot'u eşiği geçerse hasar backstab_damage olur (lag compensation'lı pozda; `Player.get_facing` = yaw, `TargetDummy.get_facing` = +Z, spawn'lara doğru). `V` hızlı bıçak (`player.melee_weapon`) backstab yapmaz.
 - `V`: `MeleeWeapon.swing()` (sahibi: bekleme + animasyon, silah bu sürede ateş edemez) → `_request_melee` → host bütçe kontrolü + lag compensation ile `server_fire`: 5 ışınlık yelpaze, en yakın hitbox; `take_hit(..., is_melee = def.counts_as_knife)` (knife ödülü; Bear'ın tekmesi sayılmaz).
 - `Q`: `Ability.try_use` (sahibi: yerel bekleme, HUD) → `_request_ability` → host kendi saatinde `server_try_use` (bekleme × 0,9 tolerans) → `server_use`. Hareket güçleri (aşama 5) `_use_local` ile sahibinde çalışır.
 - Fırlatmalar (bombalar, yapışkan bomba, mayın, fırlatma bıçağı): `Player.get_throw_launch(origin, dir, hız, kaldırma)` → sağ elden çıkar (`THROW_HAND_OFFSET`), nişangahın değdiği noktaya doğru gider (ışın `world | player`, 80 m; 2 m'den yakında bakış yönü), atanın yatay koşu hızını taşır (`THROW_INHERIT`; uzak oyuncuda `PlayerNetSync.get_latest_velocity()`). Duvara yapışıkken el noktası duvarın bu tarafına çekilir.
@@ -311,7 +318,7 @@ Hitscan raycast maskesi: `world | hitbox`. Oyuncu kapsülü maskesi: `world | pl
 
 ## Input Map
 
-Aksiyon isimleri (`project.godot` içinde, fiziksel tuş kodu ile): `move_forward`, `move_back`, `move_left`, `move_right`, `jump`, `crouch` (Ctrl: eğil; koşarken basınca slide), `sprint` (Shift), `respawn` (T, sadece test range), `fire`, `secondary`, `ability`, `reload`, `interact` (E basılı: kasa aç), `melee`, `weapon_primary`, `weapon_secondary`, `weapon_special` (3, airdrop silahı), `class_menu`, `scoreboard`, `pause_menu` (Esc).
+Aksiyon isimleri (`project.godot` içinde, fiziksel tuş kodu ile): `move_forward`, `move_back`, `move_left`, `move_right`, `jump`, `crouch` (Ctrl: eğil; koşarken basınca slide), `sprint` (Shift), `respawn` (T, sadece test range), `fire`, `secondary`, `ability`, `reload`, `interact` (E basılı: kasa aç), `melee`, `weapon_primary`, `weapon_secondary`, `weapon_knife` (3, bıçak), `weapon_special` (4, airdrop silahı), `class_menu`, `scoreboard`, `pause_menu` (Esc).
 
 ## Kodlama kuralları
 
