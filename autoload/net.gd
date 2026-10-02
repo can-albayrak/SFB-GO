@@ -19,9 +19,8 @@ const MAIN_MENU_PATH: String = "res://scenes/main.tscn"
 const GAME_PATH: String = "res://scenes/game.tscn"
 const LOBBY_PATH: String = "res://scenes/lobby.tscn"
 const DEFAULT_MAP_PATH: String = "res://scenes/maps/test_range.tscn"
-## Maps the host can pick in the lobby (names and scene paths, same order).
-const MAP_NAMES: Array[String] = ["Test Range"]
-const MAP_PATHS: Array[String] = [DEFAULT_MAP_PATH]
+## Maps the host can pick in the lobby (the first is the default).
+const MAP_LIST: MapList = preload("res://data/maps/map_list.tres")
 const GAME_WAIT_FRAMES: int = 600 ## Host: give up sending lobby peers in if the match never loads.
 
 var player_names: Dictionary[int, String] = {}
@@ -120,7 +119,7 @@ func server_start_match(kill_target: int, minutes: float, map_index: int) -> voi
 		if peer_id != 1:
 			lobby_peers.append(peer_id)
 	Match.configure(kill_target, minutes)
-	map_path = MAP_PATHS[clampi(map_index, 0, MAP_PATHS.size() - 1)]
+	map_path = MAP_LIST.get_map(map_index).scene_path
 	get_tree().change_scene_to_file(GAME_PATH)
 	for i: int in GAME_WAIT_FRAMES:
 		if Game.find(get_tree()) != null:

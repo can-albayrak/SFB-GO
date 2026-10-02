@@ -201,9 +201,9 @@ func _build_settings_panel() -> Control:
 		_minutes_spin.max_value = MAX_MINUTES
 		_minutes_spin.value = Net.lobby_minutes
 		_map_option = OptionButton.new()
-		for map_name: String in Net.MAP_NAMES:
-			_map_option.add_item(map_name)
-		_map_option.selected = clampi(Net.lobby_map_index, 0, Net.MAP_NAMES.size() - 1)
+		for map_def: MapDef in Net.MAP_LIST.maps:
+			_map_option.add_item(_map_label(map_def))
+		_map_option.selected = clampi(Net.lobby_map_index, 0, Net.MAP_LIST.maps.size() - 1)
 		row.add_child(_field("KILLS", _kills_spin))
 		row.add_child(_field("MINUTES", _minutes_spin))
 		row.add_child(_field("MAP", _map_option))
@@ -242,7 +242,13 @@ func _refresh() -> void:
 	if _kills_value != null:
 		_kills_value.text = str(Net.lobby_kill_target)
 		_minutes_value.text = str(roundi(Net.lobby_minutes))
-		_map_value.text = Net.MAP_NAMES[clampi(Net.lobby_map_index, 0, Net.MAP_NAMES.size() - 1)]
+		_map_value.text = _map_label(Net.MAP_LIST.get_map(Net.lobby_map_index))
+
+
+func _map_label(map_def: MapDef) -> String:
+	if map_def.players_hint.is_empty():
+		return map_def.display_name
+	return "%s  (%s)" % [map_def.display_name, map_def.players_hint]
 
 
 func _player_row(peer_id: int, is_me: bool, is_last: bool) -> Control:

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MapDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/map_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"test_range"
+display_name = "Test Range"
+scene_path = "res://scenes/maps/test_range.tscn"
+players_hint = "practice"
