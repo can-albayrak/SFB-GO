@@ -2,24 +2,30 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 7 – Harita blockout (AVM), başlanmadı. Aşama 6 kapandı (2026-10-01). Modeller (aşama 8) Can'la birlikte. Görsel geçişin ilk turu (UI, atmosfer, birinci şahıs gövde) yapıldı. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
-**Son güncelleme:** 2026-10-01
+**Şu anki aşama:** 7 – Harita blockout (AVM): yazıldı ve headless doğrulandı, **Can oynamadı**. Aşama 6 kapandı (2026-10-01). Modeller (aşama 8) Can'la birlikte. Görsel geçişin ilk turu (UI, atmosfer, birinci şahıs gövde) yapıldı. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
+**Son güncelleme:** 2026-10-02
 
 ## Sıradaki oturum
 
-**Durum:** Tek dal `main`. Aşama 5 kapandı: Godot'ta headless doğrulandı, Can oynadı (Cheetah, hareket, lobi iki pencere, Hawk parlaması), aşama sonu bağımsız inceleme yapıldı ve bulgular düzeltildi. Smoke test 88/0, ağ testi lobi + geç katılma 0 hata.
+**Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
-0. **Aşama 7 – AVM blockout:** GDD "Harita tasarım kuralları" (64×48 m, atrium + halka koridor, 2 kat + çatı, otopark; 10–12 spawn, 3 airdrop, 5–6 pickup). Kodda gerekenler: basamak çıkma (step-up), lobide harita listesi, mankensiz maç haritası. Modeller (aşama 8) Can'la, Blender ile.
+0. **Aşama 7 – Can'ın oynama testi (evde):**
+   - Lobide harita listesi: "Mall (4-10)" varsayılan, "Test Range" ikinci.
+   - AVM'de tek başına tur: yürüyen merdivenler, iç merdivenler (market ve mağaza), çatı merdiveni, yangın merdiveni, balkon merdiveni, yükleme rampası. Takılma, havaya kalkma, kamera zıplaması var mı?
+   - Test Range'de yeni merdiven alanı (x −36 ile −26, z −17 ile −28): kaldırım, 0,15 / 0,3 / 0,4 m tekli basamaklar, 2 m'lik merdiven, çıkılmaması gereken 0,6 m'lik blok. Basamak çıkma hissi doğal mı, kamera yumuşak mı?
+   - Akış: bölge değiştirmek 5–10 sn mi, yemek katı koridorunda Hawk çok mu güçlü, çatı çok mu açık, spawn'lar adil mi, iki kişiyle (iki pencere) birbirini bulmak kolay mı?
+   - Notlar "Denge notları"na; yerleşim değişiklikleri `tools/maps/build_mall_blockout.py`'de yapılıp sahne yeniden üretilir.
+   - Testler geçince: aşama sonu bağımsız inceleme, aşama 7 kapanır (GDD'deki 10 kişi testi 4–6 kişiyle de sayılabilir, Can'ın kararı).
 0. **Görsel geçiş (sürüyor):** Can'ın oyunda bakıp yorumlaması: menüler, HUD, ekran filtresi, atmosfer, kollar/bacaklar. Sonra karakter ve silah modelleri (Blender), yüzler.
 1. ~~**Aşama 6 – Pickup'lar ve airdrop:**~~ yazıldı (aşağıda). Notlar: GDD'deki değerlerle (pickup 45 sn / 5–6 nokta, airdrop 3. dakikadan sonra her 2–3 dk, airdrop silahları). Host-authoritative: pickup/airdrop kararları sadece host. Airdrop silahlarının `.tres`'inde `kill_ammo_reward = false`. Test haritasına geçici pickup / airdrop noktaları; yeni testler `smoke_test` ve `net_test`'e.
 2. **Paralelde (Can hazır olunca) Blender:** karakter yüzü denemesi (Avaturn GLB → sadece kafa, poligon azaltma, 512 px doku; ham dosyalar `private_assets/`), AVM adayı [Suburban Mall 1980](https://sketchfab.com/3d-models/suburban-mall-1980-edcfb6e9dc47439491ce865b8e9f54b3) kontrolü → `docs/ASSETS.md`.
 3. **Can'da bekleyen:** Bear ve Volcano'nun ayrıntılı oynanışı.
 
-**Doğrulama komutları:** `--import`, `res://tests/smoke_test.tscn`, `res://tests/net_test.tscn` (host önce, `--role=host` / `--role=client`, `+ --late`). Büyük bir pull'dan sonra ana klasörde önce `--import` (yoksa eski `.godot` önbelleği yüzünden menü scripti derlenmez, butonlar çalışmaz).
+**Doğrulama komutları:** `--import`, `res://tests/smoke_test.tscn`, `res://tests/movement_test.tscn` (basamaklar, merdivenler, AVM rampaları, çatıdan atlama), `res://tests/map_test.tscn` (her haritada spawn / pickup / airdrop noktaları, navmesh ile yürüyerek ulaşılabilirlik, yüksek katlara en az iki yol), `res://tests/net_test.tscn` (host önce, `--role=host` / `--role=client`, `+ --late`; lobi yolu artık AVM'de koşar). AVM sahnesini yeniden üretmek: `python tools/maps/build_mall_blockout.py` (`--preview KLASÖR` ile katların üstten PNG'si, Pillow gerekir). Büyük bir pull'dan sonra ana klasörde önce `--import` (yoksa eski `.godot` önbelleği yüzünden menü scripti derlenmez, butonlar çalışmaz).
 
 **Henüz yazılmayan kararlar:** yüz seçimi (aşama 8, yüzler gelince), HUD/menü yeni tasarımı (aşama 9; tasarım taslağı "SFB:GO HUD ve Menü": HUD beğenildi, menüler sade nötr gri; GDD "Görsel referans").
 
-**Notlar:** Harita blockout'u aşama 7 (4–6 kişi ölçeği GDD'de). Dosya başına ~500–560 satır yeterli; `player.gd` 567.
+**Notlar:** Dosya başına ~500 satır hedefi; `player.gd` 660 ve `hud.gd` 629 satır (bölünmesi gerekebilir).
 
 ## Aşamalar
 
@@ -34,7 +40,7 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | 4 | Sınıf altyapısı: loadout menüsü, Resource tabanlı sınıf/silah/güç sistemi | ⏳ Devam ediyor |
 | 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ✅ Bitti (2026-10-01) |
 | 6 | Pickup'lar ve airdrop | ✅ Bitti (2026-10-01) |
-| 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | Bekliyor |
+| 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | ⏳ Blockout yazıldı, headless doğrulandı; oynama testi bekliyor |
 | 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | ⏳ Atmosfer, ekran filtresi, birinci şahıs gövde (yer tutucu) yapıldı; modeller bekliyor |
 | 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | ⏳ Menü/HUD yeni tasarımı ve grafik ayarları yapıldı |
 
@@ -139,6 +145,29 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Can'ın oynama testi: "güzel, gayet iyi". Düzeltilen: kasanın içinden geçiliyordu (inince katı, dünya katmanı), dürbünde görüş kendiliğinden aşağı kayıyordu (yavaş silahlarda geri tepmenin geri inişi tüm atış aralığını bekliyordu; artık en fazla 0,2 sn)
 - [x] Aşama sonu bağımsız kod incelemesi. Düzeltilenler: havada / haritadan düşerek ölen taşıyıcının silahı ulaşılamaz yerde kalıyordu (artık zemine iner, düşüşte kaybolur), Minigun HUD sayacı geri zıplıyordu ve sonda hayalet atışlar vardı (sahibin sayısı geri artmaz), maç yeniden başlayınca alınmış pickup'lar eksik kalıyordu, Double Jump yere inerken buffer'lı bunny hop'u yiyordu, maç sonu ekranında kasa açma barı doluyordu. Minigun ısınmasının host kontrolü bilinen sorun
 
+## Aşama 7 – Harita blockout (AVM)
+
+- [x] Basamak çıkma (`Movement._move_and_step`): duvara takılınca "yukarı, ileri, aşağı" denemesi, `MovementDef.step_height` 0,4 m (`standard.tres`). Kapsülün yuvarlak altı basamak kenarına değdiği için üst yüzey kısa bir ışınla kontrol edilir; en az 0,15 m ileri gidilir (kenarda asılı kalmaz); göz yüksekliği yükselme kadar indirilip yumuşakça geri gelir. Zemine yapışma (floor snap) da 0,4 m: merdiven inerken havalanma yok. Charge ve Dash da basamak çıkar.
+- [x] Harita kuralı: **merdivenler görsel basamak + görünmez rampa çarpışması** (CS haritaları gibi); arka arkaya sığ basamakta kapsül iki kenar arasında titriyordu. Rampanın üst ucu bağlandığı döşemenin kenarına tam oturur: arada 0,1 m'lik dışbükey kenar kalırsa floor snap tutmaz, inen oyuncu havalanır.
+- [x] Harita listesi: `MapDef` / `MapList` (`data/maps/map_list.tres`: Mall, Test Range), lobide "Mall (4-10)", `Net.MAP_LIST` (eski `MAP_NAMES` / `MAP_PATHS` kaldırıldı). Mankenler sadece Test Range'de.
+- [x] AVM blockout (`scenes/maps/mall/mall.tscn`, `tools/maps/build_mall_blockout.py` ile üretilir, 290 kutu):
+  - **Bina:** 64×48 m, zemin 0 m, üst kat 5 m, çatı 10 m.
+  - **Avlu:** 20×14 m, iki kat boyunca açık; çatıda tavan penceresi (içine atlanır, airdrop düşer). Etrafında halka koridor, üst katta korkuluklu galeri. Avluda kuru fıskiye, iki kiosk, saksılar, iki yürüyen merdiven.
+  - **Kuzey:** zemin ve üst katta 4'er dükkân; zemin dükkânların arkasında dar servis koridoru (Bear/Volcano).
+  - **Güney:** zeminde 2 dükkân ve giriş koridoru; üst katta binayı boydan boya geçen yemek katı koridoru (Hawk), tezgâhlar ve masalar kırıcı siper.
+  - **Batı:** zeminde market rafları ve kasalar, iç merdiven; üst katta depo salonu ve ofisler.
+  - **Doğu:** iki katlı mağaza, iç merdiven, çatı merdiveni.
+  - **Dışarısı:** doğuda otopark (arabalar, bariyerler, gişe) ve yemek katına çıkan balkon merdiveni; batıda yükleme rampası, konteynerler ve çatıya kadar çıkan yangın merdiveni; kuzey ve güney dış şeritler (bina etrafında tur).
+  - **Çit:** site 110×64 m, 3 m çit; çit hattında 60 m'lik görünmez duvar (çatıdan bhop'la atlayan çiti aşıyordu; kanca da üstüne yetişemez).
+  - **Noktalar:** 12 spawn (her bölge ve kat); 6 pickup (3 Health dar yerlerde, Speed avlu ve otoparkta, Double Jump çatıda); 4 airdrop noktası (avlunun tavan penceresi altı, otopark, çatı, yükleme alanı).
+- [x] Headless testler:
+  - `movement_test` 45/0.
+  - `map_test` 143/0: en uzun yürüme Spawn3 → Spawn12 127 m = 19,2 sn; çatıya 2, üst kata 6 yol var ve her biri tek tek kaldırılınca bile oralara ulaşılıyor.
+  - Smoke 113/0.
+  - Ağ testi: lobi 29 + 26 (AVM'de), geç katılma 28 + 27.
+- [ ] **Can'ın oynama testi** (yukarıdaki liste)
+- [ ] Aşama sonu bağımsız kod incelemesi
+
 ## Tasarım geçişi (2026-10-01) — bitti
 
 İş bilgisayarında yazıldı (Godot yoktu); evde Godot 4.7.2 headless ile doğrulandı, Can oynadı, aşama 5 ile kapandı. Kamera hissi, Settings ve vuruş hissi için ayrıca yorum gelmedi; oynadıkça ayarlanır.
@@ -176,7 +205,10 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Ölüm ekranındaki "öldürenin kalan canı" kill ödülünden önceki can.
 - Aşama 6 notu: airdrop silahlarının `.tres`'inde `kill_ammo_reward = false` olmalı (varsayılan true).
 - Geç katılma loadout ekranında Esc oyundan çıkar (henüz oyuncu yok, pause menüsü yok).
-- Tek harita hâlâ test_range (mankenli). Mankensiz maç haritası aşama 7'de (mall).
+- AVM blockout oynanmadı: akış, siper yoğunluğu ve görüş hatları sadece kâğıt üstünde (navmesh testi yürünebilirliği doğrular, oynanışı değil). Işık yok (ortam ışığı + güneş); iç mekân karanlık görünebilir (aşama 8: LightmapGI).
+- Basamak çıkma: tek basamaktan inerken kenardan kısa bir düşüş olur (~0,1 sn, iniş çökmesi). Yavaş yürürken basamağa değince en az 0,15 m ileri atılır; eğilerek kaldırıma yürürken küçük bir sıçrama hissedilebilir.
+- AVM'nin görünmez site duvarı mermi ve bombaları da durdurur (site dışında kimse yok); kanca da ona takılabilir (çit hattında, 40 m menzil içindeyse).
+- `map_test` navmesh'i CSG'nin render mesh'inden çıkarır (Godot uyarısı: "had to parse RenderingServer meshes"); sadece testte, oyunda navmesh yok.
 - Bear'ın yakın dövüş silahlarıyla Bear'a karşı TTK hedefin üstünde (1,5–2,4 sn); sadece hız cezası istendiği için hasarlara dokunulmadı.
 - Decoy sadece görsel: vurulamaz, kurşun içinden geçer (GDD "hologram" diyor; istenirse hitbox eklenir).
 - Marksman Rifle şimdilik Burst Rifle modelini kullanıyor (yer tutucu, aşama 8).
@@ -248,3 +280,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-01 | 6 | Can'ın testi olumlu. Kasa katı oldu; dürbünde gecikmeli geri tepme inişi (görüş kendiliğinden aşağı kayma) düzeldi. |
 | 2026-10-01 | 6 → 7 | Aşama 6 sonu bağımsız inceleme: 5 düzeltme (havada ölen taşıyıcının silahı zemine iner, Minigun sayacı, pickup'lar maç başında sıfırlanır, Double Jump bunny hop'u yemez, maç sonunda kasa açılmaz). **Aşama 6 kapandı.** |
 | 2026-10-02 | 7 | Bıçak: büyük model, 0,2 m isabet yarıçapı, daha hızlı ve düz atış. Smoke 113/0. Yarın/bugün: aşama 7 (AVM) ve modeller. |
+| 2026-10-02 | 7 | (iş bilgisayarı, Godot 4.7.2 headless, oynanmadı) Silah modeli adayları `ASSETS.md`'ye (Sketchfab, Falxxx PS1 serisi; söküm modeller arkadaş sürümünde serbest). Basamak çıkma + floor snap, merdiven = görsel basamak + rampa, harita listesi (`MapDef`), AVM blockout üreteci ve sahnesi, görünmez site duvarı. `movement_test` 45/0, `map_test` 143/0, smoke 113/0, ağ testi 0 hata. Can'ın evde oynama testi bekliyor. |

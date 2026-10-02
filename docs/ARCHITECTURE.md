@@ -32,11 +32,12 @@ sfb-go/
 ├── data/
 │   ├── classes/             # ClassDef .tres (wolf, hawk, bear, cheetah, volcano) + roster.tres
 │   ├── camera/              # CameraFeelDef .tres (default.tres: FOV kayması, head bob, iniş, slide, sarsıntı)
-│   ├── movement/            # MovementDef .tres (standard.tres: ivme, zıplama, bhop, slide, coyote)
+│   ├── maps/                # MapDef .tres (mall, test_range) + map_list.tres (lobi sırası, ilki varsayılan)
+│   ├── movement/            # MovementDef .tres (standard.tres: ivme, zıplama, bhop, slide, coyote, basamak)
 │   ├── weapons/             # WeaponDef .tres
 │   └── abilities/           # AbilityDef .tres
 ├── scripts/
-│   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd, camera_feel_def.gd
+│   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd, camera_feel_def.gd, map_def.gd, map_list.gd
 │   ├── game/                # game.gd (maç sahnesi: harita, spawn, respawn), lag_compensator.gd
 │   ├── player/              # player.gd + bileşenler (player_net_sync, player_requests, player_status, player_effects), movement.gd, camera_feel.gd, first_person_legs.gd, first_person_arms.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
@@ -55,13 +56,16 @@ sfb-go/
 │   ├── ui/
 │   └── maps/
 │       ├── test_range.tscn  # Test haritası + hedef mankenleri
-│       └── mall/            # İlk gerçek harita
+│       └── mall/mall.tscn   # AVM blockout (tools/maps/build_mall_blockout.py üretir)
 ├── tests/                   # Headless otomatik testler (komutlar dosyaların başında)
 │   ├── smoke_test.tscn      # Tek process: her sınıf/silah/güç mankene, kill ödülü, UI panelleri
+│   ├── movement_test.tscn   # Gerçek Movement: basamaklar, merdivenler, AVM rampaları, çatıdan atlama
+│   ├── map_test.tscn        # Her harita: spawn/pickup/airdrop noktaları, navmesh ile ulaşılabilirlik, yüksek katlara 2+ yol
 │   ├── net_test.tscn        # İki process, gerçek ENet: --role=host / --role=client (+ --late)
 │   └── ui_preview.tscn      # Sahte veriyle tek ekran (--screen=lobby|loadout|range|death|scoreboard|down|walk|slide); --write-movie ile kare yakalanır
 ├── tools/                   # .gdignore; oyun dışı araçlar
-│   └── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
+│   ├── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
+│   └── maps/build_mall_blockout.py     # AVM blockout sahnesini üretir (Python; --preview ile kat PNG'leri)
 └── assets/
     ├── models/              # characters/soldier.glb, weapons/*.glb (Blender'da +Y ileri = Godot -Z)
     ├── textures/
@@ -93,7 +97,7 @@ sfb-go/
 
 - `scenes/game.tscn` (`/root/Game`, `scripts/game/game.gd`): maç sahnesi. `Net.map_path` haritasını `Map` adıyla yükler (her peer'da aynı yol), `HUD`, `Players` ve `PlayerSpawner` içerir. Haritalar sadece geometri + `SpawnPoints` (Marker3D) + harita nesneleri (mankenler).
 - **Host:** `Net.host_game()` → ENet server (port 7777) → `lobby.tscn` (komut satırı `--host`: `use_lobby = false`, doğrudan `game.tscn`). **Client:** `Net.join_game()` → bağlanınca adres `Settings.last_host`'a kaydedilir, `_request_register(name)` → host lobi açıksa `_welcome_lobby()` (client `lobby.tscn` yükler), maç sürüyorsa `_welcome(map_path)` → client `game.tscn` yükler → `Game._request_spawn()`.
-- **Lobi (`Net.in_lobby`):** oyuncu listesi, isim, hazır durumu (`_request_ready` → host `ready_peers` → `_on_lobby_synced` herkese), boş yüz yeri (aşama 8). Host kill/dakika/harita seçer (`server_set_lobby_settings`, `Net.MAP_NAMES/MAP_PATHS`) ve Start der: `server_start_match` → `Match.configure` → host `game.tscn` yükler, kendi `Game`'i hazır olunca lobideki her peer'a mevcut `_welcome`'ı gönderir. Yani lobiden gelenler geç katılanla aynı yoldan girer; `Game` ve `Match` lobiden habersizdir.
+- **Lobi (`Net.in_lobby`):** oyuncu listesi, isim, hazır durumu (`_request_ready` → host `ready_peers` → `_on_lobby_synced` herkese), boş yüz yeri (aşama 8). Host kill/dakika/harita seçer (`server_set_lobby_settings`, `Net.MAP_LIST` = `data/maps/map_list.tres`, indeks) ve Start der: `server_start_match` → `Match.configure` → host `game.tscn` yükler, kendi `Game`'i hazır olunca lobideki her peer'a mevcut `_welcome`'ı gönderir. Yani lobiden gelenler geç katılanla aynı yoldan girer; `Game` ve `Match` lobiden habersizdir.
 - Host, sahnesi yüklenmiş peer'ları `Net.ingame_peers`'te tutar. Oyun RPC'leri sadece bunlara gider (`Net.broadcast(node, method, args)`), yüklenmekte olan client "node not found" almaz. Hareket yayını (`Net.state_peers`) katılımdan 0,5 sn sonra başlar; unreliable paketler reliable spawn paketlerini geçmesin diye. Geç katılana mankenlerin canı `sync_to_peer` ile gönderilir.
 - Maç kuralları `Match.rules` (`MatchDef`, `data/match/default.tres`): kill hedefi, süre, respawn, spawn koruması, sonuç ekranı süresi. Host lobide kill/dakika seçer (`Match.configure`). Test Range `Match.configure_test_range()` → `data/match/test_range.tres`: limit yok, `infinite_ammo` (Weapon şarjör düşmez), `ability_cooldowns = false` (`Ability.get_cooldown()` 0).
 
@@ -274,7 +278,20 @@ Bileşenler sahnede sabit düğümler: RPC'leri her peer'da aynı yolda (`Player
 - **Affedicilik:** jump buffer (`jump_buffer_time`) ve coyote time (`coyote_time`: kenardan düştükten kısa süre sonra zıplama).
 - **Slide:** Yerdeyken ve hız eşiğin üstündeyken Ctrl (düz ileri) → kısa süreli düşük sürtünmeli kayma, alçak kapsül. Slide'dan zıplamada (`slide_jump_keeps_speed`) hız 1,3 tavanına kırpılmaz, korunur (kazanç yok; aynı tick'te başlayan slide sayılmaz).
 - **Crouch:** Kapsül ve kamera alçalır, hız düşer. Havada crouch = crouch-jump (kasalara çıkış).
+- **Basamak çıkma (`_move_and_step`):** `move_and_slide` duvara (normal y < 0,7) takılırsa başlangıçtan "yukarı `step_height`, ileri, aşağı" denenir. Üst yüzey kısa bir ışınla kontrol edilir, çünkü kapsülün yuvarlak altı basamağın kenarına eğik temas eder. İleri adım en az `STEP_MIN_FORWARD` (0,15 m), böylece kapsül kenarda asılı kalmaz. Göz yükselme kadar indirilir ve `_update_eye` ile yumuşakça geri gelir. Sadece yerdeyken ve yukarı hız yokken çalışır (zıplarken değil); Charge ve Dash de kullanır. `floor_snap_length` = `step_height`, merdiven ve rampa inerken ayak yerde kalır.
 - Değerler `data/movement/standard.tres` (`MovementDef`, `ClassDef.movement`) dosyasında; koşu hızı sınıfın `move_speed` değeri. Hareket sadece sahip peer'da çalışır.
+
+### Haritalar
+
+- `MapDef` (`id`, `display_name`, `scene_path`, `players_hint`), `MapList` (`data/maps/map_list.tres`; lobi sırası, ilki varsayılan). Host indeksi seçer, `Net.server_start_match` yolu `map_path` olarak herkese gönderir. Komut satırı `--host` ve Test Range `Net.DEFAULT_MAP_PATH` (test_range) kullanır.
+- Harita sahnesi: `Geometry` (çarpışmalı her şey, katman 1: hareket, mermi, kanca, basamak çıkma görür), `SpawnPoints` (Marker3D, yaw = bakış), `Pickups` (`pickup.tscn` + `PickupDef`), `AirdropPoints` (Marker3D; üstü 40 m açık olmalı, kasa oradan düşer). Mankenler sadece Test Range'de.
+- **Yapım kuralları** (`map_test` ve `movement_test` bunları denetler):
+  - Merdiven = görsel basamaklar (çarpışmasız) + görünmez rampa çarpışması. Arka arkaya sığ basamaklarda kapsül iki kenar arasında takılır.
+  - Rampanın üst ucu bağlandığı döşemenin kenarına tam oturur. Aradaki küçük dışbükey kenarda floor snap tutmaz, inen oyuncu havalanır. Alt ucu zeminin içine uzanır.
+  - Tek basamak, kaldırım ve eşik ≤ 0,4 m (basamak çıkma); daha yüksekler zıplama / crouch-jump ister (crouch-jump ~1,4 m).
+  - Çatıdan bhop hızıyla atlayan çiti aşmasın: site sınırında yüksek görünmez duvar (StaticBody3D + BoxShape3D, mesh yok; gizli CSG kullanılmaz).
+  - Her yüksek noktaya en az iki yol: `map_test.ALTERNATE_ROUTES`'ta harita başına listelenir, her yol tek tek kaldırılıp navmesh yeniden çıkarılır.
+- **AVM:** `tools/maps/build_mall_blockout.py` yerleşimi koddan üretir (CSGBox3D, `use_collision`). Yerleşim oturana kadar değişiklik orada yapılır ve sahne yeniden üretilir; sonra sahne elle düzenlenip üreteç bırakılabilir. Eksenler: x doğu, z güney; bina x −32..32, z −24..24; katlar 0 / 5 / 10 m.
 
 ## Fizik katmanları
 
