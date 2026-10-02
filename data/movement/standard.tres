@@ -24,3 +24,4 @@ slide_duration = 1.1
 slide_cooldown = 0.9
 slide_max_speed_mult = 1.55
 slide_jump_keeps_speed = true
+step_height = 0.4

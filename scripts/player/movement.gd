@@ -23,6 +23,14 @@ const DASH_STUCK_SPEED: float = 2.0 ## Dash ends early when a wall stops us belo
 const DASH_STUCK_GRACE: float = 0.05
 const FLOOR_PROBE_MIN: float = 0.15 ## Metres: a floor this close below always counts as landing.
 const GRAPPLE_ACCEL: float = 40.0 ## m/s^2 toward the pull speed, so the start is not a hard snap.
+const STEP_WALL_NORMAL_Y: float = 0.7 ## Contacts steeper than this (walls, stair faces) may be stepped over.
+const STEP_MIN_RISE: float = 0.02 ## Metres: smaller rises are left to the capsule sliding.
+const STEP_MIN_GAIN: float = 0.01 ## Metres: the step must get further than sliding along the wall did.
+const STEP_PROBE_INSET: float = 0.03 ## Metres past the step's edge where its top is checked.
+const STEP_PROBE_HEIGHT: float = 0.05
+## Metres: a step moves at least this far forward, so the capsule ends over the step
+## instead of perched on its edge (a tilted contact that is not floor).
+const STEP_MIN_FORWARD: float = 0.15
 
 ## Touched the ground after being in the air (camera landing dip).
 signal landed(fall_speed: float)
@@ -131,8 +139,75 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 		hvel = _air_accelerate(hvel, wish_dir, wish_speed, delta)
 
 	body.velocity = Vector3(hvel.x, vel.y, hvel.z)
-	body.move_and_slide()
+	_move_and_step(on_floor and vel.y <= 0.0)
 	_update_eye(delta)
+
+
+## move_and_slide, then: walking into something low (a stair, a kerb) retries the move
+## raised by up to def.step_height and sets the body down on top of it. The eye is lowered
+## by the rise, so the camera climbs smoothly instead of popping up.
+func _move_and_step(grounded: bool) -> void:
+	body.floor_snap_length = def.step_height # Feet stay on the floor walking down stairs.
+	var start: Transform3D = body.global_transform
+	var vel: Vector3 = body.velocity
+	body.move_and_slide()
+	if not grounded or def.step_height <= 0.0 or not _hit_wall():
+		return
+	var motion := Vector3(vel.x, 0.0, vel.z) * get_physics_process_delta_time()
+	if motion.length_squared() < 0.000001:
+		return
+	if motion.length() < STEP_MIN_FORWARD:
+		motion = motion.normalized() * STEP_MIN_FORWARD
+	var offset: Vector3 = _find_step(start, motion)
+	if offset == Vector3.INF:
+		return
+	var dir: Vector3 = motion.normalized()
+	var slid: Vector3 = body.global_position - start.origin
+	if offset.dot(dir) - slid.dot(dir) < STEP_MIN_GAIN:
+		return
+	body.global_position = start.origin + offset
+	body.velocity = Vector3(vel.x, 0.0, vel.z) # The wall contact took speed away; the step keeps it.
+	_eye_height -= offset.y
+
+
+func _hit_wall() -> bool:
+	for i: int in body.get_slide_collision_count():
+		if body.get_slide_collision(i).get_normal().y < STEP_WALL_NORMAL_Y:
+			return true
+	return false
+
+
+## Up, forward, down from `start`. Returns the offset to stand on the step, or INF when
+## there is no headroom, the obstacle is too high, or there is no walkable top.
+func _find_step(start: Transform3D, motion: Vector3) -> Vector3:
+	var hit := KinematicCollision3D.new()
+	var up: Vector3 = Vector3.UP * def.step_height
+	if body.test_move(start, up, hit):
+		up = hit.get_travel()
+		if up.y < STEP_MIN_RISE:
+			return Vector3.INF
+	var raised: Transform3D = start.translated(up)
+	if body.test_move(raised, motion):
+		return Vector3.INF
+	var ahead: Transform3D = raised.translated(motion)
+	if not body.test_move(ahead, Vector3.DOWN * up.y, hit):
+		return Vector3.INF
+	if not _is_walkable_top(hit.get_position(), motion.normalized()):
+		return Vector3.INF
+	var offset: Vector3 = up + motion + hit.get_travel()
+	if offset.y < STEP_MIN_RISE:
+		return Vector3.INF
+	return offset
+
+
+## The rounded capsule bottom lands on the step's edge, so the contact normal is tilted
+## even on a flat stair. A short ray just past the contact finds the real top surface.
+func _is_walkable_top(contact: Vector3, dir: Vector3) -> bool:
+	var from: Vector3 = contact + dir * STEP_PROBE_INSET + Vector3.UP * STEP_PROBE_HEIGHT
+	var to: Vector3 = from + Vector3.DOWN * STEP_PROBE_HEIGHT * 2.0
+	var query := PhysicsRayQueryParameters3D.create(from, to, body.collision_mask, [body.get_rid()])
+	var result: Dictionary = body.get_world_3d().direct_space_state.intersect_ray(query)
+	return not result.is_empty() and (result.normal as Vector3).y >= cos(body.floor_max_angle)
 
 
 ## Falling onto a floor within the jump buffer: that press is a buffered landing hop
@@ -235,12 +310,13 @@ func _step_charge(delta: float) -> void:
 	var vel: Vector3 = body.velocity
 	vel.x = _charge_dir.x * _charge_speed
 	vel.z = _charge_dir.z * _charge_speed
-	if body.is_on_floor():
+	var grounded: bool = body.is_on_floor()
+	if grounded:
 		vel.y = maxf(vel.y, 0.0)
 	else:
 		vel.y -= def.gravity * delta
 	body.velocity = vel
-	body.move_and_slide()
+	_move_and_step(grounded and vel.y <= 0.0)
 	if _charge_time > CHARGE_STUCK_GRACE and Vector2(body.get_real_velocity().x, body.get_real_velocity().z).length() < CHARGE_STUCK_SPEED:
 		_charge_left = 0.0 # Ran into a wall.
 	_update_eye(delta)
@@ -250,7 +326,7 @@ func _step_dash(delta: float) -> void:
 	_dash_left -= delta
 	_dash_time += delta
 	body.velocity = _dash_velocity
-	body.move_and_slide()
+	_move_and_step(body.is_on_floor())
 	var real: Vector3 = body.get_real_velocity()
 	if _dash_time > DASH_STUCK_GRACE and Vector2(real.x, real.z).length() < DASH_STUCK_SPEED:
 		_dash_left = 0.0 # Ran into a wall.

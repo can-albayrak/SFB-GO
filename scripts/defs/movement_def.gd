@@ -33,3 +33,8 @@ extends Resource
 @export var slide_max_speed_mult: float = 1.55 ## Slide boost may exceed the bhop cap up to base * this.
 ## Jumping out of a slide keeps the current speed (no gain) instead of clamping to the bhop cap.
 @export var slide_jump_keeps_speed: bool = false
+
+@export_group("Steps")
+## Walking into anything up to this high (stairs, kerbs) climbs onto it; the camera follows smoothly.
+## Also how far the feet stick to the floor walking down stairs. 0 = off.
+@export var step_height: float = 0.0
