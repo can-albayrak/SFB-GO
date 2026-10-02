@@ -60,6 +60,17 @@ func clear_snapshots() -> void:
 	_has_render_time = false
 
 
+## Velocity from the two newest snapshots (remote players have no simulated velocity).
+func get_latest_velocity() -> Vector3:
+	if _snapshots.size() < 2:
+		return Vector3.ZERO
+	var a: Snapshot = _snapshots[_snapshots.size() - 2]
+	var b: Snapshot = _snapshots[_snapshots.size() - 1]
+	if b.time <= a.time:
+		return Vector3.ZERO
+	return (b.position - a.position) / (b.time - a.time)
+
+
 ## Remote peers, every frame: places the body ~INTERP_DELAY in the past.
 func interpolate(delta: float) -> void:
 	if _snapshots.is_empty():

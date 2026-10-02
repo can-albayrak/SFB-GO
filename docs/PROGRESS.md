@@ -242,6 +242,9 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya.
 
+- 2026-10-02 (Can): Bear çok zayıf. Can 175 → 200; Chainsaw hasar 7 → 11 (70 → 110 DPS), taşırken hız %75 → %85; Claws erişim 1,7 → 2,0 m; Sledgehammer erişim 2,3 → 2,6 m, aralık 1,1 → 0,95 sn; Charge bekleme 12 → 8 sn; Shield 12 → 10 sn. Can'la birlikte oynanıp tekrar bakılacak.
+- 2026-10-02 (Can): Q bombaları ve fırlatma bıçağı "düzgün gitmiyor": artık sağ elden çıkıp nişangah noktasına gidiyor ve koşu hızını taşıyor (testte 10 m'ye nişanlı frag dururken 12,3 m'de, koşarken 17,4 m'de patladı; bıçak 15 m'de mankene isabet). Değer değişmedi, sadece fırlatma yolu.
+
 - 2026-10-01 (Can, ilk test): Cheetah zor kontrol ediliyor, zıplarken akıyor, havada çok yön değişiyor. Serbest hava ivmesi 10 → 3 (`MovementDef.air_control_accel`, `standard.tres`, tüm sınıflar). Can: "daha iyi, gayet iyi".
 - 2026-10-02 (Can): Fırlatma bıçağı küçük ve çok yaylı geliyordu: model ~1,6×, isabet yarıçapı 0,2 m (`projectile_radius`), hız 24 → 34 m/s, kaldırma 2 → 0,8, yerçekimi 14 → 7 (`throw_gravity`).
 - 2026-10-01 (Can, ikinci tur): Dash 0,15 sn × 18 m/s → 0,25 sn × 22 m/s (2,7 → 5,5 m). Shotgun şarjörü 6 → 8. Grenade Launcher hasarı 95 → 81 (−%15). Mayın tetik yarıçapı 0,8 → 1,3 m, modeli ~1,7× büyüdü. Dürbünde hareket isabetsizliği: Heavy Rifle `move_spread` 3 → 6, Marksman 2 → 3,5 (CS gibi; dürbünde yürürken görüntü de bulanıklaşır).
@@ -283,3 +286,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-02 | 7 | Bıçak: büyük model, 0,2 m isabet yarıçapı, daha hızlı ve düz atış. Smoke 113/0. Yarın/bugün: aşama 7 (AVM) ve modeller. |
 | 2026-10-02 | 7 | (iş bilgisayarı, Godot 4.7.2 headless, oynanmadı) Silah modeli adayları `ASSETS.md`'ye (Sketchfab, Falxxx PS1 serisi; söküm modeller arkadaş sürümünde serbest). Basamak çıkma + floor snap, merdiven = görsel basamak + rampa, harita listesi (`MapDef`), AVM blockout üreteci ve sahnesi, görünmez site duvarı. `movement_test` 45/0, `map_test` 143/0, smoke 113/0, ağ testi 0 hata. Çıkışta airdrop silahı düşer, geç katılmada Esc pause açar. Can'ın evde oynama testi bekliyor. |
 | 2026-10-02 | 7 | Evde pull + doğrulama: import temiz, smoke 113/0, map 143/0, ağ testi (lobi + geç katılma) 0 hata. movement_test merdiven-iniş kontrolü kaldırımın kenarından düşmeyi de sayıyordu (bilinen ~0,1 sn düşüş, tek basamak testinde ayrıca var); hedef kaldırımın üstüne çekildi, 45/0. Oyun Can'ın denemesi için açıldı. |
+| 2026-10-02 | 7 | Can'ın isteği: Bear güçlendirildi (yukarıda), fırlatmalar elden + nişangaha + koşu hızı taşıyor, Test Range'de her an sınıf değişimi ve Esc'te kalıcı "UNLIMITED ABILITIES" anahtarı (varsayılan kapalı). Smoke 113/0, movement 45/0, map 143/0, ağ testi 0 hata; fırlatma/sınıf değişimi ayrıca headless doğrulandı. |

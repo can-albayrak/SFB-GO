@@ -36,9 +36,11 @@ func configure(kill_target: int, time_limit_minutes: float) -> void:
 	rules.time_limit = time_limit_minutes * 60.0
 
 
-## Offline Test Range: no limits, endless magazines, abilities always ready.
+## Offline Test Range: no limits, endless magazines, any-time class swaps; abilities without
+## a cooldown when the player switched that on (Esc panel).
 func configure_test_range() -> void:
 	rules = TEST_RANGE_RULES.duplicate()
+	rules.ability_cooldowns = not Settings.practice_unlimited_abilities
 
 
 func has_time_limit() -> bool:

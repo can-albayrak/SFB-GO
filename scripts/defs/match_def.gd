@@ -22,4 +22,5 @@ extends Resource
 
 @export_group("Practice")
 @export var infinite_ammo: bool = false ## Magazines never empty (Test Range).
-@export var ability_cooldowns: bool = true ## False: abilities are always ready (Test Range).
+@export var ability_cooldowns: bool = true ## False: abilities are always ready (Test Range toggle, Settings.practice_unlimited_abilities).
+@export var loadout_swap_anytime: bool = false ## True: a loadout pick applies at once at any time, not only right after spawning (Test Range).

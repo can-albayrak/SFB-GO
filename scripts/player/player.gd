@@ -21,6 +21,14 @@ const SCOPE_FOV_LERP: float = 25.0 ## Per second; how fast the zoom eases in and
 const INTERP_DELAY: float = 0.1 ## Remote players are drawn this far in the past.
 const PROTECTION_BLINK_PERIOD: float = 0.25
 const FALL_WEAPON_NAME: String = "Fall"
+# Throws (get_throw_launch): hand offset from the eye as (right, up, forward) metres.
+const THROW_HAND_OFFSET: Vector3 = Vector3(0.18, -0.15, 0.4)
+const THROW_WALL_MARGIN: float = 0.1
+const THROW_AIM_RANGE: float = 80.0
+const THROW_MIN_AIM_DISTANCE: float = 2.0 ## Closer than this the throw just follows the view.
+const THROW_INHERIT: float = 1.0 ## Share of the thrower's horizontal run speed the throw keeps.
+const THROW_WORLD_MASK: int = 1
+const THROW_AIM_MASK: int = 1 | 2 # world | player bodies
 ## Weapon slot of a carried airdrop weapon (key 3); 0 / 1 are the loadout's guns.
 const SPECIAL_SLOT: int = 2
 
@@ -240,6 +248,34 @@ func get_zoom() -> float:
 	return current_weapon.def.scope_zoom if is_scoped and current_weapon != null else 1.0
 
 
+## Host: start point and velocity of a throw (grenades, sticky bombs, throwing knives).
+## It leaves the right hand (not the middle of the screen), flies through the crosshair point
+## from there, and carries the thrower's own run speed.
+## Returns [spawn: Vector3, velocity: Vector3].
+func get_throw_launch(origin: Vector3, dir: Vector3, speed: float, lift: float) -> Array:
+	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var right: Vector3 = dir.cross(Vector3.UP).normalized() if absf(dir.y) < 0.99 else global_basis.x
+	var up: Vector3 = right.cross(dir).normalized()
+	var spawn: Vector3 = origin + dir * THROW_HAND_OFFSET.z + right * THROW_HAND_OFFSET.x + up * THROW_HAND_OFFSET.y
+	# Never spawn on the far side of a thin wall the thrower is hugging.
+	var wall: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(origin, spawn, THROW_WORLD_MASK))
+	if not wall.is_empty():
+		spawn = (wall["position"] as Vector3) - (spawn - origin).normalized() * THROW_WALL_MARGIN
+	# Aim at what the crosshair is on, so a flat throw lands where you look.
+	var aim_query := PhysicsRayQueryParameters3D.create(origin, origin + dir * THROW_AIM_RANGE, THROW_AIM_MASK, get_hit_exclusions())
+	var aim_hit: Dictionary = space.intersect_ray(aim_query)
+	var target: Vector3 = aim_hit["position"] if not aim_hit.is_empty() else origin + dir * THROW_AIM_RANGE
+	var throw_dir: Vector3 = (target - spawn).normalized() if spawn.distance_to(target) > THROW_MIN_AIM_DISTANCE else dir
+	var carried: Vector3 = get_move_velocity()
+	carried.y = 0.0
+	return [spawn, throw_dir * speed + Vector3.UP * lift + carried * THROW_INHERIT]
+
+
+## Current movement velocity: simulated for our own player, estimated from snapshots otherwise.
+func get_move_velocity() -> Vector3:
+	return velocity if is_local else net_sync.get_latest_velocity()
+
+
 ## Own body and hitboxes, so our rays never hit ourselves.
 func get_hit_exclusions() -> Array[RID]:
 	return [get_rid(), head_hitbox.get_rid(), body_hitbox.get_rid(), leg_hitbox.get_rid()]
@@ -328,10 +364,10 @@ func server_use_special_round() -> void:
 
 
 ## Host: a validated loadout request. Within the first seconds after spawning it switches at
-## once (GDD), otherwise it waits for the next spawn.
+## once (GDD), otherwise it waits for the next spawn. Test Range: always at once.
 func server_choose_loadout(code: PackedInt32Array) -> void:
 	assert(multiplayer.is_server(), "server_choose_loadout is host-only")
-	var in_window: bool = _now() - _spawned_at <= Match.rules.loadout_swap_window
+	var in_window: bool = _now() - _spawned_at <= Match.rules.loadout_swap_window or Match.rules.loadout_swap_anytime
 	if is_alive and in_window and Match.state == Match.State.PLAYING:
 		# Only a player unhurt this life gets the new class's full health (no heal-by-swapping,
 		# also not by passing through a class whose maximum is the current health).

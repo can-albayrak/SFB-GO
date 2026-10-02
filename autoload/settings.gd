@@ -18,6 +18,9 @@ var loadout_class: StringName = &"wolf"
 var loadout_primary: int = 0
 var loadout_ability: int = 0
 
+## Test Range only: abilities without a cooldown (toggle in the Esc panel).
+var practice_unlimited_abilities: bool = false
+
 ## Horizontal FOV measured at 4:3, same convention as CS (80–110).
 var fov: float = 90.0
 ## CS-compatible: a CS sensitivity value feels the same here.
@@ -66,6 +69,7 @@ func load_settings() -> void:
 	loadout_class = StringName(_read(config, "loadout", "class", String(loadout_class)))
 	loadout_primary = _read(config, "loadout", "primary", loadout_primary)
 	loadout_ability = _read(config, "loadout", "ability", loadout_ability)
+	practice_unlimited_abilities = _read(config, "practice", "unlimited_abilities", practice_unlimited_abilities)
 	fov = _read(config, "view", "fov", fov)
 	mouse_sensitivity = _read(config, "view", "sensitivity", mouse_sensitivity)
 	crosshair_color = _read(config, "crosshair", "color", crosshair_color)
@@ -100,6 +104,7 @@ func save_settings() -> void:
 	config.set_value("loadout", "class", String(loadout_class))
 	config.set_value("loadout", "primary", loadout_primary)
 	config.set_value("loadout", "ability", loadout_ability)
+	config.set_value("practice", "unlimited_abilities", practice_unlimited_abilities)
 	config.set_value("view", "fov", fov)
 	config.set_value("view", "sensitivity", mouse_sensitivity)
 	config.set_value("crosshair", "color", crosshair_color)

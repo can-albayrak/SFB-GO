@@ -20,4 +20,5 @@ airdrop_open_time = 3.0
 airdrop_max_active = 3
 weapon_drop_lifetime = 45.0
 infinite_ammo = true
-ability_cooldowns = false
+ability_cooldowns = true
+loadout_swap_anytime = true

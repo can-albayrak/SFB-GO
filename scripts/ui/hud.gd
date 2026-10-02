@@ -400,6 +400,10 @@ func _build_pause_panel() -> void:
 	var resume := Style.menu_button("RESUME")
 	resume.pressed.connect(_on_resume_pressed)
 	box.add_child(resume)
+	if multiplayer.multiplayer_peer is OfflineMultiplayerPeer: # Test Range practice switch.
+		var unlimited := Style.menu_button(_unlimited_abilities_text())
+		unlimited.pressed.connect(_on_unlimited_abilities_pressed.bind(unlimited))
+		box.add_child(unlimited)
 	var settings := Style.menu_button("SETTINGS")
 	settings.pressed.connect(func() -> void: _settings_panel.open())
 	box.add_child(settings)
@@ -407,6 +411,21 @@ func _build_pause_panel() -> void:
 	leave.add_theme_color_override(&"font_color", Style.TEXT_DIM)
 	leave.pressed.connect(func() -> void: Net.leave())
 	box.add_child(leave)
+
+
+func _unlimited_abilities_text() -> String:
+	return "UNLIMITED ABILITIES: %s" % ("ON" if Settings.practice_unlimited_abilities else "OFF")
+
+
+## Test Range only (offline, we are the host): abilities without a cooldown, remembered.
+func _on_unlimited_abilities_pressed(button: Button) -> void:
+	Settings.practice_unlimited_abilities = not Settings.practice_unlimited_abilities
+	Settings.save_settings()
+	Match.rules.ability_cooldowns = not Settings.practice_unlimited_abilities
+	button.text = _unlimited_abilities_text()
+	if Settings.practice_unlimited_abilities and is_instance_valid(_player) and _player.ability != null:
+		_player.ability.cooldown_left = 0.0
+		_player.ability.host_ready_at = -INF
 
 
 func _on_resume_pressed() -> void:
