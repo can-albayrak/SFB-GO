@@ -105,12 +105,12 @@ func _measure_arm(side: String) -> ArmsIK.Arm:
 
 
 func _skeleton_local_basis() -> Basis:
-	var basis := Basis.IDENTITY
+	var result := Basis.IDENTITY
 	var node: Node = _skeleton
 	while node != _model:
-		basis = (node as Node3D).transform.basis * basis
+		result = (node as Node3D).transform.basis * result
 		node = node.get_parent()
-	return basis
+	return result
 
 
 func _process(delta: float) -> void:
@@ -141,10 +141,10 @@ func _shown_weapon() -> Weapon:
 
 func _set_arm(arm: ArmsIK.Arm, weapon: Weapon, holds: bool, right: bool) -> void:
 	arm.enabled = true
-	var to_global: Transform3D = global_transform
-	arm.pole = to_global.basis * (RIGHT_POLE if right else LEFT_POLE)
+	var holder_to_world: Transform3D = global_transform
+	arm.pole = holder_to_world.basis * (RIGHT_POLE if right else LEFT_POLE)
 	if not holds:
-		arm.target = to_global * Transform3D(Basis.IDENTITY, RIGHT_REST if right else LEFT_REST)
+		arm.target = holder_to_world * Transform3D(Basis.IDENTITY, RIGHT_REST if right else LEFT_REST)
 		return
 	var grip: Vector3 = weapon.transform * _grip(weapon, right)
 	var hold: Basis = weapon.transform.basis.orthonormalized()
@@ -157,7 +157,7 @@ func _set_arm(arm: ArmsIK.Arm, weapon: Weapon, holds: bool, right: bool) -> void
 		hold = hold * marker.transform.basis.orthonormalized()
 	elif not right and _on_handguard(weapon):
 		hold = hold * Basis(Vector3.BACK, deg_to_rad(HANDGUARD_ROLL))
-	arm.target = to_global * Transform3D(hold, grip)
+	arm.target = holder_to_world * Transform3D(hold, grip)
 
 
 ## Melee weapons and throwing knives: the model's own axis is the handle.
