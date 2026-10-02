@@ -5,7 +5,8 @@ extends Node
 ## player capsule fits there; pickups stand on a floor; airdrop points have a floor and open
 ## sky above (crates fall from 40 m); every spawn, pickup and airdrop point can be walked to
 ## from the first spawn (navmesh baked from the map's colliders: steps up to the step height,
-## ramps, no jumps). Also prints the longest walk between two spawns (GDD: 15-20 s end to end).
+## ramps, no jumps); high levels stay reachable with any one way up removed (ALTERNATE_ROUTES).
+## Also prints the longest walk between two spawns (GDD: 15-20 s end to end).
 ## Prints PASS / FAIL lines and quits with exit code 1 when anything failed.
 
 const GAME_SCENE: PackedScene = preload("res://scenes/game.tscn")
@@ -20,7 +21,22 @@ const NAV_CELL_HEIGHT: float = 0.1
 const REACH_TOLERANCE: float = 0.75 ## Metres between a marker and where its path ends.
 const RUN_SPEED: float = 6.6 ## Wolf's run speed, for the end-to-end time.
 const MAX_END_TO_END: float = 25.0 ## Seconds; the GDD aims for 15-20.
-const TIMEOUT: float = 180.0
+const TIMEOUT: float = 300.0
+## Per map id: high levels, their spawns and every way up. Each way is removed on its own
+## and the spawns must stay reachable (GDD: at least two ways to every high point).
+const ALTERNATE_ROUTES: Dictionary = {
+	&"mall": {
+		"roof": {
+			"spawns": ["Spawn12"],
+			"routes": ["Geometry/Upper/StairsRoof", "Geometry/Outside/FireEscapeHigh"],
+		},
+		"upper floor": {
+			"spawns": ["Spawn8", "Spawn9", "Spawn10", "Spawn11"],
+			"routes": ["Geometry/Ground/EscalatorW", "Geometry/Ground/EscalatorE", "Geometry/Ground/StairsWest",
+				"Geometry/Ground/StairsEast", "Geometry/Outside/FireEscapeLow", "Geometry/Outside/BalconyStairs"],
+		},
+	},
+}
 
 var _passes: int = 0
 var _failures: int = 0
@@ -74,6 +90,7 @@ func _test_map(map_def: MapDef) -> void:
 		_check(_open_sky(space, pos, exclude), "%s airdrop %s has open sky" % [label, drop.name])
 
 	await _test_reachability(label, map, spawns, pickups + drops)
+	await _test_alternate_routes(map_def, map, spawns)
 	game.queue_free()
 	await _frames(3)
 
@@ -81,39 +98,12 @@ func _test_map(map_def: MapDef) -> void:
 func _test_reachability(label: String, map: Node3D, spawns: Array[Node3D], others: Array[Node3D]) -> void:
 	if spawns.is_empty():
 		return
-	var nav_mesh := NavigationMesh.new()
-	nav_mesh.agent_radius = AGENT_RADIUS
-	nav_mesh.agent_height = CAPSULE_HEIGHT
-	nav_mesh.agent_max_climb = 0.4
-	nav_mesh.agent_max_slope = 45.0
-	nav_mesh.cell_size = NAV_CELL_SIZE
-	nav_mesh.cell_height = NAV_CELL_HEIGHT
-	nav_mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
-	nav_mesh.geometry_collision_mask = WORLD_MASK
-	var source := NavigationMeshSourceGeometryData3D.new()
-	NavigationServer3D.parse_source_geometry_data(nav_mesh, source, map.get_node("Geometry"))
-	NavigationServer3D.bake_from_source_geometry_data(nav_mesh, source)
-	_check(nav_mesh.get_polygon_count() > 0, "%s navmesh baked (%d polygons)" % [label, nav_mesh.get_polygon_count()])
-	if nav_mesh.get_polygon_count() == 0:
+	var nav: Dictionary = await _bake(map, spawns[0].global_position)
+	_check(nav.polygons > 0, "%s navmesh baked (%d polygons)" % [label, nav.polygons])
+	if nav.polygons == 0:
+		_free_nav(nav)
 		return
-
-	var nav_map: RID = NavigationServer3D.map_create()
-	NavigationServer3D.map_set_cell_size(nav_map, NAV_CELL_SIZE)
-	NavigationServer3D.map_set_cell_height(nav_map, NAV_CELL_HEIGHT)
-	NavigationServer3D.map_set_active(nav_map, true)
-	var region: RID = NavigationServer3D.region_create()
-	NavigationServer3D.region_set_map(region, nav_map)
-	NavigationServer3D.region_set_navigation_mesh(region, nav_mesh)
-	# The server syncs maps between frames (a big region can take a few); queries before
-	# that come back empty.
-	var first: Vector3 = spawns[0].global_position
-	for i: int in 120:
-		await get_tree().process_frame
-		if NavigationServer3D.map_get_iteration_id(nav_map) == 0:
-			continue
-		if NavigationServer3D.map_get_closest_point(nav_map, first).distance_to(first) < REACH_TOLERANCE:
-			break
-
+	var nav_map: RID = nav.map
 	var start: Vector3 = spawns[0].global_position
 	var longest: float = 0.0
 	var longest_pair: String = ""
@@ -129,8 +119,85 @@ func _test_reachability(label: String, map: Node3D, spawns: Array[Node3D], other
 	var seconds: float = longest / RUN_SPEED
 	print("INFO %s longest walk between spawns: %.0f m, %.1f s (%s)" % [label, longest, seconds, longest_pair])
 	_check(seconds <= MAX_END_TO_END, "%s end to end on foot within %d s" % [label, roundi(MAX_END_TO_END)])
-	NavigationServer3D.free_rid(region)
-	NavigationServer3D.free_rid(nav_map)
+	_free_nav(nav)
+
+
+## GDD: every high point can be reached by at least two ways. Each way up is taken out on
+## its own (node removed, navmesh rebaked); the level's spawns must stay reachable.
+func _test_alternate_routes(map_def: MapDef, map: Node3D, spawns: Array[Node3D]) -> void:
+	var levels: Dictionary = ALTERNATE_ROUTES.get(map_def.id, {})
+	for level_name: String in levels:
+		var level: Dictionary = levels[level_name]
+		for route_path: String in level.routes:
+			var route: Node = map.get_node_or_null(route_path)
+			_check(route != null, "%s route %s exists" % [map_def.display_name, route_path])
+			if route == null:
+				continue
+			var parent: Node = route.get_parent()
+			parent.remove_child(route)
+			await _frames(2)
+			var nav: Dictionary = await _bake(map, spawns[0].global_position)
+			for spawn_name: String in level.spawns:
+				var target: Node3D = map.get_node("SpawnPoints/" + spawn_name)
+				_check(_path_length(nav.map, spawns[0].global_position, target.global_position) >= 0.0,
+					"%s %s (%s) reachable without %s" % [map_def.display_name, level_name, spawn_name, route.name])
+			_free_nav(nav)
+			parent.add_child(route)
+			await _frames(2)
+		# Sanity: with every way up removed the level must be cut off, or the test proves nothing.
+		var removed: Array[Array] = []
+		for route_path: String in level.routes:
+			var route: Node = map.get_node_or_null(route_path)
+			if route != null:
+				removed.append([route, route.get_parent()])
+				route.get_parent().remove_child(route)
+		await _frames(2)
+		var cut: Dictionary = await _bake(map, spawns[0].global_position)
+		var first_target: Node3D = map.get_node("SpawnPoints/" + (level.spawns[0] as String))
+		_check(_path_length(cut.map, spawns[0].global_position, first_target.global_position) < 0.0,
+			"%s %s is cut off with every way up removed (test sanity)" % [map_def.display_name, level_name])
+		_free_nav(cut)
+		for pair: Array in removed:
+			(pair[1] as Node).add_child(pair[0] as Node)
+		await _frames(2)
+
+
+## Bakes a navmesh from the map's colliders and waits until the server can answer queries.
+## Returns {map, region, polygons}.
+func _bake(map: Node3D, probe: Vector3) -> Dictionary:
+	var nav_mesh := NavigationMesh.new()
+	nav_mesh.agent_radius = AGENT_RADIUS
+	nav_mesh.agent_height = CAPSULE_HEIGHT
+	nav_mesh.agent_max_climb = 0.4
+	nav_mesh.agent_max_slope = 45.0
+	nav_mesh.cell_size = NAV_CELL_SIZE
+	nav_mesh.cell_height = NAV_CELL_HEIGHT
+	nav_mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
+	nav_mesh.geometry_collision_mask = WORLD_MASK
+	var source := NavigationMeshSourceGeometryData3D.new()
+	NavigationServer3D.parse_source_geometry_data(nav_mesh, source, map.get_node("Geometry"))
+	NavigationServer3D.bake_from_source_geometry_data(nav_mesh, source)
+	var nav_map: RID = NavigationServer3D.map_create()
+	NavigationServer3D.map_set_cell_size(nav_map, NAV_CELL_SIZE)
+	NavigationServer3D.map_set_cell_height(nav_map, NAV_CELL_HEIGHT)
+	NavigationServer3D.map_set_active(nav_map, true)
+	var region: RID = NavigationServer3D.region_create()
+	NavigationServer3D.region_set_map(region, nav_map)
+	NavigationServer3D.region_set_navigation_mesh(region, nav_mesh)
+	# The server syncs maps between frames (a big region can take a few); queries before
+	# that come back empty.
+	for i: int in 120:
+		await get_tree().process_frame
+		if NavigationServer3D.map_get_iteration_id(nav_map) == 0:
+			continue
+		if NavigationServer3D.map_get_closest_point(nav_map, probe).distance_to(probe) < REACH_TOLERANCE:
+			break
+	return {"map": nav_map, "region": region, "polygons": nav_mesh.get_polygon_count()}
+
+
+func _free_nav(nav: Dictionary) -> void:
+	NavigationServer3D.free_rid(nav.region)
+	NavigationServer3D.free_rid(nav.map)
 
 
 ## Path length on foot, or -1 when the path does not reach `to`.

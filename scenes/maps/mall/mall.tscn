@@ -72,6 +72,18 @@ uv1_scale = Vector3(0.6, 0.6, 0.6)
 uv1_triplanar = true
 texture_filter = 2
 
+[sub_resource type="BoxShape3D" id="Shape_ClipN"]
+size = Vector3(111, 60, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_ClipS"]
+size = Vector3(111, 60, 0.6)
+
+[sub_resource type="BoxShape3D" id="Shape_ClipW"]
+size = Vector3(0.6, 60, 65)
+
+[sub_resource type="BoxShape3D" id="Shape_ClipE"]
+size = Vector3(0.6, 60, 65)
+
 [node name="Mall" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -705,18 +717,18 @@ material = SubResource("Mat_concrete")
 
 
 [node name="EscalatorW" type="CSGBox3D" parent="Geometry/Ground"]
-position = Vector3(-5.166, 2.3653, -5)
-rotation = Vector3(0, 0, 5.8274)
+position = Vector3(-4.9329, 2.2988, -5)
+rotation = Vector3(0, 0, 5.8195)
 use_collision = true
-size = Vector3(11.6596, 0.3, 2)
+size = Vector3(11.4803, 0.3, 2)
 material = SubResource("Mat_concrete")
 
 
 [node name="EscalatorE" type="CSGBox3D" parent="Geometry/Ground"]
-position = Vector3(5.166, 2.3653, 5)
-rotation = Vector3(0, 0, 0.4558)
+position = Vector3(4.9329, 2.2988, 5)
+rotation = Vector3(0, 0, 0.4636)
 use_collision = true
-size = Vector3(11.6596, 0.3, 2)
+size = Vector3(11.4803, 0.3, 2)
 material = SubResource("Mat_concrete")
 
 
@@ -784,10 +796,10 @@ material = SubResource("Mat_crate")
 
 
 [node name="StairsWest" type="CSGBox3D" parent="Geometry/Ground"]
-position = Vector3(-30.35, 2.3612, -12.1569)
-rotation = Vector3(0.389, 0, 0)
+position = Vector3(-30.35, 2.3038, -11.9192)
+rotation = Vector3(0.3948, 0, 0)
 use_collision = true
-size = Vector3(2.5, 0.3, 13.4848)
+size = Vector3(2.5, 0.3, 13.3)
 material = SubResource("Mat_concrete")
 
 
@@ -883,10 +895,10 @@ material = SubResource("Mat_crate")
 
 
 [node name="StairsEast" type="CSGBox3D" parent="Geometry/Ground"]
-position = Vector3(30.35, 2.3612, -14.1569)
-rotation = Vector3(0.389, 0, 0)
+position = Vector3(30.35, 2.3038, -13.9192)
+rotation = Vector3(0.3948, 0, 0)
 use_collision = true
-size = Vector3(2.5, 0.3, 13.4848)
+size = Vector3(2.5, 0.3, 13.3)
 material = SubResource("Mat_concrete")
 
 
@@ -1668,10 +1680,10 @@ material = SubResource("Mat_crate")
 
 
 [node name="StairsRoof" type="CSGBox3D" parent="Geometry/Upper"]
-position = Vector3(30.35, 7.3612, 0.1569)
-rotation = Vector3(-0.389, 0, 0)
+position = Vector3(30.35, 7.3038, -0.0808)
+rotation = Vector3(-0.3948, 0, 0)
 use_collision = true
-size = Vector3(2.5, 0.3, 13.4848)
+size = Vector3(2.5, 0.3, 13.3)
 material = SubResource("Mat_concrete")
 
 
@@ -2012,10 +2024,10 @@ material = SubResource("Mat_concrete")
 
 
 [node name="BalconyStairs" type="CSGBox3D" parent="Geometry/Outside"]
-position = Vector3(34.25, 2.3609, 24.4439)
-rotation = Vector3(0.3833, 0, 0)
+position = Vector3(34.25, 2.3038, 24.5808)
+rotation = Vector3(0.3948, 0, 0)
 use_collision = true
-size = Vector3(2.5, 0.3, 13.6701)
+size = Vector3(2.5, 0.3, 13.3)
 material = SubResource("Mat_concrete")
 
 
@@ -2027,10 +2039,10 @@ material = SubResource("Mat_concrete")
 
 
 [node name="DockRamp" type="CSGBox3D" parent="Geometry/Outside"]
-position = Vector3(-34.5, 0.454, 0.4156)
-rotation = Vector3(0.2311, 0, 0)
+position = Vector3(-34.5, 0.4191, 0.6109)
+rotation = Vector3(0.2355, 0, 0)
 use_collision = true
-size = Vector3(3, 0.3, 5.5393)
+size = Vector3(3, 0.3, 5.442)
 material = SubResource("Mat_concrete")
 
 
@@ -2063,10 +2075,10 @@ material = SubResource("Mat_crate")
 
 
 [node name="FireEscapeLow" type="CSGBox3D" parent="Geometry/Outside"]
-position = Vector3(-33.4, 2.3612, 22.8431)
-rotation = Vector3(0.389, 0, 0)
+position = Vector3(-33.4, 2.3038, 23.0808)
+rotation = Vector3(0.3948, 0, 0)
 use_collision = true
-size = Vector3(2.2, 0.3, 13.4848)
+size = Vector3(2.2, 0.3, 13.3)
 material = SubResource("Mat_concrete")
 
 
@@ -2078,10 +2090,10 @@ material = SubResource("Mat_concrete")
 
 
 [node name="FireEscapeHigh" type="CSGBox3D" parent="Geometry/Outside"]
-position = Vector3(-36, 7.3612, 5.8431)
-rotation = Vector3(0.389, 0, 0)
+position = Vector3(-36, 7.3038, 6.0808)
+rotation = Vector3(0.3948, 0, 0)
 use_collision = true
-size = Vector3(2, 0.3, 13.4848)
+size = Vector3(2, 0.3, 13.3)
 material = SubResource("Mat_concrete")
 
 
@@ -2133,6 +2145,32 @@ use_collision = true
 size = Vector3(4.4, 1.4, 1.9)
 material = SubResource("Mat_crate")
 
+
+[node name="Clips" type="Node3D" parent="Geometry"]
+
+[node name="ClipN" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(7, 30, -32.4)
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/ClipN"]
+shape = SubResource("Shape_ClipN")
+
+[node name="ClipS" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(7, 30, 32.4)
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/ClipS"]
+shape = SubResource("Shape_ClipS")
+
+[node name="ClipW" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(-48.4, 30, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/ClipW"]
+shape = SubResource("Shape_ClipW")
+
+[node name="ClipE" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(62.4, 30, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/ClipE"]
+shape = SubResource("Shape_ClipE")
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 

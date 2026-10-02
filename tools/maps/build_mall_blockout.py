@@ -28,7 +28,10 @@ WALL = 0.4
 DOOR_H = 3.0  # Door openings; a lintel fills the rest up to the slab.
 RAIL_H = 1.1  # Railings and parapets are half cover.
 
+CLIP_H = 60.0  # Invisible site walls: higher than a grapple can reach from the roof (40 m).
+
 boxes = []  # (name, parent, center, size, material, rotation)
+clips = []  # (name, center, size): invisible StaticBody3D walls
 markers = []  # (group, name, position, yaw, extra)
 
 
@@ -100,9 +103,19 @@ def slab(parent, name, x0, x1, z0, z1, top, holes=(), mat="Mat_floor"):
             count += 1
 
 
+RAMP_TUCK = 0.3  # The low end runs on under the floor it starts from, so there is no lip.
+
+
 def ramp(parent, name, axis, a0, a1, w0, w1, y_low, y_high, thick=0.3, mat="Mat_concrete"):
     """A walkable ramp along `axis`, rising from coordinate a0 (y_low) to a1 (y_high).
-    w0..w1 is its extent across. Used for escalators and stairs (step visuals come later)."""
+    w0..w1 is its extent across. Used for escalators and stairs (step visuals come later).
+    a1 must be exactly the edge of the floor it reaches: the top meets that floor flush.
+    A top ending short of the edge leaves a convex lip where the capsule's rounded bottom
+    gets a tilted contact, floor snap refuses it and players walking down take off."""
+    run, rise = a1 - a0, y_high - y_low
+    slope = math.hypot(run, rise)
+    a0 -= RAMP_TUCK * run / slope
+    y_low -= RAMP_TUCK * rise / slope
     run, rise = a1 - a0, y_high - y_low
     length = math.hypot(run, rise)
     mid_a, mid_y, mid_w = (a0 + a1) / 2, (y_low + y_high) / 2, (w0 + w1) / 2
@@ -112,7 +125,7 @@ def ramp(parent, name, axis, a0, a1, w0, w1, y_low, y_high, thick=0.3, mat="Mat_
             angle += math.pi
         normal = (0.0, math.cos(angle), math.sin(angle))
         center = (mid_w - normal[0] * thick / 2, mid_y - normal[1] * thick / 2, mid_a - normal[2] * thick / 2)
-        size = (abs(w1 - w0), thick, length + 0.3)
+        size = (abs(w1 - w0), thick, length)
         rot = (angle, 0.0, 0.0)
     else:
         angle = math.atan2(rise, run)  # Rotation about z maps local +x onto the slope.
@@ -120,7 +133,7 @@ def ramp(parent, name, axis, a0, a1, w0, w1, y_low, y_high, thick=0.3, mat="Mat_
             angle += math.pi
         normal = (-math.sin(angle), math.cos(angle), 0.0)
         center = (mid_a - normal[0] * thick / 2, mid_y - normal[1] * thick / 2, mid_w - normal[2] * thick / 2)
-        size = (length + 0.3, thick, abs(w1 - w0))
+        size = (length, thick, abs(w1 - w0))
         rot = (0.0, 0.0, angle)
     boxes.append((name, parent, center, size, mat, rot))
 
@@ -143,6 +156,11 @@ def build():
     wall(X, "FenceS", "x", 32, -48, 62, 0, 3, mat="Mat_concrete", thick=0.3)
     wall(X, "FenceW", "z", -48, -32, 32, 0, 3, mat="Mat_concrete", thick=0.3)
     wall(X, "FenceE", "z", 62, -32, 32, 0, 3, mat="Mat_concrete", thick=0.3)
+    # A bhop off the roof clears the 3 m fence (the strips are only 8 m wide): invisible
+    # walls on the fence line keep everyone on the site.
+    for name, c, size in [("ClipN", (7, -32.4), (111, 0.6)), ("ClipS", (7, 32.4), (111, 0.6)),
+                          ("ClipW", (-48.4, 0), (0.6, 65)), ("ClipE", (62.4, 0), (0.6, 65))]:
+        clips.append((name, (c[0], CLIP_H / 2, c[1]), (size[0], CLIP_H, size[1])))
 
     # Outer walls. Ground: service door west and north, supermarket door west, main entrance
     # south, two department store doors east. Upper: food court opens west (fire escape) and
@@ -179,8 +197,8 @@ def build():
     for i, (px, pz) in enumerate([(-12.5, 4), (12.5, -4), (6, -9.5), (-6, 9.5)]):
         prop(G, f"Planter{i}", px, pz, 1.6, 1.0, 1.6, mat="Mat_concrete")
     # Escalators: both start at the atrium centre line and land on the east / west gallery.
-    ramp(G, "EscalatorW", "x", 0, -10.2, -6, -4, 0, UPPER)
-    ramp(G, "EscalatorE", "x", 0, 10.2, 4, 6, 0, UPPER)
+    ramp(G, "EscalatorW", "x", 0, -10, -6, -4, 0, UPPER)
+    ramp(G, "EscalatorE", "x", 0, 10, 4, 6, 0, UPPER)
 
     # Supermarket (west wing): shelf rows (full cover), checkout counters (half cover),
     # stairs up along the west wall.
@@ -189,7 +207,7 @@ def build():
         prop(G, f"ShelfS{i}", sx, 8, 0.8, 2.0, 12)
     for i, cx in enumerate([-29, -24, -19]):
         prop(G, f"Checkout{i}", cx, 17, 3, 1.1, 0.8)
-    ramp(G, "StairsWest", "z", -6, -18.2, -31.6, -29.1, 0, UPPER)
+    ramp(G, "StairsWest", "z", -6, -18, -31.6, -29.1, 0, UPPER)
     wall(G, "StairsWestRail", "z", -28.9, -18, -6, 0, RAIL_H, mat="Mat_concrete", thick=0.2)
 
     # Service corridor: crates (half cover).
@@ -204,7 +222,7 @@ def build():
     prop(G, "DisplayA", 20, 16, 2, 1.0, 1.5)
     prop(G, "DisplayB", 26, 16, 2, 1.0, 1.5)
     prop(G, "Counter", 27.5, -6, 0.8, 1.1, 3)
-    ramp(G, "StairsEast", "z", -8, -20.2, 29.1, 31.6, 0, UPPER)
+    ramp(G, "StairsEast", "z", -8, -20, 29.1, 31.6, 0, UPPER)
     wall(G, "StairsEastRail", "z", 28.9, -20, -8, 0, RAIL_H, mat="Mat_concrete", thick=0.2)
 
     # South shops: a little cover each.
@@ -260,7 +278,7 @@ def build():
     for i, (rx, rz) in enumerate([(21, -10), (25, -2), (21, 4)]):
         prop(U, f"Rack{i}", rx, rz, 2.5, 1.2, 0.6, y=u0)
     prop(U, "TallShelf", 22, -16, 4, 2.0, 0.8, y=u0)
-    ramp(U, "StairsRoof", "z", -6, 6.2, 29.1, 31.6, u0, ROOF)
+    ramp(U, "StairsRoof", "z", -6, 6, 29.1, 31.6, u0, ROOF)
     wall(U, "StairsRoofRail", "z", 28.9, -6, 6, u0, u0 + RAIL_H, mat="Mat_concrete", thick=0.2)
 
     # Roof ----------------------------------------------------------------------
@@ -298,19 +316,19 @@ def build():
     # Balcony off the food court's east end, stairs down to the parking.
     slab(X, "Balcony", 32, 36, 12.5, 18.5, UPPER, mat="Mat_concrete")
     wall(X, "BalconyRail", "z", 36, 12.5, 18.5, UPPER, UPPER + RAIL_H, mat="Mat_concrete", thick=0.2)
-    ramp(X, "BalconyStairs", "z", 30.7, 18.3, 33, 35.5, 0, UPPER)
+    ramp(X, "BalconyStairs", "z", 30.5, 18.5, 33, 35.5, 0, UPPER)
 
     # Loading dock (west): raised dock with a ramp, containers (full cover), crates.
     add_box(X, "Dock", -36, -32.2, 0, 1.2, -20, -2, "Mat_concrete")
-    ramp(X, "DockRamp", "z", 3, -2.1, -36, -33, 0, 1.2)
+    ramp(X, "DockRamp", "z", 3, -2, -36, -33, 0, 1.2)
     prop(X, "ContainerA", -42, -22, 2.5, 2.6, 6, mat="Mat_wall")
     prop(X, "ContainerB", -44, 6, 6, 2.6, 2.5, mat="Mat_wall")
     prop(X, "DockCrateA", -39, -12, 1.2, 1.2, 1.2)
     prop(X, "DockCrateB", -40.5, 22, 2.0, 2.0, 2.0)
     # Fire escape: ground -> landing at the food court door -> roof.
-    ramp(X, "FireEscapeLow", "z", 29, 16.8, -34.5, -32.3, 0, UPPER)
+    ramp(X, "FireEscapeLow", "z", 29, 17, -34.5, -32.3, 0, UPPER)
     slab(X, "FireLanding", -37, -32, 12, 17, UPPER, mat="Mat_concrete")
-    ramp(X, "FireEscapeHigh", "z", 12, -0.2, -37, -35, UPPER, ROOF)
+    ramp(X, "FireEscapeHigh", "z", 12, 0, -37, -35, UPPER, ROOF)
     slab(X, "FireBridge", -37, -32, -3, 0, ROOF, mat="Mat_concrete")
     wall(X, "FireLandingRail", "z", -37, 12, 17, UPPER, UPPER + RAIL_H, mat="Mat_concrete", thick=0.2)
 
@@ -450,7 +468,11 @@ def f(v):
 
 
 def write_scene():
-    out = [HEADER]
+    clip_subs = "".join(
+        f'\n[sub_resource type="BoxShape3D" id="Shape_{name}"]\nsize = Vector3({f(sz[0])}, {f(sz[1])}, {f(sz[2])})\n'
+        for name, c, sz in clips)
+    header = HEADER.replace('\n[node name="Mall"', clip_subs + '\n[node name="Mall"', 1)
+    out = [header]
     names = set()
     for name, parent, c, s, mat, rot in boxes:
         key = (parent, name)
@@ -463,6 +485,12 @@ def write_scene():
         out.append("use_collision = true")
         out.append(f"size = Vector3({f(s[0])}, {f(s[1])}, {f(s[2])})")
         out.append(f'material = SubResource("{mat}")\n')
+    out.append('\n[node name="Clips" type="Node3D" parent="Geometry"]')
+    for name, c, sz in clips:
+        out.append(f'\n[node name="{name}" type="StaticBody3D" parent="Geometry/Clips"]')
+        out.append(f"position = Vector3({f(c[0])}, {f(c[1])}, {f(c[2])})")
+        out.append(f'\n[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/{name}"]')
+        out.append(f'shape = SubResource("Shape_{name}")')
     for group in ["SpawnPoints", "Pickups", "AirdropPoints"]:
         out.append(f'\n[node name="{group}" type="Node3D" parent="."]\n')
         for g, name, p, yaw, extra in markers:
