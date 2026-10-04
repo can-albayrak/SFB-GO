@@ -1,10 +1,13 @@
 # Builds the Windows game and publishes it as a GitHub Release (zip to download and play).
-# Runs when a tag like v0.8.0 is pushed, or by hand from the Actions tab (pick the tag name).
+# Runs when tools/ci/release_version.txt changes on any branch (the release gets that tag),
+# when a tag like v0.8.0 is pushed, or by hand from the Actions tab (pick the tag name).
 name: Release
 
 on:
   push:
+    branches: ["**"]
     tags: ["v*"]
+    paths: ["tools/ci/release_version.txt"] # Branch pushes only; tag pushes always run.
   workflow_dispatch:
     inputs:
       tag:
@@ -25,7 +28,11 @@ jobs:
 
       - name: Release name
         id: tag
-        run: echo "tag=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+        run: |
+          tag="${{ github.event.inputs.tag }}"
+          if [ -z "$tag" ] && [ "${{ github.ref_type }}" = "tag" ]; then tag="${{ github.ref_name }}"; fi
+          if [ -z "$tag" ]; then tag="$(tr -d '[:space:]' < tools/ci/release_version.txt)"; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Install Godot and the Windows export templates
         run: |
