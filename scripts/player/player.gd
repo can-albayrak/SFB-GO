@@ -190,7 +190,10 @@ func _physics_process(delta: float) -> void:
 		equip(cmd.weapon_slot)
 
 	var weapon_def: WeaponDef = current_weapon.def
+	var was_scoped: bool = is_scoped
 	is_scoped = cmd.secondary and weapon_def.scope_zoom > 0.0 and not current_weapon.is_reloading and not movement.is_sliding
+	if is_scoped and not was_scoped:
+		Sfx.play_ui(self, Sfx.SCOPE_IN)
 	weapon_holder.visible = not is_scoped
 	if is_scoped:
 		cmd.sprint = false

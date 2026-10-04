@@ -43,7 +43,13 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
-0. **En yeni (2026-10-04 akşam, Can test edecek), Release `v0.8.3`:**
+0. **En yeni (2026-10-04 gece, Can test edecek), Release `v0.8.4`:**
+   - Can'ın ses paketi: gerçek adım sesleri (beton üstünde bot, 8 çeşit), iniş, pompalı (4 çeşit + reload'da pompa), sniper/ağır silah, roketatar/GL, patlama, dürbün açma, grapple, airdrop uyarısı. Tüfek/tabanca/railgun sesleri hâlâ üretilmiş (pakette yok).
+   - Kendi ekranında Saul: kollar lacivert takım kolu + beyaz manşet + ten eller, aşağı bakınca takım pantolon + siyah ayakkabı.
+   - SMG birinci şahısta %30 küçük.
+   - Pakette olup kullanılmayanlar: Player_Jump (zıplama sesi istemiyordun), roket uçuş döngüsü, robot ölümleri, el feneri, bilgisayar çöküşü, düşme döngüsü.
+   - Ses paketinin kaynağı/lisansı bilinmiyor (ASSETS.md'de "?"); Can bulursa yazılmalı.
+0. **Önceki (2026-10-04 akşam), Release `v0.8.3`:**
    - Zıplayınca/inişte çıkan patlama gibi ses gitti: iniş artık iki ayak basma sesi. Adımlar CS tarzı (topuk-taban tıkırtısı), geldiği yönden, ~32 m'ye kadar; başkalarının inişi de duyuluyor.
    - Vurulunca çok hafif sarsıntı (0,7° → 0,4°) + ekran kenarında kırmızı parlama; can %60'ın altına inince kalıcı kırmızı kenar, can azaldıkça koyulaşıyor (ayarlardaki hasar sarsıntısı kaydırıcısı bunu da kısar).
    - Birinci şahıs silahlar %15 büyük (`view_model_scale`; sniperlar zaten ayrıca %25).
@@ -364,3 +370,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-04 | 8 | (bulut) Diğer dallar kontrol edilmeden `main` üzerinden çalışılmıştı: en yeni dal `claude/rocket-launcher-weapon-tuning-16afab` (Steam, eller, Ice Yard, sesler) animasyon dalına birleştirildi. Can'ın Saul Goodman modeli (iskeletsiz) `CharacterSkin` ile Mixamo iskeletine (parça bazlı otomatik ağırlık), `WeaponHoldModifier` (silah omuz önünde, iki elde IK), reload/throw Mixamo klipleri + eğik reload + bıçak savurma, aksiyonlar ağdan (`report_action`), herkesin başında nick (taşıyanınki duvar arkasından), sniperlar birinci şahısta %25 büyük. Smoke 132/0, ağ testi 29 + 25, 28 + 28. Release v0.8.1. |
 | 2026-10-04 | 8 | Animasyon dalı (`claude/cool-faraday-3ukcaw`, içinde Steam / rocket-launcher / epic-pascal) `main`'e birleştirildi. Release iş akışı artık sadece `main`'den; `v0.8.2` zip'i main'in son halinden. |
 | 2026-10-04 | 8 | Can'ın listesi: iniş sesi patlama yerine iki ayak (`Sfx.land`, uzak oyuncularınki de), CS tarzı adım sesleri (`gen_sfx.py` `footstep`), tam panlı 3D, 32 m; hasar sarsıntısı 0,4°; `DamageOverlay` (darbe parlaması + düşük canda kalıcı kırmızı, ScreenFx'in üstünde); birinci şahıs silahlar 1,15x (`view_model_scale`). Smoke 132/0. Release v0.8.3. |
+| 2026-10-04 | 8 | Can'ın FREE FPS SFX Pack'i (`convert_sfx_pack.sh`: mono, sessizlik kesimi): adım ×8, iniş, pompalı ×4 + pompa, sniper ×4, roket ×4, patlama ×4, dürbün, grapple, uyarı; `gen_sfx.py` sadece kalan sesleri üretir. Birinci şahıs Saul (kollar vertex rengi + shader: takım kolu/manşet/ten; bacaklar takım). SMG birinci şahısta 0,7x. Smoke 132/0. Release v0.8.4. |

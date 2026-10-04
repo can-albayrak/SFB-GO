@@ -208,6 +208,8 @@ func _show_grapple(point: Vector3, seconds: float) -> void:
 	if _sender_id() != 1:
 		return
 	player.get_parent().add_child(GrappleBeam.create(player, point, seconds))
+	Sfx.play_at(player.get_parent(), Sfx.GRAPPLE_SHOT, player.global_position + Vector3.UP * 1.4, Sfx.STEP_DB + 4.0)
+	Sfx.play_at(player.get_parent(), Sfx.GRAPPLE_HOOK, point, Sfx.STEP_DB + 4.0)
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -280,3 +282,6 @@ func _show_action(action: int, seconds: float) -> void:
 	if _sender_id() != 1 or player.is_local or player.rig == null:
 		return
 	player.rig.play_action(action as SoldierRig.Action, seconds)
+	var slot: int = player.held_slot
+	if action == SoldierRig.Action.RELOAD and slot >= 0 and slot < player.weapons.size():
+		Sfx.reload(player.get_parent(), player.weapons[slot].def, player.global_position)
