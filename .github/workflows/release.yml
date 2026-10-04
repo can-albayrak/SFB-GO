@@ -1,11 +1,11 @@
 # Builds the Windows game (Steam version: GodotSteam templates, IP play works too) and publishes it as a GitHub Release (zip to download and play).
-# Runs when tools/ci/release_version.txt changes on any branch (the release gets that tag),
+# Runs when tools/ci/release_version.txt changes on main (the release gets that tag),
 # when a tag like v0.8.0 is pushed, or by hand from the Actions tab (pick the tag name).
 name: Release
 
 on:
   push:
-    branches: ["**"]
+    branches: ["main"]
     tags: ["v*"]
     paths: ["tools/ci/release_version.txt"] # Branch pushes only; tag pushes always run.
   workflow_dispatch:

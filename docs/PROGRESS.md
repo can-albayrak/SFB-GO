@@ -43,14 +43,13 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
-0. **En yeni (2026-10-04, bulut, Can test edecek):** dal `claude/cool-faraday-3ukcaw` = `claude/rocket-launcher-weapon-tuning-16afab` (Steam vb. hepsi) + animasyonlar. Release `v0.8.1` (GitHub Releases, Windows zip; Steam'siz, IP ile). Main hâlâ eski (`4edb141`).
+0. **En yeni (2026-10-04, bulut, Can test edecek):** hepsi `main`'de (2026-10-04'te `claude/cool-faraday-3ukcaw` birleştirildi; o dal `claude/rocket-launcher-weapon-tuning-16afab` ve `claude/epic-pascal-u74jyd`'yi de içeriyor, yani Steam vb. hepsi). Release `v0.8.2` (GitHub Releases, Windows zip, Steam sürümü: Steam + IP). Yeni işler `main`'den başlamalı.
    - **Karakter Saul Goodman** (Can'ın modeli, iskeletsiz geldi): `CharacterSkin` çalışma anında Mixamo iskeletine bağlıyor. Bütün Mixamo animasyonları onunla oynuyor.
    - **Silah tutuşu:** silah omzun önünde, bakış yönünde; sağ el kabzada, sol el ön tutamakta (IK). Tabanca/bıçak gibi kısa silahlar kollar uzanmış.
    - **Karşı tarafa görünenler:** reload (şarjörlü tüfeklerde Mixamo klibi, pompalı/revolver/tabanca/roketatar vb.'de silah yukarı kalkar), bomba ve fırlatma bıçağı atışı (Throw_Grenade'in sadece atış kısmı), bıçak savurma (V ve bıçak). Ateş, koşu, ölüm eskisi gibi.
    - **Nick:** her oyuncunun başında küçük nick; airdrop taşıyanınki turuncu ve duvar arkasından görünür (eski dev "▼ RAILGUN" yazısı kalktı).
    - **Sniperlar (Heavy, Marksman)** birinci şahısta %25 büyük.
    - Bakılacaklar: tutuş oyunda inandırıcı mı (`WeaponHoldModifier` sabitleri), Saul'un omuz/ceket deformasyonu, nick boyu, reload süreleri. Tek başına: `godot --path . res://tests/anim_preview.tscn -- --focus=reload --side`.
-   - Beğenilirse bu dal main'e birleştirilmeli (main çok geride).
 0. **Aşama 7 – Can'ın oynama testi (evde):**
    - Lobide harita listesi: "Mall (4-10)" varsayılan, "Test Range" ikinci.
    - AVM'de tek başına tur: yürüyen merdivenler, iç merdivenler (market ve mağaza), çatı merdiveni, yangın merdiveni, balkon merdiveni, yükleme rampası. Takılma, havaya kalkma, kamera zıplaması var mı?
@@ -285,7 +284,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Yer tutucu modeller: `tools/blender/build_placeholders.py` (Blender 5.2 headless, MCP gerekmez) → `assets/models/characters/soldier.glb`, `assets/models/weapons/{assault_rifle,pistol,heavy_rifle,shotgun}.glb`. Değiştirmek için scripti düzenle, yeniden çalıştır:
   `"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --background --factory-startup --python tools/blender/build_placeholders.py -- .`
 - Meshy şimdilik kullanılmıyor (Can'ın kararı). Detaylı modeller aşama 8'de.
-- **Release:** `tools/ci/release_version.txt` değişip herhangi bir dala push'lanınca (o tag'le), `v*` tag'i push'lanınca veya Actions → Release → Run workflow ile `.github/workflows/release.yml` Godot 4.7.2 indirip `tools/steam/build_steam.py` ile Steam sürümünü (GodotSteam şablonları, Steam + IP) derler, `CREDITS.txt` (ASSETS.md kredi tablosundan) ekler, zip'i GitHub Release'e yükler. Notlar `tools/ci/release_notes.md`.
+- **Release:** `tools/ci/release_version.txt` değişip `main`'e push'lanınca (o tag'le), `v*` tag'i push'lanınca veya Actions → Release → Run workflow ile `.github/workflows/release.yml` Godot 4.7.2 indirip `tools/steam/build_steam.py` ile Steam sürümünü (GodotSteam şablonları, Steam + IP) derler, `CREDITS.txt` (ASSETS.md kredi tablosundan) ekler, zip'i GitHub Release'e yükler. Notlar `tools/ci/release_notes.md`.
 
 ## Denge notları
 
@@ -357,3 +356,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-04 | 7/8 | Roketatar Half-Life gibi güdümlü (sağ tık lazer aç/kapa, kırmızı nokta, host roketi bakış noktasına 140°/s ile çevirir). Decoy artık oyuncunun birebir kopyası (mavi hologram yok), hızını devralıyor, yerçekimi/sürtünme ve oyuncu kapsülü var. Prosedürel sesler (`tools/gen_sfx.py` → `assets/audio`, `Sfx`): silah, patlama, adım, iniş, bıçak, hit/kill; ayarlarda ses seviyesi. Minigun ve LMG daha isabetli, railgun 8 mermi. Ayar slider'ları tekerlekle değişmiyor; ana menüde Steam paneli ayarların üstüne çiziliyordu. Smoke 132/0, ağ testi 29 + 25. Oynama testi bekliyor. |
 | 2026-10-04 | 8 | Can'ın Mixamo animasyonları (11 FBX, mesh'siz) oyuna: `SoldierRig` (AnimationTree: 6 yönlü koşu, çömelme, zıplama/düşme, üst gövde ateş), `SoldierMesh` (yer tutucu asker skinned mesh), `SpineAimModifier` (görünen kafayı hitbox eksenine dikleştirir + bakış eğimi), `Corpse` (ölüm klibi). `tests/anim_preview.tscn`. Release iş akışı (GitHub Actions, Windows export). Smoke 125/0, movement 50/0, map 143/0, ağ (normal + geç katılma) 0 hata; export edilmiş Linux derlemesinde smoke 125/0. Dal `claude/cool-faraday-3ukcaw` (o sırada eski `main` üstüne; aynı gün `claude/rocket-launcher-weapon-tuning-16afab` birleştirildi). |
 | 2026-10-04 | 8 | (bulut) Diğer dallar kontrol edilmeden `main` üzerinden çalışılmıştı: en yeni dal `claude/rocket-launcher-weapon-tuning-16afab` (Steam, eller, Ice Yard, sesler) animasyon dalına birleştirildi. Can'ın Saul Goodman modeli (iskeletsiz) `CharacterSkin` ile Mixamo iskeletine (parça bazlı otomatik ağırlık), `WeaponHoldModifier` (silah omuz önünde, iki elde IK), reload/throw Mixamo klipleri + eğik reload + bıçak savurma, aksiyonlar ağdan (`report_action`), herkesin başında nick (taşıyanınki duvar arkasından), sniperlar birinci şahısta %25 büyük. Smoke 132/0, ağ testi 29 + 25, 28 + 28. Release v0.8.1. |
+| 2026-10-04 | 8 | Animasyon dalı (`claude/cool-faraday-3ukcaw`, içinde Steam / rocket-launcher / epic-pascal) `main`'e birleştirildi. Release iş akışı artık sadece `main`'den; `v0.8.2` zip'i main'in son halinden. |
