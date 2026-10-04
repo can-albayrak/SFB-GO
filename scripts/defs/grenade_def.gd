@@ -27,3 +27,4 @@ enum Kind { FRAG, FLASH }
 @export var trigger_victim_damage: float = 0.0 ## Mine: dealt straight to whoever set it off, before the blast.
 @export var explode_on_fuse: bool = true ## False: when fuse_time runs out it just disappears.
 @export var max_per_thrower: int = 0 ## > 0: older ones of the same kind are removed (mines).
+@export var guided_turn_rate: float = 0.0 ## Degrees/second a guided rocket can turn; 0 = never steers.

@@ -78,6 +78,8 @@ var scope_blend: float = 0.0
 var requested_loadout: PackedInt32Array = PackedInt32Array()
 ## Host: health removed by the last take_hit (0 when blocked by a shield or not allowed).
 var last_damage_dealt: float = 0.0
+## Host: the owner's Rocket Launcher laser is on (sent by PlayerRequests.send_guided).
+var rocket_guided: bool = true
 
 ## Increments on every respawn; stale state packets from a previous life are dropped.
 var _life: int = 0

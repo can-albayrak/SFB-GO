@@ -2,7 +2,7 @@ class_name PlayerEffects
 extends Node
 ## Visuals of one Player that everyone sees: Bear's shield panel and Hawk's scope glint
 ## (both driven by replicated Player state, so late joiners see them too), grapple rope,
-## decoy hologram and remote tracers (host broadcasts). Never affects gameplay.
+## decoy copy and remote tracers (host broadcasts). Never affects gameplay.
 ## Child node "Effects" of the player scene, so its RPC path is the same everywhere.
 
 const SHIELD_SIZE: Vector3 = Vector3(1.3, 1.7, 0.06)
@@ -129,10 +129,10 @@ func show_grapple(point: Vector3, seconds: float) -> void:
 	Net.broadcast(self, &"_show_grapple", [point, seconds])
 
 
-## Host: everyone sees a hologram of this player where they stand now.
+## Host: everyone sees a copy of this player where they stand now, carrying their momentum.
 func show_decoy(seconds: float) -> void:
 	assert(multiplayer.is_server(), "show_decoy is host-only")
-	Net.broadcast(self, &"_show_decoy", [player.global_position, player.rotation.y, seconds])
+	Net.broadcast(self, &"_show_decoy", [player.global_position, player.rotation.y, seconds, player.get_move_velocity()])
 
 
 ## Bright dot on the remote body's scope; a fixed-size billboard, so it reads at any distance
@@ -195,10 +195,10 @@ func _show_grapple(point: Vector3, seconds: float) -> void:
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _show_decoy(at: Vector3, yaw: float, seconds: float) -> void:
+func _show_decoy(at: Vector3, yaw: float, seconds: float, start_velocity: Vector3) -> void:
 	if _sender_id() != 1:
 		return
-	player.get_parent().add_child(Decoy.create(player.model, at, yaw, seconds)) # The copy keeps the crouch squash.
+	player.get_parent().add_child(Decoy.create(player.model, at, yaw, seconds, start_velocity, player.movement.def)) # The copy keeps the crouch squash.
 
 
 @rpc("any_peer", "call_local", "unreliable")

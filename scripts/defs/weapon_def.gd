@@ -74,6 +74,9 @@ enum ViewHands { NONE, RIGHT, BOTH }
 
 @export_group("Launcher")
 @export var grenade: GrenadeDef ## Explosive fired by a PROJECTILE weapon (Grenade Launcher).
+## Rocket Launcher (Half-Life style): right click toggles laser guidance; while it is on
+## and the launcher is in hand, live rockets steer towards where the shooter aims.
+@export var guidable: bool = false
 
 @export_group("Melee")
 @export var melee_spread_scale: float = 1.0 ## Widens the fan of hit rays (Sledgehammer).

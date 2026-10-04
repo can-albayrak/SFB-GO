@@ -45,6 +45,10 @@ func send_equip(slot: int) -> void:
 	_request_equip.rpc_id(1, slot)
 
 
+func send_guided(on: bool) -> void:
+	_request_guided.rpc_id(1, on)
+
+
 ## Host: the sender owns this player (the host's own calls count as from peer 1).
 func _from_owner() -> bool:
 	var sender: int = multiplayer.get_remote_sender_id()
@@ -181,3 +185,10 @@ func _request_fall_death() -> void:
 	if not _from_owner() or not player.is_alive or Match.state != Match.State.PLAYING:
 		return # Between matches: the restart respawns everyone anyway.
 	player.server_fall_death()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _request_guided(on: bool) -> void:
+	if not _from_owner():
+		return
+	player.rocket_guided = on
