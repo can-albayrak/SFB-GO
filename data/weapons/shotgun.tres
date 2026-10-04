@@ -24,6 +24,7 @@ falloff_start = 7.0
 falloff_end = 20.0
 falloff_min_mult = 0.1
 recoil_pattern = PackedVector2Array(0, 4.14)
+view_kick = 7.0
 recoil_recovery = 10.0
 recoil_recovery_delay = 0.1
 scene = ExtResource("2_scene")

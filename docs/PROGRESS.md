@@ -43,7 +43,12 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
-0. **En yeni (2026-10-04 gece, Can test edecek), Release `v0.8.4`:**
+0. **En yeni (2026-10-05, Can test edecek), Release `v0.8.5`:**
+   - Tutuşlar: tabanca ve revolver daha ileride (kollar uzanmış, CS gibi), revolver %30 büyük, musket %35 büyük; bıçak sağ altta, ağzı öne-sola yatık (eskiden yukarı kalkık hançer gibiydi).
+   - Bıçak sesleri: savurma Can'ın "knife swish"i, bıçağı çekince "knife scrape" (CS'deki gibi).
+   - Ağır silahlarda görsel tekme: her atışta silah yukarı-geri sıçrar, kamera biraz (nişan değişmez). Miktar silahın `.tres`'inde `view_kick` (Heavy 9 … GL 4).
+   - Bakılacaklar: tekme dozu (`view_kick`, `data/camera/default.tres` kick grubu), tabanca/revolver yeri.
+0. **Önceki (2026-10-04 gece), Release `v0.8.4`:**
    - Can'ın ses paketi: gerçek adım sesleri (beton üstünde bot, 8 çeşit), iniş, pompalı (4 çeşit + reload'da pompa), sniper/ağır silah, roketatar/GL, patlama, dürbün açma, grapple, airdrop uyarısı. Tüfek/tabanca/railgun sesleri hâlâ üretilmiş (pakette yok).
    - Kendi ekranında Saul: kollar lacivert takım kolu + beyaz manşet + ten eller, aşağı bakınca takım pantolon + siyah ayakkabı.
    - SMG birinci şahısta %30 küçük.
@@ -371,3 +376,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-04 | 8 | Animasyon dalı (`claude/cool-faraday-3ukcaw`, içinde Steam / rocket-launcher / epic-pascal) `main`'e birleştirildi. Release iş akışı artık sadece `main`'den; `v0.8.2` zip'i main'in son halinden. |
 | 2026-10-04 | 8 | Can'ın listesi: iniş sesi patlama yerine iki ayak (`Sfx.land`, uzak oyuncularınki de), CS tarzı adım sesleri (`gen_sfx.py` `footstep`), tam panlı 3D, 32 m; hasar sarsıntısı 0,4°; `DamageOverlay` (darbe parlaması + düşük canda kalıcı kırmızı, ScreenFx'in üstünde); birinci şahıs silahlar 1,15x (`view_model_scale`). Smoke 132/0. Release v0.8.3. |
 | 2026-10-04 | 8 | Can'ın FREE FPS SFX Pack'i (`convert_sfx_pack.sh`: mono, sessizlik kesimi): adım ×8, iniş, pompalı ×4 + pompa, sniper ×4, roket ×4, patlama ×4, dürbün, grapple, uyarı; `gen_sfx.py` sadece kalan sesleri üretir. Birinci şahıs Saul (kollar vertex rengi + shader: takım kolu/manşet/ten; bacaklar takım). SMG birinci şahısta 0,7x. Smoke 132/0. Release v0.8.4. |
+| 2026-10-05 | 8 | Tabanca/revolver ileri + revolver 1,3x, musket 1,35x, bıçak açısı; bıçak sesleri (Freesound swish + scrape, çekince `Weapon.draw`); `WeaponDef.view_kick` + `CameraFeel.add_kick` (silah modeli + %30 kamera, nişan aynı). Smoke 132/0. Release v0.8.5. |

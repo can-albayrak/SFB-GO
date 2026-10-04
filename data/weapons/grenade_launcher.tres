@@ -20,6 +20,7 @@ equip_time = 0.6
 move_speed_mult = 0.95
 grenade = ExtResource("3_round")
 recoil_pattern = PackedVector2Array(0, 3.036)
+view_kick = 4.0
 recoil_recovery = 9.0
 recoil_recovery_delay = 0.1
 scene = ExtResource("2_scene")

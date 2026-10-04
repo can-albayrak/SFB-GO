@@ -186,6 +186,8 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | Glock-18 (PSX Weapon Pack) | `assets/models/weapons/real/pistol.glb`, `dual_pistols.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | Rigged Low Poly FPS Hands | `assets/models/characters/fp_hands/fp_hands.glb` | [Sketchfab](https://sketchfab.com/3d-models/rigged-low-poly-fps-hands-c0d32b85e1ff4c4aa710d416545104b1) | hvarley | CC-BY-4.0 |
 | PSX Base Male - PlayStation Character - Low Poly (artık sahnede yok) | `assets/models/characters/psx_man/psx_man.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-base-male-playstation-character-low-poly-186d173d59044734b908215ecbc88b1f) | jonniemadeit | CC-BY-4.0 |
+| knife-scrape-4 (bıçak çekme) | `assets/audio/knife_draw.wav` | [Freesound 614073](https://freesound.org/s/614073/) | stormwaveaudio | Freesound (lisans sayfada kontrol edilmeli) |
+| knife swish mixed (bıçak savurma) | `assets/audio/swing.wav` | [Freesound 423281](https://freesound.org/s/423281/) | thepigboy | Freesound (lisans sayfada kontrol edilmeli) |
 | FREE FPS SFX Pack (adım, iniş, pompalı, sniper, roket, patlama, dürbün, grapple, uyarı) | `assets/audio/*.wav` (`tools/convert_sfx_pack.sh`) | Can'ın zip'i (2026-10-04), kaynağı/lisansı yazılı değil | ? | ? (paket adı "free"; kaynak bulununca buraya) |
 | PS2 Saul Goodman (oyuncu gövdesi) | `assets/models/characters/saul/saul.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps2-saul-goodman-f3545ae03d40406c97ee6fd3c49a7793) | FusedMaker | CC-BY-4.0 |
 | Colt Python (PSX Revolver Pack [FIXED]) | `assets/models/weapons/real/revolver.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |

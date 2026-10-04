@@ -1,4 +1,4 @@
-"""Generates the procedural sound effects in assets/audio (rifle, light, rail, hit, kill, swing).
+"""Generates the procedural sound effects in assets/audio (rifle, light, rail, hit, kill).
 Run: python tools/gen_sfx.py"""
 import math
 import os
@@ -80,9 +80,7 @@ def main():
     # Hit marker tick and kill ding.
     write("hit", [math.sin(2 * math.pi * 1400 * i / RATE) * math.exp(-i / (0.03 * RATE)) for i in range(int(0.1 * RATE))])
     write("kill", [(math.sin(2 * math.pi * 1046 * i / RATE) + 0.5 * math.sin(2 * math.pi * 1568 * i / RATE)) * math.exp(-i / (0.18 * RATE)) for i in range(int(0.5 * RATE))])
-    # Melee swing: band-passed whoosh.
-    n = int(0.25 * RATE)
-    write("swing", [a * math.sin(math.pi * i / n) for i, a in enumerate(lowpass(noise(0.25), 1500))])
+    # Knife swing and draw are recorded clips now (docs/ASSETS.md).
 
 
 if __name__ == "__main__":

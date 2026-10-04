@@ -21,6 +21,7 @@ equip_time = 0.9
 move_speed_mult = 0.92
 move_spread = 6.0
 recoil_pattern = PackedVector2Array(0, 4.416)
+view_kick = 9.0
 recoil_recovery = 8.0
 recoil_recovery_delay = 0.1
 scope_zoom = 4.0
