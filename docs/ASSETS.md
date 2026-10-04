@@ -185,7 +185,8 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | MAC-11 (PSX Weapon Pack) | `assets/models/weapons/real/smg.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | Glock-18 (PSX Weapon Pack) | `assets/models/weapons/real/pistol.glb`, `dual_pistols.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | Rigged Low Poly FPS Hands | `assets/models/characters/fp_hands/fp_hands.glb` | [Sketchfab](https://sketchfab.com/3d-models/rigged-low-poly-fps-hands-c0d32b85e1ff4c4aa710d416545104b1) | hvarley | CC-BY-4.0 |
-| PSX Base Male - PlayStation Character - Low Poly | `assets/models/characters/psx_man/psx_man.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-base-male-playstation-character-low-poly-186d173d59044734b908215ecbc88b1f) | jonniemadeit | CC-BY-4.0 |
+| PSX Base Male - PlayStation Character - Low Poly (artık sahnede yok) | `assets/models/characters/psx_man/psx_man.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-base-male-playstation-character-low-poly-186d173d59044734b908215ecbc88b1f) | jonniemadeit | CC-BY-4.0 |
+| PS2 Saul Goodman (oyuncu gövdesi) | `assets/models/characters/saul/saul.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps2-saul-goodman-f3545ae03d40406c97ee6fd3c49a7793) | FusedMaker | CC-BY-4.0 |
 | Colt Python (PSX Revolver Pack [FIXED]) | `assets/models/weapons/real/revolver.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | PS1-style Steyr AUG | `assets/models/weapons/real/burst_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-steyr-aug-0d5f437f7193404ea0f030651421434f) | andrewwhiskin | CC-BY-4.0 |
 | Low-Poly M249 SAW | `assets/models/weapons/real/lmg.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m249-saw-76011c365636451c90a8e3a46c2d8ca5) | TastyTony | CC-BY-4.0 |
@@ -201,7 +202,7 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | Ps1 low-poly chainsaw | `assets/models/weapons/real/chainsaw.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-low-poly-chainsaw-507b09788e6c403690274a32d1ffe023) | Madeleinone | CC-BY-4.0 |
 | Grenade | `assets/models/weapons/real/frag_grenade.glb` | [Sketchfab](https://sketchfab.com/3d-models/grenade-8d6b63e11b464bb2a10cdbb0a082b5e7) | Chpndl | CC-BY-4.0 |
 | Flashbang | `assets/models/weapons/real/flashbang.glb` | [Sketchfab](https://sketchfab.com/3d-models/flashbang-f4a48db9bd54420696ed282af9574dd9) | Chpndl | CC-BY-4.0 |
-| Mixamo animations (rifle idle, walks, crouch walk, jump, firing, dying) | `assets/models/characters/mixamo/*.fbx` | [Mixamo](https://www.mixamo.com) | Adobe | Mixamo license |
+| Mixamo animations (rifle idle, walks, crouch walk, jump, firing, dying, reload, throw grenade) | `assets/models/characters/mixamo/*.fbx` | [Mixamo](https://www.mixamo.com) | Adobe | Mixamo license |
 
 Mixamo animasyonları: Adobe Mixamo lisansı oyunda telifsiz kullanıma izin verir, kredi şart değil; animasyon dosyaları tek başına (oyun dışında) dağıtılamaz. Sadece iskelet + animasyon indirildi ("without skin"), gövde bizim yer tutucu.
 

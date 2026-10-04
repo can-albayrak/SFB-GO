@@ -16,6 +16,7 @@ fire_interval = 0.075
 automatic = true
 magazine_size = 35
 reload_time = 1.8
+reload_clip = true
 equip_time = 0.35
 move_speed_mult = 1.0
 move_spread = 0.4

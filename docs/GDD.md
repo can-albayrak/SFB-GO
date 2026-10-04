@@ -237,7 +237,7 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 2. 3–4 olası noktadan biri seçilir (host); ışık hüzmesi iner, kasa 10–15 sn'de paraşütle düşer.
 3. Kasayı açmak için `E` 3 sn basılı tutulur; hasar alınırsa iptal olur.
 
-**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür (başının üstünde duvar arkasından da görünen işaret) ve yavaşlar (%15). Ölünce silah kalan mermisiyle yere düşer, üstünden geçen alır (45 sn sonra kaybolur). Kill ödülü bu silahlara mermi eklemez. Airdrop silahı **4** tuşunda (3 = bıçak); kasadan alınca hemen elde olur. Silah taşırken kasa açılamaz.
+**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür (başının üstündeki nick turuncu olur ve duvar arkasından da görünür; her oyuncunun başında küçük nick yazar, Can'ın kararı 2026-10-04) ve yavaşlar (%15). Ölünce silah kalan mermisiyle yere düşer, üstünden geçen alır (45 sn sonra kaybolur). Kill ödülü bu silahlara mermi eklemez. Airdrop silahı **4** tuşunda (3 = bıçak); kasadan alınca hemen elde olur. Silah taşırken kasa açılamaz.
 
 **Silah:** Her airdrop'ta rastgele biri, kasa açılana kadar bilinmez. Hasarlar oynadıkça ayarlanır.
 

@@ -3,7 +3,7 @@ extends RefCounted
 ## Builds the third-person animation library once from the Mixamo FBX clips in
 ## assets/models/characters/mixamo (skeleton only, no mesh). Walk clips lose their root
 ## motion (the body is placed by the game) and missing directions are made by playing
-## existing clips backwards.
+## existing clips backwards. Reload and throw only ever play on the upper body.
 
 const DIR: String = "res://assets/models/characters/mixamo/"
 const SOURCE_CLIP: StringName = &"mixamo_com"
@@ -22,7 +22,12 @@ const CLIPS: Dictionary = {
 	&"jump_down": ["jump_down.fbx", false, true],
 	&"fire": ["firing_rifle.fbx", true, true],
 	&"dying": ["dying.fbx", false, false], # Keeps root motion: the body falls forward.
+	&"reload": ["reload.fbx", false, true],
+	&"throw_full": ["throw_grenade.fbx", false, true],
 }
+## The kneeling grenade clip: only the arm going back and the throw (seconds).
+const THROW_FROM: float = 1.1
+const THROW_TO: float = 2.3
 
 ## Ground speed of each walk clip in m/s (measured from its root motion), keyed by the
 ## blend space point it sits on (x = right, y = forward).
@@ -68,6 +73,8 @@ static func _build() -> void:
 	_library.add_animation(&"run_back_right", _reversed(_library.get_animation(&"run_fwd_left")))
 	_library.add_animation(&"crouch_left", _reversed(_library.get_animation(&"crouch_right")))
 	_library.add_animation(&"crouch_idle", _frozen(_library.get_animation(&"crouch_right"), 0.0))
+	_library.add_animation(&"throw", _cut(_library.get_animation(&"throw_full"), THROW_FROM, THROW_TO))
+	_library.remove_animation(&"throw_full")
 
 	for clip: StringName in [&"run_fwd", &"run_left", &"run_right", &"run_fwd_left"]:
 		ground_points[clip] = drift[clip]
@@ -118,6 +125,21 @@ static func _reversed(source: Animation) -> Animation:
 		for key: int in source.track_get_key_count(track):
 			var time: float = source.length - source.track_get_key_time(track, key)
 			animation.track_insert_key(copy, time, source.track_get_key_value(track, key))
+	return animation
+
+
+## The part of `source` between two times, starting at 0.
+static func _cut(source: Animation, from: float, to: float) -> Animation:
+	var animation := Animation.new()
+	animation.length = to - from
+	for track: int in source.get_track_count():
+		var copy: int = animation.add_track(source.track_get_type(track))
+		animation.track_set_path(copy, source.track_get_path(track))
+		animation.track_set_interpolation_type(copy, source.track_get_interpolation_type(track))
+		for key: int in source.track_get_key_count(track):
+			var time: float = source.track_get_key_time(track, key)
+			if time >= from and time <= to:
+				animation.track_insert_key(copy, time - from, source.track_get_key_value(track, key))
 	return animation
 
 

@@ -11,9 +11,11 @@ const SHIELD_COLOR: Color = Color(0.35, 0.8, 1.0, 0.4)
 ## Scope glint (GDD Hawk): shown to others while scoped, same screen size at any distance.
 const GLINT_OFFSET: Vector3 = Vector3(0.15, 1.5, -0.45)
 const GLINT_SIZE: float = 0.04
-## Airdrop carrier marker over the head, seen through walls.
-const CARRIER_HEIGHT: float = 2.3
-const CARRIER_PIXEL_SIZE: float = 0.0015
+## Name over every other player's head; an airdrop carrier's shows through walls (GDD).
+const NAME_HEIGHT: float = 2.05
+const NAME_PIXEL_SIZE: float = 0.0011
+const NAME_FONT_SIZE: int = 20
+const NAME_COLOR: Color = Color(0.92, 0.94, 0.96)
 const CARRIER_COLOR: Color = Color(1.0, 0.45, 0.35)
 ## Pickup glow (GDD: a player under a boost glows in its colour).
 const POWERUP_LIGHT_ENERGY: float = 2.5
@@ -26,7 +28,9 @@ var _glint: MeshInstance3D
 var _sent_scoped: bool = false ## Owner: scope state last told to the host.
 var _held_model: Node3D
 var _powerup_light: OmniLight3D
-var _carrier_label: Label3D
+var _name_label: Label3D
+var _carrying: bool = false
+var _held_length: float = 0.0 ## Length of the world model in hand (0 = none).
 
 @onready var player: Player = get_parent()
 
@@ -42,17 +46,16 @@ func setup() -> void:
 	_powerup_light.position.y = 1.1
 	_powerup_light.visible = false
 	player.model.add_child(_powerup_light) # Hidden with the body (dead, own view).
-	_carrier_label = Label3D.new()
-	_carrier_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_carrier_label.no_depth_test = true # GDD: an airdrop carrier is visible to everyone, walls or not.
-	_carrier_label.fixed_size = true
-	_carrier_label.pixel_size = CARRIER_PIXEL_SIZE
-	_carrier_label.font_size = 32
-	_carrier_label.outline_size = 8
-	_carrier_label.modulate = CARRIER_COLOR
-	_carrier_label.position.y = CARRIER_HEIGHT
-	_carrier_label.visible = false
-	player.model.add_child(_carrier_label)
+	_name_label = Label3D.new()
+	_name_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_name_label.fixed_size = true
+	_name_label.pixel_size = NAME_PIXEL_SIZE
+	_name_label.font_size = NAME_FONT_SIZE
+	_name_label.outline_size = 4
+	_name_label.position.y = NAME_HEIGHT
+	player.model.add_child(_name_label) # Hidden with the body (dead, own view).
+	Net.players_changed.connect(_refresh_name)
+	_refresh_name()
 
 
 ## Owner, every tick: tells the host when the scope goes up or down (others see the glint).
@@ -75,12 +78,23 @@ func show_shield(active: bool) -> void:
 		_shield_visual.visible = active and not player.is_local
 
 
-## Player.special_weapon changed (every peer): "▼ RAILGUN" over a carrier. Empty = none.
+## Player.special_weapon changed (every peer): a carrier's name shows through walls.
 func show_carrier(weapon_name: String) -> void:
-	if _carrier_label == null:
+	_carrying = not weapon_name.is_empty()
+	_refresh_name()
+
+
+func _refresh_name() -> void:
+	if _name_label == null:
 		return
-	_carrier_label.text = "▼  %s" % weapon_name.to_upper()
-	_carrier_label.visible = not weapon_name.is_empty()
+	_name_label.text = Net.player_names.get(player.get_multiplayer_authority(), "")
+	_name_label.no_depth_test = _carrying # GDD: an airdrop carrier is visible to everyone, walls or not.
+	_name_label.modulate = CARRIER_COLOR if _carrying else NAME_COLOR
+
+
+## Length of the weapon model in hand (SoldierRig: how the hands hold it). 0 = none.
+func get_held_length() -> float:
+	return _held_length
 
 
 ## Player.powerups changed (every peer): glow in the colour of an active boost.
@@ -97,6 +111,7 @@ func show_powerups(mask: int) -> void:
 ## Player.held_slot or the loadout changed (every peer): the world model in the body's hand.
 ## Hidden on the owner with the rest of the body.
 func show_held_weapon(slot: int) -> void:
+	_held_length = 0.0
 	if _held_model != null:
 		_held_model.queue_free()
 		_held_model = null
@@ -108,6 +123,7 @@ func show_held_weapon(slot: int) -> void:
 	_held_model = def.world_model.instantiate() as Node3D
 	_held_model.scale = Vector3.ONE * def.world_model_scale
 	player.hand.add_child(_held_model)
+	_held_length = _model_length(_held_model) * def.world_model_scale
 	player.remote_muzzle.position = def.world_muzzle * def.world_model_scale
 
 
@@ -231,3 +247,36 @@ func _play_remote_shot() -> void:
 	if slot < 0 or slot >= player.weapons.size():
 		return
 	Sfx.shot(player.get_parent(), player.weapons[slot].def, player.remote_muzzle.global_position)
+
+
+static func _model_length(model: Node3D) -> float:
+	var length: float = 0.0
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		var box: AABB = mesh.get_aabb()
+		if mesh.is_inside_tree():
+			box = (model.global_transform.affine_inverse() * mesh.global_transform) * box
+		length = maxf(length, box.size.z)
+	return length
+
+
+## Owner: something others should see the body do (reload, throw, knife swing).
+func report_action(action: SoldierRig.Action, seconds: float) -> void:
+	_request_action.rpc_id(1, action, seconds)
+
+
+## Owner -> host -> everyone else: SoldierRig.play_action. Cosmetic only.
+@rpc("any_peer", "call_local", "unreliable_ordered")
+func _request_action(action: int, seconds: float) -> void:
+	if not multiplayer.is_server() or _sender_id() != player.get_multiplayer_authority():
+		return
+	for peer_id: int in Net.ingame_peers:
+		if peer_id != player.get_multiplayer_authority():
+			_show_action.rpc_id(peer_id, action, clampf(seconds, 0.0, 10.0))
+
+
+@rpc("any_peer", "call_local", "unreliable_ordered")
+func _show_action(action: int, seconds: float) -> void:
+	if _sender_id() != 1 or player.is_local or player.rig == null:
+		return
+	player.rig.play_action(action as SoldierRig.Action, seconds)

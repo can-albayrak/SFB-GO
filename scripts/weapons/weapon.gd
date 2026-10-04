@@ -150,6 +150,7 @@ func _start_reload() -> void:
 		return
 	_reload_left = def.reload_time
 	_set_reloading(true)
+	player.effects.report_action(SoldierRig.Action.RELOAD, def.reload_time / player.status.get_reload_speed_mult())
 
 
 func _set_reloading(value: bool) -> void:

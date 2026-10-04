@@ -218,6 +218,8 @@ func _physics_process(delta: float) -> void:
 		ability.tick(delta)
 		if cmd.ability and ability.try_use(get_aim_origin(), -get_aim_basis().z):
 			requests.send_ability(get_aim_origin(), -get_aim_basis().z)
+			if ability is GrenadeAbility:
+				effects.report_action(SoldierRig.Action.THROW, 0.0) # Others see the throw.
 	var airdrops: AirdropManager = AirdropManager.find(get_tree())
 	if airdrops != null:
 		airdrops.tick_local(self, cmd.interact)

@@ -23,6 +23,9 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var burst_interval: float = 0.07 ## Seconds between shots inside a burst.
 @export var magazine_size: int = 30
 @export var reload_time: float = 2.0
+## Others see the Mixamo magazine-reload clip (box-magazine guns). False: the gun is tipped
+## up while reloading instead (shotgun, revolver, pistols, launchers...).
+@export var reload_clip: bool = false
 @export var equip_time: float = 0.4
 @export var move_speed_mult: float = 1.0
 @export var uses_ammo: bool = true ## False = never runs dry (melee weapons).

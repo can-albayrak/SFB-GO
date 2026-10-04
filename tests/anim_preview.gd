@@ -1,14 +1,17 @@
 extends Node
 ## Third-person animation preview on the offline Test Range: fake remote players run,
-## strafe, back-pedal while looking up and down, crouch-walk, jump, fire and die in a loop.
+## strafe, back-pedal while looking up and down, crouch-walk, jump, fire, die, reload (clip and
+## tipped-up gun), throw and knife-swing in a loop.
 ##   godot --path . res://tests/anim_preview.tscn
 ##   godot --path . res://tests/anim_preview.tscn -- --shots=C:/tmp/anim   (saves frames, quits)
-##   ... -- --focus=strafe   (camera close on one act: run_circle, strafe, back_aim, crouch, jump, die)
+##   ... -- --focus=strafe   (camera close on one act: run_circle, strafe, back_aim, crouch, jump, die,
+##   reload, tilt, throw, swing); add --side to look from the fake's right side
 ## The fakes are moved by hand like snapshots would; nothing goes through the network.
 
 const GAME_SCENE: PackedScene = preload("res://scenes/game.tscn")
 const PLAYER_SCENE: PackedScene = preload("res://scenes/player/player.tscn")
-const ACTS: Array[String] = ["run_circle", "strafe", "back_aim", "crouch", "jump", "die"]
+const ACTS: Array[String] = ["run_circle", "strafe", "back_aim", "crouch", "jump", "die", "reload", "tilt", "throw", "swing"]
+const ACTION_PERIOD: float = 2.5
 const SPACING: float = 3.0
 const SHOT_TIMES: Array[float] = [1.0, 1.6, 2.3, 3.1, 4.4, 5.2]
 const FIRE_PERIOD: float = 0.45
@@ -23,12 +26,15 @@ var _shots_dir: String = ""
 var _shot_index: int = 0
 var _camera: Camera3D
 var _focus: int = -1
+var _side: bool = false
 
 
 func _ready() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--shots="):
 			_shots_dir = arg.trim_prefix("--shots=")
+		elif arg == "--side":
+			_side = true
 		elif arg.begins_with("--focus="):
 			_focus = ACTS.find(arg.trim_prefix("--focus="))
 	_open.call_deferred()
@@ -52,6 +58,7 @@ func _open() -> void:
 		var fake: Player = PLAYER_SCENE.instantiate()
 		fake.name = str(100 + i)
 		fake.setup_authority(100 + i)
+		Net.player_names[100 + i] = ACTS[i].capitalize() # Name tag over the head.
 		var origin: Vector3 = _floor_below(base + forward * 7.0 + right * (float(i) - (ACTS.size() - 1) * 0.5) * SPACING)
 		fake.position = origin
 		_game.players_root.add_child(fake)
@@ -87,6 +94,8 @@ func _process(delta: float) -> void:
 		var target: Vector3 = _origins[_focus] + Vector3.UP * 1.1
 		var toward: Vector3 = -_fakes[_focus].global_basis.z
 		_camera.global_position = target + toward * 2.6 + _fakes[_focus].global_basis.x * 1.2 + Vector3.UP * 0.2
+		if _side:
+			_camera.global_position = target + _fakes[_focus].global_basis.x * 1.8 + toward * 0.4 + Vector3.UP * 0.15
 		_camera.look_at(target)
 	_camera.current = true
 	if not _shots_dir.is_empty() and _shot_index < SHOT_TIMES.size() and _time >= SHOT_TIMES[_shot_index]:
@@ -121,6 +130,18 @@ func _act(fake: Player, origin: Vector3, act: String, fire_now: bool) -> void:
 		"jump":
 			var hop: float = fmod(_time, 1.4)
 			fake.global_position = origin + Vector3.UP * maxf(0.0, 4.5 * hop - 4.9 * hop * hop)
+		"reload", "tilt", "throw", "swing":
+			var slot: int = 1 if act == "tilt" else (2 if act == "swing" else 0) # Primary / pistol / knife.
+			if fake.held_slot != slot and slot < fake.weapons.size():
+				fake.held_slot = slot
+			if fmod(_time, ACTION_PERIOD) < fmod(_time - get_process_delta_time(), ACTION_PERIOD):
+				var kind: SoldierRig.Action = SoldierRig.Action.RELOAD
+				if act == "throw":
+					kind = SoldierRig.Action.THROW
+				elif act == "swing":
+					kind = SoldierRig.Action.SWING
+				var seconds: float = 0.4 if act == "swing" else fake.weapons[slot].def.reload_time
+				fake.rig.play_action(kind, seconds)
 		"die":
 			var cycle: float = fmod(_time, DIE_PERIOD)
 			var alive: bool = cycle < DIE_PERIOD * 0.25

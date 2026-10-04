@@ -16,6 +16,7 @@ fire_interval = 1.6
 automatic = false
 magazine_size = 8
 reload_time = 0.0
+reload_clip = true
 equip_time = 0.8
 move_speed_mult = 0.9
 kill_ammo_reward = false

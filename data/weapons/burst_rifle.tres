@@ -18,6 +18,7 @@ burst_count = 3
 burst_interval = 0.07
 magazine_size = 30
 reload_time = 2.4
+reload_clip = true
 equip_time = 0.45
 move_speed_mult = 1.0
 move_spread = 1.5

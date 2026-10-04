@@ -34,6 +34,7 @@ func holster() -> void:
 ## Owner: the host spawns the knife, so the request and the view throw are all there is to do.
 func _fire() -> void:
 	_play_throw()
+	player.effects.report_action(SoldierRig.Action.THROW, 0.0)
 	player.send_fire(player.get_aim_origin(), -player.get_aim_basis().z, player.weapons.find(self))
 
 

@@ -4,18 +4,18 @@
 [ext_resource type="PackedScene" path="res://assets/models/weapons/real/marksman_rifle.glb" id="2_model"]
 
 [node name="MarksmanRifle" type="Node3D"]
-position = Vector3(0.19, -0.2, -0.5)
+position = Vector3(0.19, -0.187, -0.53)
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-scale = Vector3(0.72, 0.72, 0.72)
+scale = Vector3(0.9, 0.9, 0.9)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(-0.0027, -0.0068, -0.5622)
+position = Vector3(-0.0034, -0.0085, -0.7027)
 
 [node name="RightHand" type="Marker3D" parent="."]
-position = Vector3(0, -0.052, 0.12)
+position = Vector3(0, -0.065, 0.15)
 
 [node name="LeftHand" type="Marker3D" parent="."]
-position = Vector3(0, -0.007, -0.18)
+position = Vector3(0, -0.0088, -0.225)
 rotation = Vector3(0, 0, -0.4363)
