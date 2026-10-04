@@ -24,7 +24,7 @@ jobs:
   windows:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Release name
         id: tag
@@ -48,7 +48,7 @@ jobs:
 
       - name: Import and export
         run: |
-          cp tools/ci/export_presets.cfg export_presets.cfg
+          cp tools/ci/windows_presets.cfg export_presets.cfg
           godot --headless --path . --import
           mkdir -p build/SFB-GO
           godot --headless --path . --export-release "Windows Desktop" build/SFB-GO/SFB-GO.exe

@@ -239,7 +239,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Yer tutucu modeller: `tools/blender/build_placeholders.py` (Blender 5.2 headless, MCP gerekmez) → `assets/models/characters/soldier.glb`, `assets/models/weapons/{assault_rifle,pistol,heavy_rifle,shotgun}.glb`. Değiştirmek için scripti düzenle, yeniden çalıştır:
   `"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --background --factory-startup --python tools/blender/build_placeholders.py -- .`
 - Meshy şimdilik kullanılmıyor (Can'ın kararı). Detaylı modeller aşama 8'de.
-- **Release:** `tools/ci/release_version.txt` değişip herhangi bir dala push'lanınca (o tag'le), `v*` tag'i push'lanınca veya Actions → Release → Run workflow ile `.github/workflows/release.yml` Godot 4.7.2 + Windows şablonlarını indirir, `tools/ci/export_presets.cfg` ile export eder, `CREDITS.txt` (ASSETS.md kredi tablosundan) ekler, zip'i GitHub Release'e yükler. Notlar `tools/ci/release_notes.md`. Yerel export için aynı dosyayı köke `export_presets.cfg` olarak kopyala (kökteki git dışı).
+- **Release:** `tools/ci/release_version.txt` değişip herhangi bir dala push'lanınca (o tag'le), `v*` tag'i push'lanınca veya Actions → Release → Run workflow ile `.github/workflows/release.yml` Godot 4.7.2 + Windows şablonlarını indirir, `tools/ci/windows_presets.cfg` ile export eder, `CREDITS.txt` (ASSETS.md kredi tablosundan) ekler, zip'i GitHub Release'e yükler. Notlar `tools/ci/release_notes.md`. Yerel export için bu dosyayı köke `export_presets.cfg` olarak kopyala (`.gitignore` her `export_presets.cfg` adını dışlar, CI kopyası bu yüzden farklı adlı).
 
 ## Denge notları
 
