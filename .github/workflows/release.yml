@@ -1,0 +1,63 @@
+# Builds the Windows game and publishes it as a GitHub Release (zip to download and play).
+# Runs when a tag like v0.8.0 is pushed, or by hand from the Actions tab (pick the tag name).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create (e.g. v0.8.1)"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Release name
+        id: tag
+        run: echo "tag=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Godot and the Windows export templates
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -sSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          curl -sSL -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$dir"
+          unzip -q -j templates.tpz "templates/windows_release_x86_64.exe" "templates/windows_debug_x86_64.exe" "templates/version.txt" -d "$dir"
+          rm godot.zip templates.tpz
+
+      - name: Import and export
+        run: |
+          cp tools/ci/export_presets.cfg export_presets.cfg
+          godot --headless --path . --import
+          mkdir -p build/SFB-GO
+          godot --headless --path . --export-release "Windows Desktop" build/SFB-GO/SFB-GO.exe
+          test -s build/SFB-GO/SFB-GO.exe
+
+      - name: Zip
+        run: |
+          python3 tools/ci/make_credits.py build/SFB-GO/CREDITS.txt
+          cd build
+          zip -r "SFB-GO-${{ steps.tag.outputs.tag }}-windows.zip" SFB-GO
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: SFB:GO ${{ steps.tag.outputs.tag }}
+          body_path: tools/ci/release_notes.md
+          files: build/SFB-GO-${{ steps.tag.outputs.tag }}-windows.zip

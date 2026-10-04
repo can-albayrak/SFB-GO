@@ -200,5 +200,8 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | Ps1 low-poly chainsaw | `assets/models/weapons/real/chainsaw.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-low-poly-chainsaw-507b09788e6c403690274a32d1ffe023) | Madeleinone | CC-BY-4.0 |
 | Grenade | `assets/models/weapons/real/frag_grenade.glb` | [Sketchfab](https://sketchfab.com/3d-models/grenade-8d6b63e11b464bb2a10cdbb0a082b5e7) | Chpndl | CC-BY-4.0 |
 | Flashbang | `assets/models/weapons/real/flashbang.glb` | [Sketchfab](https://sketchfab.com/3d-models/flashbang-f4a48db9bd54420696ed282af9574dd9) | Chpndl | CC-BY-4.0 |
+| Mixamo animations (rifle idle, walks, crouch walk, jump, firing, dying) | `assets/models/characters/mixamo/*.fbx` | [Mixamo](https://www.mixamo.com) | Adobe | Mixamo license |
+
+Mixamo animasyonları: Adobe Mixamo lisansı oyunda telifsiz kullanıma izin verir, kredi şart değil; animasyon dosyaları tek başına (oyun dışında) dağıtılamaz. Sadece iskelet + animasyon indirildi ("without skin"), gövde bizim yer tutucu.
 
 PSX Revolver (Timnuts) **Sketchfab Standard** lisanslı, CC-BY değil: oyunda kullanılabilir, model tek başına dağıtılamaz (repo ve Release gizli kalmalı; açık paylaşımda değiştirilmeli). Ham dosyalar `private_assets/weapons/` (git dışı); işlenmiş halleri `tools/blender/process_weapon_models.py` ile üretilir, sahnelere `tools/apply_weapon_models.py` ile bağlanır.

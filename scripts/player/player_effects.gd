@@ -205,6 +205,7 @@ func _show_decoy(at: Vector3, yaw: float, seconds: float) -> void:
 func _show_shot(_from: Vector3, to: Vector3, beam: bool) -> void:
 	if _sender_id() != 1 or player.is_local:
 		return
+	player.rig.play_fire()
 	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
 	if beam:
 		ShotEffects.spawn_beam(player.get_parent(), player.remote_muzzle.global_position, to)
@@ -216,6 +217,7 @@ func _show_shot(_from: Vector3, to: Vector3, beam: bool) -> void:
 func _on_pellets_fired(ends: PackedVector3Array) -> void:
 	if _sender_id() != 1 or player.is_local:
 		return
+	player.rig.play_fire()
 	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
 	for end_point: Vector3 in ends:
 		ShotEffects.spawn_tracer(player.get_parent(), player.remote_muzzle.global_position, end_point)

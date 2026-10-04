@@ -39,7 +39,7 @@ sfb-go/
 ├── scripts/
 │   ├── defs/                # class_def.gd, class_roster.gd, weapon_def.gd, ability_def.gd, grenade_def.gd, movement_def.gd, match_def.gd, camera_feel_def.gd, map_def.gd, map_list.gd
 │   ├── game/                # game.gd (maç sahnesi: harita, spawn, respawn), lag_compensator.gd
-│   ├── player/              # player.gd + bileşenler (player_net_sync, player_requests, player_status, player_effects), movement.gd, camera_feel.gd, first_person_legs.gd, first_person_arms.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd
+│   ├── player/              # player.gd + bileşenler (player_net_sync, player_requests, player_status, player_effects), movement.gd, camera_feel.gd, first_person_legs.gd, first_person_arms.gd, player_input.gd, player_command.gd, hitbox.gd, loadout.gd, soldier_rig.gd + soldier_animations.gd + soldier_mesh.gd + spine_aim_modifier.gd (üçüncü şahıs animasyonlu gövde), corpse.gd
 │   ├── maps/                # target_dummy.gd vb. harita scriptleri
 │   ├── weapons/             # weapon.gd (taban), hitscan_weapon.gd, shotgun_weapon.gd, dual_pistols_weapon.gd, launcher_weapon.gd, melee_weapon.gd, throwing_knife_weapon.gd
 │   ├── abilities/           # ability.gd (taban), grenade_ability.gd, grenade.gd (bomba/mermi), grapple, decoy, shield, charge, dash, adrenaline
@@ -62,6 +62,7 @@ sfb-go/
 │   ├── movement_test.tscn   # Gerçek Movement: basamaklar, merdivenler, AVM rampaları, çatıdan atlama
 │   ├── map_test.tscn        # Her harita: spawn/pickup/airdrop noktaları, navmesh ile ulaşılabilirlik, yüksek katlara 2+ yol
 │   ├── net_test.tscn        # İki process, gerçek ENet: --role=host / --role=client (+ --late)
+│   ├── anim_preview.tscn    # Test Range'de sahte uzak oyuncular: koşu, yan adım, geri + yukarı/aşağı bakış, çömelme, zıplama, ateş, ölüm (--focus=, --shots=)
 │   └── ui_preview.tscn      # Sahte veriyle tek ekran (--screen=lobby|loadout|range|death|scoreboard|down|walk|slide); --write-movie ile kare yakalanır
 ├── tools/                   # .gdignore; oyun dışı araçlar
 │   ├── blender/build_placeholders.py   # Yer tutucu modelleri üretir (Blender headless → .glb)
@@ -69,7 +70,7 @@ sfb-go/
 │   ├── apply_weapon_models.py          # real/ modelleri silah sahnelerine ve WeaponDef'lere bağlar (ölçek, namlu, üçüncü şahıs)
 │   └── maps/build_mall_blockout.py     # AVM blockout sahnesini üretir (Python; --preview ile kat PNG'leri)
 └── assets/
-    ├── models/              # characters/soldier.glb, weapons/*.glb yer tutucular, weapons/real/*.glb indirilen modeller (Blender'da +Y ileri = Godot -Z)
+    ├── models/              # characters/mixamo/*.fbx (Mixamo, mesh'siz iskelet + animasyon), characters/soldier.glb (eski statik yer tutucu, artık sahnede yok), weapons/*.glb yer tutucular, weapons/real/*.glb indirilen modeller (Blender'da +Y ileri = Godot -Z)
     ├── textures/
     ├── audio/
     └── shaders/             # ps2_screen.gdshader + ps2_screen.tres (ekran filtresi değerleri)
@@ -239,7 +240,10 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 │   ├── HeadHitbox (Area3D)         hitbox.gd       – zone = HEAD
 │   ├── BodyHitbox (Area3D)                         – zone = BODY
 │   └── LegHitbox (Area3D)                          – zone = LEG (eğilince Hitbox.set_pose; kutular local_to_scene)
-├── Model (Node3D)                                  – başkalarının gördüğü gövde (sahibinde gizli)
+├── Model (Node3D)                                  – başkalarının gördüğü gövde (sahibinde gizli), çömelince scale.y = SoldierRig.CROUCH_SCALE
+│   ├── Rig (SoldierRig)                            – `Player._ready`'de koddan kurulur: Mixamo iskeleti + asker mesh'i + AnimationTree
+│   ├── Hand (Node3D) / Muzzle                      – eldeki silah; Rig her frame sağ el kemiğine koyar, bakış yönüne çevirir
+│   └── Crown                                       – lider tacı; Rig kafanın üstüne koyar
 ├── Movement (Node)                 movement.gd     – Quake tarzı ivme, bhop, slide, crouch
 ├── PlayerInput (Node)              player_input.gd – sadece sahip client'ta aktif
 ├── NetSync (Node)                  player_net_sync.gd – hareket senkronu (sahip → host → diğerleri), interpolasyon, host hız kontrolü
@@ -251,6 +255,18 @@ Player (CharacterBody3D)            player.gd       – durum, bileşenleri bağ
 
 Bileşenler sahnede sabit düğümler: RPC'leri her peer'da aynı yolda (`Players/<id>/Requests` vb.). Dışarıdan erişim `player.status.server_stun(...)`, `player.effects.show_grapple(...)` gibi; silahlar `player.send_fire(...)` ile atar. Bileşenlerin `_ready`'si oyuncununkinden önce çalıştığı için oyuncuya düğüm ekleyen kurulum (`Effects.setup`) `Player._ready`'den çağrılır.
 ```
+
+### Üçüncü şahıs animasyon (aşama 8)
+
+Sadece görsel; hitbox'lar, vuruş ve ölüm kararı değişmedi (host, sabit kutular, lag compensation).
+
+- **Kaynak:** `assets/models/characters/mixamo/*.fbx` (Mixamo "without skin": sadece `mixamorig_*` iskeleti + tek klip). `SoldierAnimations` (statik, bir kez) klipleri bir `AnimationLibrary`'ye toplar: yürüyüşlerin kök hareketi silinir (gövdeyi oyun taşır), hızları kök hareketinden ölçülür; eksik yönler ters oynatmayla üretilir (`run_back` = ileri yürüyüş tersten, `run_back_right`, `crouch_left`), `crouch_idle` = çömelme yürüyüşünün ilk karesi. `strafing.fbx` kullanılmıyor (yerinde, yönü belirsiz).
+- **Gövde:** `SoldierMesh` eski yer tutucu askerin kutularını (aynı renkler) Mixamo iskeletine tek kemikle bağlı tek bir skinned mesh olarak üretir (tek draw call). Değiştirmek için `SIDE_PARTS` / `CENTRE_PARTS`.
+- **Ağaç (`SoldierRig`):** `state` Transition (ground / crouch / jump / fall) → `fire` Blend2 (üst gövde filtresi, `firing_rifle` atıştan sonra 0,35 sn). ground = BlendSpace2D (idle + 6 yön, yerel hız m/s; 2,2 m/s üstü klibi hızlandırır), crouch = BlendSpace1D (sol / dur / sağ) + üst gövdede nişan pozu. Girdiler her peer'ın zaten bildikleri: interpolasyonlu pozisyondan hız, yaw, `look_pitch`, `is_pose_crouched()`, gösterilen atış (`PlayerEffects._show_shot`), yer için kısa aşağı ray (katman 1).
+- **`SpineAimModifier` (SkeletonModifier3D, animasyondan sonra):** (1) *upright*: omurgayı kafa ayakların (oyuncu orijininin) üstüne gelecek şekilde döndürür. Hitbox'lar animasyonla oynamadığı için öne eğik koşu klibi görünen kafayı kafa hitbox'ının dışına taşıyordu (~18 cm); şimdi görünen kafa hitbox ekseninde (koşarken ~9 cm alçak, kürenin içinde). (2) *pitch*: omurga bakış açısına eğilir (±60°).
+- **Çömelme:** klip, çömelmiş kafa hitbox'ından (0,98 m) uzun durur; `Model` `CROUCH_SCALE` (0,74) ile basılır.
+- **Ölüm:** `_set_alive(false)` başkalarının ekranında `Corpse` bırakır (yeni bir rig, `dying` 1,4x, 5 sn sonra batarak kaybolur; collision yok). Decoy `Model`'i kopyaladığında rig donmuş pozla gelir (`_player` yok → ağaç kapalı).
+- Kendi oyuncunda rig de çalışır (decoy kopyası gerçek poz alsın diye), ama `Model` gizli.
 
 ### Girdi, bakış ve kamera
 

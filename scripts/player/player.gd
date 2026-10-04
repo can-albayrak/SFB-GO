@@ -90,6 +90,8 @@ var _hurt_since_spawn: bool = false
 var _spawned_at: float = 0.0
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
+## Animated third-person body under Model (every peer; hidden on your own screen).
+var rig: SoldierRig
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -119,6 +121,10 @@ func setup_authority(peer_id: int) -> void:
 func _ready() -> void:
 	is_local = is_multiplayer_authority()
 	crown.visible = false
+	rig = SoldierRig.create()
+	model.add_child(rig)
+	model.move_child(rig, 0)
+	rig.setup(self)
 	effects.setup()
 	effects.show_glint(scope_glint)
 	effects.show_shield(shield_up)
@@ -425,7 +431,7 @@ func apply_pose(crouched: bool) -> void:
 	head_hitbox.set_pose(HEAD_POSE_CROUCH if crouched else HEAD_POSE_STAND)
 	body_hitbox.set_pose(BODY_POSE_CROUCH if crouched else BODY_POSE_STAND)
 	leg_hitbox.set_pose(LEG_POSE_CROUCH if crouched else LEG_POSE_STAND)
-	model.scale.y = Movement.CROUCH_HEIGHT / Movement.STAND_HEIGHT if crouched else 1.0
+	model.scale.y = SoldierRig.CROUCH_SCALE if crouched else 1.0
 	if not is_local:
 		movement.set_crouch_shape(crouched)
 		head.position.y = Movement.CROUCH_EYE if crouched else Movement.STAND_EYE
@@ -580,10 +586,15 @@ func _set_health(value: int) -> void:
 
 
 func _set_alive(value: bool) -> void:
+	var was_alive: bool = is_alive
 	is_alive = value
 	if is_node_ready():
 		if not value:
 			status.reset_local()
+			if was_alive and not is_local: # Others see the body fall; your own view stays clean.
+				get_parent().add_child(Corpse.create(model))
+		else:
+			rig.reset_motion()
 		_apply_alive_state()
 	alive_changed.emit(value)
 

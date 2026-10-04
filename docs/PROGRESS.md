@@ -3,12 +3,13 @@
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Şu anki aşama:** 7 – Harita blockout (AVM): yazıldı ve headless doğrulandı, **Can oynamadı**. Aşama 6 kapandı (2026-10-01). Modeller (aşama 8) Can'la birlikte. Görsel geçişin ilk turu (UI, atmosfer, birinci şahıs gövde) yapıldı. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
-**Son güncelleme:** 2026-10-02
+**Son güncelleme:** 2026-10-04
 
 ## Sıradaki oturum
 
 **Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
+0. **Animasyonlar – Can'ın oynama testi:** dal `claude/cool-faraday-3ukcaw` (main'e henüz birleşmedi), Release `v0.8.0` (GitHub Releases, Windows zip). İki pencere / iki bilgisayarla karşıdakine bak: koşu, yan adım, geri, çapraz, çömelme, zıplama, ateş, yukarı/aşağı nişan, ölüm. Tek başına bakmak için: `godot --path . res://tests/anim_preview.tscn` (sahte oyuncular; `-- --focus=crouch` gibi). Bakılacaklar: koşu hızına göre ayaklar kayıyor mu, eldeki silah yeri, çömelme boyu, ceset duvarın içine giriyor mu. Beğenilirse main'e birleştir.
 0. **Aşama 7 – Can'ın oynama testi (evde):**
    - Lobide harita listesi: "Mall (4-10)" varsayılan, "Test Range" ikinci.
    - AVM'de tek başına tur: yürüyen merdivenler, iç merdivenler (market ve mağaza), çatı merdiveni, yangın merdiveni, balkon merdiveni, yükleme rampası. Takılma, havaya kalkma, kamera zıplaması var mı?
@@ -41,7 +42,7 @@ Her aşamanın sonunda oynanabilir bir sürüm olur; bir aşama bitmeden diğeri
 | 5 | Sınıflar: Hawk, Bear, Cheetah, Volcano (sırayla, her biri ayrı test) | ✅ Bitti (2026-10-01) |
 | 6 | Pickup'lar ve airdrop | ✅ Bitti (2026-10-01) |
 | 7 | Harita blockout: alışveriş merkezi, 10 kişi testi | ⏳ Blockout yazıldı, headless doğrulandı; oynama testi bekliyor |
-| 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | ⏳ Atmosfer, ekran filtresi, birinci şahıs gövde (yer tutucu) yapıldı; modeller bekliyor |
+| 8 | Görsel geçiş: Blender modelleri, Mixamo animasyonları, ışık, post-process | ⏳ Atmosfer, ekran filtresi, birinci şahıs gövde (yer tutucu), üçüncü şahıs Mixamo animasyonları yapıldı; modeller bekliyor |
 | 9 | Cila: ses, anonslar, efektler, hit marker, grafik ayarları, 1050 Ti testi | ⏳ Menü/HUD yeni tasarımı ve grafik ayarları yapıldı |
 
 Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler → commit → gerekirse Release.
@@ -190,6 +191,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - [x] Atmosfer: soğuk kapalı gökyüzü, mavimsi sis, prosedürel kirli beton dokusu (test range)
 - [x] Ekran filtresi: grain, vignette, soğuk/yıkanmış renk, 5 bit renk + dither; Settings'te kapatma ve render ölçeği
 - [x] Birinci şahıs: silahı tutan eldivenli kollar, aşağı bakınca ve kayarken görünen bacaklar (prosedürel)
+- [x] Üçüncü şahıs Mixamo animasyonları (2026-10-04): yer tutucu asker Mixamo iskeletine bağlandı; idle, 6 yönlü koşu, çömelme yürüyüşü, zıplama/düşme, ateş (üst gövde), yukarı/aşağı nişan, ölüm + ceset. Silah sağ elde, bakış yönünde. Ayrıntı ARCHITECTURE "Üçüncü şahıs animasyon".
 - [ ] Can'ın oyunda değerlendirmesi
 - [ ] HUD silah ikonları gerçek modellerden render (modeller gelince), menü arka planı AVM kamera turu (aşama 7/8)
 
@@ -224,7 +226,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Aşama 6: Airdrop silah modelleri yer tutucu (Railgun = Heavy Rifle + mavi bobin, Minigun = LMG + namlu, Rocket = tüp). Minigun'un dönmesi başkalarına görünmüyor. Pickup alma host'un gördüğü konuma göre (~100 ms geriden). Speed pickup Adrenaline ile çarpılarak birleşir. Anons sesleri aşama 9.
 - Minigun ısınması sadece sahibinde kontrol ediliyor (host ateş hızını kontrol ediyor ama ısınmayı değil; hileli client anında ateş edebilir, mermi takibi gibi bilinçli olarak ertelendi).
 - Ekran filtresi HUD ve menüleri de etkiler (bilinçli: PS2 hissi); yazılar okunmazsa filtre ayarlardan kapatılır.
-- Uzak oyuncu modeli animasyonsuz, eğilince y'de basılır; elindeki silah artık doğru model (`held_slot`) ama tutuş pozu yok (aşama 8).
+- Üçüncü şahıs animasyonun sınırları: hitbox'lar animasyonla oynamaz (sabit kutular). Görünen kafa omurga düzeltmesiyle hitbox ekseninde tutuluyor ama koşarken ~9 cm alçak, zıplama başında daha alçak. Sadece sağa çömelme klibi var: çömelerek ileri/geri yürürken yan adım klibi oynar. Silah sağ elde, sol el ön tutamakta değil. Ceset kök hareketiyle ~1,5 m öne düşer, duvar içine girebilir. Bıçak savurma ve bomba atma hâlâ animasyonsuz. `strafing.fbx` kullanılmıyor.
 - Lag compensation 400 ms'den yüksek gecikmede tam telafi etmez (bilinçli üst sınır).
 - Bıçak savurma ve bomba atma başkalarına animasyon olarak görünmüyor (aşama 8).
 
@@ -237,6 +239,7 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 - Yer tutucu modeller: `tools/blender/build_placeholders.py` (Blender 5.2 headless, MCP gerekmez) → `assets/models/characters/soldier.glb`, `assets/models/weapons/{assault_rifle,pistol,heavy_rifle,shotgun}.glb`. Değiştirmek için scripti düzenle, yeniden çalıştır:
   `"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --background --factory-startup --python tools/blender/build_placeholders.py -- .`
 - Meshy şimdilik kullanılmıyor (Can'ın kararı). Detaylı modeller aşama 8'de.
+- **Release:** `v*` tag'i push'lanınca (veya Actions → Release → Run workflow) `.github/workflows/release.yml` Godot 4.7.2 + Windows şablonlarını indirir, `tools/ci/export_presets.cfg` ile export eder, `CREDITS.txt` (ASSETS.md kredi tablosundan) ekler, zip'i GitHub Release'e yükler. Notlar `tools/ci/release_notes.md`. Yerel export için aynı dosyayı köke `export_presets.cfg` olarak kopyala (kökteki git dışı).
 
 ## Denge notları
 
@@ -297,3 +300,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-02 | 7 | Musket 75 hasar / 3 mermi. AVM'ye tavan lambaları (40 OmniLight) + ortam ışığı. Hata: Cheetah'ın hızında kapsülün yuvarlak altı 0,6 m'lik bloğun kenarına oturup iki basamakta üstüne çıkıyordu (movement_test oyuncunun kayıtlı sınıfıyla koştuğu için ortaya çıktı); basamak üstü artık ayaktan en fazla step_height yukarıda olabilir. movement_test her zaman Wolf ile başlar, blok kontrolü her sınıf için (50/0). Smoke 125/0, map 143/0, ağ testi 0 hata. |
 | 2026-10-02 | 7/8 | Silah modelleri: 21 Sketchfab modeli `process_weapon_models.py` ile işlendi (yön, gerçek boy, el noktası, poligon ≤ 2500, doku ≤ 512, renk tonu) ve `apply_weapon_models.py` ile birinci/üçüncü şahıs sahnelerine bağlandı; Marksman Rifle kendi sahnesine (SVD) kavuştu. Krediler ASSETS.md'de (PSX Revolver Sketchfab Standard lisanslı). `private_assets/.gdignore`. Testler 125/0, 50/0, 143/0, ağ 0 hata. |
 | 2026-10-02 | 7/8 | Birinci şahıs silahlar %20 büyüdü (`VIEW_SCALE`), çift tabanca ters duruyordu (çevrildi). Arkadaşlara taşınabilir sürüm: `builds/SFB-GO_v0.7.zip` (Godot exe + proje + import önbelleği + SFB-GO.bat; export şablonları kurulu olmadığı için gerçek export yerine). Smoke 125/0. |
+| 2026-10-04 | 8 | Can'ın Mixamo animasyonları (11 FBX, mesh'siz) oyuna: `SoldierRig` (AnimationTree: 6 yönlü koşu, çömelme, zıplama/düşme, üst gövde ateş), `SoldierMesh` (yer tutucu asker skinned mesh), `SpineAimModifier` (görünen kafayı hitbox eksenine dikleştirir + bakış eğimi), `Corpse` (ölüm klibi). `tests/anim_preview.tscn`. Release iş akışı (GitHub Actions, Windows export). Smoke 125/0, movement 50/0, map 143/0, ağ (normal + geç katılma) 0 hata; export edilmiş Linux derlemesinde smoke 125/0. Dal `claude/cool-faraday-3ukcaw`. |
