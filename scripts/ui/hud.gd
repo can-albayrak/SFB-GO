@@ -77,6 +77,8 @@ var _pause_panel: Control
 
 @onready var crosshair: Crosshair = $Crosshair
 @onready var scoreboard: Scoreboard = $Scoreboard
+var _damage_overlay: DamageOverlay
+
 @onready var loadout_menu: LoadoutMenu = $LoadoutMenu
 @onready var flash_overlay: ColorRect = $FlashOverlay
 
@@ -85,6 +87,8 @@ func _ready() -> void:
 	_scope_overlay = ScopeOverlay.new()
 	add_child(_scope_overlay)
 	move_child(_scope_overlay, 0) # Under everything, so health/ammo stay readable while scoped.
+	_damage_overlay = DamageOverlay.new()
+	add_child(_damage_overlay) # Its own canvas layer, above the screen filter.
 	var hud_root: Control = _build_hud()
 	add_child(hud_root)
 	move_child(hud_root, 1)
@@ -629,6 +633,7 @@ func _on_local_player_spawned(player: Player) -> void:
 	player.protection_changed.connect(_on_protection_changed)
 	_on_alive_changed(player.is_alive)
 	_on_protection_changed(player.is_protected)
+	_damage_overlay.watch(player)
 
 
 func _on_alive_changed(is_alive: bool) -> void:
