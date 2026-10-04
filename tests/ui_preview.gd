@@ -6,17 +6,24 @@ extends Node
 ## death (killed by a fall), scoreboard (Tab board shown), and frozen body poses for the
 ## first-person legs: down (look at your feet), walk, slide; drops (Test Range rules: pickups
 ## and a falling airdrop crate).
+## range also takes --class=N --primary=N --slot=N (roster index, primary choice, weapon slot in
+## hand: view model and arms), --special=N (airdrop weapon in slot 3 = key 4),
+## --map=res://...tscn (another map), --at=x,y,z --yaw=deg --pitch=deg (camera placement) and
+## --hud=off (view model only), --fire=seconds (one shot, swing or throw after that long;
+## with --alt=1 the right click instead, the knife's heavy stab).
 ## Nothing is saved: the settings file is left alone.
 
 const FAKE_NAMES: Dictionary[int, String] = {1: "Can", 2: "Grizz", 3: "Volt"}
 
 
+var _args: Dictionary[String, String] = {}
+
+
 func _ready() -> void:
-	var screen: String = "lobby"
 	for arg: String in OS.get_cmdline_user_args():
-		if arg.begins_with("--screen="):
-			screen = arg.trim_prefix("--screen=")
-	_open.call_deferred(screen)
+		if arg.begins_with("--") and arg.contains("="):
+			_args[arg.substr(2, arg.find("=") - 2)] = arg.substr(arg.find("=") + 1)
+	_open.call_deferred(_args.get("screen", "lobby"))
 
 
 func _open(screen: String) -> void:
@@ -49,11 +56,13 @@ func _open(screen: String) -> void:
 			else:
 				Match.configure(20, 10.0)
 			Net.player_names.assign({1: "Can"})
-			Net.map_path = Net.DEFAULT_MAP_PATH
+			Net.map_path = _args.get("map", Net.DEFAULT_MAP_PATH)
 			get_tree().change_scene_to_file(Net.GAME_PATH)
 			await get_tree().create_timer(0.5).timeout
 			var game: Game = Game.find(get_tree())
 			var player := game.players_root.get_node_or_null("1") as Player
+			if player != null and screen == "range":
+				_place_view(player)
 			if screen == "death" and player != null:
 				player.server_fall_death()
 			elif screen == "drops" and player != null:
@@ -95,3 +104,34 @@ func _pose_body(player: Player, screen: String) -> void:
 			player.movement.is_sliding = true
 			player.head.position.y = Movement.CROUCH_EYE
 			player.velocity = forward * 9.0
+
+
+## Range screen options: class, weapon in hand, camera placement.
+func _place_view(player: Player) -> void:
+	if _args.has("class"):
+		player.loadout = Loadout.make(_args["class"].to_int(), _args.get("primary", "0").to_int(), 0)
+	if _args.has("special"):
+		player.special_weapon = _args["special"].to_int()
+	if _args.has("slot"):
+		player.equip(_args["slot"].to_int())
+	if _args.has("at"):
+		player.set_physics_process(false)
+		var parts: PackedStringArray = _args["at"].split(",")
+		player.global_position = Vector3(parts[0].to_float(), parts[1].to_float(), parts[2].to_float())
+	if _args.has("yaw"):
+		player.rotation.y = deg_to_rad(_args["yaw"].to_float())
+	if _args.has("pitch"):
+		player.look_pitch = deg_to_rad(_args["pitch"].to_float())
+	if _args.get("hud", "on") == "off":
+		var hud := Game.find(get_tree()).get_node_or_null(^"HUD") as CanvasLayer
+		if hud != null:
+			hud.visible = false # View model shots: no pause panel when the window is not focused.
+	if _args.has("fire"):
+		# One shot / swing / throw this many seconds after opening (frames of the animation).
+		await get_tree().create_timer(_args["fire"].to_float()).timeout
+		if _args.get("alt", "0") == "1": # Right click: the knife's heavy stab.
+			var stab := PlayerCommand.new()
+			stab.secondary_pressed = true
+			player.current_weapon.tick(0.0, stab)
+		else:
+			player.current_weapon.call(&"_shoot_once")

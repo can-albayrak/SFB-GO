@@ -4,11 +4,10 @@
 [ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="2_cdef"]
 [ext_resource type="Resource" path="res://data/classes/wolf.tres" id="3_wolf"]
 [ext_resource type="Resource" path="res://data/classes/hawk.tres" id="4_hawk"]
-[ext_resource type="Resource" path="res://data/classes/bear.tres" id="5_bear"]
 [ext_resource type="Resource" path="res://data/classes/cheetah.tres" id="6_cheetah"]
 [ext_resource type="Resource" path="res://data/classes/volcano.tres" id="7_volcano"]
 [ext_resource type="Resource" path="res://data/classes/cowboy.tres" id="8_cowboy"]
 
 [resource]
 script = ExtResource("1_roster")
-classes = Array[ExtResource("2_cdef")]([ExtResource("3_wolf"), ExtResource("4_hawk"), ExtResource("5_bear"), ExtResource("6_cheetah"), ExtResource("7_volcano"), ExtResource("8_cowboy")])
+classes = Array[ExtResource("2_cdef")]([ExtResource("3_wolf"), ExtResource("4_hawk"), ExtResource("6_cheetah"), ExtResource("7_volcano"), ExtResource("8_cowboy")])

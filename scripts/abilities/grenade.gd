@@ -13,6 +13,8 @@ const GROUND_PROBE: float = 0.25 ## ... on ground found this far below its centr
 const WORLD_MASK: int = 1
 const BLINK_PERIOD: float = 0.8 ## Mine light: seconds per blink cycle (cosmetic).
 const BLINK_ON_SHARE: float = 0.35 ## Share of the cycle the light is on.
+const GUIDE_RANGE: float = 500.0 ## Guided rocket: how far the shooter's laser reaches.
+const GUIDE_MASK: int = 1 | 2 # world | players
 
 var def: GrenadeDef
 var thrower_id: int = 0
@@ -62,6 +64,8 @@ func _physics_process(delta: float) -> void:
 	if not multiplayer.is_server():
 		return
 	_age += delta
+	if def.guided_turn_rate > 0.0:
+		_steer(delta)
 	if _stuck:
 		_follow_anchor()
 	elif get_contact_count() > 0:
@@ -89,6 +93,36 @@ func _physics_process(delta: float) -> void:
 		else:
 			set_physics_process(false)
 			queue_free()
+
+
+## Guided rocket (Half-Life style): while the shooter is alive, holds a guidable launcher
+## and has the laser on, turn towards the point their view ray hits, at a limited rate.
+func _steer(delta: float) -> void:
+	var thrower: Player = _get_thrower()
+	if thrower == null or not thrower.is_alive or not thrower.rocket_guided:
+		return
+	if thrower.held_slot < 0 or thrower.held_slot >= thrower.weapons.size() or not thrower.weapons[thrower.held_slot].def.guidable:
+		return
+	var speed: float = linear_velocity.length()
+	if speed < 0.01:
+		return
+	var origin: Vector3 = thrower.get_aim_origin()
+	var forward: Vector3 = thrower.get_look_forward()
+	var exclude: Array[RID] = thrower.get_hit_exclusions()
+	exclude.append(get_rid())
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + forward * GUIDE_RANGE, GUIDE_MASK, exclude)
+	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+	var target: Vector3 = hit["position"] if not hit.is_empty() else origin + forward * GUIDE_RANGE
+	var current: Vector3 = linear_velocity / speed
+	var wanted: Vector3 = (target - global_position).normalized()
+	var angle: float = current.angle_to(wanted)
+	if angle < 0.001:
+		return
+	var step: float = minf(deg_to_rad(def.guided_turn_rate) * delta / angle, 1.0)
+	var new_dir: Vector3 = current.slerp(wanted, step).normalized()
+	linear_velocity = new_dir * speed
+	angular_velocity = Vector3.ZERO
+	global_basis = Basis.looking_at(new_dir)
 
 
 func _explode() -> void:

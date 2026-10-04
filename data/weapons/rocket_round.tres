@@ -17,3 +17,4 @@ damage = 200.0
 self_damage_mult = 0.4
 knockback = 11.0
 explode_on_impact = true
+guided_turn_rate = 140.0

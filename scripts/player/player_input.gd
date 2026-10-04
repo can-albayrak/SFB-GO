@@ -71,6 +71,8 @@ func gather() -> PlayerCommand:
 		cmd.weapon_slot = 0
 	elif Input.is_action_just_pressed(&"weapon_secondary"):
 		cmd.weapon_slot = 1
+	elif Input.is_action_just_pressed(&"weapon_knife"):
+		cmd.weapon_slot = Player.KNIFE_SLOT
 	elif Input.is_action_just_pressed(&"weapon_special"):
 		cmd.weapon_slot = Player.SPECIAL_SLOT
 	return cmd

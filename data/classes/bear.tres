@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="9_adef"]
 [ext_resource type="Resource" path="res://data/abilities/shield.tres" id="10_shield"]
 [ext_resource type="Resource" path="res://data/abilities/charge.tres" id="11_charge"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="12_knife"]
 
 [resource]
 script = ExtResource("1_class")
@@ -23,3 +24,4 @@ primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_hammer"), ExtReso
 secondary_weapon = ExtResource("6_throw")
 abilities = Array[ExtResource("9_adef")]([ExtResource("10_shield"), ExtResource("11_charge")])
 quick_melee = ExtResource("8_kick")
+knife = ExtResource("12_knife")

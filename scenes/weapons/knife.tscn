@@ -4,11 +4,11 @@
 [ext_resource type="PackedScene" path="res://assets/models/weapons/real/knife.glb" id="2_model"]
 
 [node name="Knife" type="Node3D"]
-position = Vector3(0.2, -0.22, -0.36)
+position = Vector3(0.22, -0.25, -0.42)
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-rotation = Vector3(0.61, 0.8, 0.2)
+rotation = Vector3(0.45, 0.35, 0)
 scale = Vector3(1.02, 1.02, 1.02)
 
 [node name="Muzzle" type="Marker3D" parent="."]

@@ -20,6 +20,11 @@ func send_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 	_request_fire.rpc_id(1, origin, dir, slot, player.weapons[slot].def.id)
 
 
+## Held knife right click: the heavy stab with the weapon in `slot`.
+func send_stab(origin: Vector3, dir: Vector3, slot: int) -> void:
+	_request_stab.rpc_id(1, origin, dir, slot, player.weapons[slot].def.id)
+
+
 func send_melee(origin: Vector3, dir: Vector3) -> void:
 	_request_melee.rpc_id(1, origin, dir)
 
@@ -38,6 +43,10 @@ func send_fall_death() -> void:
 
 func send_equip(slot: int) -> void:
 	_request_equip.rpc_id(1, slot)
+
+
+func send_guided(on: bool) -> void:
+	_request_guided.rpc_id(1, on)
 
 
 ## Host: the sender owns this player (the host's own calls count as from peer 1).
@@ -84,8 +93,30 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 		player.server_use_special_round() # Last: an empty gun is removed right here.
 
 
-## Host: alive, not stunned, inside this slot's fire-rate budget, plausible origin. Charges the budget.
-func _accept_fire(weapon: Weapon, slot: int, origin: Vector3) -> bool:
+## Host: a heavy knife stab. Same checks as a shot, charged with heavy_interval on the slot's
+## budget, so left and right clicks together are never faster than the knife allows.
+@rpc("any_peer", "call_local", "reliable")
+func _request_stab(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringName) -> void:
+	if not _from_owner() or slot < 0 or slot >= player.weapons.size():
+		return
+	var knife := player.weapons[slot] as MeleeWeapon
+	if knife == null or knife.def.id != weapon_id or knife.def.heavy_damage <= 0.0:
+		return
+	if not _accept_fire(knife, slot, origin, knife.def.heavy_interval):
+		return
+	_end_protection()
+	knife.server_heavy = true
+	var compensator: LagCompensator = LagCompensator.find(get_tree())
+	if compensator != null:
+		compensator.fire_rewound(player, knife, origin, dir.normalized())
+	else:
+		knife.server_fire(origin, dir.normalized())
+	knife.server_heavy = false
+
+
+## Host: alive, not stunned, inside this slot's fire-rate budget, plausible origin. Charges the
+## budget with the weapon's shot interval (or `interval`, a heavy stab's).
+func _accept_fire(weapon: Weapon, slot: int, origin: Vector3, interval: float = -1.0) -> bool:
 	if not player.is_alive or player.status.is_stunned_host() or not _origin_ok(origin):
 		return false
 	while _next_fire_times.size() <= slot:
@@ -94,8 +125,9 @@ func _accept_fire(weapon: Weapon, slot: int, origin: Vector3) -> bool:
 	# Budget, not gap between arrivals: bunched packets pass, sustained over-rate does not.
 	if now < _next_fire_times[slot] - FIRE_BURST_SLACK:
 		return false
-	var interval: float = weapon.def.get_average_shot_interval() * FIRE_RATE_TOLERANCE / player.status.get_host_fire_rate_mult()
-	_next_fire_times[slot] = maxf(_next_fire_times[slot], now - FIRE_BURST_SLACK) + interval
+	var seconds: float = interval if interval > 0.0 else weapon.def.get_average_shot_interval()
+	seconds *= FIRE_RATE_TOLERANCE / player.status.get_host_fire_rate_mult()
+	_next_fire_times[slot] = maxf(_next_fire_times[slot], now - FIRE_BURST_SLACK) + seconds
 	return true
 
 
@@ -153,3 +185,10 @@ func _request_fall_death() -> void:
 	if not _from_owner() or not player.is_alive or Match.state != Match.State.PLAYING:
 		return # Between matches: the restart respawns everyone anyway.
 	player.server_fall_death()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _request_guided(on: bool) -> void:
+	if not _from_owner():
+		return
+	player.rocket_guided = on

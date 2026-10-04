@@ -168,9 +168,18 @@ func _reset_recoil() -> void:
 func _apply_recoil_kick() -> void:
 	if def.recoil_pattern.is_empty():
 		return
-	var index: int = mini(_shot_index, def.recoil_pattern.size() - 1)
-	recoil_offset += def.recoil_pattern[index]
+	recoil_offset += def.recoil_pattern[recoil_index(_shot_index)]
+	recoil_offset.y = minf(recoil_offset.y, def.recoil_max_up)
 	_shot_index += 1
+
+
+## Pattern entry for the `shot`th shot of a spray: past the end it loops from recoil_loop_start.
+func recoil_index(shot: int) -> int:
+	var size: int = def.recoil_pattern.size()
+	if shot < size:
+		return shot
+	var loop_start: int = clampi(def.recoil_loop_start, 0, size - 1) if def.recoil_loop_start >= 0 else size - 1
+	return loop_start + (shot - size) % (size - loop_start)
 
 
 func _update_recoil(delta: float) -> void:

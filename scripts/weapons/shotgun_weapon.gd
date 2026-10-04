@@ -21,6 +21,7 @@ func _fire() -> void:
 			ShotEffects.spawn_impact(player.get_parent(), end_point)
 		ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
 	ShotEffects.spawn_muzzle_flash(muzzle)
+	Sfx.shot(player.get_parent(), def, muzzle.global_position)
 	player.send_fire(origin, dir, player.weapons.find(self))
 
 

@@ -114,15 +114,7 @@ func _sample_at(samples: Array, time: float) -> Sample:
 
 
 func _get_rtt_seconds(peer_id: int) -> float:
-	if peer_id == 1:
-		return 0.0
-	var enet := multiplayer.multiplayer_peer as ENetMultiplayerPeer
-	if enet == null:
-		return 0.0
-	var packet_peer: ENetPacketPeer = enet.get_peer(peer_id)
-	if packet_peer == null:
-		return 0.0
-	return packet_peer.get_statistic(ENetPacketPeer.PEER_ROUND_TRIP_TIME) / 1000.0
+	return Net.get_rtt(peer_id)
 
 
 func _now() -> float:

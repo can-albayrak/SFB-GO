@@ -15,22 +15,31 @@ func _fire() -> void:
 	if not hit.is_empty() and not (hit["collider"] is Hitbox):
 		ShotEffects.spawn_impact(player.get_parent(), end_point)
 	ShotEffects.spawn_muzzle_flash(muzzle)
+	Sfx.shot(player.get_parent(), def, muzzle.global_position)
 	ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
 	player.send_fire(origin, dir, player.weapons.find(self))
 
 
-## Random cone: scoped weapons fired from the hip (Hawk balance rule) plus the gradual
-## speed penalty. The owner picks the direction; the host traces what it is sent.
+## Random cone (get_spread_cone) around the aim. The owner picks the direction; the host
+## traces what it is sent.
 func _apply_spread(dir: Vector3) -> Vector3:
-	var cone: float = def.get_move_spread(player.movement.get_horizontal_speed())
-	if not player.is_scoped:
-		cone += def.unscoped_spread
+	var cone: float = get_spread_cone()
 	if cone <= 0.0:
 		return dir
 	var angle: float = deg_to_rad(cone) * sqrt(randf())
 	var around: float = randf() * TAU
 	var local := Vector3(sin(angle) * cos(around), sin(angle) * sin(around), -cos(angle))
 	return (Basis.looking_at(dir) * local).normalized()
+
+
+## Degrees of random cone right now: scoped weapons fired from the hip or mid-zoom (Hawk
+## balance rule), the gradual speed penalty and a slide.
+func get_spread_cone() -> float:
+	var cone: float = def.get_move_spread(player.movement.get_horizontal_speed())
+	cone += def.unscoped_spread * (1.0 - player.scope_blend if player.is_scoped else 1.0)
+	if player.movement.is_sliding:
+		cone += player.class_def.movement.slide_spread
+	return cone
 
 
 func server_fire(origin: Vector3, dir: Vector3) -> Vector3:

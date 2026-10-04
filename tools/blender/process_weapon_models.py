@@ -1,7 +1,9 @@
-"""Turns the downloaded weapon models (private_assets/weapons/*.glb) into game-ready .glb files.
+"""Turns the downloaded weapon models (private_assets/weapons/: .glb, .blend, .obj, .fbx) into game-ready .glb files.
 
 Run headless (does not touch any open Blender window):
     blender --background --factory-startup --python tools/blender/process_weapon_models.py -- <project_root> [ids...] [--preview DIR]
+or with Blender as a Python module (pip install bpy; used in the cloud, no Blender install):
+    python tools/blender/process_weapon_models.py -- <project_root> [ids...] [--preview DIR]
 
 Output: assets/models/weapons/real/<id>.glb plus assets/models/weapons/real/muzzles.json
 (muzzle / tip point of every model in Godot space, metres, for the weapon scenes).
@@ -23,34 +25,38 @@ MAX_TEXTURE = 512
 RAW_DIR = "private_assets/weapons"
 OUT_DIR = "assets/models/weapons/real"
 
+# Packs Can sent on 2026-10-02 (unzipped into private_assets/weapons/packs/).
+PSX_PACK = "packs/PSX-Weapon-Pack/"
+REVOLVER_PACK = "packs/PSXRevolverPack[FIXED]/Files/"
+
 # id -> settings. "raw": file in RAW_DIR. "kind" sets the hand position (see HAND_SHARE).
 # "length": metres along the long axis. Optional, all decided on the --preview renders:
 #   "flip": the automatic axis guess pointed the muzzle backwards (turn 180 degrees about up),
 #   "drop": parts whose name contains any of these are removed (spare shells, casings, ...),
+#   "drop_exact": parts with exactly these names are removed (when one name is part of another),
 #   "max_x": parts centred beyond this raw X are removed (a second, exploded copy),
 #   "undo_euler": degrees (XYZ) the author left the whole model rotated by,
 #   "axes": (forward, up) raw axes such as ("-x", "z") when the size-based guess is wrong,
 #   "tint": RGB multiplier for the colour (darkens a too-light texture; colours an untextured model).
 MODELS = {
-    "assault_rifle": {"raw": "ps1_style_ak-47.glb", "kind": "rifle", "length": 0.88},
+    "assault_rifle": {"raw": PSX_PACK + "FN FAL/FN FAL.blend", "kind": "rifle", "length": 0.88},
     "burst_rifle": {"raw": "ps1-style_steyr_aug.glb", "kind": "rifle", "length": 0.79, "flip": True},
     "lmg": {"raw": "low-poly_m249_saw.glb", "kind": "rifle", "length": 1.0, "flip": True},
-    "heavy_rifle": {"raw": "ps1_style_awp_sniper.glb", "kind": "rifle", "length": 1.2},
+    "heavy_rifle": {"raw": PSX_PACK + "Remington-m700/Remington-m700.blend", "kind": "rifle", "length": 1.2},
     "marksman_rifle": {"raw": "svd.glb", "kind": "rifle", "length": 1.22},
-    "smg": {"raw": "mac10_psx.glb", "kind": "pistol", "length": 0.32, "max_x": 0.7},
-    "dual_pistols": {"raw": "ps1-style_beretta_m9.glb", "kind": "pistol", "length": 0.22,
-                     "drop": ("Casing", "Suppressor"), "undo_euler": (30.0, 0.0, 30.0), "tint": (0.45, 0.45, 0.45),
-                     "flip": True},
-    "pistol": {"raw": "glock_psx.glb", "kind": "pistol", "length": 0.19, "flip": True, "tint": (0.4, 0.4, 0.4)},
-    "shotgun": {"raw": "lowpoly_-_remington_shotgun_-_ps1__psx_style.glb", "kind": "rifle", "length": 1.0,
-                "flip": True, "drop": ("pCylinder",)},
+    "smg": {"raw": PSX_PACK + "MAC-11/MAC-11.blend", "kind": "pistol", "length": 0.32},
+    "dual_pistols": {"raw": PSX_PACK + "Glock-18/Glock-18.blend", "kind": "pistol", "length": 0.2},
+    "pistol": {"raw": PSX_PACK + "Glock-18/Glock-18.blend", "kind": "pistol", "length": 0.19},
+    "shotgun": {"raw": PSX_PACK + "Remington-870/Remington-870.blend", "kind": "rifle", "length": 1.0,
+                "drop": ("ShotgunBullet",)},
     "grenade_launcher": {"raw": "ps1_style_grenade_launcher.glb", "kind": "rifle", "length": 0.8},
     "railgun": {"raw": "ps1_style_railgun.glb", "kind": "rifle", "length": 1.1, "flip": True,
                 "tint": (0.1, 0.11, 0.14)},  # Linear base colour (no texture): ~0.35 on screen.
     "minigun": {"raw": "low-poly_m134_minigun.glb", "kind": "rifle", "length": 1.0, "flip": True},
     "rocket_launcher": {"raw": "ps1_style_rocket_launcher.glb", "kind": "rifle", "length": 1.1},
     "musket": {"raw": "hunting_rifle.glb", "kind": "rifle", "length": 1.3},
-    "revolver": {"raw": "psx_revolver.glb", "kind": "pistol", "length": 0.3, "flip": True},
+    "revolver": {"raw": REVOLVER_PACK + "Colt Python/ColtPyton.obj", "kind": "pistol", "length": 0.3,
+                 "drop_exact": ("CPBullet", "CPCyilnderFull")},  # Full = the swung-out copy.
     "knife": {"raw": "combat_knife.glb", "kind": "melee", "length": 0.3},
     "throwing_knife": {"raw": "throwing_knife.glb", "kind": "melee", "length": 0.3, "flip": True},
     "sledgehammer": {"raw": "sledge_hammer.glb", "kind": "melee", "length": 0.9, "flip": True},
@@ -69,17 +75,52 @@ def reset() -> None:
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
 
-def import_joined(path: str, drop: tuple, max_x: float) -> bpy.types.Object:
-    bpy.ops.import_scene.gltf(filepath=path)
+def load_raw(path: str) -> None:
+    """Brings the raw model into the (empty) scene, whatever its format."""
+    ext = os.path.splitext(path)[1].lower()
+    if ext == ".blend":
+        bpy.ops.wm.open_mainfile(filepath=path)
+        if bpy.context.object is not None and bpy.context.object.mode != "OBJECT":
+            bpy.ops.object.mode_set(mode="OBJECT")  # Saved while editing (Remington-870).
+        relink_missing_images(os.path.dirname(path))
+    elif ext == ".obj":
+        bpy.ops.wm.obj_import(filepath=path)
+        relink_missing_images(os.path.dirname(path))
+    elif ext == ".fbx":
+        bpy.ops.import_scene.fbx(filepath=path)
+        relink_missing_images(os.path.dirname(path))
+    else:
+        bpy.ops.import_scene.gltf(filepath=path)
+
+
+def relink_missing_images(folder: str) -> None:
+    """Points images that failed to load at a file of the same name (any case) under `folder`
+    (packs saved on Windows: "fn-fal_texture.png" is really "FN_FAL_texture.png")."""
+    files = {}
+    for base, _dirs, names in os.walk(folder):
+        for name in names:
+            files.setdefault(name.lower(), os.path.join(base, name))
+    for image in bpy.data.images:
+        if image.source != "FILE" or image.size[0] > 0:
+            continue
+        wanted = os.path.basename(bpy.path.abspath(image.filepath).replace("\\", "/")).lower()
+        if wanted in files:
+            image.filepath = files[wanted]
+            image.reload()
+
+
+def import_joined(path: str, drop: tuple, max_x: float, drop_exact: tuple = ()) -> bpy.types.Object:
+    load_raw(path)
     meshes = []
     for o in [o for o in bpy.context.scene.objects if o.type == "MESH"]:
         centre = sum((o.matrix_world @ Vector(c) for c in o.bound_box), Vector()) / 8.0
-        if any(part in o.name for part in drop) or centre.x > max_x:
+        if any(part in o.name for part in drop) or o.name in drop_exact or centre.x > max_x:
             bpy.data.objects.remove(o, do_unlink=True)
         else:
             meshes.append(o)
     bpy.ops.object.select_all(action="DESELECT")
     for o in meshes:
+        o.hide_set(False)
         o.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
     if len(meshes) > 1:
@@ -194,7 +235,8 @@ def process(root: str, wid: str, preview: str) -> dict:
     cfg = MODELS[wid]
     kind = cfg["kind"]
     reset()
-    obj = import_joined(os.path.join(root, RAW_DIR, cfg["raw"]), cfg.get("drop", ()), cfg.get("max_x", INF))
+    obj = import_joined(os.path.join(root, RAW_DIR, cfg["raw"]), cfg.get("drop", ()), cfg.get("max_x", INF),
+                        cfg.get("drop_exact", ()))
     orient(obj, cfg)
     scale_and_place(obj, kind, cfg["length"])
     decimate(obj, MAX_TRIS[kind])
@@ -219,12 +261,13 @@ def process(root: str, wid: str, preview: str) -> dict:
 def render_side(obj: bpy.types.Object, path: str) -> None:
     """Side view from +X: forward (+Y) points to the right, up (+Z) up, red dot = origin (hand)."""
     scene = bpy.context.scene
-    try:
-        scene.render.engine = "BLENDER_WORKBENCH"
-    except TypeError:
-        pass
-    scene.display.shading.light = "STUDIO"
-    scene.display.shading.color_type = "TEXTURE"
+    # Cycles on the CPU: Workbench needs a GPU context (fails headless in the cloud).
+    scene.render.engine = "CYCLES"
+    scene.cycles.device = "CPU"
+    scene.cycles.samples = 16
+    world = bpy.data.worlds.new("Preview")
+    world.color = (1.0, 1.0, 1.0)
+    scene.world = world
     scene.render.resolution_x, scene.render.resolution_y = 640, 320
     lo, hi = bounds(obj)
     centre = (lo + hi) * 0.5
