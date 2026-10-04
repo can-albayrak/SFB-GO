@@ -1,4 +1,4 @@
-"""Generates the placeholder sound effects in assets/audio (procedural, no samples).
+"""Generates the procedural sound effects in assets/audio (rifle, light, rail, hit, kill, swing).
 Run: python tools/gen_sfx.py"""
 import math
 import os
@@ -61,31 +61,11 @@ def gunshot(seconds, cutoff, decay, boom_freq, boom_amp):
     return mix(crack, [s * 1.6 for s in body], thump(seconds, boom_freq * 3.0, boom_freq, decay * 1.2, boom_amp))
 
 
-def bandpass(samples, low, high):
-    lowpassed = lowpass(samples, high)
-    return [a - b for a, b in zip(lowpassed, lowpass(lowpassed, low))]
-
-
-def click(seconds, brightness, decay, amp):
-    n = noise(seconds)
-    burst = bandpass(n, 900 * brightness, 4200 * brightness)
-    knock = thump(seconds, 220 * brightness, 95 * brightness, decay * 1.6, 0.35)
-    return mix([a * b * amp * 2.2 for a, b in zip(burst, env(len(n), 0.0005, decay))], [k * amp for k in knock])
-
-
-def footstep(gap, brightness, weight=1.0):
-    heel = click(0.09, brightness, 0.012, 1.0 * weight)
-    sole = click(0.11, brightness * 0.9, 0.018, 0.75 * weight)
-    return mix(heel, [0.0] * int(gap * RATE) + sole)
-
-
 def main():
     random.seed(7)
     os.makedirs(OUT, exist_ok=True)
     write("shot_light", gunshot(0.25, 2600, 0.05, 110, 0.5))
     write("shot_rifle", gunshot(0.35, 1800, 0.07, 80, 0.8))
-    write("shot_heavy", gunshot(0.5, 1200, 0.11, 60, 1.0))
-    write("shot_shotgun", gunshot(0.6, 900, 0.14, 55, 1.2))
     # Railgun: falling zap over a hiss.
     n = int(0.7 * RATE)
     zap, phase = [], 0.0
@@ -95,21 +75,8 @@ def main():
         zap.append((math.sin(phase) + 0.4 * math.sin(phase * 2.01)) * math.exp(-t / 0.18))
     hiss = [a * b * 0.5 for a, b in zip(lowpass(noise(0.7), 5000), env(n, 0.001, 0.12))]
     write("shot_rail", mix(zap, hiss, thump(0.7, 200, 50, 0.15, 0.6)))
-    # Launcher: thump plus a rising whoosh.
-    n = int(0.7 * RATE)
-    whoosh = [a * math.sin(math.pi * i / n) * 0.8 for i, a in enumerate(lowpass(noise(0.7), 700))]
-    write("shot_launcher", mix(thump(0.7, 160, 45, 0.12, 1.0), whoosh, gunshot(0.3, 1500, 0.05, 70, 0.3)))
-    # Explosion: long low rumble.
-    n = noise(1.8)
-    rumble = [a * b for a, b in zip(lowpass(lowpass(n, 400), 300), env(len(n), 0.003, 0.45))]
-    crack = [a * b * 0.6 for a, b in zip(lowpass(n, 3000), env(len(n), 0.001, 0.05))]
-    write("explosion", mix([s * 3.0 for s in rumble], crack, thump(1.8, 120, 30, 0.35, 1.4)))
-    # Footsteps (CS-like boots on concrete): heel click, then the sole slapping down ~45 ms
-    # later; each click is a short bright noise burst over a small low knock. Three variants.
-    for k in range(3):
-        write("step_%d" % (k + 1), footstep(0.04 + 0.01 * k, 1.0 + 0.15 * k))
-    # Landing: both feet at once (two steps a few ms apart) with a bit more body, no boom.
-    write("land", mix(footstep(0.03, 0.85, 1.3), [0.0] * int(0.012 * RATE) + footstep(0.035, 0.95, 1.1)))
+    # Shotgun, sniper/heavy, launcher, explosion, footsteps and landing come from the recorded
+    # "FREE FPS SFX Pack" now (tools/convert_sfx_pack.sh).
     # Hit marker tick and kill ding.
     write("hit", [math.sin(2 * math.pi * 1400 * i / RATE) * math.exp(-i / (0.03 * RATE)) for i in range(int(0.1 * RATE))])
     write("kill", [(math.sin(2 * math.pi * 1046 * i / RATE) + 0.5 * math.sin(2 * math.pi * 1568 * i / RATE)) * math.exp(-i / (0.18 * RATE)) for i in range(int(0.5 * RATE))])

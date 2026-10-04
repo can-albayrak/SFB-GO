@@ -22,6 +22,28 @@ const MODEL_GUN_NODES: Array[String] = ["Cube_0_033", "Cube_0_113"] ## The model
 const RIGHT_HOLD: Vector3 = Vector3(0.0, -0.005, -0.215)
 const LEFT_HOLD: Vector3 = Vector3(0.0, 0.1, -0.515)
 
+## Saul Goodman's arms: the forearm (weighted to the first bone) is drawn as his dark suit
+## sleeve, a white shirt cuff at the wrist, the hand keeps the model's skin.
+const SLEEVE_BONE_PREFIX: String = "Bone_0" ## Bone_01 / Bone_020: the forearm bone of each arm.
+const SUIT_COLOR: Color = Color(0.11, 0.12, 0.17)
+const CUFF_COLOR: Color = Color(0.85, 0.86, 0.88)
+const SLEEVE_SHADER: String = """
+shader_type spatial;
+render_mode diffuse_lambert_wrap, cull_disabled;
+uniform sampler2D albedo_texture : source_color, filter_nearest_mipmap;
+uniform vec3 suit_color : source_color;
+uniform vec3 cuff_color : source_color;
+uniform float self_light = 0.5;
+void fragment() {
+	vec3 skin = texture(albedo_texture, UV).rgb;
+	float sleeve = smoothstep(0.45, 0.6, COLOR.r);
+	float cuff = smoothstep(0.35, 0.5, COLOR.r) * (1.0 - sleeve);
+	ALBEDO = mix(mix(skin, cuff_color, cuff), suit_color * (0.75 + 0.5 * skin.r), sleeve);
+	ROUGHNESS = 0.9;
+	BACKLIGHT = vec3(self_light);
+}
+"""
+
 ## Light reaching the hands' shadow side (wrapped diffuse + this much backlight), so a forearm
 ## turned away from the sun is not a black shape.
 const SELF_LIGHT: float = 0.5
@@ -80,15 +102,61 @@ func _ready() -> void:
 
 func _light_up(mesh: MeshInstance3D) -> void:
 	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for surface: int in mesh.get_surface_override_material_count():
-		var material := mesh.get_active_material(surface) as StandardMaterial3D
-		if material == null:
+	var sleeve_binds: Dictionary = _sleeve_binds(mesh)
+	var dressed := ArrayMesh.new()
+	for surface: int in mesh.mesh.get_surface_count():
+		var arrays: Array = mesh.mesh.surface_get_arrays(surface)
+		var original := mesh.get_active_material(surface) as StandardMaterial3D
+		if arrays[Mesh.ARRAY_BONES] != null and not sleeve_binds.is_empty():
+			arrays[Mesh.ARRAY_COLOR] = _sleeve_colors(arrays, sleeve_binds)
+		dressed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		if original == null:
 			continue
-		var lit := material.duplicate() as StandardMaterial3D
-		lit.diffuse_mode = BaseMaterial3D.DIFFUSE_LAMBERT_WRAP # Light wraps round into the shadow side.
-		lit.backlight_enabled = true
-		lit.backlight = Color(SELF_LIGHT, SELF_LIGHT, SELF_LIGHT)
-		mesh.set_surface_override_material(surface, lit)
+		var shader := Shader.new()
+		shader.code = SLEEVE_SHADER
+		var lit := ShaderMaterial.new()
+		lit.shader = shader
+		lit.set_shader_parameter(&"albedo_texture", original.albedo_texture)
+		lit.set_shader_parameter(&"suit_color", SUIT_COLOR if arrays[Mesh.ARRAY_COLOR] != null else Color.WHITE)
+		lit.set_shader_parameter(&"cuff_color", CUFF_COLOR)
+		lit.set_shader_parameter(&"self_light", SELF_LIGHT) # Light wraps round into the shadow side.
+		dressed.surface_set_material(surface, lit)
+	mesh.mesh = dressed
+	for surface: int in mesh.get_surface_override_material_count():
+		mesh.set_surface_override_material(surface, null)
+
+
+## Skin bind indices of the forearm bone (the sleeve).
+func _sleeve_binds(mesh: MeshInstance3D) -> Dictionary:
+	var binds: Dictionary = {}
+	var skin: Skin = mesh.skin
+	var skeleton := mesh.get_node_or_null(mesh.skeleton) as Skeleton3D
+	if skin == null:
+		return binds
+	for bind: int in skin.get_bind_count():
+		var bone_name: String = String(skin.get_bind_name(bind))
+		if bone_name.is_empty() and skeleton != null and skin.get_bind_bone(bind) >= 0:
+			bone_name = skeleton.get_bone_name(skin.get_bind_bone(bind))
+		if bone_name.begins_with(SLEEVE_BONE_PREFIX):
+			binds[bind] = true
+	return binds
+
+
+## Vertex colour red = how much the vertex follows the forearm (1 = sleeve, 0 = hand).
+func _sleeve_colors(arrays: Array, sleeve_binds: Dictionary) -> PackedColorArray:
+	var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+	var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+	var count: int = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var per_vertex: int = bones.size() / maxi(count, 1)
+	var colors := PackedColorArray()
+	colors.resize(count)
+	for i: int in count:
+		var share: float = 0.0
+		for k: int in per_vertex:
+			if sleeve_binds.has(bones[i * per_vertex + k]):
+				share += weights[i * per_vertex + k]
+		colors[i] = Color(share, 0.0, 0.0, 1.0)
+	return colors
 
 
 ## Moves one forearm out of the imported model into this node, keeping where it was.

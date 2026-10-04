@@ -107,7 +107,9 @@ func _ready() -> void:
 	Events.match_ended.connect(_on_match_ended)
 	Events.match_started.connect(_on_match_started)
 	Events.local_flashed.connect(_on_local_flashed)
-	Events.airdrop_incoming.connect(func(_point: Vector3) -> void: _show_banner("AIRDROP INCOMING"))
+	Events.airdrop_incoming.connect(func(_point: Vector3) -> void:
+		_show_banner("AIRDROP INCOMING")
+		Sfx.play_ui(self, Sfx.WARNING))
 	Events.airdrop_opened.connect(func(peer_id: int, weapon_name: String) -> void:
 		_show_banner("%s GOT THE %s" % [Net.get_player_name(peer_id).to_upper(), weapon_name.to_upper()]))
 	loadout_menu.confirmed.connect(_on_loadout_confirmed)

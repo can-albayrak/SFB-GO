@@ -27,8 +27,8 @@ const STEP_LIFT: float = 0.13
 const BLEND_RATE: float = 10.0 ## Per second, how fast poses change.
 const MIN_WALK_SPEED: float = 0.3
 
-const SLEEVE_COLOR: Color = Color(0.36, 0.38, 0.27)
-const BOOT_COLOR: Color = Color(0.1, 0.08, 0.06)
+const SLEEVE_COLOR: Color = Color(0.1, 0.11, 0.15) ## Saul's suit trousers.
+const BOOT_COLOR: Color = Color(0.05, 0.04, 0.04) ## Black dress shoes.
 
 var _player: Player
 var _legs: Array[Dictionary] = [] ## {hip, knee, ankle} per leg, left then right.
