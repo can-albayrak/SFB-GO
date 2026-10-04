@@ -97,6 +97,8 @@ func _ready() -> void:
 	Events.local_stunned.connect(_on_local_stunned)
 	Events.local_player_spawned.connect(_on_local_player_spawned)
 	Events.hit_confirmed.connect(crosshair.show_hit)
+	Events.hit_confirmed.connect(func(_zone: Hitbox.Zone, killed: bool, _amount: float) -> void:
+		Sfx.play_ui(self, Sfx.KILL if killed else Sfx.HIT))
 	Events.player_died.connect(_on_player_died)
 	Events.match_ended.connect(_on_match_ended)
 	Events.match_started.connect(_on_match_started)

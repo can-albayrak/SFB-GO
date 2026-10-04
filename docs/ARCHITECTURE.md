@@ -171,6 +171,12 @@ sfb-go/
 
 Host spawn eder ve simüle eder, pozisyonları client'lara yayılır. Atan client kendi ekranında hemen görsel bir kopya gösterir, host'unki gelince ona geçer.
 
+Güdümlü roket: `WeaponDef.guidable` silahta sağ tık lazeri açar/kapatır (sahip `PlayerRequests.send_guided` → host `Player.rocket_guided`). `GrenadeDef.guided_turn_rate > 0` olan roketi host her fizik adımında, atan canlıysa, güdümlü silah elindeyse ve lazer açıksa, bakış ışınının çarptığı noktaya sınırlı hızla döndürür (`Grenade._steer`). Lazer noktası sadece sahipte, görsel.
+
+### Ses (`scripts/game/sfx.gd`)
+
+`Sfx` statik yardımcı: konumlu tek seferlik `AudioStreamPlayer3D` (silah, patlama, adım, iniş, bıçak savurma) ve UI sesleri (hit, kill). Tamamen kozmetik, her eşte yerel çalar; uzak oyuncunun silah sesi `_show_shot` / `_on_pellets_fired` ile gelir. Silah sesi `WeaponDef` istatistiklerinden seçilir (`Sfx.shot_stream`). Klipler `tools/gen_sfx.py` ile üretilir; ses seviyesi `Settings.sfx_volume`. Headless'ta çalmaz.
+
 ## Veri sistemi
 
 Tüm denge değerleri koddan ayrı, `.tres` dosyalarında. Değer değiştirmek için kod açılmaz.

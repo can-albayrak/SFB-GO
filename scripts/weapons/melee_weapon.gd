@@ -103,6 +103,7 @@ func _fire() -> void:
 
 
 func _play_swing(duration: float, stab: bool = false) -> void:
+	Sfx.play_at(player.get_parent(), Sfx.SWING, global_position, Sfx.STEP_DB)
 	_stop_tween()
 	transform = _rest
 	_stab_pose = stab

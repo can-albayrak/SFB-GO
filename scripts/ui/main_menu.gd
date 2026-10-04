@@ -45,10 +45,10 @@ func _ready() -> void:
 	last_host_button.pressed.connect(_on_last_host_pressed)
 	test_range_button.pressed.connect(_on_test_range_pressed)
 	quit_button.pressed.connect(get_tree().quit)
-	var settings_panel := SettingsPanel.new()
-	add_child(settings_panel)
-	settings_button.pressed.connect(settings_panel.open)
 	_build_steam_panel()
+	var settings_panel := SettingsPanel.new()
+	add_child(settings_panel) # Last child: drawn over the Steam panel and takes its clicks.
+	settings_button.pressed.connect(settings_panel.open)
 	_handle_command_line()
 
 

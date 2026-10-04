@@ -206,6 +206,7 @@ func _show_shot(_from: Vector3, to: Vector3, beam: bool) -> void:
 	if _sender_id() != 1 or player.is_local:
 		return
 	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
+	_play_remote_shot()
 	if beam:
 		ShotEffects.spawn_beam(player.get_parent(), player.remote_muzzle.global_position, to)
 	else:
@@ -217,5 +218,14 @@ func _on_pellets_fired(ends: PackedVector3Array) -> void:
 	if _sender_id() != 1 or player.is_local:
 		return
 	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
+	_play_remote_shot()
 	for end_point: Vector3 in ends:
 		ShotEffects.spawn_tracer(player.get_parent(), player.remote_muzzle.global_position, end_point)
+
+
+## Gunshot of the weapon this remote player holds, at their gun.
+func _play_remote_shot() -> void:
+	var slot: int = player.held_slot
+	if slot < 0 or slot >= player.weapons.size():
+		return
+	Sfx.shot(player.get_parent(), player.weapons[slot].def, player.remote_muzzle.global_position)

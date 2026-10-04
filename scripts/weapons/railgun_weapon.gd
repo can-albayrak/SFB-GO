@@ -11,6 +11,7 @@ func _fire() -> void:
 	var origin: Vector3 = player.get_aim_origin()
 	var dir: Vector3 = _apply_spread(-player.get_aim_basis().z)
 	ShotEffects.spawn_muzzle_flash(muzzle)
+	Sfx.shot(player.get_parent(), def, muzzle.global_position)
 	ShotEffects.spawn_beam(player.get_parent(), muzzle.global_position, origin + dir * def.max_range)
 	player.send_fire(origin, dir, player.weapons.find(self))
 

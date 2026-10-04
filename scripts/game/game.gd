@@ -348,6 +348,7 @@ func _explosion_fx(kind: GrenadeDef.Kind, point: Vector3) -> void:
 	if multiplayer.get_remote_sender_id() > 1:
 		return
 	ShotEffects.spawn_explosion(self, point, kind == GrenadeDef.Kind.FLASH)
+	Sfx.explosion(self, point)
 
 
 @rpc("any_peer", "call_remote", "reliable")

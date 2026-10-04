@@ -20,6 +20,11 @@ const FALL_DEATH_Y: float = -30.0
 const SCOPE_FOV_LERP: float = 25.0 ## Per second; how fast the zoom eases in and out.
 const INTERP_DELAY: float = 0.1 ## Remote players are drawn this far in the past.
 const PROTECTION_BLINK_PERIOD: float = 0.25
+const STEP_DISTANCE: float = 2.3 ## Metres between footstep sounds.
+const STEP_MIN_SPEED: float = 3.5 ## m/s: slower (walk key, crouch) is silent.
+const STEP_MAX_VERTICAL_SPEED: float = 1.5 ## Remote players: faster up/down counts as airborne.
+const STEP_TELEPORT_DISTANCE: float = 3.0 ## A jump this big in one frame is a respawn, not a step.
+const LAND_SOUND_SPEED: float = 4.0 ## m/s of fall speed before landing makes a thud.
 const FALL_WEAPON_NAME: String = "Fall"
 # Throws (get_throw_launch): hand offset from the eye as (right, up, forward) metres.
 const THROW_HAND_OFFSET: Vector3 = Vector3(0.18, -0.15, 0.4)
@@ -96,6 +101,8 @@ var _hurt_since_spawn: bool = false
 var _spawned_at: float = 0.0
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
+var _step_distance: float = 0.0 ## Metres walked on the ground since the last footstep sound.
+var _last_step_position: Vector3 = Vector3.ZERO
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -143,6 +150,9 @@ func _ready() -> void:
 		camera.current = true
 		_camera_feel = CameraFeel.new()
 		movement.landed.connect(_camera_feel.on_landed)
+		movement.landed.connect(func(fall_speed: float) -> void:
+			if fall_speed >= LAND_SOUND_SPEED:
+				Sfx.play_at(get_parent(), Sfx.LAND, global_position, Sfx.STEP_DB + 4.0))
 		# Your own body in view: legs on the body, arms with the view model (visual only).
 		add_child(FirstPersonLegs.create(self))
 		weapon_holder.add_child(FirstPersonArms.create(self))
@@ -227,6 +237,26 @@ func _process(delta: float) -> void:
 		net_sync.interpolate(delta)
 		if is_alive and is_protected:
 			model.visible = fmod(Time.get_ticks_msec() / 1000.0, PROTECTION_BLINK_PERIOD) < PROTECTION_BLINK_PERIOD * 0.6
+	_update_footsteps()
+
+
+## Footstep sounds on every peer: one every STEP_DISTANCE metres while moving on the ground
+## faster than a careful walk (crouch-walking and slow walking stay silent, like CS).
+func _update_footsteps() -> void:
+	var moved: Vector3 = global_position - _last_step_position
+	_last_step_position = global_position
+	var velocity_now: Vector3 = get_move_velocity()
+	var grounded: bool = is_on_floor() if is_local else absf(velocity_now.y) < STEP_MAX_VERTICAL_SPEED
+	var horizontal_speed: float = Vector2(velocity_now.x, velocity_now.z).length()
+	if not is_alive or not grounded or horizontal_speed < STEP_MIN_SPEED or moved.length() > STEP_TELEPORT_DISTANCE:
+		_step_distance = 0.0
+		return
+	if is_local and movement.is_sliding:
+		return
+	_step_distance += Vector2(moved.x, moved.z).length()
+	if _step_distance >= STEP_DISTANCE:
+		_step_distance = 0.0
+		Sfx.step(get_parent(), global_position)
 
 
 ## Owner: the recoil the view does not follow tips the gun in view up and back instead.

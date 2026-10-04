@@ -15,6 +15,7 @@ func _fire() -> void:
 	if not hit.is_empty() and not (hit["collider"] is Hitbox):
 		ShotEffects.spawn_impact(player.get_parent(), end_point)
 	ShotEffects.spawn_muzzle_flash(muzzle)
+	Sfx.shot(player.get_parent(), def, muzzle.global_position)
 	ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
 	player.send_fire(origin, dir, player.weapons.find(self))
 

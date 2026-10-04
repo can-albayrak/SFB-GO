@@ -79,6 +79,8 @@ func _rebuild() -> void:
 		func(v: float) -> void: Settings.fov = v)
 	_add_slider("Mouse sensitivity", 0.1, 8.0, 0.05, Settings.mouse_sensitivity, "%.2f",
 		func(v: float) -> void: Settings.mouse_sensitivity = v)
+	_add_percent("Sound volume", Settings.sfx_volume,
+		func(v: float) -> void: Settings.sfx_volume = v)
 
 	_add_section("CROSSHAIR")
 	_add_color("Color", Settings.crosshair_color,
@@ -147,6 +149,7 @@ func _add_slider(text: String, min_value: float, max_value: float, step: float, 
 	slider.step = step
 	slider.value = value
 	slider.custom_minimum_size = Vector2(SLIDER_WIDTH, 0.0)
+	slider.scrollable = false # The mouse wheel scrolls the list; only dragging changes values.
 	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(slider)
 	var value_label := Label.new()
@@ -169,6 +172,7 @@ func _add_percent(text: String, value: float, on_change: Callable) -> void:
 	slider.step = 0.05
 	slider.value = value
 	slider.custom_minimum_size = Vector2(SLIDER_WIDTH, 0.0)
+	slider.scrollable = false # The mouse wheel scrolls the list; only dragging changes values.
 	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(slider)
 	var value_label := Label.new()

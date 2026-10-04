@@ -48,6 +48,7 @@ func _exit_tree() -> void:
 ## Owner: muzzle flash now; the host spawns the round.
 func _fire() -> void:
 	ShotEffects.spawn_muzzle_flash(muzzle)
+	Sfx.shot(player.get_parent(), def, muzzle.global_position)
 	player.send_fire(player.get_aim_origin(), -player.get_aim_basis().z, player.weapons.find(self))
 
 

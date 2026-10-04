@@ -25,6 +25,8 @@ var practice_unlimited_abilities: bool = false
 var fov: float = 90.0
 ## CS-compatible: a CS sensitivity value feels the same here.
 var mouse_sensitivity: float = 2.0
+## Sound effects volume, 0 (mute) .. 1.
+var sfx_volume: float = 0.8
 
 var crosshair_color: Color = Color(0.3, 1.0, 0.45)
 var crosshair_length: float = 8.0
@@ -103,6 +105,7 @@ func load_settings() -> void:
 	crosshair_thickness = _read(config, "crosshair", "thickness", crosshair_thickness)
 	crosshair_dot = _read(config, "crosshair", "dot", crosshair_dot)
 	hit_marker_enabled = _read(config, "crosshair", "hit_marker", hit_marker_enabled)
+	sfx_volume = _read(config, "audio", "sfx_volume", sfx_volume)
 	camera_fov_shift = _read(config, "camera", "fov_shift", camera_fov_shift)
 	camera_head_bob = _read(config, "camera", "head_bob", camera_head_bob)
 	camera_landing = _read(config, "camera", "landing", camera_landing)
@@ -139,6 +142,7 @@ func save_settings() -> void:
 	config.set_value("crosshair", "thickness", crosshair_thickness)
 	config.set_value("crosshair", "dot", crosshair_dot)
 	config.set_value("crosshair", "hit_marker", hit_marker_enabled)
+	config.set_value("audio", "sfx_volume", sfx_volume)
 	config.set_value("camera", "fov_shift", camera_fov_shift)
 	config.set_value("camera", "head_bob", camera_head_bob)
 	config.set_value("camera", "landing", camera_landing)
