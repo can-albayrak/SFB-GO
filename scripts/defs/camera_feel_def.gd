@@ -35,6 +35,19 @@ extends Resource
 @export var shake_time: float = 0.18
 @export var shake_frequency: float = 30.0 ## Hz.
 
+@export_group("View Model")
+## Every first-person weapon is drawn this much bigger (hands follow the grips). Snipers
+## already have their own 1.25x in their scenes.
+@export var view_model_scale: float = 1.15
+
+@export_group("Damage Overlay")
+@export var hurt_flash_alpha: float = 0.35 ## Red at the screen edges right after a hit of hurt_full_damage.
+@export var hurt_full_damage: float = 40.0
+@export var hurt_min_share: float = 0.4 ## Small hits still flash this share.
+@export var hurt_flash_time: float = 0.45 ## Seconds the flash fades over.
+@export var low_health_start: float = 0.6 ## Health share where the lasting red edge begins.
+@export var low_health_alpha: float = 0.5 ## Red edge strength at 1 health.
+
 @export_group("Recoil")
 ## Share of the weapon's recoil the view follows. 0: the crosshair stays where it is and the
 ## shots climb away from it by the pattern (Can's call); 1: the view is kicked as far as the shots.

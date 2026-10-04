@@ -38,6 +38,7 @@ const TILT_EASE: float = 0.2 ## Seconds to tip up and back down.
 const THROW_TIME: float = 0.7 ## Seconds the throw clip is squeezed into.
 
 var skeleton: Skeleton3D
+var grounded: bool = true ## Feet on the ground this frame (short ray; Player footsteps use it).
 
 var _player: Player
 var _tree: AnimationTree
@@ -185,7 +186,8 @@ func _process(delta: float) -> void:
 	var speed: float = planar.length()
 	var crouched: bool = _player.is_pose_crouched()
 	var state: String = "crouch" if crouched else "ground"
-	if not _on_ground():
+	grounded = _on_ground()
+	if not grounded:
 		state = "fall" if _velocity.y < FALL_SPEED else "jump"
 	if state != _state:
 		_state = state

@@ -23,7 +23,11 @@ const STEPS: Array[AudioStream] = [
 
 const SHOT_DB: float = -4.0
 const EXPLOSION_DB: float = 2.0
-const STEP_DB: float = -10.0
+const STEP_DB: float = -8.0
+const LAND_DB: float = -5.0
+## Footsteps carry like CS (heard through a wall or two, ~30 m), panned hard to their side.
+const STEP_UNIT_SIZE: float = 5.0
+const STEP_MAX_DISTANCE: float = 32.0
 const UI_DB: float = -8.0
 const PITCH_JITTER: float = 0.06
 const UNIT_SIZE: float = 8.0 ## Metres at which a sound is at its full volume.
@@ -31,14 +35,16 @@ const MAX_DISTANCE: float = 120.0
 
 
 ## Plays `stream` once at `point` in `parent`'s world; the player frees itself afterwards.
-static func play_at(parent: Node, stream: AudioStream, point: Vector3, volume_db: float = 0.0, unit_size: float = UNIT_SIZE) -> void:
+static func play_at(parent: Node, stream: AudioStream, point: Vector3, volume_db: float = 0.0, unit_size: float = UNIT_SIZE, max_distance: float = MAX_DISTANCE) -> void:
 	if parent == null or not parent.is_inside_tree() or DisplayServer.get_name() == "headless":
 		return
 	var audio := AudioStreamPlayer3D.new()
 	audio.stream = stream
 	audio.volume_db = volume_db + _master_db()
 	audio.unit_size = unit_size
-	audio.max_distance = MAX_DISTANCE
+	audio.max_distance = max_distance
+	audio.panning_strength = 1.0 # Full left/right: you hear which side it came from.
+	audio.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
 	audio.pitch_scale = randf_range(1.0 - PITCH_JITTER, 1.0 + PITCH_JITTER)
 	audio.attenuation_filter_cutoff_hz = 8000.0
 	audio.finished.connect(audio.queue_free)
@@ -85,7 +91,12 @@ static func explosion(parent: Node, point: Vector3) -> void:
 
 
 static func step(parent: Node, point: Vector3) -> void:
-	play_at(parent, STEPS[randi() % STEPS.size()], point, STEP_DB, UNIT_SIZE * 0.5)
+	play_at(parent, STEPS[randi() % STEPS.size()], point, STEP_DB, STEP_UNIT_SIZE, STEP_MAX_DISTANCE)
+
+
+## Landing from a jump or fall: both feet, a little louder than a step (no boom).
+static func land(parent: Node, point: Vector3) -> void:
+	play_at(parent, LAND, point, LAND_DB, STEP_UNIT_SIZE, STEP_MAX_DISTANCE)
 
 
 static func _master_db() -> float:

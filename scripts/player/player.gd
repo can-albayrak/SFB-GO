@@ -22,7 +22,6 @@ const INTERP_DELAY: float = 0.1 ## Remote players are drawn this far in the past
 const PROTECTION_BLINK_PERIOD: float = 0.25
 const STEP_DISTANCE: float = 2.3 ## Metres between footstep sounds.
 const STEP_MIN_SPEED: float = 3.5 ## m/s: slower (walk key, crouch) is silent.
-const STEP_MAX_VERTICAL_SPEED: float = 1.5 ## Remote players: faster up/down counts as airborne.
 const STEP_TELEPORT_DISTANCE: float = 3.0 ## A jump this big in one frame is a respawn, not a step.
 const LAND_SOUND_SPEED: float = 4.0 ## m/s of fall speed before landing makes a thud.
 const FALL_WEAPON_NAME: String = "Fall"
@@ -105,6 +104,8 @@ var _camera_feel: CameraFeel
 var rig: SoldierRig
 var _step_distance: float = 0.0 ## Metres walked on the ground since the last footstep sound.
 var _last_step_position: Vector3 = Vector3.ZERO
+var _was_grounded: bool = true ## Remote players: on the ground last frame (landing sound).
+var _air_fall_speed: float = 0.0 ## Remote players: fastest fall since leaving the ground.
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -158,7 +159,7 @@ func _ready() -> void:
 		movement.landed.connect(_camera_feel.on_landed)
 		movement.landed.connect(func(fall_speed: float) -> void:
 			if fall_speed >= LAND_SOUND_SPEED:
-				Sfx.play_at(get_parent(), Sfx.LAND, global_position, Sfx.STEP_DB + 4.0))
+				Sfx.land(get_parent(), global_position))
 		# Your own body in view: legs on the body, arms with the view model (visual only).
 		add_child(FirstPersonLegs.create(self))
 		weapon_holder.add_child(FirstPersonArms.create(self))
@@ -254,7 +255,13 @@ func _update_footsteps() -> void:
 	var moved: Vector3 = global_position - _last_step_position
 	_last_step_position = global_position
 	var velocity_now: Vector3 = get_move_velocity()
-	var grounded: bool = is_on_floor() if is_local else absf(velocity_now.y) < STEP_MAX_VERTICAL_SPEED
+	var grounded: bool = is_on_floor() if is_local else rig.grounded
+	if not is_local:
+		# Others hear remote players land too (the owner's own landing comes from Movement.landed).
+		if grounded and not _was_grounded and _air_fall_speed >= LAND_SOUND_SPEED and is_alive:
+			Sfx.land(get_parent(), global_position)
+		_air_fall_speed = 0.0 if grounded else maxf(_air_fall_speed, -velocity_now.y)
+		_was_grounded = grounded
 	var horizontal_speed: float = Vector2(velocity_now.x, velocity_now.z).length()
 	if not is_alive or not grounded or horizontal_speed < STEP_MIN_SPEED or moved.length() > STEP_TELEPORT_DISTANCE:
 		_step_distance = 0.0
@@ -620,6 +627,7 @@ func _add_weapon(def: WeaponDef) -> Weapon:
 	var weapon: Weapon = def.scene.instantiate()
 	weapon.setup(def, self)
 	weapon.visible = false
+	weapon.scale = Vector3.ONE * CameraFeel.DEF.view_model_scale # Grips and muzzle scale with it.
 	weapon_holder.add_child(weapon)
 	return weapon
 
