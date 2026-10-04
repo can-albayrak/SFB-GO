@@ -23,6 +23,9 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var burst_interval: float = 0.07 ## Seconds between shots inside a burst.
 @export var magazine_size: int = 30
 @export var reload_time: float = 2.0
+## Others see the Mixamo magazine-reload clip (box-magazine guns). False: the gun is tipped
+## up while reloading instead (shotgun, revolver, pistols, launchers...).
+@export var reload_clip: bool = false
 @export var equip_time: float = 0.4
 @export var move_speed_mult: float = 1.0
 @export var uses_ammo: bool = true ## False = never runs dry (melee weapons).
@@ -42,8 +45,14 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var spin_up_time: float = 0.0 ## Minigun: seconds of holding fire before it shoots.
 
 @export_group("Recoil")
-## Per-shot view kick in degrees: x = right, y = up. Shots past the end reuse the last entry.
+## Per-shot kick of the aim in degrees: x = right, y = up (CS spray: climb first, then sway).
+## Shots past the end loop back to recoil_loop_start, so a long spray sways side to side
+## instead of climbing forever.
 @export var recoil_pattern: PackedVector2Array
+## Index the pattern loops back to; -1 = the last entry only.
+@export var recoil_loop_start: int = -1
+## The kick never takes the aim more than this many degrees above where it started.
+@export var recoil_max_up: float = 8.0
 ## Degrees per second the view returns once firing stops.
 @export var recoil_recovery: float = 12.0
 ## Recovery starts this long after the next shot would have been ready.
@@ -68,11 +77,23 @@ enum ViewHands { NONE, RIGHT, BOTH }
 
 @export_group("Launcher")
 @export var grenade: GrenadeDef ## Explosive fired by a PROJECTILE weapon (Grenade Launcher).
+## Rocket Launcher (Half-Life style): right click toggles laser guidance; while it is on
+## and the launcher is in hand, live rockets steer towards where the shooter aims.
+@export var guidable: bool = false
 
 @export_group("Melee")
 @export var melee_spread_scale: float = 1.0 ## Widens the fan of hit rays (Sledgehammer).
 @export var melee_swing_angle: float = 70.0 ## View sweep per swing in degrees; 0 = no sweep (Chainsaw).
 @export var knockback: float = 0.0 ## Metres/second pushed onto a player hit (Kick).
+## Held knife only (not the V quick swing): damage of a hit from behind (CS backstab). 0 = none.
+@export var backstab_damage: float = 0.0
+## How far behind counts: dot of the victim's facing and the attacker-to-victim direction
+## (CS: 0.475, about 60 degrees either side of straight behind).
+@export var backstab_dot: float = 0.475
+## Held knife right click (CS:GO): a slower, heavier stab. 0 = no heavy attack.
+@export var heavy_damage: float = 0.0
+@export var heavy_interval: float = 1.0 ## Seconds after a heavy stab before the knife is ready again.
+@export var heavy_backstab_damage: float = 0.0 ## A heavy stab from behind.
 
 @export_group("Thrown")
 @export var throw_speed: float = 22.0
@@ -86,7 +107,13 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var scope_zoom: float = 0.0 ## 0 = no scope; otherwise right mouse zooms by this factor.
 @export var scope_move_mult: float = 0.5 ## Speed multiplier while scoped (no sprint).
 @export var scope_sway: float = 0.0 ## Degrees of view sway while scoped (halved when crouched).
-@export var unscoped_spread: float = 0.0 ## Degrees of random cone when firing without the scope.
+## Degrees of random cone when firing without the scope (every shot for a gun without one).
+@export var unscoped_spread: float = 0.0
+## Seconds from right click to full zoom. The unscoped cone fades out over the same time,
+## so a shot fired mid-zoom is still inaccurate (no instant quick scopes).
+@export var scope_in_time: float = 0.0
+## False: no crosshair while this gun is in hand and not scoped (snipers, CS style).
+@export var hip_crosshair: bool = true
 
 @export_group("Scene")
 @export var scene: PackedScene ## Visual + behaviour (Weapon subclass).

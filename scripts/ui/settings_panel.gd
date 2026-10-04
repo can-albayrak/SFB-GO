@@ -79,6 +79,8 @@ func _rebuild() -> void:
 		func(v: float) -> void: Settings.fov = v)
 	_add_slider("Mouse sensitivity", 0.1, 8.0, 0.05, Settings.mouse_sensitivity, "%.2f",
 		func(v: float) -> void: Settings.mouse_sensitivity = v)
+	_add_percent("Sound volume", Settings.sfx_volume,
+		func(v: float) -> void: Settings.sfx_volume = v)
 
 	_add_section("CROSSHAIR")
 	_add_color("Color", Settings.crosshair_color,
@@ -107,6 +109,10 @@ func _rebuild() -> void:
 		func(v: float) -> void: Settings.camera_damage_shake = v)
 
 	_add_section("GRAPHICS")
+	_add_toggle("Fullscreen (Alt+Enter)", Settings.fullscreen,
+		func(on: bool) -> void:
+			Settings.fullscreen = on
+			Settings.apply_window_mode())
 	_add_toggle("Screen filter (grain, PS2 colour)", Settings.post_process,
 		func(on: bool) -> void: Settings.post_process = on)
 	_add_slider("Render scale %", 50.0, 100.0, 5.0, Settings.render_scale * 100.0, "%.0f",
@@ -143,6 +149,7 @@ func _add_slider(text: String, min_value: float, max_value: float, step: float, 
 	slider.step = step
 	slider.value = value
 	slider.custom_minimum_size = Vector2(SLIDER_WIDTH, 0.0)
+	slider.scrollable = false # The mouse wheel scrolls the list; only dragging changes values.
 	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(slider)
 	var value_label := Label.new()
@@ -165,6 +172,7 @@ func _add_percent(text: String, value: float, on_change: Callable) -> void:
 	slider.step = 0.05
 	slider.value = value
 	slider.custom_minimum_size = Vector2(SLIDER_WIDTH, 0.0)
+	slider.scrollable = false # The mouse wheel scrolls the list; only dragging changes values.
 	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(slider)
 	var value_label := Label.new()

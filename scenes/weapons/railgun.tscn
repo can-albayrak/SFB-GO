@@ -12,3 +12,10 @@ scale = Vector3(0.78, 0.78, 0.78)
 
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(0, 0.0456, -0.5491)
+
+[node name="RightHand" type="Marker3D" parent="."]
+position = Vector3(0, -0.074, 0.026)
+
+[node name="LeftHand" type="Marker3D" parent="."]
+position = Vector3(0, -0.02, -0.3)
+rotation = Vector3(0, 0, -0.4363)

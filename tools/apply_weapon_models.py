@@ -37,7 +37,7 @@ SCENES = {
     "rocket_launcher": ("rocket_launcher", 0.65, None, ("Tube", "Grip"), True),
     "musket": ("musket", 0.55, None, (), True),
     "knife": ("knife", 0.85, None, (), False),
-    "throwing_knife": ("throwing_knife", 1.15, None, (), False),
+    "throwing_knife": ("throwing_knife", 0.75, None, (), False),
     "sledgehammer": ("sledgehammer", 0.5, None, (), False),
     "chainsaw": ("chainsaw", 0.55, (0.0, 0.0, 0.0), (), False),
 }
@@ -48,7 +48,7 @@ DEFS = {
     "dual_pistols": "dual_pistols", "revolver": "revolver", "shotgun": "shotgun",
     "grenade_launcher": "grenade_launcher", "railgun": "railgun", "minigun": "minigun",
     "rocket_launcher": "rocket_launcher", "musket": "musket", "throwing_knives": "throwing_knife",
-    "sledgehammer": "sledgehammer", "chainsaw": "chainsaw",
+    "sledgehammer": "sledgehammer", "chainsaw": "chainsaw", "knife": "knife",
 }
 # Other scenes that only swap the model file and scale (projectiles).
 PROJECTILES = {

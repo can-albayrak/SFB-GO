@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterModelDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/character_model_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/saul/saul.glb" id="2_scene"]
+
+[resource]
+script = ExtResource("1_def")
+scene = ExtResource("2_scene")
+height = 1.82
+yaw_degrees = -90.0
+fit_points = Dictionary[String, Vector3]({
+"LeftArm": Vector3(0.256, 1.175, -0.047),
+"LeftForeArm": Vector3(0.254, 0.886, 0.015),
+"LeftHand": Vector3(0.251, 0.76, 0.025),
+"LeftUpLeg": Vector3(0.112, 0.483, -0.005),
+"LeftLeg": Vector3(0.125, 0.08, -0.027)
+})

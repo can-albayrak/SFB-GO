@@ -39,6 +39,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 **Lobi:** Host kill hedefi, süre ve haritayı seçer. Oyuncular kendi isimlerini girer.
 
 - **Bağlanma:** Host'un Tailscale IP'si bir kez girilir ve kaydedilir; sonraki açılışlarda "Last host" ile tek tıkla bağlanılır.
+- **Steam (2026-10-02, Can):** Steam sürümünde (App ID 480, Spacewar) IP yok: host "HOST ON STEAM" der, arkadaşlar menüdeki listeden ("FIND STEAM GAMES") ya da Steam davetinden / arkadaş listesindeki "Join Game"den girer. Steam bağlantıyı kendi aktarır, port açmak gerekmez. IP ile bağlanma aynen durur.
 - **Basit lobi:** Oyuncu listesi, her oyuncunun adı, yüz seçimi ve "hazır" durumu görünür; host ayarları yapar ve "Start" der. Maç ortasında katılma (geç katılma) yine mümkün. Sohbet, takım/renk seçimi gibi ek özellikler yoktur.
 - **Yüz ve sınıf seçimi:** Her oyuncu lobide ilk doğuşu için **yüzünü ve sınıfını** (loadout) seçer. Ölünce ikisini de değiştirebilir (ölüm ekranındaki menü). Geç katılan oyuncuya katılma sırasında yüz + sınıf sorulur, seçince maça girer.
 
@@ -46,16 +47,17 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 
 | Konu | Karar |
 | --- | --- |
-| Hareket | Hafif bunny hop (zamanlı zıplamada hız korunur, sonsuz hızlanma yok), crouch, slide (koşarken crouch). Düşme hasarı yok. |
+| Hareket | Hafif bunny hop (zamanlı zıplamada hız korunur, sonsuz hızlanma yok), crouch, slide (koşarken crouch). Eğimden aşağı slide hızlanır ve eğim bitene kadar sürer (üst sınırlı). Slide sırasında atışlar çok dağılır. Düşme hasarı yok. |
 | Nişan | Nişan (ADS) modu yok, yalnızca Hawk'ın dürbünü |
 | Hasar | Kafa 2x, bacak 0,75x. Hawk Heavy Rifle kafa ve gövdeden tek atış (bacak hariç). |
 | Mermi tipi | Mermili silahlar hitscan; bomba, roket, grenade launcher ve fırlatma bıçağı fiziksel mermi |
-| Geri tepme | Her silahta sabit, öğrenilebilir desen; CS'ten belirgin şekilde hafif |
+| Geri tepme | Her silahta sabit, öğrenilebilir desen (CS spreyi: önce yukarı tırmanır, sonra tırmanmadan sağa sola salınır; tırmanmanın üst sınırı var). Nişangah yerinde kalır, mermiler desene göre gider; oyuncu fareyi aşağı ve yana çekerek telafi eder. |
 | Can | Yenilenme yok, yalnızca Health pickup |
 | Mermi | Yedek mermi sınırsız, sadece şarjör değiştirilir (airdrop silahı hariç) |
 | Ayak sesi | Yön ve konum anlaşılacak kadar belirgin (aşırı vurgulanmaz). **Ctrl ile eğilip yürürken** ses çok az çıkar. |
-| Hızlı yakın dövüş | Herkese `V` ile bıçak: 25 hasar, ~1,5 m menzil, 0,8 sn bekleme. Bear'da `V` = kısa tekme (az hasar, geri itme). |
-| Yedek silah | Bear hariç herkese tek tip tabanca. Bear'a 3 Throwing Knife. |
+| Hızlı yakın dövüş | Herkese `V` ile bıçak: bıçağın sol tık vuruşu (30 hasar, ~1,5 m menzil, 0,45 sn bekleme). |
+| Bıçak slotu (CS:GO gibi) | Her sınıfta bıçak **3** tuşunda elde tutulur. **Sol tık** seri ve hafif: 30 hasar, 0,45 sn, arkadan 90. **Sağ tık** yavaş ve ağır: 65 hasar, 1 sn, **arkadan tek atar** (CS kuralı: hedefin baktığı yön ile saldırandan hedefe çizgi aynı yöne, ~60° içinde). Bıçak elde iken sınıf hızının %15 fazlasıyla koşulur. `V` ile hızlı bıçak arkadan öldürmez. |
+| Yedek silah | Herkese tek tip tabanca (Cowboy'da Revolver). |
 | FOV ve fare | Varsayılan FOV 90 (80–110), fare hassasiyeti, crosshair özelleştirme (renk, boyut, boşluk) |
 
 ### Hareket hissi (hedef)
@@ -111,7 +113,6 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Silah kimliği | Silahlar en çok **ateş ritmi ve sesle** ayrılır: SMG sık ve ince, Heavy Rifle yavaş ve tok, Shotgun tek patlama. Hasar/TTK birbirine yakın tutulur, fark his ve ritimdedir (menzil rolü dar tutulur, istisna: Shotgun yakın, Marksman/Heavy uzak). |
 | Geri tepme | Mevcut karar korunur: her silahta sabit, öğrenilebilir desen; CS'ten hafif. |
 | Heavy Rifle | Tek atış kafa/gövdede kalır, **bacakta öldürmez** (bacak vuruşu yüksek hasar verir ama can bırakır). Uygulama: `heavy_rifle.tres` içinde bacak çarpanı. |
-| Bear | Her mesafede orta güçlü; hız cezası az. Dar alanlarda güçlü kalır ama açıkta tamamen çaresiz değildir. Yakın dövüş kimliği korunur, ağır silahlar (Chainsaw) hâlâ yavaşlatır. |
 
 **Not:** Kafa vuruşu (2x) TTK'yı yarıya indirir; bu, nişan becerisinin ödülü olarak kalır. Hawk Heavy Rifle'ın tek atışı bu TTK hedefinin dışındadır (kasıtlı istisna).
 
@@ -143,12 +144,11 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 ## Sınıflar
 
-6 sınıf, çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy: tek ana silah, tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
+5 sınıf (Bear 2026-10-03'te çıkarıldı), çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy: tek ana silah, tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
 
 | Sınıf | Can | Hız | Rol | Görünüm |
 | --- | --- | --- | --- | --- |
 | Hawk | 80 | Normal | Uzak mesafe, yüksek nokta | Uzun palto, boyun atkısı |
-| Bear | 200 | Hafif yavaş (hız cezası az) | Yakın dövüş tankı, her mesafede orta güçlü | Kaynaklı ev yapımı zırh, omuz ve kol koruyucuları |
 | Cheetah | 70 | Çok hızlı | Vur-kaç, hareket | Eşofman, kapüşon, koşu ayakkabısı |
 | Wolf | 100 | Normal | Dengeli, başlangıç sınıfı | Askeri yelek, bere |
 | Volcano | 110 | Biraz yavaş | Patlayıcı, alan kontrolü | Kirli koruyucu tulum, madenci kafa lambası (kask yok) |
@@ -162,21 +162,9 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Marksman Rifle | Kafa 1, gövde 2, bacak 3 atış | Hızlı atış ve şarjör, belirgin geri tepme |
 
 - **Güçler (15 sn):** Grapple (yüksek noktaya çekilme) · Decoy (yerinde hologram bırakma)
-- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz düşük isabet
+- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz çok düşük isabet ve nişangah yok (CS keskin nişancıları gibi). Dürbün sağ tıkla yavaşça açılır (~0,3 sn); tam açılana kadar isabet düşük kalır (anında quick scope yok).
 - **Namlu parlaması:** Sadece dürbün açıkken. Haritanın her yerinden görünür (mesafe sınırı yok), yeri net belli olur.
 - **Yedek:** Tabanca
-
-### Bear
-
-| Silah | Hasar | Not |
-| --- | --- | --- |
-| Sledgehammer | 2 vuruş (Cheetah'a 1) | Yavaş, geniş alan |
-| Claws | 4 vuruş | Çok hızlı, kısa menzil |
-| Chainsaw | Sürekli hasar | Basılı tutulur, kullanırken yavaşlar |
-
-- **Güçler:** Shield (12 sn; 3 sn önden gelen hasarı engeller, arkadan korumaz) · Charge (ileri hücum, çarptığı rakibi 2 sn stunlar)
-- **Yedek: 3 Throwing Knife.** Kavisli fiziksel atış, 35 hasar (kafaya 70). Iskalarsa duvara veya zemine saplanır (diğer oyuncular da görür), üstünden geçince toplanır. Toplanmazsa ya da hedefe saplanırsa her bıçak 8 sn'de envantere geri döner.
-- **V:** Tekme (az hasar, geri itme)
 
 ### Cheetah
 
@@ -207,7 +195,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Grenade Launcher | Alan hasarı | Kavisli atış, kendine de hasar verir |
 
 - **Güçler (20 sn):** Sticky Bomb (duvara veya oyuncuya yapışır) · Landmine (üstüne basanı patlatır)
-- **Landmine:** Herkese görünür, kırmızı ışığı yanıp söner. Tetik alanı küçük ama basanı **öldürür** (her sınıfı, Bear dahil).
+- **Landmine:** Herkese görünür, kırmızı ışığı yanıp söner. Tetik alanı küçük ama basanı **öldürür** (her sınıfı).
 - **Kendine hasar:** Volcano'nun patlayıcıları (Grenade Launcher, Sticky Bomb, Landmine) Volcano'nun kendisine **yarı hasar** verir.
 - **Yedek:** Tabanca
 
@@ -226,7 +214,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek tıkla aynısıyla doğulur.
 
 - **Ölüyken:** Ölüm ekranında menü açılır, seçilen sınıfla doğulur.
-- **Yaşarken:** `B` menüyü açar; ekranda "Next spawn: Bear" yazar, bir sonraki doğuşta geçilir.
+- **Yaşarken:** `B` menüyü açar; ekranda "Next spawn: Hawk" yazar, bir sonraki doğuşta geçilir.
 - **Spawn koruması sırasında:** Doğduktan sonraki ilk 3 sn içinde seçim yapılırsa anında geçilir.
 
 ## Pickup'lar
@@ -249,14 +237,14 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 2. 3–4 olası noktadan biri seçilir (host); ışık hüzmesi iner, kasa 10–15 sn'de paraşütle düşer.
 3. Kasayı açmak için `E` 3 sn basılı tutulur; hasar alınırsa iptal olur.
 
-**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür (başının üstünde duvar arkasından da görünen işaret) ve yavaşlar (%15). Ölünce silah kalan mermisiyle yere düşer, üstünden geçen alır (45 sn sonra kaybolur). Kill ödülü bu silahlara mermi eklemez. Airdrop silahı **3** tuşunda; kasadan alınca hemen elde olur. Silah taşırken kasa açılamaz.
+**Kurallar:** Mermi sınırlı, bitince silah yok olur. Taşıyan haritada herkese görünür (başının üstündeki nick turuncu olur ve duvar arkasından da görünür; her oyuncunun başında küçük nick yazar, Can'ın kararı 2026-10-04) ve yavaşlar (%15). Ölünce silah kalan mermisiyle yere düşer, üstünden geçen alır (45 sn sonra kaybolur). Kill ödülü bu silahlara mermi eklemez. Airdrop silahı **4** tuşunda (3 = bıçak); kasadan alınca hemen elde olur. Silah taşırken kasa açılamaz.
 
 **Silah:** Her airdrop'ta rastgele biri, kasa açılana kadar bilinmez. Hasarlar oynadıkça ayarlanır.
 
 | Silah | Mermi | Davranış |
 | --- | --- | --- |
-| Railgun | 8 | Işın. **Sınırsız menzil, bütün duvarları deler**, haritanın her yerinden vurabilir. Her yerden tek atış, atış sıklığı düşük. |
-| Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli. |
+| Railgun | 4 | Işın. **Sınırsız menzil, bütün duvarları deler**, haritanın her yerinden vurabilir. Her yerden tek atış, atış sıklığı düşük. |
+| Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli, mermiler dağılır. |
 | Rocket Launcher | 6 | Fiziksel roket. Merkezde 200 hasar, merkezden uzaklaştıkça azalır; alanı Frag'den büyük. Sıkanı geri iter (recoil, rocket jump). |
 
 ## Harita tasarım kuralları
@@ -268,7 +256,7 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 | Açık meydan | Geniş, dağınık siper | Wolf, Hawk |
 | Uzun koridor | Uzun görüş hattı, arada kırıcı siperler | Hawk |
 | Yüksek noktalar | Çatı, köprü, kule; grapple noktaları | Hawk, Cheetah |
-| Dar iç mekan | Kısa koridor, köşe, kapı | Bear, Volcano |
+| Dar iç mekan | Kısa koridor, köşe, kapı | Volcano, Cheetah |
 | Dikey kısa yollar | Zıplanabilir çıkıntı, pencereden atlama | Cheetah |
 
 **Denge kuralları:**
@@ -291,7 +279,7 @@ Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'd
 - 10–12 spawn noktası, tüm bölgelere dağılmış (10 kişide de yeterli)
 - 3 airdrop noktası, bölgelerin kesiştiği yerlerde
 
-**İlk harita:** Terk edilmiş alışveriş merkezi. Dar koridorlu mağazalar (Bear, Volcano), ortada açık atrium (Wolf), üst katlar ve yürüyen merdivenler (Hawk, Cheetah), dışarıda otopark ve çatı. Bina yaklaşık **64 × 48 m**, iki kat (0 m ve 5 m) ve çatı (10 m); 5–6 dükkân, bir uzun yemek katı koridoru, dükkân arkalarında dar servis koridoru, dışarıda otopark ve yükleme alanı.
+**İlk harita:** Terk edilmiş alışveriş merkezi. Dar koridorlu mağazalar (Volcano), ortada açık atrium (Wolf), üst katlar ve yürüyen merdivenler (Hawk, Cheetah), dışarıda otopark ve çatı. Bina yaklaşık **64 × 48 m**, iki kat (0 m ve 5 m) ve çatı (10 m); 5–6 dükkân, bir uzun yemek katı koridoru, dükkân arkalarında dar servis koridoru, dışarıda otopark ve yükleme alanı.
 
 **Yerleşim kararları:**
 
@@ -329,4 +317,4 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 - **Test:** Hasar sayısı gösteren hedef mankenleri. Bot yok. Test Range'de güçlerin bekleme süresi yok ve şarjör bitmez (`data/match/test_range.tres`); airdrop gelince 5 sn'de bir iner (haritada her airdrop silahı zaten varsa inmez).
 - **Sesli iletişim:** Discord (oyun içi ses yok)
 - **Dağıtım:** GitHub gizli repo (kod) + Releases (oyun zip'i). Arkadaşlar collaborator olarak eklenir.
-- **Bağlantı:** Tailscale ile sanal LAN, host'un portu dışarı açmasına gerek yok.
+- **Bağlantı:** Tailscale ile sanal LAN, host'un portu dışarı açmasına gerek yok. Ya da Steam sürümü (App ID 480): lobi + Steam'in P2P aktarımı.

@@ -6,6 +6,7 @@ extends Node
 ## climbed and walked down with the feet on the floor, a 0.6 m block is not stepped onto.
 ## Mall: escalator up and down, roof stairs, fire escape, dock ramp (ramp-to-slab joints),
 ## and a full-speed jump off the roof stays inside the site (invisible walls on the fence).
+## Slides: on flat ground a slide only slows down; down the escalator it speeds up and lasts.
 ## Prints PASS / FAIL lines and quits with exit code 1 when anything failed.
 
 const GAME_SCENE: PackedScene = preload("res://scenes/game.tscn")
@@ -22,6 +23,7 @@ var _passes: int = 0
 var _failures: int = 0
 var _game: Game
 var _player: Player
+var _flat_slide: Dictionary = {}
 
 
 func _ready() -> void:
@@ -37,8 +39,12 @@ func _run() -> void:
 		await _test_stairs_up()
 		await _test_stairs_down()
 		await _test_too_high()
+		_flat_slide = await _slide(Vector3(0.0, 0.05, 0.0), 0.0, 2.5)
+		_check(_flat_slide.max_speed <= _flat_slide.start_speed + 0.05,
+			"a slide on flat ground does not speed up (%.1f -> max %.1f m/s)" % [_flat_slide.start_speed, _flat_slide.max_speed])
 	if await _load_map(MALL_PATH):
 		await _test_mall_ramps()
+		await _test_slope_slide()
 		await _test_roof_leap()
 	_finish()
 
@@ -121,6 +127,45 @@ func _test_mall_ramps() -> void:
 		_check(stats.reached and absf(y - (case[4] as float)) < 0.15, "mall %s (y=%.2f)" % [case[0], y])
 		_check(stats.min_speed > 3.0, "mall %s keeps speed (lowest %.1f m/s)" % [case[0], stats.min_speed])
 		_check(stats.air_ticks <= 3, "mall %s stays on the floor (%d ticks in the air)" % [case[0], stats.air_ticks])
+
+
+## Slide from the top of the down escalator: the slope pulls the slide faster than it started
+## and keeps it going past MovementDef.slide_duration.
+func _test_slope_slide() -> void:
+	var stats: Dictionary = await _slide(Vector3(-12.0, UPPER_TOP + 0.05, -5.0), -PI / 2.0, 2.5)
+	_check(stats.max_speed > stats.start_speed + 1.0,
+		"a slide down the escalator speeds up (%.1f -> max %.1f m/s)" % [stats.start_speed, stats.max_speed])
+	_check(stats.slide_time > _player.class_def.movement.slide_duration,
+		"a slide down the escalator outlasts a flat slide (%.2f s)" % stats.slide_time)
+	_check(stats.max_speed <= _player.movement.base_speed * _player.class_def.movement.slide_slope_max_speed_mult + 0.05,
+		"slope slide stays under its cap (max %.1f m/s)" % stats.max_speed)
+
+
+## Runs into a slide at `from` facing `yaw` (crouch held) for `seconds`: speeds and slide time.
+func _slide(from: Vector3, yaw: float, seconds: float) -> Dictionary:
+	_player.global_position = from
+	_player.rotation.y = yaw
+	_player.movement.reset()
+	_player.movement.base_speed = _player.class_def.move_speed # Physics is off: nothing else sets it.
+	var forward := Vector3(-sin(yaw), 0.0, -cos(yaw))
+	_player.velocity = forward * _player.movement.base_speed
+	var dt: float = 1.0 / Engine.physics_ticks_per_second
+	var stats: Dictionary = {"start_speed": 0.0, "max_speed": 0.0, "slide_time": 0.0}
+	for i: int in roundi(seconds / dt):
+		var cmd := PlayerCommand.new()
+		cmd.move = Vector2(0.0, -1.0)
+		cmd.crouch = true
+		cmd.crouch_pressed = i == 0
+		_player.movement.physics_step(dt, cmd)
+		await get_tree().physics_frame
+		if i == 0:
+			stats.start_speed = _player.movement.get_horizontal_speed()
+		if not _player.movement.is_sliding:
+			break
+		stats.slide_time += dt
+		stats.max_speed = maxf(stats.max_speed, _player.movement.get_horizontal_speed())
+	_player.movement.reset()
+	return stats
 
 
 ## Leaps off the roof edge north and south at full speed: the site's invisible walls keep the

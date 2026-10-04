@@ -20,6 +20,11 @@ const FALL_DEATH_Y: float = -30.0
 const SCOPE_FOV_LERP: float = 25.0 ## Per second; how fast the zoom eases in and out.
 const INTERP_DELAY: float = 0.1 ## Remote players are drawn this far in the past.
 const PROTECTION_BLINK_PERIOD: float = 0.25
+const STEP_DISTANCE: float = 2.3 ## Metres between footstep sounds.
+const STEP_MIN_SPEED: float = 3.5 ## m/s: slower (walk key, crouch) is silent.
+const STEP_MAX_VERTICAL_SPEED: float = 1.5 ## Remote players: faster up/down counts as airborne.
+const STEP_TELEPORT_DISTANCE: float = 3.0 ## A jump this big in one frame is a respawn, not a step.
+const LAND_SOUND_SPEED: float = 4.0 ## m/s of fall speed before landing makes a thud.
 const FALL_WEAPON_NAME: String = "Fall"
 # Throws (get_throw_launch): hand offset from the eye as (right, up, forward) metres.
 const THROW_HAND_OFFSET: Vector3 = Vector3(0.18, -0.15, 0.4)
@@ -29,8 +34,10 @@ const THROW_MIN_AIM_DISTANCE: float = 2.0 ## Closer than this the throw just fol
 const THROW_INHERIT: float = 1.0 ## Share of the thrower's horizontal run speed the throw keeps.
 const THROW_WORLD_MASK: int = 1
 const THROW_AIM_MASK: int = 1 | 2 # world | player bodies
-## Weapon slot of a carried airdrop weapon (key 3); 0 / 1 are the loadout's guns.
-const SPECIAL_SLOT: int = 2
+## Weapon slots: 0 / 1 the loadout's guns, the class's knife (key 3, CS style), then a
+## carried airdrop weapon (key 4).
+const KNIFE_SLOT: int = 2
+const SPECIAL_SLOT: int = 3
 
 # Hitbox poses: x = centre height above feet, y = box height (0 = keep shape).
 const HEAD_POSE_STAND: Vector2 = Vector2(1.62, 0.0)
@@ -70,10 +77,14 @@ var ability: Ability = null
 var is_local: bool = false
 ## Owner: right mouse held with a scoped weapon (zoom, slow, sway, no sprint).
 var is_scoped: bool = false
+## Owner: 0 -> 1 over the gun's scope_in_time while scoped (zoom and accuracy), 0 when not.
+var scope_blend: float = 0.0
 ## Owner: the loadout last sent to the host (drives "Next spawn" on the HUD).
 var requested_loadout: PackedInt32Array = PackedInt32Array()
 ## Host: health removed by the last take_hit (0 when blocked by a shield or not allowed).
 var last_damage_dealt: float = 0.0
+## Host: the owner's Rocket Launcher laser is on (sent by PlayerRequests.send_guided).
+var rocket_guided: bool = true
 
 ## Increments on every respawn; stale state packets from a previous life are dropped.
 var _life: int = 0
@@ -90,6 +101,10 @@ var _hurt_since_spawn: bool = false
 var _spawned_at: float = 0.0
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
+## Animated third-person body under Model (every peer; hidden on your own screen).
+var rig: SoldierRig
+var _step_distance: float = 0.0 ## Metres walked on the ground since the last footstep sound.
+var _last_step_position: Vector3 = Vector3.ZERO
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Camera3D
@@ -119,6 +134,10 @@ func setup_authority(peer_id: int) -> void:
 func _ready() -> void:
 	is_local = is_multiplayer_authority()
 	crown.visible = false
+	rig = SoldierRig.create()
+	model.add_child(rig)
+	model.move_child(rig, 0)
+	rig.setup(self)
 	effects.setup()
 	effects.show_glint(scope_glint)
 	effects.show_shield(shield_up)
@@ -137,6 +156,9 @@ func _ready() -> void:
 		camera.current = true
 		_camera_feel = CameraFeel.new()
 		movement.landed.connect(_camera_feel.on_landed)
+		movement.landed.connect(func(fall_speed: float) -> void:
+			if fall_speed >= LAND_SOUND_SPEED:
+				Sfx.play_at(get_parent(), Sfx.LAND, global_position, Sfx.STEP_DB + 4.0))
 		# Your own body in view: legs on the body, arms with the view model (visual only).
 		add_child(FirstPersonLegs.create(self))
 		weapon_holder.add_child(FirstPersonArms.create(self))
@@ -154,6 +176,7 @@ func _physics_process(delta: float) -> void:
 		status.server_tick()
 	if not is_local or not is_alive:
 		is_scoped = false
+		scope_blend = 0.0
 		if is_local:
 			effects.report_scoped(false) # Re-sends on the next scope after a respawn.
 		return
@@ -170,6 +193,10 @@ func _physics_process(delta: float) -> void:
 	weapon_holder.visible = not is_scoped
 	if is_scoped:
 		cmd.sprint = false
+		var scope_rate: float = 1.0 / weapon_def.scope_in_time if weapon_def.scope_in_time > 0.0 else INF
+		scope_blend = minf(scope_blend + delta * scope_rate, 1.0)
+	else:
+		scope_blend = 0.0
 	effects.report_scoped(is_scoped) # Others see the glint.
 	var scope_mult: float = weapon_def.scope_move_mult if is_scoped else 1.0
 	# GDD: carrying an airdrop weapon slows you down, in hand or not.
@@ -191,6 +218,8 @@ func _physics_process(delta: float) -> void:
 		ability.tick(delta)
 		if cmd.ability and ability.try_use(get_aim_origin(), -get_aim_basis().z):
 			requests.send_ability(get_aim_origin(), -get_aim_basis().z)
+			if ability is GrenadeAbility:
+				effects.report_action(SoldierRig.Action.THROW, 0.0) # Others see the throw.
 	var airdrops: AirdropManager = AirdropManager.find(get_tree())
 	if airdrops != null:
 		airdrops.tick_local(self, cmd.interact)
@@ -207,13 +236,43 @@ func _process(delta: float) -> void:
 		_camera_feel.update(delta, movement, is_scoped)
 		var eye: Vector3 = head.get_global_transform_interpolated().origin
 		eye += Vector3.UP * _camera_feel.vertical + global_basis.x * _camera_feel.lateral
-		var view: Basis = _look_basis(current_weapon.get_view_recoil() + _get_scope_sway() + _camera_feel.shake)
+		var recoil: Vector2 = current_weapon.get_view_recoil()
+		var view: Basis = _look_basis(recoil * CameraFeel.DEF.recoil_view_share + _get_scope_sway() + _camera_feel.shake)
 		camera.global_transform = Transform3D(view * Basis(Vector3.BACK, _camera_feel.roll), eye)
+		_kick_view_model(recoil * (1.0 - CameraFeel.DEF.recoil_view_share))
 		camera.fov = lerpf(camera.fov, _get_target_fov(), minf(SCOPE_FOV_LERP * delta, 1.0))
 	else:
 		net_sync.interpolate(delta)
 		if is_alive and is_protected:
 			model.visible = fmod(Time.get_ticks_msec() / 1000.0, PROTECTION_BLINK_PERIOD) < PROTECTION_BLINK_PERIOD * 0.6
+	_update_footsteps()
+
+
+## Footstep sounds on every peer: one every STEP_DISTANCE metres while moving on the ground
+## faster than a careful walk (crouch-walking and slow walking stay silent, like CS).
+func _update_footsteps() -> void:
+	var moved: Vector3 = global_position - _last_step_position
+	_last_step_position = global_position
+	var velocity_now: Vector3 = get_move_velocity()
+	var grounded: bool = is_on_floor() if is_local else absf(velocity_now.y) < STEP_MAX_VERTICAL_SPEED
+	var horizontal_speed: float = Vector2(velocity_now.x, velocity_now.z).length()
+	if not is_alive or not grounded or horizontal_speed < STEP_MIN_SPEED or moved.length() > STEP_TELEPORT_DISTANCE:
+		_step_distance = 0.0
+		return
+	if is_local and movement.is_sliding:
+		return
+	_step_distance += Vector2(moved.x, moved.z).length()
+	if _step_distance >= STEP_DISTANCE:
+		_step_distance = 0.0
+		Sfx.step(get_parent(), global_position)
+
+
+## Owner: the recoil the view does not follow tips the gun in view up and back instead.
+func _kick_view_model(recoil: Vector2) -> void:
+	var feel: CameraFeelDef = CameraFeel.DEF
+	var back: float = minf(recoil.length() * feel.recoil_model_back, feel.recoil_model_max_back)
+	var tip := Basis.from_euler(Vector3(deg_to_rad(recoil.y * feel.recoil_model_pitch), -deg_to_rad(recoil.x * feel.recoil_model_pitch), 0.0))
+	weapon_holder.transform = Transform3D(tip, Vector3(0.0, 0.0, back))
 
 
 func equip(slot: int) -> void:
@@ -243,9 +302,18 @@ func get_look_forward() -> Vector3:
 	return -_look_basis(Vector2.ZERO).z
 
 
-## Zoom factor of the active scope (1 when not scoped). Mouse sensitivity is divided by it.
+## Flat direction the body faces (knife backstabs; on the host this is the rewound yaw).
+func get_facing() -> Vector3:
+	return Vector3(-sin(rotation.y), 0.0, -cos(rotation.y))
+
+
+## Zoom factor of the active scope (1 when not scoped, rising while it comes up).
+## Mouse sensitivity is divided by it.
 func get_zoom() -> float:
-	return current_weapon.def.scope_zoom if is_scoped and current_weapon != null else 1.0
+	if not is_scoped or current_weapon == null:
+		return 1.0
+	var eased: float = scope_blend * scope_blend * (3.0 - 2.0 * scope_blend)
+	return lerpf(1.0, current_weapon.def.scope_zoom, eased)
 
 
 ## Host: start point and velocity of a throw (grenades, sticky bombs, throwing knives).
@@ -425,7 +493,7 @@ func apply_pose(crouched: bool) -> void:
 	head_hitbox.set_pose(HEAD_POSE_CROUCH if crouched else HEAD_POSE_STAND)
 	body_hitbox.set_pose(BODY_POSE_CROUCH if crouched else BODY_POSE_STAND)
 	leg_hitbox.set_pose(LEG_POSE_CROUCH if crouched else LEG_POSE_STAND)
-	model.scale.y = Movement.CROUCH_HEIGHT / Movement.STAND_HEIGHT if crouched else 1.0
+	model.scale.y = SoldierRig.CROUCH_SCALE if crouched else 1.0
 	if not is_local:
 		movement.set_crouch_shape(crouched)
 		head.position.y = Movement.CROUCH_EYE if crouched else Movement.STAND_EYE
@@ -492,7 +560,7 @@ func _apply_loadout() -> void:
 		weapon.queue_free()
 	weapons.clear()
 	current_weapon = null
-	for def: WeaponDef in [Loadout.get_primary(loadout), class_def.secondary_weapon]:
+	for def: WeaponDef in [Loadout.get_primary(loadout), class_def.secondary_weapon, class_def.knife]:
 		weapons.append(_add_weapon(def))
 
 	if melee_weapon != null:
@@ -580,10 +648,15 @@ func _set_health(value: int) -> void:
 
 
 func _set_alive(value: bool) -> void:
+	var was_alive: bool = is_alive
 	is_alive = value
 	if is_node_ready():
 		if not value:
 			status.reset_local()
+			if was_alive and not is_local: # Others see the body fall; your own view stays clean.
+				get_parent().add_child(Corpse.create(model))
+		else:
+			rig.reset_motion()
 		_apply_alive_state()
 	alive_changed.emit(value)
 

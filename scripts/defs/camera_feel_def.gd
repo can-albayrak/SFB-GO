@@ -1,6 +1,6 @@
 class_name CameraFeelDef
 extends Resource
-## Camera feel tuning: speed FOV shift, head bob, landing dip, slide camera, damage shake.
+## Camera feel tuning: speed FOV shift, head bob, landing dip, slide camera, damage shake, recoil.
 ## Values live in data/camera/*.tres; each player scales every effect in Settings (0 = off).
 
 @export_group("FOV Shift")
@@ -34,3 +34,13 @@ extends Resource
 @export var shake_min_share: float = 0.35 ## Small hits still shake this share of the full angle.
 @export var shake_time: float = 0.18
 @export var shake_frequency: float = 30.0 ## Hz.
+
+@export_group("Recoil")
+## Share of the weapon's recoil the view follows. 0: the crosshair stays where it is and the
+## shots climb away from it by the pattern (Can's call); 1: the view is kicked as far as the shots.
+@export var recoil_view_share: float = 0.0
+## The gun in view tips up this many degrees per degree of recoil (so the kick still shows)...
+@export var recoil_model_pitch: float = 0.6
+## ...and slides back this many metres per degree, up to recoil_model_max_back.
+@export var recoil_model_back: float = 0.012
+@export var recoil_model_max_back: float = 0.06

@@ -60,7 +60,10 @@ func _run() -> void:
 	await _test_smoke_break()
 	await _test_kill_reward()
 	await _test_quick_switch()
-	await _test_knife_radius()
+	await _test_scope_and_spread()
+	await _test_knife_speed()
+	await _test_spray()
+	await _test_backstab()
 	await _test_swap_rules()
 	await _test_pickups()
 	await _test_airdrop()
@@ -81,8 +84,9 @@ func _test_loadouts() -> void:
 			for ai: int in maxi(class_def.abilities.size(), 1):
 				var code: PackedInt32Array = Loadout.make(ci, wi, ai)
 				await _set_loadout(code)
-				var ok: bool = _player.class_def == class_def and _player.weapons.size() == 2 \
+				var ok: bool = _player.class_def == class_def and _player.weapons.size() == 3 \
 					and _player.weapons[0].def == class_def.primary_weapons[wi] \
+					and _player.weapons[Player.KNIFE_SLOT].def == class_def.knife \
 					and (class_def.abilities.is_empty() or _player.ability != null)
 				_check(ok, "loadout %s" % Loadout.describe(code))
 
@@ -96,6 +100,7 @@ func _test_weapons() -> void:
 			await _fire_slot(0, "%s %s" % [class_def.display_name, class_def.primary_weapons[wi].display_name])
 		await _set_loadout(Loadout.make(ci, 0, 0))
 		await _fire_slot(1, "%s secondary %s" % [class_def.display_name, class_def.secondary_weapon.display_name])
+		await _fire_slot(Player.KNIFE_SLOT, "%s knife (slot 3)" % class_def.display_name)
 		if _player.melee_weapon != null:
 			await _quick_melee("%s quick melee %s" % [class_def.display_name, _player.melee_weapon.def.display_name])
 
@@ -184,40 +189,135 @@ func _test_quick_switch() -> void:
 		_check(_dummy.health < DUMMY_HEALTH, "quick switch: slot %d shot accepted right after the other" % slot)
 
 
-## Bear's thrown knife has a hit radius: a throw 30 cm beside the body still lands.
-func _test_knife_radius() -> void:
-	await _set_loadout(_code_for(&"bear"))
-	await _place(HITSCAN_DISTANCE * 2.0)
+## Hawk's rifles: no crosshair from the hip, a wide cone until the scope is fully up, zoom
+## easing in over scope_in_time; any gun gets the slide cone while sliding.
+func _test_scope_and_spread() -> void:
+	await _set_loadout(_code_for(&"hawk"))
+	_player.equip(0)
+	await _frames(2)
+	var rifle := _player.current_weapon as HitscanWeapon
+	var def: WeaponDef = rifle.def
+	_check(not def.hip_crosshair and def.scope_in_time > 0.0, "%s: no hip crosshair, zoom takes time" % def.display_name)
+	_check(is_equal_approx(rifle.get_spread_cone(), def.unscoped_spread), "%s from the hip: %.1f degree cone" % [def.display_name, rifle.get_spread_cone()])
+	_player.is_scoped = true # Read synchronously: the player's next tick sets it back from input.
+	_player.scope_blend = 0.0
+	var mid_zoom_cone: float = rifle.get_spread_cone()
+	var start_zoom: float = _player.get_zoom()
+	_player.scope_blend = 1.0
+	_check(is_equal_approx(mid_zoom_cone, def.unscoped_spread) and is_zero_approx(rifle.get_spread_cone()),
+		"scope just raised is still wide, fully up is exact")
+	_check(is_equal_approx(start_zoom, 1.0) and is_equal_approx(_player.get_zoom(), def.scope_zoom), "zoom eases from 1x to %.1fx" % def.scope_zoom)
+	_player.is_scoped = false
+	_player.scope_blend = 0.0
+	_player.movement.is_sliding = true
+	var slide_cone: float = rifle.get_spread_cone() - def.unscoped_spread
+	_player.movement.is_sliding = false
+	_check(is_equal_approx(slide_cone, _player.class_def.movement.slide_spread) and slide_cone > 0.0,
+		"sliding adds a %.1f degree cone" % slide_cone)
+
+
+## Knife out (slot 3): faster than with a gun in hand (WeaponDef.move_speed_mult).
+func _test_knife_speed() -> void:
+	await _set_loadout(_code_for(&"wolf"))
+	_player.equip(0)
+	await _frames(2)
+	var gun_speed: float = _player.movement.base_speed
+	_player.equip(Player.KNIFE_SLOT)
+	await _frames(2)
+	var knife_speed: float = _player.movement.base_speed
+	_player.equip(0)
+	_check(knife_speed > gun_speed, "knife out runs faster (%.2f vs %.2f m/s)" % [knife_speed, gun_speed])
+
+
+## Held knife (slot 3): normal damage from the front, backstab_damage from behind (CS rule);
+## the V quick swing never backstabs.
+func _test_backstab() -> void:
+	await _set_loadout(_code_for(&"wolf"))
+	var knife: WeaponDef = _player.weapons[Player.KNIFE_SLOT].def
+	_check(knife.backstab_damage > 0.0, "knife has a backstab")
+	var front: float = await _knife_hit_from(_away)
+	_check(is_equal_approx(front, knife.damage), "knife from the front deals %.0f (damage %.0f)" % [front, knife.damage])
+	var behind: float = await _knife_hit_from(-_away)
+	_check(is_equal_approx(behind, knife.backstab_damage), "knife from behind deals %.0f (backstab)" % behind)
+	var side: Vector3 = _away.cross(Vector3.UP).normalized()
+	var flank: float = await _knife_hit_from(side)
+	_check(is_equal_approx(flank, knife.damage), "knife from the side deals %.0f (no backstab)" % flank)
+	var heavy_front: float = await _knife_hit_from(_away, true)
+	_check(is_equal_approx(heavy_front, knife.heavy_damage), "right click stab from the front deals %.0f" % heavy_front)
+	var heavy_behind: float = await _knife_hit_from(-_away, true)
+	_check(is_equal_approx(heavy_behind, knife.heavy_backstab_damage), "right click stab from behind deals %.0f (kill)" % heavy_behind)
+	_player.global_position = _dummy.global_position - _away * MELEE_DISTANCE + Vector3.UP * 0.05
+	await _frames(2)
+	_dummy.health = DUMMY_HEALTH
+	_player.requests._next_melee_time = -INF
+	var origin: Vector3 = _player.get_aim_origin()
+	_player.requests._request_melee(origin, (_dummy_target() - origin).normalized())
+	await _frames(1)
+	_check(is_equal_approx(DUMMY_HEALTH - _dummy.health, knife.damage), "V quick swing from behind is no backstab")
+	# Players face where they look: the flat look direction is the backstab facing.
+	_player.rotation.y = 0.7
+	var look: Vector3 = _player.get_look_forward()
+	look.y = 0.0
+	_check(_player.get_facing().dot(look.normalized()) > 0.999, "player facing follows the yaw")
+
+
+## A long spray (CS style) climbs, then sways: it stays under recoil_max_up and does not drift
+## sideways for good, for every automatic gun.
+func _test_spray() -> void:
+	for class_def: ClassDef in Loadout.roster().classes:
+		for gun_def: WeaponDef in class_def.primary_weapons:
+			if not gun_def.automatic or gun_def.recoil_pattern.is_empty():
+				continue
+			var gun: Weapon = (gun_def.scene.instantiate() as Weapon)
+			gun.def = gun_def
+			var offset := Vector2.ZERO
+			var widest: float = 0.0
+			for shot: int in 300:
+				offset += gun_def.recoil_pattern[gun.recoil_index(shot)]
+				offset.y = minf(offset.y, gun_def.recoil_max_up)
+				widest = maxf(widest, absf(offset.x))
+			gun.free()
+			_check(offset.y <= gun_def.recoil_max_up and widest < 4.0,
+				"%s: 300-shot spray stays bounded (up %.1f, widest %.1f)" % [gun_def.display_name, offset.y, widest])
+
+
+## Held knife swing (or right click stab) from `direction` (flat, from the dummy) at melee
+## range; returns the damage.
+func _knife_hit_from(direction: Vector3, heavy: bool = false) -> float:
+	_player.global_position = _dummy.global_position + direction * MELEE_DISTANCE + Vector3.UP * 0.05
+	_player.velocity = Vector3.ZERO
+	await _frames(2)
 	_dummy.health = DUMMY_HEALTH
 	_player.requests.reset_fire_budgets()
 	var origin: Vector3 = _player.get_aim_origin()
-	var side: Vector3 = _away.cross(Vector3.UP).normalized() * 0.3
-	var target: Vector3 = _dummy_target() + side
-	_player.requests._request_fire(origin, (target - origin).normalized(), 1, &"throwing_knives")
-	await get_tree().create_timer(PROJECTILE_WAIT).timeout
-	_check(_dummy.health < DUMMY_HEALTH, "thrown knife 30 cm off the body still hits")
-	_clear_projectiles()
+	var dir: Vector3 = (_dummy_target() - origin).normalized()
+	if heavy:
+		_player.requests._request_stab(origin, dir, Player.KNIFE_SLOT, &"knife")
+	else:
+		_player.requests._request_fire(origin, dir, Player.KNIFE_SLOT, &"knife")
+	await _frames(1)
+	return DUMMY_HEALTH - _dummy.health
 
 
-## Inside the swap window: hurt players never refill by swapping, and a swap drops the Shield.
+## Inside the swap window: hurt players never refill by swapping, and a swap ends a boost.
 func _test_swap_rules() -> void:
-	var bear: PackedInt32Array = _code_for(&"bear")
-	await _set_loadout(bear)
+	var cheetah: PackedInt32Array = _code_for(&"cheetah")
+	await _set_loadout(cheetah)
 	_player._spawned_at = Time.get_ticks_usec() / 1_000_000.0
 	_player._hurt_since_spawn = false
 	_player.is_protected = false
 	_player.health = _player.class_def.max_health
 	_player.ability.host_ready_at = -INF
 	_player.ability.server_try_use(_player.get_aim_origin(), Vector3.FORWARD)
-	_player.server_choose_loadout(_code_for(&"cheetah"))
+	_player.server_choose_loadout(_code_for(&"volcano"))
 	await _frames(1)
-	_check(not _player.shield_up, "loadout swap drops the Shield")
-	_player.server_choose_loadout(bear)
+	_check(is_equal_approx(_player.status.get_host_speed_mult(), 1.0), "loadout swap ends the Adrenaline boost")
+	_player.server_choose_loadout(cheetah)
 	await _frames(1)
 	_check(_player.health == _player.class_def.max_health, "unhurt swap gives full health (%d)" % _player.health)
 	_player.take_hit(55.0, Hitbox.Zone.BODY, 0, "Test")
-	_player.server_choose_loadout(_code_for(&"cheetah"))
-	_player.server_choose_loadout(bear)
+	_player.server_choose_loadout(_code_for(&"volcano"))
+	_player.server_choose_loadout(cheetah)
 	await _frames(1)
 	_check(_player.health < _player.class_def.max_health, "hurt swap does not refill (%d)" % _player.health)
 	_player.status.reset_host()
@@ -283,7 +383,7 @@ func _test_airdrop() -> void:
 		waited += 1.0 / Engine.physics_ticks_per_second
 	airdrops.tick_local(_player, false)
 	_player.set_physics_process(true)
-	_check(_player.special_weapon >= 0 and _player.weapons.size() == 3, "holding E opens the crate and gives an airdrop weapon")
+	_check(_player.special_weapon >= 0 and _player.weapons.size() == 4, "holding E opens the crate and gives an airdrop weapon")
 	_check(_player.current_weapon == _player.weapons[Player.SPECIAL_SLOT], "airdrop weapon taken in hand")
 	_check(not airdrops._crates.has(id), "opened crate is removed")
 	_player.special_weapon = -1
@@ -315,7 +415,7 @@ func _test_airdrop_weapons() -> void:
 	_player.requests.reset_fire_budgets()
 	_player.requests._request_fire(origin, (target - origin).normalized(), Player.SPECIAL_SLOT, &"railgun")
 	await _frames(1)
-	_check(_player.special_weapon == -1 and _player.weapons.size() == 2, "empty airdrop weapon disappears")
+	_check(_player.special_weapon == -1 and _player.weapons.size() == 3, "empty airdrop weapon disappears")
 
 	# Minigun spins up before firing.
 	_player.give_special_weapon(minigun, 200)

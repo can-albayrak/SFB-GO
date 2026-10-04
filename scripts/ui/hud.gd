@@ -14,13 +14,18 @@ const EDGE: float = 14.0
 const HEALTH_BAR_SIZE: Vector2 = Vector2(210.0, 20.0)
 const ABILITY_BAR_SIZE: Vector2 = Vector2(160.0, 16.0)
 const LOW_HEALTH_SHARE: float = 0.3
-const CURRENT_ICON_SIZE: Vector2 = Vector2(150.0, 44.0)
-const OTHER_ICON_SIZE: Vector2 = Vector2(74.0, 38.0)
-const OTHER_WEAPON_ALPHA: float = 0.55
+const CURRENT_ICON_SIZE: Vector2 = Vector2(150.0, 46.0)
+const OTHER_ICON_SIZE: Vector2 = Vector2(112.0, 32.0)
+const OTHER_WEAPON_ALPHA: float = 0.45
+## The weapon in hand: brighter than white-on-white (modulate above 1) on a faint light plate.
+const CURRENT_WEAPON_GLOW: Color = Color(1.2, 1.2, 1.25, 1.0)
+const CURRENT_PLATE: Color = Color(1.0, 1.0, 1.0, 0.12)
+const AMMO_FONT_CURRENT: int = 22
+const AMMO_FONT_OTHER: int = 15
 const DIM_COLOR: Color = Color(0.04, 0.04, 0.045, 0.82)
 const PAUSE_DIM: Color = Color(0.0, 0.0, 0.0, 0.55)
 const DEATH_TINT: Color = Color(0.43, 0.08, 0.06, 0.35)
-const OTHER_ROWS: int = 2 ## The guns not in hand (loadout + airdrop weapon).
+const WEAPON_ROWS: int = 4 ## One fixed row per weapon slot: primary, secondary, knife, airdrop.
 const BANNER_TIME: float = 3.0
 const OPEN_BAR_SIZE: Vector2 = Vector2(220.0, 16.0)
 const BOOST_DEFS: Array[PickupDef] = [preload("res://data/pickups/speed.tres"), preload("res://data/pickups/double_jump.tres")]
@@ -42,12 +47,10 @@ var _ability_bar: HudBar
 var _ability_label: Label
 var _class_label: Label
 var _weapon_name_label: Label
-var _current_icon: HudWeaponIcon
-var _ammo_label: Label
-var _magazine_label: Label
-var _other_rows: Array[HBoxContainer] = []
-var _other_icons: Array[HudWeaponIcon] = []
-var _other_ammo_labels: Array[Label] = []
+var _weapon_rows: Array[PanelContainer] = []
+var _weapon_icons: Array[HudWeaponIcon] = []
+var _ammo_labels: Array[Label] = []
+var _magazine_labels: Array[Label] = []
 var _boost_labels: Array[Label] = []
 var _open_box: VBoxContainer
 var _open_bar: HudBar
@@ -94,6 +97,8 @@ func _ready() -> void:
 	Events.local_stunned.connect(_on_local_stunned)
 	Events.local_player_spawned.connect(_on_local_player_spawned)
 	Events.hit_confirmed.connect(crosshair.show_hit)
+	Events.hit_confirmed.connect(func(_zone: Hitbox.Zone, killed: bool, _amount: float) -> void:
+		Sfx.play_ui(self, Sfx.KILL if killed else Sfx.HIT))
 	Events.player_died.connect(_on_player_died)
 	Events.match_ended.connect(_on_match_ended)
 	Events.match_started.connect(_on_match_started)
@@ -161,7 +166,9 @@ func _process(delta: float) -> void:
 	_scope_overlay.active = _player.is_scoped
 	if _player.is_scoped:
 		_scope_overlay.set_motion(_player.velocity.length())
-	crosshair.visible = _player.is_alive and not _player.is_scoped
+	var weapon: Weapon = _player.current_weapon
+	var hip_crosshair: bool = weapon == null or weapon.def.hip_crosshair
+	crosshair.visible = _player.is_alive and not _player.is_scoped and hip_crosshair
 	_update_health()
 	_update_ability()
 	_update_weapons()
@@ -224,35 +231,33 @@ func _build_hud() -> Control:
 	_weapon_name_label = Style.label("", &"HudSmallLabel", 12)
 	_weapon_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(_weapon_name_label)
-	var current_row := HBoxContainer.new()
-	current_row.alignment = BoxContainer.ALIGNMENT_END
-	current_row.add_theme_constant_override(&"separation", 10)
-	right.add_child(current_row)
-	_current_icon = HudWeaponIcon.new()
-	_current_icon.custom_minimum_size = CURRENT_ICON_SIZE
-	current_row.add_child(_current_icon)
-	var ammo_box := HBoxContainer.new()
-	ammo_box.add_theme_constant_override(&"separation", 4)
-	current_row.add_child(ammo_box)
-	_ammo_label = _centered(Style.label("", &"HudLabel", 22))
-	ammo_box.add_child(_ammo_label)
-	_magazine_label = _centered(Style.label("", &"HudSmallLabel", 15))
-	ammo_box.add_child(_magazine_label)
-	for i: int in OTHER_ROWS:
-		var other_row := HBoxContainer.new()
-		other_row.alignment = BoxContainer.ALIGNMENT_END
-		other_row.add_theme_constant_override(&"separation", 10)
-		other_row.modulate.a = OTHER_WEAPON_ALPHA
-		right.add_child(other_row)
+	for slot: int in WEAPON_ROWS: # Fixed order, like the number keys; the one in hand lights up.
+		var plate := PanelContainer.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = CURRENT_PLATE
+		style.content_margin_left = 6.0
+		style.content_margin_right = 4.0
+		plate.add_theme_stylebox_override(&"panel", style)
+		right.add_child(plate)
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_END
+		row.add_theme_constant_override(&"separation", 10)
+		plate.add_child(row)
 		var icon := HudWeaponIcon.new()
-		icon.custom_minimum_size = OTHER_ICON_SIZE
-		other_row.add_child(icon)
-		var ammo := _centered(Style.label("", &"HudLabel", 15))
-		ammo.custom_minimum_size.x = 34.0
-		other_row.add_child(ammo)
-		_other_rows.append(other_row)
-		_other_icons.append(icon)
-		_other_ammo_labels.append(ammo)
+		row.add_child(icon)
+		var ammo_box := HBoxContainer.new()
+		ammo_box.add_theme_constant_override(&"separation", 4)
+		ammo_box.custom_minimum_size.x = 92.0
+		ammo_box.alignment = BoxContainer.ALIGNMENT_END
+		row.add_child(ammo_box)
+		var ammo := _centered(Style.label("", &"HudLabel", AMMO_FONT_OTHER))
+		ammo_box.add_child(ammo)
+		var magazine := _centered(Style.label("", &"HudSmallLabel", 15))
+		ammo_box.add_child(magazine)
+		_weapon_rows.append(plate)
+		_weapon_icons.append(icon)
+		_ammo_labels.append(ammo)
+		_magazine_labels.append(magazine)
 
 	# Top centre: time | LEADER kills / target.
 	_top_bar = HBoxContainer.new()
@@ -497,29 +502,32 @@ func _update_weapons() -> void:
 	var weapon: Weapon = _player.current_weapon
 	if weapon == null:
 		return
-	var slot: int = _player.weapons.find(weapon)
 	_weapon_name_label.text = weapon.def.display_name.to_upper()
-	_current_icon.shape = HudWeaponIcon.shape_for(weapon.def, slot)
-	if not weapon.def.uses_ammo:
-		_ammo_label.text = ""
-		_magazine_label.text = ""
-	elif weapon.is_reloading:
-		_ammo_label.text = "RELOADING"
-		_magazine_label.text = ""
-	else:
-		_ammo_label.text = str(weapon.ammo)
-		_magazine_label.text = "/ %d" % weapon.def.magazine_size
-	var row: int = 0
-	for other_slot: int in _player.weapons.size():
-		if other_slot == slot or row >= OTHER_ROWS:
+	for slot: int in WEAPON_ROWS:
+		var row: PanelContainer = _weapon_rows[slot]
+		row.visible = slot < _player.weapons.size()
+		if not row.visible:
 			continue
-		var other: Weapon = _player.weapons[other_slot]
-		_other_rows[row].visible = true
-		_other_icons[row].shape = HudWeaponIcon.shape_for(other.def, other_slot)
-		_other_ammo_labels[row].text = str(other.ammo) if other.def.uses_ammo else ""
-		row += 1
-	for i: int in range(row, OTHER_ROWS):
-		_other_rows[i].visible = false
+		var shown: Weapon = _player.weapons[slot]
+		var in_hand: bool = shown == weapon
+		var icon: HudWeaponIcon = _weapon_icons[slot]
+		icon.show_weapon(shown.def, slot)
+		icon.custom_minimum_size = CURRENT_ICON_SIZE if in_hand else OTHER_ICON_SIZE
+		row.modulate = CURRENT_WEAPON_GLOW if in_hand else Color(1.0, 1.0, 1.0, OTHER_WEAPON_ALPHA)
+		row.self_modulate.a = 1.0 if in_hand else 0.0 # The light plate behind the weapon in hand.
+		var ammo: Label = _ammo_labels[slot]
+		var magazine: Label = _magazine_labels[slot]
+		ammo.add_theme_font_size_override(&"font_size", AMMO_FONT_CURRENT if in_hand else AMMO_FONT_OTHER)
+		magazine.visible = in_hand
+		if not shown.def.uses_ammo:
+			ammo.text = ""
+			magazine.text = ""
+		elif in_hand and shown.is_reloading:
+			ammo.text = "RELOADING"
+			magazine.text = ""
+		else:
+			ammo.text = str(shown.ammo)
+			magazine.text = "/ %d" % shown.def.magazine_size
 
 
 func _update_boosts() -> void:

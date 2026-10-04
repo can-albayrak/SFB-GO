@@ -22,3 +22,4 @@ primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("3_heavy"), ExtResou
 secondary_weapon = ExtResource("5_pistol")
 abilities = Array[ExtResource("8_adef")]([ExtResource("9_grapple"), ExtResource("10_decoy")])
 quick_melee = ExtResource("7_knife")
+knife = ExtResource("7_knife")

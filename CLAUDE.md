@@ -29,6 +29,12 @@ Arkadaşlar arası, en fazla 10 kişilik, sınıf tabanlı FPS. Godot 4 + GDScri
 - Bir aşamayı bitirmeden sonrakine geçme. Her aşama sonunda oynanabilir sürüm.
 - Kapsam dışı özellik ekleme (GDD'de yoksa önce sor).
 - Değişiklikten sonra projeyi Godot MCP ile çalıştırıp hata çıktısını kontrol et. MCP yoksa (örn. bulut oturumu) Godot 4.7 headless ile doğrula: `godot --headless --path . --import` ve `godot --headless --path . --quit-after 300`, hata çıktısını oku.
+- **Testler sadece ilgili değişiklikte (Can, token tasarrufu):** her seferinde hepsini koşma.
+  - `smoke_test`: silah / sınıf / güç / pickup / oyuncu kodu değiştiyse (sadece `.tres` sayı değişikliğinde gerekmez).
+  - `movement_test`: sadece `movement.gd`, `MovementDef` veya merdiven/basamak geometrisi değiştiyse.
+  - `map_test`: sadece bir harita sahnesi / harita üreteci değiştiyse (yeni harita dahil).
+  - `net_test`: sadece ağ kodu (`net.gd`, senkron, RPC, istekler, `game.gd` spawn akışı) değiştiyse.
+  - Çıktıdan sadece özet ve FAIL / ERROR satırlarını oku.
 
 ## Bağlam tasarrufu
 

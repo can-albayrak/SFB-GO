@@ -179,26 +179,31 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 
 | Asset | Dosya | Kaynak (link) | Yazar | Lisans |
 | --- | --- | --- | --- | --- |
-| PS1 style AK-47 | `assets/models/weapons/real/assault_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-ak-47-c05cea3e51484331bfb4c75348d659ef) | Falxxx | CC-BY-4.0 |
+| FN FAL (PSX Weapon Pack) | `assets/models/weapons/real/assault_rifle.glb` | Can'ın gönderdiği zip (2026-10-02) | ? | Lisans dosyası yok |
+| Remington M700 (PSX Weapon Pack) | `assets/models/weapons/real/heavy_rifle.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
+| Remington 870 (PSX Weapon Pack) | `assets/models/weapons/real/shotgun.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
+| MAC-11 (PSX Weapon Pack) | `assets/models/weapons/real/smg.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
+| Glock-18 (PSX Weapon Pack) | `assets/models/weapons/real/pistol.glb`, `dual_pistols.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
+| Rigged Low Poly FPS Hands | `assets/models/characters/fp_hands/fp_hands.glb` | [Sketchfab](https://sketchfab.com/3d-models/rigged-low-poly-fps-hands-c0d32b85e1ff4c4aa710d416545104b1) | hvarley | CC-BY-4.0 |
+| PSX Base Male - PlayStation Character - Low Poly (artık sahnede yok) | `assets/models/characters/psx_man/psx_man.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-base-male-playstation-character-low-poly-186d173d59044734b908215ecbc88b1f) | jonniemadeit | CC-BY-4.0 |
+| PS2 Saul Goodman (oyuncu gövdesi) | `assets/models/characters/saul/saul.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps2-saul-goodman-f3545ae03d40406c97ee6fd3c49a7793) | FusedMaker | CC-BY-4.0 |
+| Colt Python (PSX Revolver Pack [FIXED]) | `assets/models/weapons/real/revolver.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | PS1-style Steyr AUG | `assets/models/weapons/real/burst_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-steyr-aug-0d5f437f7193404ea0f030651421434f) | andrewwhiskin | CC-BY-4.0 |
 | Low-Poly M249 SAW | `assets/models/weapons/real/lmg.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m249-saw-76011c365636451c90a8e3a46c2d8ca5) | TastyTony | CC-BY-4.0 |
-| PS1 Style AWP Sniper | `assets/models/weapons/real/heavy_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-awp-sniper-da7f6dcaa2b2477f97ccdc641e6fc3b6) | Falxxx | CC-BY-4.0 |
 | SVD | `assets/models/weapons/real/marksman_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/svd-1ac10d61438844a9a69d46baa4dcd72b) | thebradqq | CC-BY-4.0 |
-| Mac10 [psx] | `assets/models/weapons/real/smg.glb` | [Sketchfab](https://sketchfab.com/3d-models/mac10-psx-266c6fcda29546fd8de6201295c23695) | Radint | CC-BY-4.0 |
-| PS1-style Beretta M9 | `assets/models/weapons/real/dual_pistols.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-beretta-m9-78e8295933594a6a9b5db4ec72b54211) | andrewwhiskin | CC-BY-4.0 |
-| Glock [psx] | `assets/models/weapons/real/pistol.glb` | [Sketchfab](https://sketchfab.com/3d-models/glock-psx-e72e230edbfe40d9ba249584bf1f836b) | Radint | CC-BY-4.0 |
-| LOWPOLY - REMINGTON SHOTGUN - PS1 / PSX STYLE | `assets/models/weapons/real/shotgun.glb` | [Sketchfab](https://sketchfab.com/3d-models/lowpoly-remington-shotgun-ps1-psx-style-89afc8d893ba479b9dcf1ee39e049bcd) | Colin.Greenall | CC-BY-4.0 |
 | PS1 Style Grenade Launcher | `assets/models/weapons/real/grenade_launcher.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-grenade-launcher-0532a58572124fe1b31ecec7a9aff462) | Falxxx | CC-BY-4.0 |
 | PS1 Style Railgun | `assets/models/weapons/real/railgun.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-railgun-057d8e6263df484dbcc767ff0aa26be7) | Falxxx | CC-BY-4.0 |
 | Low-Poly M134 Minigun | `assets/models/weapons/real/minigun.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m134-minigun-eed0c95de51b4895a48c5729582732cc) | TastyTony | CC-BY-4.0 |
 | PS1 Style Rocket Launcher | `assets/models/weapons/real/rocket_launcher.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-rocket-launcher-a95a9d11c2904f38918507e77df11dc3) | Falxxx | CC-BY-4.0 |
 | Hunting Rifle | `assets/models/weapons/real/musket.glb` | [Sketchfab](https://sketchfab.com/3d-models/hunting-rifle-31add96fe16e48eebadc78368db3305f) | Hikimore | CC-BY-4.0 |
-| PSX Revolver | `assets/models/weapons/real/revolver.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-revolver-e7799f60b2f240a2aceaf973a4367015) | Timnuts | SKETCHFAB Standard |
 | Combat Knife | `assets/models/weapons/real/knife.glb` | [Sketchfab](https://sketchfab.com/3d-models/combat-knife-7671043e9e8848379391a5fd03f112f7) | Hikimore | CC-BY-4.0 |
 | Throwing Knife | `assets/models/weapons/real/throwing_knife.glb` | [Sketchfab](https://sketchfab.com/3d-models/throwing-knife-f13c505160e34193a98fb9a092489e0a) | _NotyGuy_ | CC-BY-4.0 |
 | Sledge Hammer | `assets/models/weapons/real/sledgehammer.glb` | [Sketchfab](https://sketchfab.com/3d-models/sledge-hammer-1ba18e262c054f8687502f2ef98da9c3) | MaX3Dd | CC-BY-4.0 |
 | Ps1 low-poly chainsaw | `assets/models/weapons/real/chainsaw.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-low-poly-chainsaw-507b09788e6c403690274a32d1ffe023) | Madeleinone | CC-BY-4.0 |
 | Grenade | `assets/models/weapons/real/frag_grenade.glb` | [Sketchfab](https://sketchfab.com/3d-models/grenade-8d6b63e11b464bb2a10cdbb0a082b5e7) | Chpndl | CC-BY-4.0 |
 | Flashbang | `assets/models/weapons/real/flashbang.glb` | [Sketchfab](https://sketchfab.com/3d-models/flashbang-f4a48db9bd54420696ed282af9574dd9) | Chpndl | CC-BY-4.0 |
+| Mixamo animations (rifle idle, walks, crouch walk, jump, firing, dying, reload, throw grenade) | `assets/models/characters/mixamo/*.fbx` | [Mixamo](https://www.mixamo.com) | Adobe | Mixamo license |
 
-PSX Revolver (Timnuts) **Sketchfab Standard** lisanslı, CC-BY değil: oyunda kullanılabilir, model tek başına dağıtılamaz (repo ve Release gizli kalmalı; açık paylaşımda değiştirilmeli). Ham dosyalar `private_assets/weapons/` (git dışı); işlenmiş halleri `tools/blender/process_weapon_models.py` ile üretilir, sahnelere `tools/apply_weapon_models.py` ile bağlanır.
+Mixamo animasyonları: Adobe Mixamo lisansı oyunda telifsiz kullanıma izin verir, kredi şart değil; animasyon dosyaları tek başına (oyun dışında) dağıtılamaz. Sadece iskelet + animasyon indirildi ("without skin"), gövde bizim yer tutucu.
+
+2026-10-02: AK-47, AWP, Mac10, Beretta, Glock [psx], Remington ve PSX Revolver (Timnuts, Sketchfab Standard) yerine Can'ın iki zip'indeki modeller geçti (yukarıdaki ilk altı satır). **PSX Weapon Pack ve PSX Revolver Pack lisans dosyası içermiyor:** kaynağı ve lisansı Can'dan öğrenilip buraya yazılmalı; o zamana kadar sadece arkadaş sürümünde (repo ve Release gizli). Paketlerin ham dosyaları `private_assets/weapons/packs/` (kullanılmayanlar: 38 Special, Snub Nose, Hammerless revolverlar). Ham dosyalar `private_assets/weapons/` (git dışı); işlenmiş halleri `tools/blender/process_weapon_models.py` ile üretilir, sahnelere `tools/apply_weapon_models.py` ile bağlanır.

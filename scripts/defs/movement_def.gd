@@ -33,6 +33,13 @@ extends Resource
 @export var slide_max_speed_mult: float = 1.55 ## Slide boost may exceed the bhop cap up to base * this.
 ## Jumping out of a slide keeps the current speed (no gain) instead of clamping to the bhop cap.
 @export var slide_jump_keeps_speed: bool = false
+## Sliding down a slope: share of gravity that pulls along it (steeper = faster). Going
+## downhill the slide does not time out. 0 = slopes change nothing.
+@export var slide_slope_accel: float = 0.0
+## Slope speed-up stops at base speed * this (stays under the host's movement check).
+@export var slide_slope_max_speed_mult: float = 1.6
+## Degrees of random cone added to every shot fired while sliding.
+@export var slide_spread: float = 0.0
 
 @export_group("Steps")
 ## Walking into anything up to this high (stairs, kerbs) climbs onto it; the camera follows smoothly.

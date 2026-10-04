@@ -9,8 +9,8 @@ const MAX_KILLS: float = 100.0
 const MIN_MINUTES: float = 1.0
 const MAX_MINUTES: float = 60.0
 const MARGIN: float = 64.0
-const TABLE_WIDTH: float = 700.0
-const SIDE_WIDTH: float = 390.0
+const SIDE_WIDTH: float = 470.0
+const COLUMN_GAP: float = 40.0 ## Between the player table and the right column.
 const CONTENT_TOP: float = 120.0
 const FACE_SIZE: float = 64.0
 const ROW_HIGHLIGHT: Color = Color("1b1c1f")
@@ -75,8 +75,10 @@ func _build() -> void:
 
 	# Player table.
 	var table := _panel()
-	table.position = Vector2(MARGIN, CONTENT_TOP)
-	table.custom_minimum_size = Vector2(TABLE_WIDTH, 0.0)
+	table.set_anchors_preset(Control.PRESET_TOP_WIDE) # Whatever the right column leaves.
+	table.offset_left = MARGIN
+	table.offset_right = -MARGIN - SIDE_WIDTH - COLUMN_GAP
+	table.offset_top = CONTENT_TOP
 	add_child(table)
 	var table_box := VBoxContainer.new()
 	table_box.add_theme_constant_override(&"separation", 0)
@@ -92,6 +94,7 @@ func _build() -> void:
 	side.offset_left = -MARGIN - SIDE_WIDTH
 	side.offset_right = -MARGIN
 	side.offset_top = CONTENT_TOP
+	side.grow_horizontal = Control.GROW_DIRECTION_BEGIN # Wider content grows left, never off screen.
 	side.add_theme_constant_override(&"separation", 12)
 	add_child(side)
 	side.add_child(_build_loadout_panel())
@@ -110,6 +113,12 @@ func _build() -> void:
 		_ready_button.toggled.connect(_on_ready_toggled)
 		_ready_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		buttons.add_child(_ready_button)
+	if SteamLink.lobby_id != 0:
+		# Steam game: friends get the invite in Steam (or find it under FIND STEAM GAMES).
+		var invite := _button("INVITE", &"FrameButton", 16)
+		invite.custom_minimum_size.x = 120.0
+		invite.pressed.connect(SteamLink.invite_friends)
+		buttons.add_child(invite)
 	var leave := _button("LEAVE", &"FrameButton", 16)
 	leave.custom_minimum_size.x = 120.0
 	leave.pressed.connect(func() -> void: Net.leave())
@@ -233,7 +242,9 @@ func _refresh() -> void:
 
 	var facts: Array[String] = ["HOST  ·  %s" % Net.get_player_name(1).to_upper(),
 		"%d / %d PLAYERS" % [ids.size(), Net.MAX_PLAYERS]]
-	if multiplayer.is_server():
+	if SteamLink.lobby_id != 0:
+		facts.append("STEAM LOBBY")
+	elif multiplayer.is_server():
 		var addresses: Array[String] = _shareable_addresses()
 		if not addresses.is_empty():
 			facts.append("JOIN  ·  %s" % addresses[0])

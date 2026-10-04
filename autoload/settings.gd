@@ -25,6 +25,8 @@ var practice_unlimited_abilities: bool = false
 var fov: float = 90.0
 ## CS-compatible: a CS sensitivity value feels the same here.
 var mouse_sensitivity: float = 2.0
+## Sound effects volume, 0 (mute) .. 1.
+var sfx_volume: float = 0.8
 
 var crosshair_color: Color = Color(0.3, 1.0, 0.45)
 var crosshair_length: float = 8.0
@@ -44,10 +46,35 @@ var camera_damage_shake: float = 1.0
 ## Graphics (GDD): PS2-style screen filter (grain, vignette, colour crush) and 3D render scale.
 var post_process: bool = true
 var render_scale: float = 1.0
+## Borderless fullscreen on the current screen; false = a 1280x720 window. Alt+Enter / F11 toggle.
+var fullscreen: bool = true
 
 
 func _ready() -> void:
 	load_settings()
+	apply_window_mode()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	if key.keycode == KEY_F11 or (key.keycode == KEY_ENTER and key.alt_pressed):
+		fullscreen = not fullscreen
+		apply_window_mode()
+		save_settings()
+		changed.emit()
+		get_viewport().set_input_as_handled()
+
+
+## Sets the window to `fullscreen`. Left alone in headless runs and frame captures
+## (--write-movie), so tests and preview shots keep the project's 1280x720.
+func apply_window_mode() -> void:
+	if DisplayServer.get_name() == "headless" or "--write-movie" in OS.get_cmdline_args():
+		return
+	var wanted: DisplayServer.WindowMode = DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
+	if DisplayServer.window_get_mode() != wanted:
+		DisplayServer.window_set_mode(wanted)
 
 
 ## `extra` = degrees added to the horizontal FOV first (camera speed shift).
@@ -78,6 +105,7 @@ func load_settings() -> void:
 	crosshair_thickness = _read(config, "crosshair", "thickness", crosshair_thickness)
 	crosshair_dot = _read(config, "crosshair", "dot", crosshair_dot)
 	hit_marker_enabled = _read(config, "crosshair", "hit_marker", hit_marker_enabled)
+	sfx_volume = _read(config, "audio", "sfx_volume", sfx_volume)
 	camera_fov_shift = _read(config, "camera", "fov_shift", camera_fov_shift)
 	camera_head_bob = _read(config, "camera", "head_bob", camera_head_bob)
 	camera_landing = _read(config, "camera", "landing", camera_landing)
@@ -85,6 +113,7 @@ func load_settings() -> void:
 	camera_damage_shake = _read(config, "camera", "damage_shake", camera_damage_shake)
 	post_process = _read(config, "graphics", "post_process", post_process)
 	render_scale = clampf(_read(config, "graphics", "render_scale", render_scale), 0.5, 1.0)
+	fullscreen = _read(config, "graphics", "fullscreen", fullscreen)
 
 
 ## A hand-edited file with a wrong type falls back to the current value instead of erroring.
@@ -113,6 +142,7 @@ func save_settings() -> void:
 	config.set_value("crosshair", "thickness", crosshair_thickness)
 	config.set_value("crosshair", "dot", crosshair_dot)
 	config.set_value("crosshair", "hit_marker", hit_marker_enabled)
+	config.set_value("audio", "sfx_volume", sfx_volume)
 	config.set_value("camera", "fov_shift", camera_fov_shift)
 	config.set_value("camera", "head_bob", camera_head_bob)
 	config.set_value("camera", "landing", camera_landing)
@@ -120,4 +150,5 @@ func save_settings() -> void:
 	config.set_value("camera", "damage_shake", camera_damage_shake)
 	config.set_value("graphics", "post_process", post_process)
 	config.set_value("graphics", "render_scale", render_scale)
+	config.set_value("graphics", "fullscreen", fullscreen)
 	config.save(PATH)
