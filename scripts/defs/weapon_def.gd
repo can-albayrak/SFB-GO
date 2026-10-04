@@ -49,6 +49,9 @@ enum ViewHands { NONE, RIGHT, BOTH }
 ## Shots past the end loop back to recoil_loop_start, so a long spray sways side to side
 ## instead of climbing forever.
 @export var recoil_pattern: PackedVector2Array
+## Visual only: degrees the gun in view kicks up (and back) on every shot, the camera a bit
+## too (CameraFeelDef kick group). For heavy single shots whose pattern starts at zero.
+@export var view_kick: float = 0.0
 ## Index the pattern loops back to; -1 = the last entry only.
 @export var recoil_loop_start: int = -1
 ## The kick never takes the aim more than this many degrees above where it started.

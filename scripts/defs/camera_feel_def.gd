@@ -35,6 +35,12 @@ extends Resource
 @export var shake_time: float = 0.18
 @export var shake_frequency: float = 30.0 ## Hz.
 
+@export_group("Shot Kick")
+@export var kick_recover: float = 9.0 ## Per second; how fast a WeaponDef.view_kick settles.
+@export var kick_view_share: float = 0.3 ## Share of the kick the camera follows (aim unchanged).
+@export var kick_back: float = 0.007 ## Metres the gun slides back per degree of kick.
+@export var kick_roll: float = 0.25 ## Degrees of roll per degree of kick (alternating side).
+
 @export_group("View Model")
 ## Every first-person weapon is drawn this much bigger (hands follow the grips). Snipers
 ## already have their own 1.25x in their scenes.

@@ -4,18 +4,18 @@
 [ext_resource type="PackedScene" path="res://assets/models/weapons/real/revolver.glb" id="2_model"]
 
 [node name="Revolver" type="Node3D"]
-position = Vector3(0.15, -0.19, -0.47)
+position = Vector3(0.14, -0.2, -0.56)
 script = ExtResource("1_hitscan")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-scale = Vector3(0.96, 0.96, 0.96)
+scale = Vector3(1.248, 1.248, 1.248)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.0464, -0.2016)
+position = Vector3(0, 0.0603, -0.2621)
 
 [node name="RightHand" type="Marker3D" parent="."]
-position = Vector3(0, -0.041, 0.053)
+position = Vector3(0, -0.0533, 0.0689)
 
 [node name="LeftHand" type="Marker3D" parent="."]
-position = Vector3(-0.03, -0.086, 0.027)
+position = Vector3(-0.039, -0.1118, 0.0351)
 rotation = Vector3(0, 0, -0.7854)

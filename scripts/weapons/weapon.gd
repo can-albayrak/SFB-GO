@@ -38,6 +38,8 @@ func setup(weapon_def: WeaponDef, owner_player: Player) -> void:
 func draw() -> void:
 	visible = true
 	_cooldown = def.equip_time
+	if def.fire_type == WeaponDef.FireType.MELEE:
+		Sfx.play_ui(self, Sfx.KNIFE_DRAW) # The blade scraping out, like CS.
 
 
 func holster() -> void:

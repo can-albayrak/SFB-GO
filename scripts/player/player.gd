@@ -241,7 +241,8 @@ func _process(delta: float) -> void:
 		var eye: Vector3 = head.get_global_transform_interpolated().origin
 		eye += Vector3.UP * _camera_feel.vertical + global_basis.x * _camera_feel.lateral
 		var recoil: Vector2 = current_weapon.get_view_recoil()
-		var view: Basis = _look_basis(recoil * CameraFeel.DEF.recoil_view_share + _get_scope_sway() + _camera_feel.shake)
+		var punch := Vector2(0.0, _camera_feel.kick * CameraFeel.DEF.kick_view_share)
+		var view: Basis = _look_basis(recoil * CameraFeel.DEF.recoil_view_share + _get_scope_sway() + _camera_feel.shake + punch)
 		camera.global_transform = Transform3D(view * Basis(Vector3.BACK, _camera_feel.roll), eye)
 		_kick_view_model(recoil * (1.0 - CameraFeel.DEF.recoil_view_share))
 		camera.fov = lerpf(camera.fov, _get_target_fov(), minf(SCOPE_FOV_LERP * delta, 1.0))
@@ -280,8 +281,10 @@ func _update_footsteps() -> void:
 ## Owner: the recoil the view does not follow tips the gun in view up and back instead.
 func _kick_view_model(recoil: Vector2) -> void:
 	var feel: CameraFeelDef = CameraFeel.DEF
-	var back: float = minf(recoil.length() * feel.recoil_model_back, feel.recoil_model_max_back)
-	var tip := Basis.from_euler(Vector3(deg_to_rad(recoil.y * feel.recoil_model_pitch), -deg_to_rad(recoil.x * feel.recoil_model_pitch), 0.0))
+	var kick: float = _camera_feel.kick
+	var back: float = minf(recoil.length() * feel.recoil_model_back, feel.recoil_model_max_back) + kick * feel.kick_back
+	var roll: float = deg_to_rad(kick * feel.kick_roll * _camera_feel.kick_roll_sign)
+	var tip := Basis.from_euler(Vector3(deg_to_rad(recoil.y * feel.recoil_model_pitch + kick), -deg_to_rad(recoil.x * feel.recoil_model_pitch), roll))
 	weapon_holder.transform = Transform3D(tip, Vector3(0.0, 0.0, back))
 
 
@@ -362,6 +365,8 @@ func get_hit_exclusions() -> Array[RID]:
 ## Owning client: asks the host to resolve a shot (weapons call this).
 func send_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 	requests.send_fire(origin, dir, slot)
+	if _camera_feel != null and slot >= 0 and slot < weapons.size() and weapons[slot].def.view_kick > 0.0:
+		_camera_feel.add_kick(weapons[slot].def.view_kick)
 
 
 ## Owner: choose a loadout. The host applies it now (first seconds after spawning)
