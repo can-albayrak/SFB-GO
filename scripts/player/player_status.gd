@@ -28,6 +28,10 @@ var _double_jump_left: float = 0.0 ## Owner.
 var _host_speed_pickup_until: float = 0.0 ## Host clock.
 var _host_speed_pickup_mult: float = 1.0
 var _host_powerup_until: Dictionary[int, float] = {} ## Host clock, by PickupDef.Kind.
+# Gambler's dice: damage dealt multiplier (host) and magazines that do not empty (owner).
+var _host_damage_mult: float = 1.0
+var _host_damage_until: float = 0.0 ## Host clock.
+var _free_ammo_left: float = 0.0 ## Owner.
 
 @onready var player: Player = get_parent()
 
@@ -38,6 +42,7 @@ func tick_local(delta: float) -> void:
 	_buff_left = maxf(_buff_left - delta, 0.0)
 	_speed_pickup_left = maxf(_speed_pickup_left - delta, 0.0)
 	_double_jump_left = maxf(_double_jump_left - delta, 0.0)
+	_free_ammo_left = maxf(_free_ammo_left - delta, 0.0)
 
 
 ## Host, every physics tick.
@@ -63,6 +68,7 @@ func reset_local() -> void:
 	_buff_left = 0.0
 	_speed_pickup_left = 0.0
 	_double_jump_left = 0.0
+	_free_ammo_left = 0.0
 
 
 ## Host: respawn or death.
@@ -71,6 +77,7 @@ func reset_host() -> void:
 	_host_buff_until = 0.0
 	_host_heal_per_second = 0.0
 	_host_speed_pickup_until = 0.0
+	_host_damage_until = 0.0
 	_host_powerup_until.clear()
 	clear_shield()
 	if multiplayer.is_server():
@@ -82,6 +89,8 @@ func clear_buffs() -> void:
 	_buff_left = 0.0
 	_host_buff_until = 0.0
 	_host_heal_per_second = 0.0
+	_host_damage_until = 0.0
+	_free_ammo_left = 0.0
 	clear_shield()
 
 
@@ -206,6 +215,27 @@ func server_start_buff(seconds: float, speed_mult: float, fire_mult: float, heal
 	_host_buff_fire_mult = fire_mult
 	_host_heal_per_second = heal_per_second
 	_host_heal_carry = 0.0
+
+
+## Host: damage this player deals is multiplied by `mult` for `seconds` (Gambler's dice).
+func server_set_damage_mult(mult: float, seconds: float) -> void:
+	assert(multiplayer.is_server(), "server_set_damage_mult is host-only")
+	_host_damage_mult = mult
+	_host_damage_until = _now() + seconds
+
+
+## Host: multiplier on damage this player deals (Player.take_hit applies the attacker's).
+func get_host_damage_mult() -> float:
+	return _host_damage_mult if _now() < _host_damage_until else 1.0
+
+
+## Owner: magazines do not empty for `seconds` (Gambler's Hot Hand).
+func start_free_ammo_local(seconds: float) -> void:
+	_free_ammo_left = seconds
+
+
+func has_free_ammo() -> bool:
+	return _free_ammo_left > 0.0
 
 
 ## Owner: movement speed multiplier from an active boost.

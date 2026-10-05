@@ -144,7 +144,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 ## Sınıflar
 
-9 sınıf (Bear 2026-10-03'te çıkarıldı; Hound, Ghost, Trickster, Phantom 2026-10-05'te eklendi), çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy ve yeni dört sınıf: tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
+10 sınıf (Bear 2026-10-03'te çıkarıldı; Hound, Ghost, Trickster, Phantom, Gambler 2026-10-05'te eklendi), çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy ve yeni sınıflar: tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
 
 | Sınıf | Can | Hız | Rol | Görünüm |
 | --- | --- | --- | --- | --- |
@@ -157,6 +157,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Ghost | 80 | Hızlı | Sinsi: sessiz adım, susturucu, pelerin | (henüz yok) |
 | Trickster | 90 | Normal+ | Şakacı: rakiple yer değiştirir | (henüz yok) |
 | Phantom | 85 | Normal+ | İşaret bırakıp geri döner (kaçış, pusu) | (henüz yok) |
+| Gambler | 95 | Normal | Kumarbaz: zar atar, şansına göre | (henüz yok) |
 
 ### Hawk
 
@@ -242,7 +243,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | SMG / Burst Rifle | Cheetah / Wolf ile aynı | |
 | Revolver (yedek) | 45, kafa 90 | |
 
-- **Güç: Swap Dart (12 sn):** Q ile dart üfler (55 m/sn, 45 m, düz gider). Değdiği ilk oyuncuyla anında yer değiştirir. Dartın vuruş alanı 0,3 m yarıçap: nişan istemez ama gelişigüzel de tutmaz. Iskalamak da bekleme süresini başlatır. Yer değiştirme host'ta, ikisi için de.
+- **Güç: Swap Dart (12 sn):** Q ile dart üfler (55 m/sn, 45 m, düz gider). Değdiği ilk oyuncuyla anında yer değiştirir; **ana silahlar da değişir** (dolu şarjörle), taşınan airdrop silahı varsa o da (kalan mermisiyle). Tabanca ve bıçak değişmez. Alınan silah ölünce ya da sınıf değişince gider. Dartın vuruş alanı 0,3 m yarıçap: nişan istemez ama gelişigüzel de tutmaz. Iskalamak da bekleme süresini başlatır. Yer değiştirme host'ta, ikisi için de.
 
 ### Phantom (2026-10-05)
 
@@ -252,6 +253,21 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Tabanca (yedek) | | |
 
 - **Güç: Mark / Recall (14 sn):** İlk Q durduğun yere 15 sn'lik bir işaret bırakır (mor ışık sütunu, **herkes görür**). 15 sn içinde tekrar Q: işarete ışınlanırsın. Basmazsan işaret kaybolur. Bekleme süresi işaret kapanınca başlar. Geri dönüş süresi HUD'da **taralı**, azalan bir barla gösterilir (normal bekleme düz bar).
+
+### Gambler (2026-10-05)
+
+| Silah | Hasar | Not |
+| --- | --- | --- |
+| Assault Rifle / Shotgun | Wolf / Volcano ile aynı | |
+| Desert Eagle (yedek) | 55, kafa 110 | |
+
+- **Güç: Roll the Dice (18 sn):** Q ile zar atar (host atar, her yüz eşit şans, 1/6). Sonuç HUD barında yazar (kötü yüz taralı), iyi ya da kötü ses çalar:
+  - **Jackpot** (iyi): 6 sn 2x hasar.
+  - **Hot Hand** (iyi): 6 sn şarjör bitmez, ateş hızı 1,3x.
+  - **Lucky Streak** (iyi): can full, 6 sn 1,25x hız.
+  - **All In** (nötr): 4 sn Gambler herkesi duvar arkasından görür, herkes de Gambler'ı.
+  - **Cold Hands** (kötü): 6 sn yarı hasar.
+  - **Snake Eyes** (çok kötü): can 10'a düşer.
 
 ## Sınıf değiştirme ve loadout)
 
@@ -290,6 +306,13 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 | Railgun | 4 | Işın. **Sınırsız menzil, bütün duvarları deler**, haritanın her yerinden vurabilir. Her yerden tek atış, atış sıklığı düşük. |
 | Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli, mermiler dağılır. |
 | Rocket Launcher | 6 | Fiziksel roket. Merkezde 200 hasar, merkezden uzaklaştıkça azalır; alanı Frag'den büyük. Sıkanı geri iter (recoil, rocket jump). |
+
+## Haritalar (2026-10-05)
+
+- **Oynanabilir:** Ice Yard (fy_iceworld tarzı), Train Factory (CS Online'ın dm_trainfactory'si, birebir: Nexon'un geometrisi, dokuları ve ışığı), Test Range.
+- **Rafta:** AVM (Mall). Can beğenmedi; lobide yok, dosyaları duruyor (`scenes/maps/mall`, `movement_test` merdivenler için kullanıyor).
+- **Train Factory:** Tren deposu salonu; raylar arasında çukurlar, yükseltilmiş yollar, 10,5 m'de vinç kirişi (merdivenle). Herkese karşı: 16 doğma noktası salona yayılı. Orijinaldeki geçen trenler (çarpanı öldürür) ve patlayan variller henüz yok. Ticari oyun içeriği: sadece arkadaş arası.
+- **Merdivenler (2026-10-05):** CS gibi: ileri basıp yukarı bakınca tırmanır, aşağı bakınca iner, zıplayınca bırakır.
 
 ## Harita tasarım kuralları
 
@@ -355,6 +378,15 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 - Godot Mobile renderer (Vulkan, hafif)
 - LightmapGI ile önceden pişirilmiş ışık, sınırlı dinamik gölge
 - Grafik menüsü: çözünürlük ölçeği (3D render ölçeği), post-process aç/kapa (sis kalitesi sonra)
+
+## Fikirler (kararlaştırılmadı)
+
+Can'ın onayı olmadan yapılmaz; sadece not.
+
+- **Sonra bakılacak mekanikler (2026-10-05, Can: "kalsın sonra bakarız"):** ölünce ana silahın yere düşmesi (CS gibi, alınabilir); seri ödülleri (3 kill: herkes 2 sn görünür, 5 kill: kişisel airdrop, duyurulur); lideri öldürene +1 puan ve can; intikam ("REVENGE", ekstra can); maç kuralları (sadece kafa, bıçak 2x, sadece tabanca, büyük kafalar); Train Factory trenleri (siren + geçen tren öldürür); kill-cam; anonsçu sesleri.
+- **Gun Game (Arms Race):** Her kill'de sıradaki silaha geçilir, son silah bıçak; ilk bıçak kill'i alan kazanır. Sınıf gücü kapalı ya da açık olabilir. Mevcut silah listesiyle yapılabilir.
+- **Reddedilenler (2026-10-05):** Hitman, Vortex, Mirror, Ricochet, Leech, Marked, Saboteur (fizik ya da çok karmaşık; Thief'in silah çalma fikri Trickster'a eklendi). Hex (ters tuşlar) belki ileride.
+- **Daha önce reddedilenler:** Pyro (molotof) ve Engineer (taret) oyunu bozuyor; taret/konuşlandırılan yapı yok. Bulldog/tank ve Saul sınıfı da yok. Oyun içi sesli sohbet yok (Discord).
 
 ## Test ve dağıtım
 

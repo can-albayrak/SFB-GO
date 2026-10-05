@@ -2,7 +2,8 @@ class_name SwapDart
 extends Node3D
 ## Host only: the Trickster's dart in flight. Each tick it sweeps a sphere of `radius` along its
 ## path against player hitboxes (a wall stops it first). On a hit the thrower and the target
-## swap places (Player.server_teleport). Others see a cosmetic copy (PlayerEffects._show_dart).
+## swap places (Player.server_teleport) and primaries plus any airdrop weapons
+## (Player.server_trade_weapons). Others see a cosmetic copy (PlayerEffects._show_dart).
 
 const WORLD_MASK: int = 1
 const HITBOX_MASK: int = 4
@@ -72,4 +73,5 @@ func _swap(target: Player) -> void:
 	var there: Vector3 = target.global_position
 	_thrower.server_teleport(there)
 	target.server_teleport(here)
+	_thrower.server_trade_weapons(target)
 	_thrower.confirm_hit.rpc_id(_thrower.get_multiplayer_authority(), Hitbox.Zone.BODY, false, 0.0, there + Vector3.UP)

@@ -1,9 +1,10 @@
 """Generates the procedural sound effects in assets/audio (rifle, light, rail, hit, kill).
-Run: python tools/gen_sfx.py"""
+Run: python tools/gen_sfx.py [name ...]  (names: only those files, e.g. dice dice_good)"""
 import math
 import os
 import random
 import struct
+import sys
 import wave
 
 RATE = 22050
@@ -11,6 +12,8 @@ OUT = os.path.join(os.path.dirname(__file__), "..", "assets", "audio")
 
 
 def write(name, samples):
+    if len(sys.argv) > 1 and name not in sys.argv[1:]:
+        return
     peak = max(1e-6, max(abs(s) for s in samples))
     gain = 0.89 / peak
     with wave.open(os.path.join(OUT, name + ".wav"), "wb") as w:
@@ -104,6 +107,28 @@ def main():
     # Cloak: falling airy whoosh.
     n = int(0.5 * RATE)
     write("cloak", [a * math.sin(math.pi * i / n) * (1.0 - i / n) for i, a in enumerate(lowpass(noise(0.5), 1800))])
+    # Dice: rattle of clacks that slow down (Gambler's roll).
+    rattle = [0.0] * int(0.7 * RATE)
+    t = 0.0
+    gap = 0.035
+    while t < 0.62:
+        start = int(t * RATE)
+        clack = [a * math.exp(-i / (0.004 * RATE)) for i, a in enumerate(lowpass(noise(0.03), 5000))]
+        for i, a in enumerate(clack):
+            if start + i < len(rattle):
+                rattle[start + i] += a * (1.0 - t)
+        t += gap
+        gap *= 1.25
+    write("dice", rattle)
+    # Dice results: two rising notes (good), two falling (bad).
+    def notes(freqs):
+        out = []
+        for f in freqs:
+            n = int(0.14 * RATE)
+            out += [math.sin(2 * math.pi * f * i / RATE) * math.sin(math.pi * i / n) for i in range(n)]
+        return out
+    write("dice_good", notes([660, 990]))
+    write("dice_bad", notes([330, 220]))
 
 
 if __name__ == "__main__":

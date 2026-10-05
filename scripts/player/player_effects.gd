@@ -369,7 +369,9 @@ static func _fade_meshes(root: Node, alpha: float) -> void:
 ## Host: the Hound's Sonar found these peers; only the Hound's screen shows them.
 func server_show_sonar(peer_ids: PackedInt32Array, seconds: float) -> void:
 	assert(multiplayer.is_server(), "server_show_sonar is host-only")
-	_show_sonar.rpc_id(player.get_multiplayer_authority(), peer_ids, seconds)
+	var owner_id: int = player.get_multiplayer_authority()
+	if owner_id == multiplayer.get_unique_id() or owner_id in multiplayer.get_peers():
+		_show_sonar.rpc_id(owner_id, peer_ids, seconds)
 
 
 @rpc("any_peer", "call_local", "reliable")

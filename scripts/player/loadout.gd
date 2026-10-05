@@ -27,6 +27,26 @@ static func get_primary(code: PackedInt32Array) -> WeaponDef:
 	return get_class_def(code).primary_weapons[code[PRIMARY]]
 
 
+## A primary by itself, as class_index * PRIMARY_CODE_BASE + primary_index (Trickster's
+## Swap Dart takes the target's primary across classes). Null when the code is not in the roster.
+const PRIMARY_CODE_BASE: int = 100
+
+
+static func primary_code(code: PackedInt32Array) -> int:
+	return code[CLASS] * PRIMARY_CODE_BASE + code[PRIMARY]
+
+
+static func get_primary_by_code(weapon_code: int) -> WeaponDef:
+	if weapon_code < 0:
+		return null
+	var class_index: int = weapon_code / PRIMARY_CODE_BASE
+	var primary_index: int = weapon_code % PRIMARY_CODE_BASE
+	if class_index >= roster().classes.size():
+		return null
+	var primaries: Array[WeaponDef] = roster().classes[class_index].primary_weapons
+	return primaries[primary_index] if primary_index < primaries.size() else null
+
+
 ## Null when the class has no abilities.
 static func get_ability(code: PackedInt32Array) -> AbilityDef:
 	var abilities: Array[AbilityDef] = get_class_def(code).abilities

@@ -67,6 +67,9 @@ var powerups: int = 0: set = _set_powerups
 var special_weapon: int = -1: set = _set_special_weapon
 ## Host-owned, replicated: rounds left in it (the host counts airdrop ammo).
 var special_ammo: int = 0: set = _set_special_ammo
+## Host-owned, replicated: a primary taken from someone else by Trickster's Swap Dart
+## (Loadout.primary_code form), until the next respawn or loadout change. -1 = own primary.
+var primary_override: int = -1: set = _set_primary_override
 ## Host: host-clock time this player last lost health (cancels opening a crate).
 var last_hurt_time: float = -INF
 ## Vertical look angle in radians. Yaw is the body's own rotation.y.
@@ -212,6 +215,7 @@ func _physics_process(delta: float) -> void:
 	var carry_mult: float = weapons[SPECIAL_SLOT].def.carry_speed_mult if weapons.size() > SPECIAL_SLOT else 1.0
 	movement.base_speed = class_def.move_speed * weapon_def.move_speed_mult * status.get_speed_mult() * scope_mult * carry_mult
 	movement.air_jumps = 1 if status.has_double_jump() else 0
+	movement.look_pitch = look_pitch
 	movement.physics_step(delta, cmd)
 
 	if melee_weapon != null:
@@ -400,6 +404,10 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 	_last_hit_weapon = weapon_name
 	_last_hit_melee = is_melee
 	_last_hit_zone = zone
+	var attacker := get_parent().get_node_or_null(str(attacker_id)) as Player
+	var from_other: bool = attacker != null and attacker != self
+	if from_other:
+		amount *= attacker.status.get_host_damage_mult() # Gambler's dice.
 	var before: int = health
 	health = maxi(health - roundi(amount), 0)
 	last_damage_dealt = before - health
@@ -407,7 +415,9 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 		server_break_cloak() # Getting hit shows a Ghost.
 		_hurt_since_spawn = true
 		last_hurt_time = _now()
-		_on_hurt.rpc_id(get_multiplayer_authority(), before - health)
+		var owner_id: int = get_multiplayer_authority()
+		if owner_id == multiplayer.get_unique_id() or owner_id in multiplayer.get_peers():
+			_on_hurt.rpc_id(owner_id, before - health, from_other, attacker.global_position if from_other else Vector3.ZERO)
 	if health > 0:
 		return false
 	_die(attacker_id)
@@ -449,6 +459,7 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	_life += 1
 	net_sync.reset_validation()
 	special_weapon = -1 # Only a match restart respawns a carrier; a death already dropped it.
+	primary_override = -1 # A swapped-in primary lasts one life.
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
 	if compensator != null:
 		compensator.forget(self) # No rewinding into the previous life.
@@ -462,6 +473,33 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	is_alive = true
 	_grant_protection()
 	Net.broadcast(self, &"_respawn_at", [spawn_position, yaw, _life])
+
+
+## The primary in slot 0: a swapped-in one, else the loadout's.
+func get_primary_def() -> WeaponDef:
+	var swapped: WeaponDef = Loadout.get_primary_by_code(primary_override)
+	return swapped if swapped != null else Loadout.get_primary(loadout)
+
+
+## Primary in hand as a Loadout.primary_code.
+func get_primary_code() -> int:
+	return primary_override if Loadout.get_primary_by_code(primary_override) != null else Loadout.primary_code(loadout)
+
+
+## Host: Trickster's Swap Dart. This player and `other` trade primaries (with full magazines)
+## and any carried airdrop weapons (with their rounds). Pistols and knives stay.
+func server_trade_weapons(other: Player) -> void:
+	assert(multiplayer.is_server(), "server_trade_weapons is host-only")
+	var mine: int = get_primary_code()
+	var theirs: int = other.get_primary_code()
+	primary_override = -1 if theirs == Loadout.primary_code(loadout) else theirs
+	other.primary_override = -1 if mine == Loadout.primary_code(other.loadout) else mine
+	var my_special: Array[int] = [special_weapon, special_ammo]
+	if special_weapon >= 0 or other.special_weapon >= 0:
+		special_ammo = other.special_ammo
+		special_weapon = other.special_weapon
+		other.special_ammo = my_special[1]
+		other.special_weapon = my_special[0]
 
 
 ## Host: hands this player an airdrop weapon with `ammo` rounds (crate or dropped gun).
@@ -610,7 +648,7 @@ func _apply_loadout() -> void:
 		weapon.queue_free()
 	weapons.clear()
 	current_weapon = null
-	for def: WeaponDef in [Loadout.get_primary(loadout), class_def.secondary_weapon, class_def.knife]:
+	for def: WeaponDef in [get_primary_def(), class_def.secondary_weapon, class_def.knife]:
 		weapons.append(_add_weapon(def))
 
 	if melee_weapon != null:
@@ -666,6 +704,19 @@ func _apply_special(take_in_hand: bool) -> void:
 	effects.show_carrier(def.display_name if def != null else "")
 
 
+## Every peer: slot 0 rebuilt for a swapped primary; in hand again if it was.
+func _replace_primary() -> void:
+	var old: Weapon = weapons[0]
+	var was_held: bool = current_weapon == old
+	weapon_holder.remove_child(old)
+	old.queue_free()
+	weapons[0] = _add_weapon(get_primary_def())
+	if was_held:
+		current_weapon = null
+		equip(0)
+	effects.show_held_weapon(held_slot)
+
+
 func _add_weapon(def: WeaponDef) -> Weapon:
 	var weapon: Weapon = def.scene.instantiate()
 	weapon.setup(def, self)
@@ -678,6 +729,8 @@ func _add_weapon(def: WeaponDef) -> Weapon:
 func _set_loadout(value: PackedInt32Array) -> void:
 	if not Loadout.is_valid(value) or value == loadout and class_def != null:
 		return
+	if is_inside_tree() and multiplayer.is_server():
+		primary_override = -1 # A swapped-in primary belongs to the old loadout.
 	loadout = value
 	if is_node_ready():
 		_apply_loadout()
@@ -739,6 +792,14 @@ func _set_special_weapon(value: int) -> void:
 		effects.show_held_weapon(held_slot)
 
 
+func _set_primary_override(value: int) -> void:
+	if value == primary_override:
+		return
+	primary_override = value
+	if is_node_ready() and class_def != null and not weapons.is_empty():
+		_replace_primary()
+
+
 func _set_special_ammo(value: int) -> void:
 	special_ammo = value
 	if weapons.size() > SPECIAL_SLOT:
@@ -782,12 +843,15 @@ func flash(seconds: float) -> void:
 	Events.local_flashed.emit(seconds)
 
 
-## Host -> victim's owner: damage taken. Drives the camera shake (visual only, aim unchanged).
+## Host -> victim's owner: damage taken. Drives the camera shake (visual only, aim unchanged)
+## and, when another player did it, the hit direction indicator toward `source`.
 @rpc("any_peer", "call_local", "unreliable")
-func _on_hurt(amount: int) -> void:
+func _on_hurt(amount: int, from_other: bool, source: Vector3) -> void:
 	if not _sender_is_host() or not is_local or _camera_feel == null:
 		return
 	_camera_feel.add_shake(amount)
+	if from_other:
+		Events.local_hurt_from.emit(source)
 
 
 ## Host -> shooter only: a hit landed. Hit marker + damage number at `point` (shooter's screen only).

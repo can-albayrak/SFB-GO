@@ -126,6 +126,7 @@ pause_menu={
 3d_physics/layer_4="projectile"
 3d_physics/layer_5="pickup"
 3d_physics/layer_6="grapple"
+3d_physics/layer_7="ladder"
 
 [physics]
 
