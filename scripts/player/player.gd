@@ -212,6 +212,7 @@ func _physics_process(delta: float) -> void:
 	var carry_mult: float = weapons[SPECIAL_SLOT].def.carry_speed_mult if weapons.size() > SPECIAL_SLOT else 1.0
 	movement.base_speed = class_def.move_speed * weapon_def.move_speed_mult * status.get_speed_mult() * scope_mult * carry_mult
 	movement.air_jumps = 1 if status.has_double_jump() else 0
+	movement.look_pitch = look_pitch
 	movement.physics_step(delta, cmd)
 
 	if melee_weapon != null:

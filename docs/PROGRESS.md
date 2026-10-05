@@ -262,6 +262,8 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 ## Bilinen sorunlar
 
+- **Train Factory:** Oyuncular haritanın kendi ışığıyla değil Godot ışığıyla aydınlanıyor (karanlık köşede de aynı parlaklık). 10,5 m'deki vinç kirişi dar (~0,6 m), tepede W'ye basılı tutan karşıya düşebilir. Merdivenler `map_test` navmesh'inde yok (merdivenle çıkılan yere pickup/doğma konmadı). Kasa tavanın altından düşerken paraşüt tavana yakın başlıyor.
+
 - Bear ve Volcano ayrıntılı oynanmadı; gerçek iki bilgisayar testi henüz yok (sadece aynı PC'de iki pencere).
 - Charge'ın host'taki çarpma penceresi istek gelince başlar ve host'un çizdiği (~100 ms geriden) konumu kullanır: charge'ın son ~100–150 ms'si hedeflere karşı denenmez; duvara erken çarpan charge'da pencere bitene kadar 1,3 m'ye giren yine stunlanır.
 - Birinci şahıs kolları: el sadece yumruk pozunda (parmaklar silaha göre ayrı ayarlanmıyor), şarjör değiştirme / atış animasyonu yok; çift tabanca ve bazı silahlarda eller kısmen ekran dışında. Kollar bulutta OpenGL (Compatibility) ile görüntülendi, Mobile renderer'da ışık farklı olabilir.
@@ -388,3 +390,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-05 | 5/8 | Can'ın kararı: 4 yeni sınıf (Hound, Ghost, Trickster, Phantom), 5 silah (Scout, Double Barrel, Desert Eagle, MP5SD, USP-S; yer tutucu model/ses), 4 güç (Sonar, Cloak, Swap Dart, Mark/Recall), `WeaponDef.suppressed`, `ClassDef.silent_steps`, `Player.server_teleport` (life ile), `Player.cloaked` (StateSync), `Ability.get_hud_window` + `HudBar.striped`. GDD'ye işlendi. Smoke 189/0, ağ testi 29 + 25, 28 + 28. Release v0.9.0. |
 | 2026-10-05 | 8 | Hasar yönü göstergesi (nişangah çevresinde ince soluk yay, `CameraFeelDef.hit_dir_*`). GDD'ye "Fikirler": Gun Game; Pyro/Engineer reddedildi. Test kuralı: smoke sadece büyük değişiklikte (CLAUDE.md). |
 | 2026-10-05 | 7 | Can'ın kararı: AVM rafa kalktı (`map_list.tres`'ten çıktı, dosyalar duruyor); oynanabilir harita Ice Yard. Sıradaki aday dm_trainfactory tarzı harita. |
+| 2026-10-05 | 7 | Train Factory: Can'ın gönderdiği CS Online dm_trainfactory BSP'si birebir çevrildi (`import_goldsrc_bsp.py`: geometri, WAD dokuları, orijinal lightmap atlası, trimesh çarpışma; `GoldSrcMap` shader). CS tarzı merdiven (`Movement`, katman 7, `MovementDef.ladder_*`). Airdrop kasası tavan altından düşer (kapalı haritalar). FFA için 16 doğma noktası. Harita testi 178/0, hareket testi 62/0. Trenler ve variller yok. |

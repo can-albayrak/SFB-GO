@@ -7,6 +7,8 @@ extends Node
 ## Mall: escalator up and down, roof stairs, fire escape, dock ramp (ramp-to-slab joints),
 ## and a full-speed jump off the roof stays inside the site (invisible walls on the fence).
 ## Slides: on flat ground a slide only slows down; down the escalator it speeds up and lasts.
+## Train Factory: the long ladder (func_ladder from the BSP) climbs onto the 10.5 m crane girder,
+## looking down climbs back down, and jump lets go.
 ## Prints PASS / FAIL lines and quits with exit code 1 when anything failed.
 
 const GAME_SCENE: PackedScene = preload("res://scenes/game.tscn")
@@ -17,7 +19,9 @@ const ROOF_TOP: float = 10.0
 const UPPER_TOP: float = 5.0
 const SITE_HALF_DEPTH: float = 32.0 ## Mall site fence at z = +-32.
 const LEAP_SPEED: float = 12.0 ## Above Cheetah's slide speed (7.6 * 1.55).
-const TIMEOUT: float = 90.0
+const TRAIN_PATH: String = "res://scenes/maps/train_factory/train_factory.tscn"
+const CATWALK_TOP: float = 10.5
+const TIMEOUT: float = 120.0
 
 var _passes: int = 0
 var _failures: int = 0
@@ -46,6 +50,8 @@ func _run() -> void:
 		await _test_mall_ramps()
 		await _test_slope_slide()
 		await _test_roof_leap()
+	if await _load_map(TRAIN_PATH):
+		await _test_ladder()
 	_finish()
 
 
@@ -188,6 +194,55 @@ func _test_roof_leap() -> void:
 
 
 ## Holds W from `from` facing `yaw` until it passes `target` (along the facing) or `seconds` run out.
+func _test_ladder() -> void:
+	# Ladder1: x 26.8 .. 28.0 in front of the catwalk's south edge (z -1.5), 1.6 .. 10.6 m.
+	var stats: Dictionary = await _climb(Vector3(27.4, 1.7, -2.3), 0.3, 6.0)
+	_check(_player.global_position.y > CATWALK_TOP - 0.1 and _player.is_on_floor(),
+		"climbs the ladder onto the crane girder (y=%.2f)" % _player.global_position.y)
+	_check(stats.seconds < 4.0, "ladder climb takes %.1f s" % stats.seconds)
+	stats = await _climb(Vector3(27.4, 6.0, -2.0), -0.8, 3.0)
+	_check(_player.global_position.y < 2.0, "looking down climbs back down (y=%.2f)" % _player.global_position.y)
+	# Jump halfway up lets go: the player falls back to the floor.
+	await _climb(Vector3(27.4, 6.0, -2.0), 0.3, 0.3)
+	var cmd := PlayerCommand.new()
+	cmd.jump = true
+	for i: int in 90:
+		_player.movement.physics_step(1.0 / Engine.physics_ticks_per_second, cmd)
+		cmd = PlayerCommand.new()
+		await get_tree().physics_frame
+	_check(_player.global_position.y < 2.0 and _player.global_position.z < -2.4,
+		"jump lets go of the ladder (y=%.2f, z=%.2f)" % [_player.global_position.y, _player.global_position.z])
+
+
+## Holds forward facing +Z with `pitch` (ladders climb toward the look) for up to `seconds`;
+## stops once standing on a floor above the start after climbing.
+func _climb(from: Vector3, pitch: float, seconds: float) -> Dictionary:
+	_player.global_position = from
+	_player.rotation.y = PI
+	_player.velocity = Vector3.ZERO
+	_player.movement.reset()
+	_player.look_pitch = pitch
+	await _frames(2)
+	var cmd := PlayerCommand.new()
+	cmd.move = Vector2(0.0, -1.0)
+	var dt: float = 1.0 / Engine.physics_ticks_per_second
+	var stats: Dictionary = {"top": -INF, "seconds": 0.0}
+	var ticks: int = 0
+	while ticks * dt < seconds:
+		_player.movement.look_pitch = pitch
+		_player.movement.physics_step(dt, cmd)
+		await get_tree().physics_frame
+		ticks += 1
+		stats.top = maxf(stats.top, _player.global_position.y)
+		if pitch > 0.0 and _player.global_position.y > CATWALK_TOP and _player.global_position.z > from.z + 1.1:
+			cmd.move = Vector2.ZERO # Over the narrow girder: let go of forward.
+		if pitch > 0.0 and _player.is_on_floor() and _player.global_position.y > CATWALK_TOP - 0.1:
+			break
+	stats.seconds = ticks * dt
+	_player.look_pitch = 0.0
+	return stats
+
+
 func _walk(from: Vector3, yaw: float, target: Vector3, seconds: float = 4.0) -> Dictionary:
 	_player.global_position = from
 	_player.rotation.y = yaw

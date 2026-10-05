@@ -3,8 +3,11 @@ extends Node3D
 ## A falling airdrop crate (visual only; the AirdropManager owns the rules). It hangs under a
 ## parachute and drifts down onto its point over `fall_time`, with a light beam marking the
 ## spot from far away until it is opened. Every peer runs the same descent from its own clock.
+## Under a roof (indoor maps) it starts just below the ceiling instead of FALL_HEIGHT.
 
 const FALL_HEIGHT: float = 40.0
+const MIN_FALL_HEIGHT: float = 4.0 ## Airdrop points need at least this much room above (map_test).
+const CEILING_GAP: float = CANOPY_HEIGHT + 0.6
 const CRATE_SIZE: Vector3 = Vector3(1.0, 0.75, 1.0)
 const CRATE_COLOR: Color = Color(0.3, 0.32, 0.24)
 const STRIPE_COLOR: Color = Color(0.85, 0.75, 0.25)
@@ -21,6 +24,7 @@ var crate_id: int = 0
 var landing_point: Vector3 = Vector3.ZERO
 var fall_time: float = 10.0
 var _fall_left: float = 0.0
+var _fall_height: float = FALL_HEIGHT
 var _body: Node3D
 var _canopy: Node3D
 var _solid: StaticBody3D
@@ -36,6 +40,15 @@ static func create(id: int, point: Vector3, seconds_left: float, total_fall: flo
 	return crate
 
 
+## The crate starts this high above `point`: FALL_HEIGHT, or under the first ceiling above.
+static func fall_height_at(space: PhysicsDirectSpaceState3D, point: Vector3) -> float:
+	var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.5, point + Vector3.UP * FALL_HEIGHT, WORLD_LAYER)
+	var hit: Dictionary = space.intersect_ray(query)
+	if hit.is_empty():
+		return FALL_HEIGHT
+	return maxf((hit.position as Vector3).y - point.y - CEILING_GAP, 0.0)
+
+
 func is_landed() -> bool:
 	return _fall_left <= 0.0
 
@@ -43,6 +56,7 @@ func is_landed() -> bool:
 func _ready() -> void:
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	global_position = landing_point
+	_fall_height = fall_height_at(get_world_3d().direct_space_state, landing_point)
 	_body = Node3D.new()
 	add_child(_body)
 	_body.add_child(_box(CRATE_SIZE, CRATE_COLOR, Vector3(0.0, CRATE_SIZE.y * 0.5, 0.0)))
@@ -79,7 +93,7 @@ func _process(delta: float) -> void:
 
 func _update_fall() -> void:
 	var share: float = _fall_left / fall_time
-	_body.position.y = FALL_HEIGHT * share
+	_body.position.y = _fall_height * share
 	_body.rotation.y = share * 2.0 # A slow turn on the way down.
 	_canopy.visible = _fall_left > 0.0
 	_solid.process_mode = Node.PROCESS_MODE_INHERIT if _fall_left <= 0.0 else Node.PROCESS_MODE_DISABLED

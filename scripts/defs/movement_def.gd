@@ -45,3 +45,9 @@ extends Resource
 ## Walking into anything up to this high (stairs, kerbs) climbs onto it; the camera follows smoothly.
 ## Also how far the feet stick to the floor walking down stairs. 0 = off.
 @export var step_height: float = 0.0
+
+@export_group("Ladders")
+## Climbing speed on map ladders (m/s). 0 = ladders do nothing.
+@export var ladder_speed: float = 0.0
+## Jumping off a ladder: push away at this speed (and half of it upward).
+@export var ladder_jump_off: float = 4.0

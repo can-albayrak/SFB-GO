@@ -28,3 +28,5 @@ slide_slope_accel = 0.8
 slide_slope_max_speed_mult = 1.6
 slide_spread = 7.0
 step_height = 0.4
+ladder_speed = 4.0
+ladder_jump_off = 4.0

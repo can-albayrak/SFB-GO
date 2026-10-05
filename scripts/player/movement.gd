@@ -33,6 +33,9 @@ const STEP_PROBE_HEIGHT: float = 0.05
 ## instead of perched on its edge (a tilted contact that is not floor).
 const STEP_TOP_TOLERANCE: float = 0.03 ## Metres a step top may sit above step_height (contact rounding).
 const STEP_MIN_FORWARD: float = 0.15
+const LADDER_LAYER: int = 1 << 6 ## Physics layer 7 "ladder": Area3D volumes from the map.
+const LADDER_DOWN_PITCH: float = -0.35 ## Radians: looking further down than this, forward climbs down.
+const LADDER_RELEASE_TIME: float = 0.35 ## Seconds after jumping off before a ladder grabs again.
 
 ## Touched the ground after being in the air (camera landing dip).
 signal landed(fall_speed: float)
@@ -50,6 +53,8 @@ var is_sliding: bool = false
 var last_wish_dir: Vector3 = Vector3.ZERO
 ## Extra jumps allowed in the air this tick (Double Jump pickup); set by the player.
 var air_jumps: int = 0
+## Radians, positive looks up; set by the player (ladders climb toward the look).
+var look_pitch: float = 0.0
 
 var _jump_buffer: float = 0.0
 var _coyote_left: float = 0.0
@@ -72,6 +77,8 @@ var _dash_velocity: Vector3 = Vector3.ZERO
 var _dash_left: float = 0.0
 var _dash_time: float = 0.0
 var _dash_exit_speed: float = 0.0
+var _on_ladder: bool = false
+var _ladder_release_left: float = 0.0
 
 @onready var body: CharacterBody3D = get_parent()
 @onready var _capsule: CapsuleShape3D = collision.shape
@@ -101,6 +108,15 @@ func physics_step(delta: float, cmd: PlayerCommand) -> void:
 	if _dash_left > 0.0:
 		_step_dash(delta)
 		return
+	if def.ladder_speed > 0.0:
+		_ladder_release_left = maxf(_ladder_release_left - delta, 0.0)
+		var ladder: Area3D = _find_ladder() if _ladder_release_left <= 0.0 else null
+		var was_on_ladder: bool = _on_ladder
+		_on_ladder = ladder != null and _step_ladder(delta, cmd, ladder, on_floor)
+		if _on_ladder:
+			return
+		if was_on_ladder and _ladder_release_left <= 0.0:
+			body.velocity.y = minf(body.velocity.y, 0.0) # Off the top: no climb speed carried into a hop.
 
 	var vel: Vector3 = body.velocity
 	var hvel := Vector3(vel.x, 0.0, vel.z)
@@ -231,6 +247,43 @@ func _floor_just_below(vertical_speed: float) -> bool:
 
 
 ## Owner: pulls the body toward `target` at up to `speed` until it arrives, hits a wall or jumps off.
+func _find_ladder() -> Area3D:
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = _capsule
+	query.transform = collision.global_transform
+	query.collision_mask = LADDER_LAYER
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	var hits: Array[Dictionary] = body.get_world_3d().direct_space_state.intersect_shape(query, 1)
+	return null if hits.is_empty() else hits[0].collider as Area3D
+
+
+## On a ladder (CS style): no gravity; forward climbs up, or down when looking down; back
+## does the opposite and moves off. Moving sideways or forward also carries you along, so you
+## step off at the top. Jump lets go and pushes away. Returns false when standing at the foot
+## of the ladder and not climbing (normal walking).
+func _step_ladder(delta: float, cmd: PlayerCommand, ladder: Area3D, on_floor: bool) -> bool:
+	var forward: float = -cmd.move.y
+	var climb: float = forward * (1.0 if look_pitch > LADDER_DOWN_PITCH else -1.0)
+	if on_floor and climb <= 0.0:
+		return false
+	is_sliding = false
+	_jump_buffer = 0.0
+	if cmd.jump:
+		var away: Vector3 = body.global_position - ladder.global_position
+		away.y = 0.0
+		away = away.normalized() if away.length_squared() > 0.0001 else body.global_basis.z
+		body.velocity = away * def.ladder_jump_off + Vector3.UP * def.ladder_jump_off * 0.5
+		_ladder_release_left = LADDER_RELEASE_TIME
+	else:
+		_update_crouch(cmd.crouch, on_floor)
+		var along: Vector3 = last_wish_dir * def.ladder_speed * 0.6
+		body.velocity = Vector3(along.x, climb * def.ladder_speed, along.z)
+	_move_and_step(false)
+	_update_eye(delta)
+	return true
+
+
 func start_grapple(target: Vector3, speed: float) -> void:
 	_grapple_target = target
 	_grapple_speed = speed
@@ -281,6 +334,10 @@ func is_dashing() -> bool:
 	return _dash_left > 0.0
 
 
+func is_on_ladder() -> bool:
+	return _on_ladder
+
+
 func is_grappling() -> bool:
 	return _grappling
 
@@ -301,6 +358,8 @@ func reset() -> void:
 	_was_on_floor = true
 	_fall_speed = 0.0
 	_slide_left = 0.0
+	_on_ladder = false
+	_ladder_release_left = 0.0
 	set_crouch_shape(false)
 	_eye_height = STAND_EYE
 	head.position.y = _eye_height

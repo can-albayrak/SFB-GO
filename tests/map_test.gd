@@ -2,8 +2,9 @@ extends Node
 ## Headless map test, every map in data/maps/map_list.tres:
 ##   godot --headless --path . res://tests/map_test.tscn
 ## Loads each map in an offline match and checks: spawn points stand on a floor and the
-## player capsule fits there; pickups stand on a floor; airdrop points have a floor and open
-## sky above (crates fall from 40 m); every spawn, pickup and airdrop point can be walked to
+## player capsule fits there; pickups stand on a floor; airdrop points have a floor and room
+## above for the falling crate (open sky, or AirdropCrate.MIN_FALL_HEIGHT under a roof);
+## every spawn, pickup and airdrop point can be walked to
 ## from the first spawn (navmesh baked from the map's colliders: steps up to the step height,
 ## ramps, no jumps); high levels stay reachable with any one way up removed (ALTERNATE_ROUTES).
 ## Also prints the longest walk between two spawns (GDD: 15-20 s end to end).
@@ -12,7 +13,6 @@ extends Node
 const GAME_SCENE: PackedScene = preload("res://scenes/game.tscn")
 const WORLD_MASK: int = 1
 const FLOOR_PROBE: float = 0.3 ## Metres below a marker where the floor must be.
-const SKY_PROBE: float = 40.0 ## Airdrop crates fall from this high (AirdropCrate.FALL_HEIGHT).
 const CAPSULE_RADIUS: float = 0.35
 const CAPSULE_HEIGHT: float = 1.8
 const AGENT_RADIUS: float = 0.4
@@ -87,7 +87,7 @@ func _test_map(map_def: MapDef) -> void:
 	for drop: Node3D in drops:
 		var pos: Vector3 = drop.global_position
 		_check(_floor_below(space, pos + Vector3.UP * 0.1, exclude), "%s airdrop %s stands on a floor" % [label, drop.name])
-		_check(_open_sky(space, pos, exclude), "%s airdrop %s has open sky" % [label, drop.name])
+		_check(_room_above(space, pos, exclude), "%s airdrop %s has room for the falling crate" % [label, drop.name])
 
 	await _test_reachability(label, map, spawns, pickups + drops)
 	await _test_alternate_routes(map_def, map, spawns)
@@ -231,9 +231,8 @@ func _capsule_fits(space: PhysicsDirectSpaceState3D, feet: Vector3, exclude: Arr
 	return space.intersect_shape(query, 1).is_empty()
 
 
-func _open_sky(space: PhysicsDirectSpaceState3D, pos: Vector3, exclude: Array[RID]) -> bool:
-	var query := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 0.5, pos + Vector3.UP * SKY_PROBE, WORLD_MASK, exclude)
-	return space.intersect_ray(query).is_empty()
+func _room_above(space: PhysicsDirectSpaceState3D, pos: Vector3, _exclude: Array[RID]) -> bool:
+	return AirdropCrate.fall_height_at(space, pos) >= AirdropCrate.MIN_FALL_HEIGHT
 
 
 func _children(map: Node, group_name: String) -> Array[Node3D]:

@@ -293,9 +293,10 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 
 ## Haritalar (2026-10-05)
 
-- **Oynanabilir:** Ice Yard (fy_iceworld tarzı), Test Range.
+- **Oynanabilir:** Ice Yard (fy_iceworld tarzı), Train Factory (CS Online'ın dm_trainfactory'si, birebir: Nexon'un geometrisi, dokuları ve ışığı), Test Range.
 - **Rafta:** AVM (Mall). Can beğenmedi; lobide yok, dosyaları duruyor (`scenes/maps/mall`, `movement_test` merdivenler için kullanıyor).
-- **Sıradaki aday:** CS 1.6'daki dm_trainfactory tarzı bir harita (yerleşim ondan, geometri ve dokular bizim).
+- **Train Factory:** Tren deposu salonu; raylar arasında çukurlar, yükseltilmiş yollar, 10,5 m'de vinç kirişi (merdivenle). Herkese karşı: 16 doğma noktası salona yayılı. Orijinaldeki geçen trenler (çarpanı öldürür) ve patlayan variller henüz yok. Ticari oyun içeriği: sadece arkadaş arası.
+- **Merdivenler (2026-10-05):** CS gibi: ileri basıp yukarı bakınca tırmanır, aşağı bakınca iner, zıplayınca bırakır.
 
 ## Harita tasarım kuralları
 
