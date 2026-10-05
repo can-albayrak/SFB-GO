@@ -383,6 +383,7 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 
 Can'ın onayı olmadan yapılmaz; sadece not.
 
+- **Sonra bakılacak mekanikler (2026-10-05, Can: "kalsın sonra bakarız"):** ölünce ana silahın yere düşmesi (CS gibi, alınabilir); seri ödülleri (3 kill: herkes 2 sn görünür, 5 kill: kişisel airdrop, duyurulur); lideri öldürene +1 puan ve can; intikam ("REVENGE", ekstra can); maç kuralları (sadece kafa, bıçak 2x, sadece tabanca, büyük kafalar); Train Factory trenleri (siren + geçen tren öldürür); kill-cam; anonsçu sesleri.
 - **Gun Game (Arms Race):** Her kill'de sıradaki silaha geçilir, son silah bıçak; ilk bıçak kill'i alan kazanır. Sınıf gücü kapalı ya da açık olabilir. Mevcut silah listesiyle yapılabilir.
 - **Reddedilenler (2026-10-05):** Hitman, Vortex, Mirror, Ricochet, Leech, Marked, Saboteur (fizik ya da çok karmaşık; Thief'in silah çalma fikri Trickster'a eklendi). Hex (ters tuşlar) belki ileride.
 - **Daha önce reddedilenler:** Pyro (molotof) ve Engineer (taret) oyunu bozuyor; taret/konuşlandırılan yapı yok. Bulldog/tank ve Saul sınıfı da yok. Oyun içi sesli sohbet yok (Discord).
