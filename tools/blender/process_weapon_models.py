@@ -59,6 +59,7 @@ MODELS = {
               "attach": (PISTOL_PACK + "Glock 17/Glock17.obj", "Supressor")},
     "shotgun": {"raw": PSX_PACK + "Remington-870/Remington-870.blend", "kind": "rifle", "length": 1.0,
                 "drop": ("ShotgunBullet",)},
+    "mp5sd": {"raw": "packs/MP5/mp5_psx.fbx", "kind": "rifle", "length": 0.75, "flip": True},  # Can, 2026-10-06 (with suppressor).
     "double_barrel": {"raw": SHOTGUN_PACK + "DoubleBarrelShotgun/DoubleBarrelShotgun.obj", "kind": "rifle",
                       "length": 1.05, "drop": ("Shell",)},
     "grenade_launcher": {"raw": HEAVY_PACK + "grenadelauncher.blend", "kind": "rifle", "length": 0.8, "flip": True},
