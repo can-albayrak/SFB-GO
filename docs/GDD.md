@@ -356,6 +356,13 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 - LightmapGI ile önceden pişirilmiş ışık, sınırlı dinamik gölge
 - Grafik menüsü: çözünürlük ölçeği (3D render ölçeği), post-process aç/kapa (sis kalitesi sonra)
 
+## Fikirler (kararlaştırılmadı)
+
+Can'ın onayı olmadan yapılmaz; sadece not.
+
+- **Gun Game (Arms Race):** Her kill'de sıradaki silaha geçilir, son silah bıçak; ilk bıçak kill'i alan kazanır. Sınıf gücü kapalı ya da açık olabilir. Mevcut silah listesiyle yapılabilir.
+- **Reddedilenler (2026-10-05):** Pyro (molotof) ve Engineer (taret) oyunu bozuyor; taret/konuşlandırılan yapı yok. Bulldog/tank ve Saul sınıfı da yok. Oyun içi sesli sohbet yok (Discord).
+
 ## Test ve dağıtım
 
 - **Test:** Hasar sayısı gösteren hedef mankenleri. Bot yok. Test Range'de güçlerin bekleme süresi yok ve şarjör bitmez (`data/match/test_range.tres`); airdrop gelince 5 sn'de bir iner (haritada her airdrop silahı zaten varsa inmez).

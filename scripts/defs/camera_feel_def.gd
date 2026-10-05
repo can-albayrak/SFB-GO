@@ -53,6 +53,12 @@ extends Resource
 @export var hurt_flash_time: float = 0.45 ## Seconds the flash fades over.
 @export var low_health_start: float = 0.6 ## Health share where the lasting red edge begins.
 @export var low_health_alpha: float = 0.5 ## Red edge strength at 1 health.
+## Hit direction: a thin, faint red arc around the crosshair pointing toward the attacker.
+@export var hit_dir_alpha: float = 0.4
+@export var hit_dir_time: float = 1.0 ## Seconds it fades over.
+@export var hit_dir_radius: float = 0.12 ## Share of the screen height from the centre.
+@export var hit_dir_arc_degrees: float = 36.0
+@export var hit_dir_width: float = 3.0 ## Pixels at 1080p.
 
 @export_group("Recoil")
 ## Share of the weapon's recoil the view follows. 0: the crosshair stays where it is and the

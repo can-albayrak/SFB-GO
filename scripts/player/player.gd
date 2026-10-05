@@ -407,7 +407,10 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 		server_break_cloak() # Getting hit shows a Ghost.
 		_hurt_since_spawn = true
 		last_hurt_time = _now()
-		_on_hurt.rpc_id(get_multiplayer_authority(), before - health)
+		var attacker := get_parent().get_node_or_null(str(attacker_id)) as Player
+		var from_other: bool = attacker != null and attacker != self
+		_on_hurt.rpc_id(get_multiplayer_authority(), before - health, from_other,
+			attacker.global_position if from_other else Vector3.ZERO)
 	if health > 0:
 		return false
 	_die(attacker_id)
@@ -782,12 +785,15 @@ func flash(seconds: float) -> void:
 	Events.local_flashed.emit(seconds)
 
 
-## Host -> victim's owner: damage taken. Drives the camera shake (visual only, aim unchanged).
+## Host -> victim's owner: damage taken. Drives the camera shake (visual only, aim unchanged)
+## and, when another player did it, the hit direction indicator toward `source`.
 @rpc("any_peer", "call_local", "unreliable")
-func _on_hurt(amount: int) -> void:
+func _on_hurt(amount: int, from_other: bool, source: Vector3) -> void:
 	if not _sender_is_host() or not is_local or _camera_feel == null:
 		return
 	_camera_feel.add_shake(amount)
+	if from_other:
+		Events.local_hurt_from.emit(source)
 
 
 ## Host -> shooter only: a hit landed. Hit marker + damage number at `point` (shooter's screen only).

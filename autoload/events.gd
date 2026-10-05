@@ -32,6 +32,10 @@ signal match_ended(winner_id: int, awards: Array)
 @warning_ignore("unused_signal")
 signal local_flashed(seconds: float)
 
+## Local player hurt by another player standing at `source` (hit direction indicator).
+@warning_ignore("unused_signal")
+signal local_hurt_from(source: Vector3)
+
 ## Every peer: a crate is coming down at `point` (announcement).
 @warning_ignore("unused_signal")
 signal airdrop_incoming(point: Vector3)
