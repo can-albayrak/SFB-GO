@@ -16,6 +16,7 @@ var health: float = 0.0
 var last_damage_dealt: float = 0.0
 
 var _material := StandardMaterial3D.new()
+var _reveal_serial: int = 0
 
 @onready var info_label: Label3D = $InfoLabel
 
@@ -33,6 +34,18 @@ func get_facing() -> Vector3:
 	var facing: Vector3 = global_basis.z
 	facing.y = 0.0
 	return facing.normalized()
+
+
+## Sonar in the Test Range (only on the user's screen): shows through walls for `seconds`.
+func reveal(overlay: Material, seconds: float) -> void:
+	for mesh: MeshInstance3D in [$BodyMesh, $HeadMesh]:
+		mesh.material_overlay = overlay
+	_reveal_serial += 1
+	var serial: int = _reveal_serial
+	get_tree().create_timer(seconds).timeout.connect(func() -> void:
+		if serial == _reveal_serial:
+			for mesh: MeshInstance3D in [$BodyMesh, $HeadMesh]:
+				mesh.material_overlay = null)
 
 
 ## Host only: tells a late joiner the current health.

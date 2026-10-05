@@ -9,7 +9,7 @@ extends Node
 ## range also takes --class=N --primary=N --slot=N (roster index, primary choice, weapon slot in
 ## hand: view model and arms), --special=N (airdrop weapon in slot 3 = key 4),
 ## --map=res://...tscn (another map), --at=x,y,z --yaw=deg --pitch=deg (camera placement) and
-## --hud=off (view model only), --fire=seconds (one shot, swing or throw after that long;
+## --hud=off (view model only), --ability=seconds (the Q ability after that long), --fire=seconds (one shot, swing or throw after that long;
 ## with --alt=1 the right click instead, the knife's heavy stab).
 ## Nothing is saved: the settings file is left alone.
 
@@ -126,6 +126,11 @@ func _place_view(player: Player) -> void:
 		var hud := Game.find(get_tree()).get_node_or_null(^"HUD") as CanvasLayer
 		if hud != null:
 			hud.visible = false # View model shots: no pause panel when the window is not focused.
+	if _args.has("ability"):
+		# The Q ability this many seconds after opening (e.g. Sonar on the dummies).
+		await get_tree().create_timer(_args["ability"].to_float()).timeout
+		if player.ability != null and player.ability.try_use(player.get_aim_origin(), -player.get_aim_basis().z):
+			player.requests.send_ability(player.get_aim_origin(), -player.get_aim_basis().z)
 	if _args.has("fire"):
 		# One shot / swing / throw this many seconds after opening (frames of the animation).
 		await get_tree().create_timer(_args["fire"].to_float()).timeout

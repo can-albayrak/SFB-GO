@@ -3,7 +3,7 @@
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Şu anki aşama:** 7 – Harita blockout (AVM): yazıldı ve headless doğrulandı, **Can oynamadı**. Aşama 6 kapandı (2026-10-01). Modeller (aşama 8) Can'la birlikte. Görsel geçişin ilk turu (UI, atmosfer, birinci şahıs gövde) yapıldı. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
-**Son güncelleme:** 2026-10-04
+**Son güncelleme:** 2026-10-06
 
 ## Sıradaki oturum
 
@@ -43,7 +43,12 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
-0. **En yeni (2026-10-05, Can test edecek), Release `v0.9.0`: 4 yeni sınıf**
+0. **En yeni (2026-10-06, Can test edecek): Sonar ve kırmızı düzeltmeleri**
+   - **Sonar** Test Range mankenlerini de kırmızı gösteriyor (sadece kullananın ekranında, görsel); eskiden sadece gerçek oyuncuları işaretlediği için tek başına denerken hiçbir şey olmuyordu. Kırmızı artık gövde + eldeki silahın tamamında ve daha belirgin (alfa 0,55 → 0,8). Decoy kopyası kırmızıyı devralmıyor.
+   - **Test Range'de sınıf değişince can doluyor** (Gambler'ın kötü zarı ya da hasar sonrası düşük can ve ekran kenarındaki kırmızı yeni sınıfa taşınıyordu). Gerçek maçta kural aynı (yaralıysan can dolmaz). Client'ta kırmızı kenar yeni sınıfın maksimum canına göre yeniden hesaplanıyor.
+   - Sınıf değiştirmek Ghost pelerinini bitirir (yeni silahlar soluk değildi).
+   - `ui_preview`'e `--ability=saniye` (Q gücünü tetikler).
+0. **Önceki (2026-10-05, Can test edecek), Release `v0.9.0`: 4 yeni sınıf**
    - **Hound** (90 can): Scout / Double Barrel + Desert Eagle, Q **Sonar** (25 m içindekiler 2 sn duvar arkasından kırmızı; onlar ping duyar).
    - **Ghost** (80, hızlı, adım sesi yok): MP5SD + USP-S (susturuculu: 12 m'den uzağa ses yok, mermi izi/alev yok), Q **Pelerin** (4 sn, 0,6 sn'de solar, ateş/hasar bozar).
    - **Trickster** (90): SMG / Burst + Revolver, Q **Swap Dart** (12 sn; değdiği ilk oyuncuyla yer değiştirir, 0,3 m vuruş alanı).
@@ -392,3 +397,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-05 | 7 | Can'ın kararı: AVM rafa kalktı (`map_list.tres`'ten çıktı, dosyalar duruyor); oynanabilir harita Ice Yard. Sıradaki aday dm_trainfactory tarzı harita. |
 | 2026-10-05 | 7 | Train Factory: Can'ın gönderdiği CS Online dm_trainfactory BSP'si birebir çevrildi (`import_goldsrc_bsp.py`: geometri, WAD dokuları, orijinal lightmap atlası, trimesh çarpışma; `GoldSrcMap` shader). CS tarzı merdiven (`Movement`, katman 7, `MovementDef.ladder_*`). Airdrop kasası tavan altından düşer (kapalı haritalar). FFA için 16 doğma noktası. Harita testi 178/0, hareket testi 62/0. Trenler ve variller yok. |
 | 2026-10-05 | 5 | Trickster'ın dartı silah da değiştirir (`Player.primary_override` StateSync 11, `server_trade_weapons`; ana silah + airdrop silahı, tabanca kalır). Yeni sınıf Gambler: Roll the Dice (`DiceAbility`, `DiceFaceDef`; 3 iyi, 1 nötr, 1 kötü, 1 çok kötü), `PlayerStatus` hasar çarpanı + bedava mermi, zar sesleri (`gen_sfx.py dice dice_good dice_bad`). Smoke 219/0, ağ testi 29 + 25. |
+| 2026-10-06 | 5/8 | Sonar: Test Range mankenleri (`TargetDummy.reveal`, sahibinde), reveal tüm model MeshInstance'larına (`SoldierRig.reveal`/`clear_reveal`), Decoy kırmızı kopyalamıyor, renk daha belirgin. Test Range'de sınıf değişimi canı doldurur (`loadout_swap_anytime`), `_apply_loadout` sonunda `health_changed`, sınıf değişimi pelerini bozar. `ui_preview --ability`. Smoke 219/0. |

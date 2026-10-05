@@ -7,6 +7,11 @@ extends Ability
 
 func _use_local(_origin: Vector3, _dir: Vector3) -> void:
 	Sfx.play_ui(player, Sfx.SONAR)
+	# Test Range dummies never move or fight back, so the owner marks them itself (visual).
+	for node: Node in get_tree().get_nodes_in_group(TargetDummy.GROUP):
+		var dummy := node as TargetDummy
+		if dummy.global_position.distance_to(player.global_position) <= def.max_range:
+			dummy.reveal(PlayerEffects.get_sonar_material(), def.duration)
 
 
 func server_use(_origin: Vector3, _dir: Vector3) -> void:

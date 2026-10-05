@@ -41,6 +41,7 @@ static func create(source: Node3D, at: Vector3, yaw: float, seconds: float, star
 	decoy.add_child(shape)
 	var body: Node3D = source.duplicate()
 	body.visible = true
+	SoldierRig.clear_reveal(body)
 	for extra: String in ["Crown", "Glint"]: # Leader crown and scope glint stay on the player.
 		var node: Node = body.get_node_or_null(extra)
 		if node != null:

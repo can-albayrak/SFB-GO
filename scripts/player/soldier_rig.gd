@@ -123,18 +123,29 @@ func setup(player: Player) -> void:
 	_tree.advance(0.0)
 
 
-## Hound Sonar (only on the Hound's screen): the body shows through walls in `overlay`
-## for `seconds`.
+## Hound Sonar (only on the Hound's screen): the body and the gun in hand show through walls
+## in `overlay` for `seconds`. A newer reveal restarts the time.
 func reveal(overlay: Material, seconds: float) -> void:
-	var body := get_node_or_null("Body/Skeleton3D/Body") as GeometryInstance3D
-	if body == null:
-		return
-	body.material_overlay = overlay
+	var root: Node = get_parent() if get_parent() != null else self # The player's Model.
+	var meshes: Array[MeshInstance3D] = []
+	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		mesh.material_overlay = overlay
+		meshes.append(mesh)
 	_reveal_serial += 1
 	var serial: int = _reveal_serial
 	get_tree().create_timer(seconds).timeout.connect(func() -> void:
-		if serial == _reveal_serial and is_instance_valid(body):
-			body.material_overlay = null)
+		if serial != _reveal_serial:
+			return
+		for mesh: MeshInstance3D in meshes:
+			if is_instance_valid(mesh):
+				mesh.material_overlay = null)
+
+
+## Copies of a body (decoy) never keep a reveal: it belongs to the live player.
+static func clear_reveal(root: Node) -> void:
+	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+		(node as MeshInstance3D).material_overlay = null
 
 
 ## Every peer that is shown a shot from this player.

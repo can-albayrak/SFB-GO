@@ -299,7 +299,7 @@ func _show_action(action: int, seconds: float) -> void:
 const CLOAK_HIDE: float = 0.94 ## Transparency of a fully cloaked body for others (a faint shimmer stays).
 const CLOAK_OWN: float = 0.55 ## The cloaked owner's own gun and arms, so they know it is on.
 const CLOAK_DEFAULT_FADE: float = 0.5
-const SONAR_COLOR: Color = Color(1.0, 0.25, 0.2, 0.55)
+const SONAR_COLOR: Color = Color(1.0, 0.18, 0.12, 0.8)
 const MARK_COLOR: Color = Color(0.65, 0.35, 1.0, 0.35)
 const MARK_HEIGHT: float = 2.4
 const MARK_RADIUS: float = 0.35
@@ -381,10 +381,11 @@ func _show_sonar(peer_ids: PackedInt32Array, seconds: float) -> void:
 	for node: Node in player.get_parent().get_children():
 		var other := node as Player
 		if other != null and other.get_multiplayer_authority() in peer_ids and other.rig != null:
-			other.rig.reveal(_get_sonar_material(), seconds)
+			other.rig.reveal(get_sonar_material(), seconds)
 
 
-static func _get_sonar_material() -> StandardMaterial3D:
+## Shared see-through red of Sonar reveals (players and Test Range dummies).
+static func get_sonar_material() -> StandardMaterial3D:
 	if _sonar_material == null:
 		_sonar_material = StandardMaterial3D.new()
 		_sonar_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

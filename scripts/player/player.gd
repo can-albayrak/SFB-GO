@@ -527,9 +527,14 @@ func server_choose_loadout(code: PackedInt32Array) -> void:
 	if is_alive and in_window and Match.state == Match.State.PLAYING:
 		# Only a player unhurt this life gets the new class's full health (no heal-by-swapping,
 		# also not by passing through a class whose maximum is the current health).
+		# Test Range (swap any time): a new class always starts full, like a fresh spawn.
 		_pending_loadout = PackedInt32Array()
 		loadout = code
-		health = class_def.max_health if not _hurt_since_spawn else mini(health, class_def.max_health)
+		server_break_cloak() # The cloak belonged to the old class (and the new guns are not faded).
+		var refill: bool = not _hurt_since_spawn or Match.rules.loadout_swap_anytime
+		health = class_def.max_health if refill else mini(health, class_def.max_health)
+		if refill:
+			_hurt_since_spawn = false
 	else:
 		_pending_loadout = code
 
@@ -679,6 +684,9 @@ func _apply_loadout() -> void:
 	_apply_special(false) # A carried airdrop weapon survives a loadout swap.
 	effects.show_held_weapon(held_slot)
 	loadout_changed.emit()
+	# StateSync can deliver the new health before the new class: redo the share of maximum
+	# (the low-health red edge) against this class.
+	health_changed.emit(health, class_def.max_health)
 
 
 ## Adds or removes the airdrop weapon in SPECIAL_SLOT to match `special_weapon` (every peer).
