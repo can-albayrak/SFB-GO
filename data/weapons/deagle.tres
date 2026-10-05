@@ -29,4 +29,4 @@ view_kick = 5.0
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(-0, 0.0371, -0.133)
+world_muzzle = Vector3(0, 0.038, -0.133)

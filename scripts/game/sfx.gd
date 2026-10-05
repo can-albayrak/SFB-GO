@@ -107,6 +107,8 @@ static func shot(parent: Node, def: WeaponDef, point: Vector3) -> void:
 
 ## Picks the gunshot clip from the weapon's stats, so new weapons get a fitting sound.
 static func shot_stream(def: WeaponDef) -> AudioStream:
+	if not def.fire_sounds.is_empty():
+		return def.fire_sounds.pick_random()
 	if def.grenade != null:
 		return SHOT_LAUNCHER.pick_random()
 	if def.pierce_walls:

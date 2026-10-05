@@ -27,3 +27,6 @@ mono_crash.*.json
 
 # Private source assets (face photos, downloaded avatars); never commit
 private_assets/
+
+# Python caches
+__pycache__/

@@ -43,7 +43,12 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
-0. **En yeni (2026-10-06, Can test edecek): Sonar ve kırmızı düzeltmeleri**
+0. **En yeni (2026-10-06, Can test edecek): Can'ın silah paketleri**
+   - **AK-47** Assault Rifle oldu (adı da "AK-47"): 18 hasar / 0,13 sn (eskisi 16 / 0,12; 100 cana yine 6 mermi, ~0,65 sn), ilk mermilerde tepme ~%15 fazla, `view_kick` 2,5 ve kendi tok atış sesi (`shot_ak_*`, sniper kaydından). `WeaponDef.fire_sounds`: silaha özel ses listesi.
+   - **Yeni modeller:** Glock 17 (Pistol), USP + susturucu (USP-S), Colt Single Action (Revolver), çift namlu (Double Barrel), Heavy pack'ten bazooka (Rocket Launcher) ve bombaatar (Grenade Launcher, birinci şahısta 0,62x). HUD ikonları yeniden üretildi.
+   - **Bakılacak:** roketatarın ön/arka yönü (dokusu RPG-26 fotoğrafı, emin değilim), GL ve roketatarda sol el, AK sesi.
+   - Hâlâ yer tutucu: MP5SD (MP5 gelmedi, iki zip de AK), Scout, Desert Eagle.
+0. **Önceki (2026-10-06): Sonar ve kırmızı düzeltmeleri**
    - **Sonar** Test Range mankenlerini de kırmızı gösteriyor (sadece kullananın ekranında, görsel); eskiden sadece gerçek oyuncuları işaretlediği için tek başına denerken hiçbir şey olmuyordu. Kırmızı artık gövde + eldeki silahın tamamında ve daha belirgin (alfa 0,55 → 0,8). Decoy kopyası kırmızıyı devralmıyor.
    - **Test Range'de sınıf değişince can doluyor** (Gambler'ın kötü zarı ya da hasar sonrası düşük can ve ekran kenarındaki kırmızı yeni sınıfa taşınıyordu). Gerçek maçta kural aynı (yaralıysan can dolmaz). Client'ta kırmızı kenar yeni sınıfın maksimum canına göre yeniden hesaplanıyor.
    - Sınıf değiştirmek Ghost pelerinini bitirir (yeni silahlar soluk değildi).
@@ -398,3 +403,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-05 | 7 | Train Factory: Can'ın gönderdiği CS Online dm_trainfactory BSP'si birebir çevrildi (`import_goldsrc_bsp.py`: geometri, WAD dokuları, orijinal lightmap atlası, trimesh çarpışma; `GoldSrcMap` shader). CS tarzı merdiven (`Movement`, katman 7, `MovementDef.ladder_*`). Airdrop kasası tavan altından düşer (kapalı haritalar). FFA için 16 doğma noktası. Harita testi 178/0, hareket testi 62/0. Trenler ve variller yok. |
 | 2026-10-05 | 5 | Trickster'ın dartı silah da değiştirir (`Player.primary_override` StateSync 11, `server_trade_weapons`; ana silah + airdrop silahı, tabanca kalır). Yeni sınıf Gambler: Roll the Dice (`DiceAbility`, `DiceFaceDef`; 3 iyi, 1 nötr, 1 kötü, 1 çok kötü), `PlayerStatus` hasar çarpanı + bedava mermi, zar sesleri (`gen_sfx.py dice dice_good dice_bad`). Smoke 219/0, ağ testi 29 + 25. |
 | 2026-10-06 | 5/8 | Sonar: Test Range mankenleri (`TargetDummy.reveal`, sahibinde), reveal tüm model MeshInstance'larına (`SoldierRig.reveal`/`clear_reveal`), Decoy kırmızı kopyalamıyor, renk daha belirgin. Test Range'de sınıf değişimi canı doldurur (`loadout_swap_anytime`), `_apply_loadout` sonunda `health_changed`, sınıf değişimi pelerini bozar. `ui_preview --ability`. Smoke 219/0. |
+| 2026-10-06 | 8 | Can'ın paketleri: AK-47 (AR, 18/0,13, kendi sesi `make_ak_shot.py`, `WeaponDef.fire_sounds`), Glock 17, USP-S (USP + paketin susturucusu, `attach`), Colt SAA revolver, çift namlu, bazooka (RL), Heavy GL. `process_weapon_models.py`: mirror modifier uygulanır, FBX animasyonu silinir, `opaque`, `attach`. Sahneler elle (model kaydırma, ASSETS.md). İkonlar yeniden. Smoke 219/0. |

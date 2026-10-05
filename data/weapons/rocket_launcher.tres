@@ -30,4 +30,4 @@ guidable = true
 scene = ExtResource("2_scene")
 world_model = ExtResource("4_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(-0, 0.0224, -0.704)
+world_muzzle = Vector3(0.0033, -0.0152, -0.704)

@@ -38,6 +38,8 @@ enum ViewHands { NONE, RIGHT, BOTH }
 ## Silenced (MP5SD, USP-S): a quiet shot heard only nearby, no tracer and no muzzle flash
 ## for anyone, so a hidden shooter stays hidden.
 @export var suppressed: bool = false
+## Own gunshot clips (one picked per shot); empty = Sfx picks one from the stats.
+@export var fire_sounds: Array[AudioStream] = []
 
 @export_group("Airdrop")
 ## Airdrop weapon (GDD "Airdrop"): the magazine is all the ammo there is (no reload), the

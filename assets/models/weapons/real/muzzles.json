@@ -1,12 +1,12 @@
 {
   "assault_rifle": {
     "muzzle": [
-      0.0001,
-      0.0311,
+      0.0,
+      0.0608,
       -0.5632
     ],
     "length": 0.88,
-    "tris": 1530
+    "tris": 562
   },
   "burst_rifle": {
     "muzzle": [
@@ -25,6 +25,15 @@
     ],
     "length": 0.8,
     "tris": 122
+  },
+  "double_barrel": {
+    "muzzle": [
+      -0.0,
+      0.0685,
+      -0.672
+    ],
+    "length": 1.05,
+    "tris": 199
   },
   "dual_pistols": {
     "muzzle": [
@@ -55,12 +64,12 @@
   },
   "grenade_launcher": {
     "muzzle": [
-      -0.0,
-      0.029,
+      0.0,
+      0.0055,
       -0.512
     ],
     "length": 0.8,
-    "tris": 772
+    "tris": 976
   },
   "heavy_rifle": {
     "muzzle": [
@@ -118,12 +127,12 @@
   },
   "pistol": {
     "muzzle": [
-      -0.0,
-      0.0371,
+      0.0,
+      0.038,
       -0.133
     ],
     "length": 0.19,
-    "tris": 784
+    "tris": 254
   },
   "railgun": {
     "muzzle": [
@@ -136,21 +145,21 @@
   },
   "revolver": {
     "muzzle": [
-      0.0,
-      0.0483,
+      -0.0,
+      0.0378,
       -0.21
     ],
     "length": 0.3,
-    "tris": 264
+    "tris": 336
   },
   "rocket_launcher": {
     "muzzle": [
-      -0.0,
-      0.0224,
+      0.0033,
+      -0.0152,
       -0.704
     ],
     "length": 1.1,
-    "tris": 448
+    "tris": 226
   },
   "shotgun": {
     "muzzle": [
@@ -187,5 +196,14 @@
     ],
     "length": 0.3,
     "tris": 506
+  },
+  "usp_s": {
+    "muzzle": [
+      -0.0,
+      0.0511,
+      -0.231
+    ],
+    "length": 0.33,
+    "tris": 347
   }
 }

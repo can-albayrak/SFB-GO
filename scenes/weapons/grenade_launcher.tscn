@@ -8,14 +8,15 @@ position = Vector3(0.2, -0.21, -0.42)
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-scale = Vector3(0.84, 0.84, 0.84)
+position = Vector3(0, -0.0588, -0.0055)
+scale = Vector3(0.62, 0.62, 0.62)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.0244, -0.4301)
+position = Vector3(0, -0.0554, -0.323)
 
 [node name="RightHand" type="Marker3D" parent="."]
 position = Vector3(0, -0.08, 0.081)
 
 [node name="LeftHand" type="Marker3D" parent="."]
-position = Vector3(0, 0.01, -0.32)
+position = Vector3(0, -0.1157, -0.2399)
 rotation = Vector3(0, 0, -0.4363)

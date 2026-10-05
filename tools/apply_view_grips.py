@@ -22,7 +22,7 @@ HANDGUARD = (0.0, 0.0, -25.0)  # Support hand rolled about the barrel: the forea
 # melee weapon: d model units along its handle axis (model -Z) from the model's origin. Melee fists
 # take their rotation from the model (FirstPersonArms), so these markers only place them.
 GRIPS = {
-    "assault_rifle": ((0.0, -0.048, 0.056, 0.0), (0.0, 0.03, -0.22, HANDGUARD)),
+    "assault_rifle": ((0.0, -0.048, 0.056, 0.0), (0.0, 0.04, -0.232, HANDGUARD)),  # AK-47 (2026-10-06).
     "burst_rifle": ((0.0, -0.047, -0.03, 0.0), (0.0, -0.005, -0.2, HANDGUARD)),
     "lmg": ((0.0, -0.069, 0.037, 0.0), (0.0, -0.01, -0.17, HANDGUARD)),
     "heavy_rifle": ((0.0, -0.03, 0.08, 0.0), (0.0, 0.0, -0.17, HANDGUARD)),

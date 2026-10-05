@@ -179,26 +179,28 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 
 | Asset | Dosya | Kaynak (link) | Yazar | Lisans |
 | --- | --- | --- | --- | --- |
-| FN FAL (PSX Weapon Pack) | `assets/models/weapons/real/assault_rifle.glb` | Can'ın gönderdiği zip (2026-10-02) | ? | Lisans dosyası yok |
 | Remington M700 (PSX Weapon Pack) | `assets/models/weapons/real/heavy_rifle.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | Remington 870 (PSX Weapon Pack) | `assets/models/weapons/real/shotgun.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | MAC-11 (PSX Weapon Pack) | `assets/models/weapons/real/smg.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
-| Glock-18 (PSX Weapon Pack) | `assets/models/weapons/real/pistol.glb`, `dual_pistols.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
+| Glock-18 (PSX Weapon Pack) | `assets/models/weapons/real/dual_pistols.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | Rigged Low Poly FPS Hands | `assets/models/characters/fp_hands/fp_hands.glb` | [Sketchfab](https://sketchfab.com/3d-models/rigged-low-poly-fps-hands-c0d32b85e1ff4c4aa710d416545104b1) | hvarley | CC-BY-4.0 |
 | PSX Base Male - PlayStation Character - Low Poly (artık sahnede yok) | `assets/models/characters/psx_man/psx_man.glb` | [Sketchfab](https://sketchfab.com/3d-models/psx-base-male-playstation-character-low-poly-186d173d59044734b908215ecbc88b1f) | jonniemadeit | CC-BY-4.0 |
 | knife-scrape-4 (bıçak çekme) | `assets/audio/knife_draw.wav` | [Freesound 614073](https://freesound.org/s/614073/) | stormwaveaudio | Freesound (lisans sayfada kontrol edilmeli) |
 | knife swish mixed (bıçak savurma) | `assets/audio/swing.wav` | [Freesound 423281](https://freesound.org/s/423281/) | thepigboy | Freesound (lisans sayfada kontrol edilmeli) |
 | FREE FPS SFX Pack (adım, iniş, pompalı, sniper, roket, patlama, dürbün, grapple, uyarı) | `assets/audio/*.wav` (`tools/convert_sfx_pack.sh`) | Can'ın zip'i (2026-10-04), kaynağı/lisansı yazılı değil | ? | ? (paket adı "free"; kaynak bulununca buraya) |
-| Yer tutucu silah modelleri (Scout = Heavy Rifle'ın M700'ü, Double Barrel = 870, Desert Eagle ve USP-S = Glock, MP5SD = MAC) | `scenes/weapons/{scout,double_barrel,deagle,usp_s,mp5sd}.tscn` | — | — | Can'ın modelleri gelince değişecek; HUD ikonları da kopya |
+| Yer tutucu silah modelleri (Scout = Heavy Rifle'ın M700'ü, Desert Eagle = Glock 17, MP5SD = MAC) | `scenes/weapons/{scout,deagle,mp5sd}.tscn` | — | — | Can'ın modelleri gelince değişecek; HUD ikonları da kopya |
+| AK-47 (MachineGunPSX) = Assault Rifle | `assets/models/weapons/real/assault_rifle.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
+| Glock 17 = Pistol (+ Desert Eagle yer tutucusu); USP + aynı paketin susturucusu = USP-S (PSX Pistol Pack [FIXED]) | `pistol.glb`, `usp_s.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
+| Double Barrel Shotgun (PSX Shotgun Pack [FIXED]) | `double_barrel.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
+| Bazooka = Rocket Launcher, Grenade Launcher (Heavy Weapons Pack) | `rocket_launcher.glb`, `grenade_launcher.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
+| PSX Revolver (Colt Single Action) = Revolver | `revolver.glb` | Can'ın rar'ı (2026-10-06) | ? | Lisans dosyası yok |
+| AK-47 atış sesi (Sniper_Shot 1–3'ten, %12 hızlı, 0,55 sn + alçak vuruş) | `assets/audio/shot_ak_{1,2,3}.wav` (`tools/make_ak_shot.py`) | FREE FPS SFX Pack | ? | ? |
 | PS2 Saul Goodman (oyuncu gövdesi) | `assets/models/characters/saul/saul.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps2-saul-goodman-f3545ae03d40406c97ee6fd3c49a7793) | FusedMaker | CC-BY-4.0 |
-| Colt Python (PSX Revolver Pack [FIXED]) | `assets/models/weapons/real/revolver.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | PS1-style Steyr AUG | `assets/models/weapons/real/burst_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-steyr-aug-0d5f437f7193404ea0f030651421434f) | andrewwhiskin | CC-BY-4.0 |
 | Low-Poly M249 SAW | `assets/models/weapons/real/lmg.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m249-saw-76011c365636451c90a8e3a46c2d8ca5) | TastyTony | CC-BY-4.0 |
 | SVD | `assets/models/weapons/real/marksman_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/svd-1ac10d61438844a9a69d46baa4dcd72b) | thebradqq | CC-BY-4.0 |
-| PS1 Style Grenade Launcher | `assets/models/weapons/real/grenade_launcher.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-grenade-launcher-0532a58572124fe1b31ecec7a9aff462) | Falxxx | CC-BY-4.0 |
 | PS1 Style Railgun | `assets/models/weapons/real/railgun.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-railgun-057d8e6263df484dbcc767ff0aa26be7) | Falxxx | CC-BY-4.0 |
 | Low-Poly M134 Minigun | `assets/models/weapons/real/minigun.glb` | [Sketchfab](https://sketchfab.com/3d-models/low-poly-m134-minigun-eed0c95de51b4895a48c5729582732cc) | TastyTony | CC-BY-4.0 |
-| PS1 Style Rocket Launcher | `assets/models/weapons/real/rocket_launcher.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-rocket-launcher-a95a9d11c2904f38918507e77df11dc3) | Falxxx | CC-BY-4.0 |
 | Hunting Rifle | `assets/models/weapons/real/musket.glb` | [Sketchfab](https://sketchfab.com/3d-models/hunting-rifle-31add96fe16e48eebadc78368db3305f) | Hikimore | CC-BY-4.0 |
 | Combat Knife | `assets/models/weapons/real/knife.glb` | [Sketchfab](https://sketchfab.com/3d-models/combat-knife-7671043e9e8848379391a5fd03f112f7) | Hikimore | CC-BY-4.0 |
 | Throwing Knife | `assets/models/weapons/real/throwing_knife.glb` | [Sketchfab](https://sketchfab.com/3d-models/throwing-knife-f13c505160e34193a98fb9a092489e0a) | _NotyGuy_ | CC-BY-4.0 |
@@ -212,3 +214,5 @@ Mixamo animasyonları: Adobe Mixamo lisansı oyunda telifsiz kullanıma izin ver
 
 2026-10-02: AK-47, AWP, Mac10, Beretta, Glock [psx], Remington ve PSX Revolver (Timnuts, Sketchfab Standard) yerine Can'ın iki zip'indeki modeller geçti (yukarıdaki ilk altı satır). **PSX Weapon Pack ve PSX Revolver Pack lisans dosyası içermiyor:** kaynağı ve lisansı Can'dan öğrenilip buraya yazılmalı; o zamana kadar sadece arkadaş sürümünde (repo ve Release gizli). Paketlerin ham dosyaları `private_assets/weapons/packs/` (kullanılmayanlar: 38 Special, Snub Nose, Hammerless revolverlar). Ham dosyalar `private_assets/weapons/` (git dışı); işlenmiş halleri `tools/blender/process_weapon_models.py` ile üretilir, sahnelere `tools/apply_weapon_models.py` ile bağlanır.
 | dm_trainfactory ("Trainshed") haritası: geometri, dokular, lightmap | `scenes/maps/train_factory/*` (`tools/maps/import_goldsrc_bsp.py` ile dönüştürüldü) | Counter-Strike Online, Can'ın gönderdiği 7z (2026-10-05) | Nexon | Ticari oyun içeriği: sadece arkadaş arası gizli kullanım. Oyun herkese açılırsa harita değiştirilmeli. |
+
+2026-10-06: Can'ın yeni paketleri `private_assets/weapons/packs/` altında (`MachineGunPSX`, `PSXPistolPack[FIXED]`, `PSXShotgunPack[FIXED]`, `Heavy Weapons Pack`, `PSXRevolverNew`). `process_weapon_models.py` ile işlendi; sahnelere `apply_weapon_models.py` ile değil **elle** bağlandı: her sahnede `Model` düğümü kaydırıldı ki yeni modelin kabzası eski `RightHand` noktasına otursun (kollar ve kadraj aynı kalsın), Muzzle ve tüfeklerde `LeftHand` yeni modelden. `apply_weapon_models.py` bu sahnelerde yeniden koşulursa kaydırma ve el ayarları (revolver 1,3x vb.) kaybolur. Pakette kullanılmayanlar: Beretta 9M, HighCalibler (Desert Eagle'a benzemiyor, dokusu bozuk), tek namlu / alt-üst / pompalı av tüfekleri, Mauser, Heavy pack bıçağı. **MP5 yok:** iki MachineGunPSX zip'i birebir aynı (ikisi de AK).

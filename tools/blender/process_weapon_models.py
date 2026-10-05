@@ -28,6 +28,10 @@ OUT_DIR = "assets/models/weapons/real"
 # Packs Can sent on 2026-10-02 (unzipped into private_assets/weapons/packs/).
 PSX_PACK = "packs/PSX-Weapon-Pack/"
 REVOLVER_PACK = "packs/PSXRevolverPack[FIXED]/Files/"
+# Packs Can sent on 2026-10-06 (same folder).
+PISTOL_PACK = "packs/PSXPistolPack[FIXED]/Files/"
+SHOTGUN_PACK = "packs/PSXShotgunPack[FIXED]/Files/"
+HEAVY_PACK = "packs/Heavy Weapons Pack/"
 
 # id -> settings. "raw": file in RAW_DIR. "kind" sets the hand position (see HAND_SHARE).
 # "length": metres along the long axis. Optional, all decided on the --preview renders:
@@ -37,26 +41,34 @@ REVOLVER_PACK = "packs/PSXRevolverPack[FIXED]/Files/"
 #   "max_x": parts centred beyond this raw X are removed (a second, exploded copy),
 #   "undo_euler": degrees (XYZ) the author left the whole model rotated by,
 #   "axes": (forward, up) raw axes such as ("-x", "z") when the size-based guess is wrong,
-#   "tint": RGB multiplier for the colour (darkens a too-light texture; colours an untextured model).
+#   "tint": RGB multiplier for the colour (darkens a too-light texture; colours an untextured model),
+#   "opaque": True when the texture's alpha is not meant as see-through (new PSX revolver: drawn invisible),
+#   "attach": (file, object) a part taken from another model, put on the front of this one's barrel
+#             (USP-S: the pistol pack's suppressor).
 MODELS = {
-    "assault_rifle": {"raw": PSX_PACK + "FN FAL/FN FAL.blend", "kind": "rifle", "length": 0.88},
+    "assault_rifle": {"raw": "packs/MachineGunPSX/GLB/MachineGunPSX.glb", "kind": "rifle", "length": 0.88},
     "burst_rifle": {"raw": "ps1-style_steyr_aug.glb", "kind": "rifle", "length": 0.79, "flip": True},
     "lmg": {"raw": "low-poly_m249_saw.glb", "kind": "rifle", "length": 1.0, "flip": True},
     "heavy_rifle": {"raw": PSX_PACK + "Remington-m700/Remington-m700.blend", "kind": "rifle", "length": 1.2},
     "marksman_rifle": {"raw": "svd.glb", "kind": "rifle", "length": 1.22},
     "smg": {"raw": PSX_PACK + "MAC-11/MAC-11.blend", "kind": "pistol", "length": 0.32},
     "dual_pistols": {"raw": PSX_PACK + "Glock-18/Glock-18.blend", "kind": "pistol", "length": 0.2},
-    "pistol": {"raw": PSX_PACK + "Glock-18/Glock-18.blend", "kind": "pistol", "length": 0.19},
+    "pistol": {"raw": PISTOL_PACK + "Glock 17/Glock17.obj", "kind": "pistol", "length": 0.19,
+               "drop_exact": ("9MM", "Supressor"), "drop": ("GlockMagazine",)},  # Spare mags beside it.
+    "usp_s": {"raw": PISTOL_PACK + "USP/USP.obj", "kind": "pistol", "length": 0.33, "drop_exact": ("9MM",),
+              "attach": (PISTOL_PACK + "Glock 17/Glock17.obj", "Supressor")},
     "shotgun": {"raw": PSX_PACK + "Remington-870/Remington-870.blend", "kind": "rifle", "length": 1.0,
                 "drop": ("ShotgunBullet",)},
-    "grenade_launcher": {"raw": "ps1_style_grenade_launcher.glb", "kind": "rifle", "length": 0.8},
+    "double_barrel": {"raw": SHOTGUN_PACK + "DoubleBarrelShotgun/DoubleBarrelShotgun.obj", "kind": "rifle",
+                      "length": 1.05, "drop": ("Shell",)},
+    "grenade_launcher": {"raw": HEAVY_PACK + "grenadelauncher.blend", "kind": "rifle", "length": 0.8, "flip": True},
     "railgun": {"raw": "ps1_style_railgun.glb", "kind": "rifle", "length": 1.1, "flip": True,
                 "tint": (0.1, 0.11, 0.14)},  # Linear base colour (no texture): ~0.35 on screen.
     "minigun": {"raw": "low-poly_m134_minigun.glb", "kind": "rifle", "length": 1.0, "flip": True},
-    "rocket_launcher": {"raw": "ps1_style_rocket_launcher.glb", "kind": "rifle", "length": 1.1},
+    "rocket_launcher": {"raw": HEAVY_PACK + "bazooka.blend", "kind": "rifle", "length": 1.1},
     "musket": {"raw": "hunting_rifle.glb", "kind": "rifle", "length": 1.3},
-    "revolver": {"raw": REVOLVER_PACK + "Colt Python/ColtPyton.obj", "kind": "pistol", "length": 0.3,
-                 "drop_exact": ("CPBullet", "CPCyilnderFull")},  # Full = the swung-out copy.
+    "revolver": {"raw": "packs/PSXRevolverNew/PSX Revolver/Revolver.fbx", "kind": "pistol", "length": 0.3,
+                 "opaque": True},
     "knife": {"raw": "combat_knife.glb", "kind": "melee", "length": 0.3},
     "throwing_knife": {"raw": "throwing_knife.glb", "kind": "melee", "length": 0.3, "flip": True},
     "sledgehammer": {"raw": "sledge_hammer.glb", "kind": "melee", "length": 0.9, "flip": True},
@@ -119,8 +131,14 @@ def import_joined(path: str, drop: tuple, max_x: float, drop_exact: tuple = ()) 
         else:
             meshes.append(o)
     bpy.ops.object.select_all(action="DESELECT")
+    for o in bpy.context.scene.objects:
+        o.animation_data_clear()  # FBX keys (new PSX revolver) would re-scale the joined mesh.
     for o in meshes:
         o.hide_set(False)
+        bpy.context.view_layer.objects.active = o
+        for mod in list(o.modifiers):  # Mirror halves (Heavy Weapons Pack grenade launcher).
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+    for o in meshes:
         o.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
     if len(meshes) > 1:
@@ -134,6 +152,44 @@ def import_joined(path: str, drop: tuple, max_x: float, drop_exact: tuple = ()) 
         if o != obj:
             bpy.data.objects.remove(o, do_unlink=True)
     return obj
+
+
+def attach_part(obj: bpy.types.Object, path: str, part: str) -> bpy.types.Object:
+    """Brings `part` of another model in and puts it on the front of `obj`'s barrel: along the
+    long axis its back touches the front end, across it is centred on the front slice."""
+    names = {o.name for o in bpy.data.objects}
+    if path.lower().endswith(".obj"):
+        bpy.ops.wm.obj_import(filepath=path)
+    else:
+        bpy.ops.import_scene.fbx(filepath=path)
+    relink_missing_images(os.path.dirname(path))
+    new = [o for o in bpy.data.objects if o.name not in names]
+    extra = next(o for o in new if o.name.startswith(part))
+    for o in new:
+        if o != extra:
+            bpy.data.objects.remove(o, do_unlink=True)
+    bpy.ops.object.select_all(action="DESELECT")
+    extra.select_set(True)
+    bpy.context.view_layer.objects.active = extra
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    lo, hi = bounds(obj)
+    axis = max(range(3), key=lambda i: hi[i] - lo[i])
+    elo, ehi = bounds(extra)
+    ecentre = (elo + ehi) * 0.5
+    front_is_max = ecentre[axis] > (lo[axis] + hi[axis]) * 0.5
+    end = hi[axis] if front_is_max else lo[axis]
+    cut = (hi[axis] - lo[axis]) * TIP_SLICE
+    front = [v.co for v in obj.data.vertices if (v.co[axis] >= end - cut if front_is_max else v.co[axis] <= end + cut)]
+    target = sum(front, Vector()) / len(front)
+    move = Vector(target - ecentre)
+    move[axis] = (end - elo[axis]) if front_is_max else (end - ehi[axis])
+    extra.data.transform(Matrix.Translation(move))
+    bpy.ops.object.select_all(action="DESELECT")
+    extra.select_set(True)
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.join()
+    return bpy.context.active_object
 
 
 def bounds(obj: bpy.types.Object) -> tuple:
@@ -192,6 +248,18 @@ def decimate(obj: bpy.types.Object, max_tris: int) -> None:
     bpy.ops.object.modifier_apply(modifier=mod.name)
 
 
+def make_opaque() -> None:
+    for mat in bpy.data.materials:
+        if mat.node_tree is None:
+            continue
+        bsdf = next((n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
+        if bsdf is not None:
+            for link in list(bsdf.inputs["Alpha"].links):
+                mat.node_tree.links.remove(link)
+            bsdf.inputs["Alpha"].default_value = 1.0
+        mat.blend_method = "OPAQUE"
+
+
 def cap_textures() -> None:
     for image in bpy.data.images:
         w, h = image.size
@@ -237,10 +305,14 @@ def process(root: str, wid: str, preview: str) -> dict:
     reset()
     obj = import_joined(os.path.join(root, RAW_DIR, cfg["raw"]), cfg.get("drop", ()), cfg.get("max_x", INF),
                         cfg.get("drop_exact", ()))
+    if "attach" in cfg:
+        obj = attach_part(obj, os.path.join(root, RAW_DIR, cfg["attach"][0]), cfg["attach"][1])
     orient(obj, cfg)
     scale_and_place(obj, kind, cfg["length"])
     decimate(obj, MAX_TRIS[kind])
     cap_textures()
+    if cfg.get("opaque", False):
+        make_opaque()
     if "tint" in cfg:
         apply_tint(cfg["tint"])
     obj.name = wid

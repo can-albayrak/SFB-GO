@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/double_barrel.tscn" id="2_scene"]
 
-[ext_resource type="PackedScene" path="res://assets/models/weapons/real/shotgun.glb" id="3_world"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/double_barrel.glb" id="3_world"]
 [resource]
 script = ExtResource("1_def")
 id = &"double_barrel"
@@ -30,4 +30,4 @@ recoil_recovery_delay = 0.1
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(0, 0.0455, -0.64)
+world_muzzle = Vector3(-0, 0.0685, -0.672)

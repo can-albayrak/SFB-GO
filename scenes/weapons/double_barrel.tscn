@@ -1,21 +1,22 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/shotgun_weapon.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/real/shotgun.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/double_barrel.glb" id="2_model"]
 
 [node name="DoubleBarrel" type="Node3D"]
 position = Vector3(0.2, -0.21, -0.45)
 script = ExtResource("1_script")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
+position = Vector3(0, -0.007, 0.0184)
 scale = Vector3(0.816, 0.816, 0.816)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.0371, -0.5222)
+position = Vector3(0, 0.0489, -0.53)
 
 [node name="RightHand" type="Marker3D" parent="."]
 position = Vector3(0, -0.03, 0.06)
 
 [node name="LeftHand" type="Marker3D" parent="."]
-position = Vector3(0, 0.013, -0.3)
+position = Vector3(0, 0.027, -0.178)
 rotation = Vector3(0, 0, -0.4363)

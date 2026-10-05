@@ -27,4 +27,4 @@ view_hands = 2
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(0, 0.0483, -0.21)
+world_muzzle = Vector3(-0, 0.0378, -0.21)

@@ -26,4 +26,4 @@ recoil_recovery_delay = 0.1
 scene = ExtResource("2_scene")
 world_model = ExtResource("4_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(-0, 0.029, -0.512)
+world_muzzle = Vector3(0, 0.0055, -0.512)

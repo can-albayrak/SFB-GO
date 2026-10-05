@@ -4,15 +4,19 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/assault_rifle.tscn" id="2_scene"]
 
 [ext_resource type="PackedScene" path="res://assets/models/weapons/real/assault_rifle.glb" id="3_world"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_ak_1.wav" id="4_shot"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_ak_2.wav" id="5_shot"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_ak_3.wav" id="6_shot"]
+
 [resource]
 script = ExtResource("1_def")
 id = &"assault_rifle"
-display_name = "Assault Rifle"
-damage = 16.0
+display_name = "AK-47"
+damage = 18.0
 headshot_mult = 2.0
 leg_mult = 0.75
 max_range = 250.0
-fire_interval = 0.12
+fire_interval = 0.13
 automatic = true
 magazine_size = 30
 reload_time = 2.2
@@ -20,12 +24,14 @@ reload_clip = true
 equip_time = 0.45
 move_speed_mult = 1.0
 move_spread = 1.5
-recoil_pattern = PackedVector2Array(0, 0.75, 0.05, 0.85, -0.05, 0.95, 0.1, 0.95, 0.15, 0.85, 0.1, 0.75, -0.1, 0.6, -0.25, 0.45, -0.35, 0.3, -0.45, 0, -0.45, 0, -0.4, 0, -0.2, 0, 0.2, 0, 0.4, 0, 0.45, 0, 0.45, 0, 0.45, 0, 0.45, 0, 0.4, 0, 0.2, 0, -0.2, 0, -0.4, 0, -0.45, 0, -0.45, 0)
+recoil_pattern = PackedVector2Array(0, 0.9, 0.05, 1.0, -0.05, 1.1, 0.1, 1.1, 0.15, 1.0, 0.1, 0.85, -0.1, 0.7, -0.25, 0.5, -0.35, 0.35, -0.45, 0, -0.45, 0, -0.4, 0, -0.2, 0, 0.2, 0, 0.4, 0, 0.45, 0, 0.45, 0, 0.45, 0, 0.45, 0, 0.4, 0, 0.2, 0, -0.2, 0, -0.4, 0, -0.45, 0, -0.45, 0)
 recoil_loop_start = 9
 recoil_max_up = 7
 recoil_recovery = 12.0
 recoil_recovery_delay = 0.08
+view_kick = 2.5
+fire_sounds = Array[AudioStream]([ExtResource("4_shot"), ExtResource("5_shot"), ExtResource("6_shot")])
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(0.0001, 0.0311, -0.5632)
+world_muzzle = Vector3(0, 0.0608, -0.5632)
