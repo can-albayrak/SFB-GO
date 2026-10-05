@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AbilityDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/cloak_ability.tscn" id="2_ability"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"cloak"
+display_name = "Cloak"
+cooldown = 16.0
+duration = 4.0
+fade_time = 0.6
+scene = ExtResource("2_ability")

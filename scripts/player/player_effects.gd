@@ -224,8 +224,10 @@ func _show_shot(_from: Vector3, to: Vector3, beam: bool) -> void:
 	if _sender_id() != 1 or player.is_local:
 		return
 	player.rig.play_fire()
-	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
 	_play_remote_shot()
+	if _held_suppressed():
+		return
+	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
 	if beam:
 		ShotEffects.spawn_beam(player.get_parent(), player.remote_muzzle.global_position, to)
 	else:
@@ -244,6 +246,11 @@ func _on_pellets_fired(ends: PackedVector3Array) -> void:
 
 
 ## Gunshot of the weapon this remote player holds, at their gun.
+func _held_suppressed() -> bool:
+	var slot: int = player.held_slot
+	return slot >= 0 and slot < player.weapons.size() and player.weapons[slot].def.suppressed
+
+
 func _play_remote_shot() -> void:
 	var slot: int = player.held_slot
 	if slot < 0 or slot >= player.weapons.size():
@@ -285,3 +292,207 @@ func _show_action(action: int, seconds: float) -> void:
 	var slot: int = player.held_slot
 	if action == SoldierRig.Action.RELOAD and slot >= 0 and slot < player.weapons.size():
 		Sfx.reload(player.get_parent(), player.weapons[slot].def, player.global_position)
+
+
+# --- Hound, Ghost, Trickster, Phantom -------------------------------------------------
+
+const CLOAK_HIDE: float = 0.94 ## Transparency of a fully cloaked body for others (a faint shimmer stays).
+const CLOAK_OWN: float = 0.55 ## The cloaked owner's own gun and arms, so they know it is on.
+const CLOAK_DEFAULT_FADE: float = 0.5
+const SONAR_COLOR: Color = Color(1.0, 0.25, 0.2, 0.55)
+const MARK_COLOR: Color = Color(0.65, 0.35, 1.0, 0.35)
+const MARK_HEIGHT: float = 2.4
+const MARK_RADIUS: float = 0.35
+const DART_LENGTH: float = 0.25
+
+static var _sonar_material: StandardMaterial3D
+
+var _cloak_value: float = 0.0 ## 0 = visible, 1 = fully cloaked (eased on every peer).
+var _mark_node: Node3D
+
+
+func _process(delta: float) -> void:
+	var target: float = 1.0 if player.cloaked and player.is_alive else 0.0
+	if is_equal_approx(_cloak_value, target):
+		return
+	_cloak_value = move_toward(_cloak_value, target, delta / _cloak_fade_time())
+	_apply_cloak()
+
+
+## Player.cloaked changed (every peer): the body fades out (or back in) in _process.
+func show_cloak(on: bool) -> void:
+	Sfx.play_at(player.get_parent(), Sfx.CLOAK, player.global_position + Vector3.UP, Sfx.STEP_DB)
+	if not on and player.is_local:
+		_cloak_value = minf(_cloak_value, 0.5)
+
+
+func _cloak_fade_time() -> float:
+	var cloak := player.ability as CloakAbility
+	return maxf(cloak.def.fade_time if cloak != null else CLOAK_DEFAULT_FADE, 0.05)
+
+
+func _apply_cloak() -> void:
+	if DisplayServer.get_name() == "headless":
+		return # Nothing is drawn (and the dummy renderer has no materials to copy).
+	var root: Node = player.weapon_holder if player.is_local else player.model
+	var hide: float = _cloak_value * (CLOAK_OWN if player.is_local else CLOAK_HIDE)
+	_fade_meshes(root, 1.0 - hide)
+	if not player.is_local and _name_label != null:
+		_name_label.visible = _cloak_value < 0.5
+
+
+## Fades every mesh under `root` to `alpha` with see-through copies of its materials (works on
+## every renderer); alpha 1 puts the real materials back.
+static func _fade_meshes(root: Node, alpha: float) -> void:
+	for node: Node in root.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		if mesh.mesh == null:
+			continue
+		for surface: int in mesh.mesh.get_surface_count():
+			if alpha >= 0.999:
+				mesh.set_surface_override_material(surface, null)
+				continue
+			var faded := mesh.get_surface_override_material(surface) as StandardMaterial3D
+			if faded == null or not faded.has_meta(&"cloak"):
+				var original := mesh.get_active_material(surface) as StandardMaterial3D
+				if original == null:
+					continue # Custom shaders (own arms) keep their look.
+				faded = original.duplicate() as StandardMaterial3D
+				faded.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				faded.set_meta(&"cloak", original.albedo_color.a)
+				mesh.set_surface_override_material(surface, faded)
+			var color: Color = faded.albedo_color
+			color.a = float(faded.get_meta(&"cloak")) * alpha
+			faded.albedo_color = color
+
+
+## Host: the Hound's Sonar found these peers; only the Hound's screen shows them.
+func server_show_sonar(peer_ids: PackedInt32Array, seconds: float) -> void:
+	assert(multiplayer.is_server(), "server_show_sonar is host-only")
+	_show_sonar.rpc_id(player.get_multiplayer_authority(), peer_ids, seconds)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _show_sonar(peer_ids: PackedInt32Array, seconds: float) -> void:
+	if _sender_id() != 1:
+		return
+	for node: Node in player.get_parent().get_children():
+		var other := node as Player
+		if other != null and other.get_multiplayer_authority() in peer_ids and other.rig != null:
+			other.rig.reveal(_get_sonar_material(), seconds)
+
+
+static func _get_sonar_material() -> StandardMaterial3D:
+	if _sonar_material == null:
+		_sonar_material = StandardMaterial3D.new()
+		_sonar_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_sonar_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_sonar_material.no_depth_test = true # Through walls.
+		_sonar_material.albedo_color = SONAR_COLOR
+		_sonar_material.render_priority = 10
+	return _sonar_material
+
+
+## Host: tells this player's owner a Sonar found them (a ping from the Hound's side).
+func server_sonar_ping(from_point: Vector3) -> void:
+	assert(multiplayer.is_server(), "server_sonar_ping is host-only")
+	var owner_id: int = player.get_multiplayer_authority()
+	if owner_id == multiplayer.get_unique_id() or owner_id in multiplayer.get_peers():
+		_sonar_ping.rpc_id(owner_id, from_point)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _sonar_ping(from_point: Vector3) -> void:
+	if _sender_id() != 1:
+		return
+	Sfx.play_at(player.get_parent(), Sfx.SONAR, from_point + Vector3.UP * 1.5, Sfx.STEP_DB + 6.0)
+
+
+## Host: every peer draws the Trickster's dart flying (cosmetic; the host's copy decides).
+func server_show_dart(start: Vector3, velocity: Vector3, seconds: float) -> void:
+	assert(multiplayer.is_server(), "server_show_dart is host-only")
+	Net.broadcast(self, &"_show_dart", [start, velocity, seconds])
+
+
+@rpc("any_peer", "call_local", "unreliable")
+func _show_dart(start: Vector3, velocity: Vector3, seconds: float) -> void:
+	if _sender_id() != 1:
+		return
+	player.get_parent().add_child(DartFx.create(start, velocity, seconds, player.get_hit_exclusions()))
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _show_teleport(target: Vector3) -> void:
+	if _sender_id() != 1:
+		return
+	Sfx.play_at(player.get_parent(), Sfx.TELEPORT, target + Vector3.UP, Sfx.STEP_DB + 2.0)
+
+
+## Host: Phantom's mark appears for everyone (a light pillar) until recalled or timed out.
+func server_show_mark(point: Vector3, seconds: float) -> void:
+	assert(multiplayer.is_server(), "server_show_mark is host-only")
+	Net.broadcast(self, &"_show_mark", [point, seconds])
+
+
+func server_hide_mark() -> void:
+	assert(multiplayer.is_server(), "server_hide_mark is host-only")
+	Net.broadcast(self, &"_hide_mark")
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _show_mark(point: Vector3, seconds: float) -> void:
+	if _sender_id() != 1:
+		return
+	_hide_mark_now()
+	_mark_node = _build_mark()
+	player.get_parent().add_child(_mark_node)
+	_mark_node.global_position = point
+	get_tree().create_timer(seconds + 0.5).timeout.connect(_hide_mark_now) # Host message lost: still goes.
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _hide_mark() -> void:
+	if _sender_id() != 1:
+		return
+	_hide_mark_now()
+
+
+func _hide_mark_now() -> void:
+	if is_instance_valid(_mark_node):
+		_mark_node.queue_free()
+	_mark_node = null
+
+
+func _exit_tree() -> void:
+	_hide_mark_now()
+
+
+func _build_mark() -> Node3D:
+	var root := Node3D.new()
+	root.name = "PhantomMark"
+	var pillar := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = MARK_RADIUS * 0.6
+	mesh.bottom_radius = MARK_RADIUS
+	mesh.height = MARK_HEIGHT
+	mesh.radial_segments = 12
+	mesh.cap_top = false
+	mesh.cap_bottom = false
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.albedo_color = MARK_COLOR
+	mesh.material = material
+	pillar.mesh = mesh
+	pillar.position.y = MARK_HEIGHT * 0.5
+	pillar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(pillar)
+	var light := OmniLight3D.new()
+	light.light_color = Color(MARK_COLOR, 1.0)
+	light.light_energy = 1.5
+	light.omni_range = 3.0
+	light.position.y = 1.0
+	root.add_child(light)
+	return root

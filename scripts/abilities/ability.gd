@@ -55,6 +55,12 @@ func server_try_use(origin: Vector3, dir: Vector3) -> bool:
 	return true
 
 
+## HUD: [seconds left, total seconds, label text, striped] of a phase the bar shows instead of
+## the cooldown (Phantom's recall window, Ghost's cloak). Empty = none.
+func get_hud_window() -> Array:
+	return []
+
+
 func _use_local(_origin: Vector3, _dir: Vector3) -> void:
 	pass
 

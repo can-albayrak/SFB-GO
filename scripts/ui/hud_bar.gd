@@ -21,6 +21,17 @@ var value: float = 1.0:
 			queue_redraw()
 
 
+## Diagonal stripes over the fill: a different kind of timer (Phantom's recall window).
+var striped: bool = false:
+	set(v):
+		if v != striped:
+			striped = v
+			queue_redraw()
+
+const STRIPE_COLOR: Color = Color(0.0, 0.0, 0.0, 0.35)
+const STRIPE_STEP: float = 8.0
+
+
 func set_colors(top: Color, mid: Color, bottom: Color) -> void:
 	fill_top = top
 	fill_mid = mid
@@ -50,3 +61,16 @@ func _draw() -> void:
 			Vector2(inner.position.x, top), Vector2(inner.position.x + fill_width, top),
 			Vector2(inner.position.x + fill_width, top + band_h), Vector2(inner.position.x, top + band_h)])
 		draw_polygon(points, colors)
+	if striped:
+		_draw_stripes(Rect2(inner.position, Vector2(fill_width, inner.size.y)))
+
+
+func _draw_stripes(area: Rect2) -> void:
+	var x: float = area.position.x - area.size.y
+	while x < area.end.x:
+		var a := Vector2(maxf(x, area.position.x), area.end.y - maxf(area.position.x - x, 0.0))
+		var top_x: float = x + area.size.y
+		var b := Vector2(minf(top_x, area.end.x), area.position.y + maxf(top_x - area.end.x, 0.0))
+		if b.x > a.x:
+			draw_line(a, b, STRIPE_COLOR, STRIPE_STEP * 0.4)
+		x += STRIPE_STEP

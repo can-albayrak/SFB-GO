@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/scout.tscn" id="2_scene"]
+
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/heavy_rifle.glb" id="3_world"]
+[resource]
+script = ExtResource("1_def")
+id = &"scout"
+display_name = "Scout"
+damage = 75.0
+headshot_mult = 2.0
+leg_mult = 0.75
+max_range = 400.0
+fire_interval = 1.1
+automatic = false
+magazine_size = 10
+reload_time = 2.0
+reload_clip = true
+equip_time = 0.5
+move_speed_mult = 1.0
+move_spread = 0.8
+recoil_pattern = PackedVector2Array(0, 2.5)
+view_kick = 6.0
+recoil_recovery = 8.0
+recoil_recovery_delay = 0.1
+scope_zoom = 2.5
+scope_move_mult = 0.85
+scope_sway = 0.05
+unscoped_spread = 2.5
+scope_in_time = 0.2
+hip_crosshair = false
+scene = ExtResource("2_scene")
+world_model = ExtResource("3_world")
+world_model_scale = 1.0
+world_muzzle = Vector3(-0.006, 0.0376, -0.768)

@@ -81,6 +81,29 @@ def main():
     write("hit", [math.sin(2 * math.pi * 1400 * i / RATE) * math.exp(-i / (0.03 * RATE)) for i in range(int(0.1 * RATE))])
     write("kill", [(math.sin(2 * math.pi * 1046 * i / RATE) + 0.5 * math.sin(2 * math.pi * 1568 * i / RATE)) * math.exp(-i / (0.18 * RATE)) for i in range(int(0.5 * RATE))])
     # Knife swing and draw are recorded clips now (docs/ASSETS.md).
+    # Silenced shot: a short muffled "pfft" (no boom), a mechanical click on top.
+    n = noise(0.18)
+    puff = [a * b for a, b in zip(lowpass(n, 900), env(len(n), 0.001, 0.035))]
+    click = [a * b * 0.4 for a, b in zip(noise(0.18), env(len(n), 0.0005, 0.006))]
+    write("shot_suppressed", mix([p * 2.0 for p in puff], click, thump(0.18, 180, 90, 0.03, 0.4)))
+    # Sonar: a clear ping with a falling echo.
+    write("sonar", [(math.sin(2 * math.pi * 1250 * i / RATE) * math.exp(-i / (0.25 * RATE))
+        + 0.4 * math.sin(2 * math.pi * 1250 * i / RATE) * math.exp(-max(0, i - int(0.22 * RATE)) / (0.2 * RATE)) * (1 if i > 0.22 * RATE else 0))
+        for i in range(int(0.9 * RATE))])
+    # Dart: a short breathy blow.
+    n = int(0.22 * RATE)
+    write("dart", [a * math.sin(math.pi * i / n) ** 2 for i, a in enumerate(lowpass(noise(0.22), 2500))])
+    # Teleport: rising shimmer.
+    n = int(0.45 * RATE)
+    tone, phase = [], 0.0
+    for i in range(n):
+        t = i / RATE
+        phase += 2 * math.pi * (300 + 1500 * t / 0.45) / RATE
+        tone.append(math.sin(phase) * math.sin(math.pi * i / n) * (0.6 + 0.4 * math.sin(2 * math.pi * 30 * t)))
+    write("teleport", mix(tone, [a * 0.3 * math.sin(math.pi * i / n) for i, a in enumerate(lowpass(noise(0.45), 4000))]))
+    # Cloak: falling airy whoosh.
+    n = int(0.5 * RATE)
+    write("cloak", [a * math.sin(math.pi * i / n) * (1.0 - i / n) for i, a in enumerate(lowpass(noise(0.5), 1800))])
 
 
 if __name__ == "__main__":

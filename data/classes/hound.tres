@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ClassDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="3_adef"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="4_move"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="5_knife"]
+[ext_resource type="Resource" path="res://data/weapons/deagle.tres" id="6_secondary"]
+[ext_resource type="Resource" path="res://data/weapons/scout.tres" id="10_scout"]
+[ext_resource type="Resource" path="res://data/weapons/double_barrel.tres" id="11_double_barrel"]
+[ext_resource type="Resource" path="res://data/abilities/sonar.tres" id="12_sonar"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"hound"
+display_name = "Hound"
+max_health = 90
+move_speed = 6.6
+movement = ExtResource("4_move")
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("10_scout"), ExtResource("11_double_barrel")])
+secondary_weapon = ExtResource("6_secondary")
+abilities = Array[ExtResource("3_adef")]([ExtResource("12_sonar")])
+quick_melee = ExtResource("5_knife")
+knife = ExtResource("5_knife")

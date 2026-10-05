@@ -14,9 +14,10 @@ func _fire() -> void:
 	var end_point: Vector3 = hit["position"] if not hit.is_empty() else origin + dir * def.max_range
 	if not hit.is_empty() and not (hit["collider"] is Hitbox):
 		ShotEffects.spawn_impact(player.get_parent(), end_point)
-	ShotEffects.spawn_muzzle_flash(muzzle)
 	Sfx.shot(player.get_parent(), def, muzzle.global_position)
-	ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
+	if not def.suppressed:
+		ShotEffects.spawn_muzzle_flash(muzzle)
+		ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
 	player.send_fire(origin, dir, player.weapons.find(self))
 
 

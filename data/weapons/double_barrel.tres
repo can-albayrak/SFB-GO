@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="WeaponDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/double_barrel.tscn" id="2_scene"]
+
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/shotgun.glb" id="3_world"]
+[resource]
+script = ExtResource("1_def")
+id = &"double_barrel"
+display_name = "Double Barrel"
+damage = 13.0
+headshot_mult = 2.0
+leg_mult = 0.75
+max_range = 25.0
+fire_interval = 0.2
+automatic = false
+magazine_size = 2
+reload_time = 2.2
+equip_time = 0.5
+move_speed_mult = 1.0
+move_spread = 1.0
+pellet_pattern = PackedVector2Array(0, 0, 0, 2.2, -2.1, 0.7, -1.3, -1.8, 1.3, -1.8, 2.1, 0.7, 0, -3.4, -3.2, 2.4, 3.2, 2.4, 0, 4.2)
+falloff_start = 5.0
+falloff_end = 14.0
+falloff_min_mult = 0.1
+recoil_pattern = PackedVector2Array(0, 5.0)
+view_kick = 9.0
+recoil_recovery = 10.0
+recoil_recovery_delay = 0.1
+scene = ExtResource("2_scene")
+world_model = ExtResource("3_world")
+world_model_scale = 1.0
+world_muzzle = Vector3(0, 0.0455, -0.64)

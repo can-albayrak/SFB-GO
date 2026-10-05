@@ -189,6 +189,7 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | knife-scrape-4 (bıçak çekme) | `assets/audio/knife_draw.wav` | [Freesound 614073](https://freesound.org/s/614073/) | stormwaveaudio | Freesound (lisans sayfada kontrol edilmeli) |
 | knife swish mixed (bıçak savurma) | `assets/audio/swing.wav` | [Freesound 423281](https://freesound.org/s/423281/) | thepigboy | Freesound (lisans sayfada kontrol edilmeli) |
 | FREE FPS SFX Pack (adım, iniş, pompalı, sniper, roket, patlama, dürbün, grapple, uyarı) | `assets/audio/*.wav` (`tools/convert_sfx_pack.sh`) | Can'ın zip'i (2026-10-04), kaynağı/lisansı yazılı değil | ? | ? (paket adı "free"; kaynak bulununca buraya) |
+| Yer tutucu silah modelleri (Scout = Heavy Rifle'ın M700'ü, Double Barrel = 870, Desert Eagle ve USP-S = Glock, MP5SD = MAC) | `scenes/weapons/{scout,double_barrel,deagle,usp_s,mp5sd}.tscn` | — | — | Can'ın modelleri gelince değişecek; HUD ikonları da kopya |
 | PS2 Saul Goodman (oyuncu gövdesi) | `assets/models/characters/saul/saul.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps2-saul-goodman-f3545ae03d40406c97ee6fd3c49a7793) | FusedMaker | CC-BY-4.0 |
 | Colt Python (PSX Revolver Pack [FIXED]) | `assets/models/weapons/real/revolver.glb` | Can'ın gönderdiği zip | ? | Lisans dosyası yok |
 | PS1-style Steyr AUG | `assets/models/weapons/real/burst_rifle.glb` | [Sketchfab](https://sketchfab.com/3d-models/ps1-style-steyr-aug-0d5f437f7193404ea0f030651421434f) | andrewwhiskin | CC-BY-4.0 |

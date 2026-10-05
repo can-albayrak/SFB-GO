@@ -7,7 +7,11 @@
 [ext_resource type="Resource" path="res://data/classes/cheetah.tres" id="6_cheetah"]
 [ext_resource type="Resource" path="res://data/classes/volcano.tres" id="7_volcano"]
 [ext_resource type="Resource" path="res://data/classes/cowboy.tres" id="8_cowboy"]
+[ext_resource type="Resource" path="res://data/classes/hound.tres" id="9_hound"]
+[ext_resource type="Resource" path="res://data/classes/ghost.tres" id="10_ghost"]
+[ext_resource type="Resource" path="res://data/classes/trickster.tres" id="11_trickster"]
+[ext_resource type="Resource" path="res://data/classes/phantom.tres" id="12_phantom"]
 
 [resource]
 script = ExtResource("1_roster")
-classes = Array[ExtResource("2_cdef")]([ExtResource("3_wolf"), ExtResource("4_hawk"), ExtResource("6_cheetah"), ExtResource("7_volcano"), ExtResource("8_cowboy")])
+classes = Array[ExtResource("2_cdef")]([ExtResource("3_wolf"), ExtResource("4_hawk"), ExtResource("6_cheetah"), ExtResource("7_volcano"), ExtResource("8_cowboy"), ExtResource("9_hound"), ExtResource("10_ghost"), ExtResource("11_trickster"), ExtResource("12_phantom")])

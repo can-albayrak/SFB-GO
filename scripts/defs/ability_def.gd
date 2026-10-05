@@ -14,4 +14,6 @@ extends Resource
 @export var fire_rate_mult: float = 1.0 ## Adrenaline: fire rate multiplier while active.
 @export var reload_speed_mult: float = 1.0 ## Smoke Break: reload timers run this much faster while active.
 @export var heal_per_second: float = 0.0 ## Smoke Break: health restored per second while active (host).
+@export var projectile_radius: float = 0.0 ## Swap Dart: hit area around the dart's path (metres).
+@export var fade_time: float = 0.0 ## Cloak: seconds the body takes to fade out (and back in).
 @export var scene: PackedScene

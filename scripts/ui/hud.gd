@@ -493,7 +493,12 @@ func _update_ability() -> void:
 		return
 	var name_text: String = ability.def.display_name.to_upper()
 	var buff_left: float = _player.status.get_buff_left()
-	if buff_left > 0.0:
+	var window: Array = ability.get_hud_window()
+	_ability_bar.striped = not window.is_empty() and bool(window[3])
+	if not window.is_empty():
+		_ability_bar.value = float(window[0]) / maxf(float(window[1]), 0.001)
+		_ability_label.text = "Q  %s  %d" % [window[2], ceili(float(window[0]))]
+	elif buff_left > 0.0:
 		_ability_bar.value = buff_left / maxf(ability.def.duration, 0.001)
 		_ability_label.text = "Q  %s  ACTIVE" % name_text
 	elif ability.is_ready():

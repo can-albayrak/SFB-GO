@@ -9,6 +9,7 @@ extends Node
 
 const GAME_SCENE: PackedScene = preload("res://scenes/game.tscn")
 const LOBBY_SCENE: PackedScene = preload("res://scenes/lobby.tscn")
+const PLAYER_SCENE: PackedScene = preload("res://scenes/player/player.tscn")
 const HITSCAN_DISTANCE: float = 4.0
 const MELEE_DISTANCE: float = 1.2
 const LAUNCH_DISTANCE: float = 6.0
@@ -58,6 +59,7 @@ func _run() -> void:
 	await _test_weapons()
 	await _test_abilities()
 	await _test_smoke_break()
+	await _test_new_class_abilities()
 	await _test_kill_reward()
 	await _test_quick_switch()
 	await _test_scope_and_spread()
@@ -139,6 +141,68 @@ func _test_abilities() -> void:
 			_clear_projectiles()
 			_player.status.reset_host()
 			_player.status.reset_local()
+
+
+## Hound Sonar, Ghost Cloak, Trickster Swap Dart, Phantom Mark / Recall, against a second
+## (fake, remote-owned) player standing in front.
+func _test_new_class_abilities() -> void:
+	await _place(HITSCAN_DISTANCE)
+	var fake: Player = PLAYER_SCENE.instantiate()
+	fake.name = "77"
+	fake.setup_authority(77)
+	_game.players_root.add_child(fake)
+	var forward: Vector3 = -_away
+	forward.y = 0.0
+	forward = forward.normalized()
+	fake.global_position = _player.global_position + forward * 6.0
+	await _frames(3)
+
+	await _set_loadout(_code_for(&"hound"))
+	_player.ability.host_ready_at = -INF
+	_check(_player.ability.server_try_use(_player.get_aim_origin(), forward), "Hound Sonar accepted")
+	await _frames(2)
+	var body := fake.rig.get_node("Body/Skeleton3D/Body") as GeometryInstance3D
+	_check(body.material_overlay != null, "Hound Sonar shows the other player through walls")
+
+	await _set_loadout(_code_for(&"ghost"))
+	_player.ability.host_ready_at = -INF
+	_player.ability.server_try_use(_player.get_aim_origin(), forward)
+	_check(_player.cloaked, "Ghost Cloak cloaks on the host")
+	await _fire_slot(0, "Ghost MP5SD while cloaked")
+	_check(not _player.cloaked, "Ghost firing ends the cloak")
+
+	await _set_loadout(_code_for(&"trickster"))
+	await _frames(2)
+	fake.global_position = _player.global_position + forward * 6.0
+	await _frames(2)
+	var mine: Vector3 = _player.global_position
+	var theirs: Vector3 = fake.global_position
+	var aim_from: Vector3 = _player.get_aim_origin()
+	var aim_dir: Vector3 = (theirs + Vector3.UP * BODY_HEIGHT - aim_from).normalized()
+	_player.ability.host_ready_at = -INF
+	_check(_player.ability.server_try_use(aim_from, aim_dir), "Trickster Swap Dart accepted")
+	await _frames(20)
+	_check(_player.global_position.distance_to(theirs) < 0.5 and fake.global_position.distance_to(mine) < 0.5,
+		"Trickster Swap Dart swaps places with the player it hits")
+
+	await _set_loadout(_code_for(&"phantom"))
+	var ability: Ability = _player.ability
+	ability.host_ready_at = -INF
+	var mark: Vector3 = _player.global_position
+	_check(ability.server_try_use(mark, forward), "Phantom Mark accepted")
+	await _frames(2)
+	_check(_player.get_parent().get_node_or_null("PhantomMark") != null, "Phantom Mark is shown")
+	_player.global_position = mark + forward * 4.0
+	await _frames(2)
+	_check(ability.server_try_use(_player.get_aim_origin(), forward), "Phantom Recall accepted inside the window")
+	await _frames(2)
+	_check(_player.global_position.distance_to(mark) < 0.5, "Phantom Recall teleports back to the mark")
+	_check(_player.get_parent().get_node_or_null("PhantomMark") == null, "Phantom Recall removes the mark")
+	_check(not ability.server_try_use(_player.get_aim_origin(), forward), "Phantom is on cooldown after recalling")
+
+	fake.queue_free()
+	await _set_loadout(Loadout.default_code())
+	await _frames(2)
 
 
 ## Cowboy's Smoke Break: health comes back over time (host) and reloads run faster (owner).

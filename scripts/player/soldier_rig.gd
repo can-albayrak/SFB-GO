@@ -38,6 +38,7 @@ const TILT_EASE: float = 0.2 ## Seconds to tip up and back down.
 const THROW_TIME: float = 0.7 ## Seconds the throw clip is squeezed into.
 
 var skeleton: Skeleton3D
+var _reveal_serial: int = 0
 var grounded: bool = true ## Feet on the ground this frame (short ray; Player footsteps use it).
 
 var _player: Player
@@ -120,6 +121,20 @@ func setup(player: Player) -> void:
 	_tree.active = true
 	set_process(true)
 	_tree.advance(0.0)
+
+
+## Hound Sonar (only on the Hound's screen): the body shows through walls in `overlay`
+## for `seconds`.
+func reveal(overlay: Material, seconds: float) -> void:
+	var body := get_node_or_null("Body/Skeleton3D/Body") as GeometryInstance3D
+	if body == null:
+		return
+	body.material_overlay = overlay
+	_reveal_serial += 1
+	var serial: int = _reveal_serial
+	get_tree().create_timer(seconds).timeout.connect(func() -> void:
+		if serial == _reveal_serial and is_instance_valid(body):
+			body.material_overlay = null)
 
 
 ## Every peer that is shown a shot from this player.

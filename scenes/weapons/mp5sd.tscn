@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/hitscan_weapon.gd" id="1_hitscan"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/smg.glb" id="2_model"]
+
+[node name="MP5SD" type="Node3D"]
+position = Vector3(0.18, -0.19, -0.389)
+script = ExtResource("1_hitscan")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+scale = Vector3(0.84, 0.84, 0.84)
+
+[node name="Muzzle" type="Marker3D" parent="."]
+position = Vector3(0, 0.0768, -0.1882)
+
+[node name="RightHand" type="Marker3D" parent="."]
+position = Vector3(0, 0, -0.021)
+
+[node name="LeftHand" type="Marker3D" parent="."]
+position = Vector3(0, 0.049, -0.105)
+rotation = Vector3(0, 0, -0.4363)
