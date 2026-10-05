@@ -1,0 +1,60 @@
+[gd_resource type="Resource" script_class="AbilityDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/dice_ability.tscn" id="2_ability"]
+[ext_resource type="Script" path="res://scripts/defs/dice_face_def.gd" id="3_face"]
+
+[sub_resource type="Resource" id="Jackpot"]
+script = ExtResource("3_face")
+title = "JACKPOT  2x DAMAGE"
+kind = 0
+mood = 1
+duration = 6.0
+damage_mult = 2.0
+
+[sub_resource type="Resource" id="HotHand"]
+script = ExtResource("3_face")
+title = "HOT HAND  NO RELOAD"
+kind = 1
+mood = 1
+duration = 6.0
+fire_rate_mult = 1.3
+
+[sub_resource type="Resource" id="Lucky"]
+script = ExtResource("3_face")
+title = "LUCKY STREAK  FULL HEALTH"
+kind = 2
+mood = 1
+duration = 6.0
+speed_mult = 1.25
+
+[sub_resource type="Resource" id="AllIn"]
+script = ExtResource("3_face")
+title = "ALL IN  EVERYONE SEES EVERYONE"
+kind = 3
+mood = 0
+duration = 4.0
+
+[sub_resource type="Resource" id="ColdHands"]
+script = ExtResource("3_face")
+title = "COLD HANDS  HALF DAMAGE"
+kind = 0
+mood = -1
+duration = 6.0
+damage_mult = 0.5
+
+[sub_resource type="Resource" id="SnakeEyes"]
+script = ExtResource("3_face")
+title = "SNAKE EYES  10 HEALTH"
+kind = 4
+mood = -2
+duration = 0.0
+set_health = 10
+
+[resource]
+script = ExtResource("1_def")
+id = &"dice"
+display_name = "Roll the Dice"
+cooldown = 18.0
+dice_faces = Array[ExtResource("3_face")]([SubResource("Jackpot"), SubResource("HotHand"), SubResource("Lucky"), SubResource("AllIn"), SubResource("ColdHands"), SubResource("SnakeEyes")])
+scene = ExtResource("2_ability")

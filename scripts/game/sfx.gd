@@ -22,6 +22,9 @@ const SONAR: AudioStream = preload("res://assets/audio/sonar.wav")
 const DART: AudioStream = preload("res://assets/audio/dart.wav")
 const TELEPORT: AudioStream = preload("res://assets/audio/teleport.wav")
 const CLOAK: AudioStream = preload("res://assets/audio/cloak.wav")
+const DICE: AudioStream = preload("res://assets/audio/dice.wav")
+const DICE_GOOD: AudioStream = preload("res://assets/audio/dice_good.wav")
+const DICE_BAD: AudioStream = preload("res://assets/audio/dice_bad.wav")
 const SHOT_LAUNCHER: Array[AudioStream] = [
 	preload("res://assets/audio/shot_launcher_1.wav"), preload("res://assets/audio/shot_launcher_2.wav"),
 	preload("res://assets/audio/shot_launcher_3.wav"), preload("res://assets/audio/shot_launcher_4.wav"),

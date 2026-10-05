@@ -172,7 +172,12 @@ func _test_new_class_abilities() -> void:
 	_check(not _player.cloaked, "Ghost firing ends the cloak")
 
 	await _set_loadout(_code_for(&"trickster"))
+	fake.loadout = _code_for(&"hound") # Scout.
+	fake.give_special_weapon(0, 5)
 	await _frames(2)
+	var my_primary: WeaponDef = _player.weapons[0].def
+	var their_primary: WeaponDef = fake.weapons[0].def
+	var my_pistol: WeaponDef = _player.weapons[1].def
 	fake.global_position = _player.global_position + forward * 6.0
 	await _frames(2)
 	var mine: Vector3 = _player.global_position
@@ -184,6 +189,14 @@ func _test_new_class_abilities() -> void:
 	await _frames(20)
 	_check(_player.global_position.distance_to(theirs) < 0.5 and fake.global_position.distance_to(mine) < 0.5,
 		"Trickster Swap Dart swaps places with the player it hits")
+	_check(_player.weapons[0].def == their_primary and fake.weapons[0].def == my_primary,
+		"Swap Dart trades primaries (%s <-> %s)" % [my_primary.display_name, their_primary.display_name])
+	_check(_player.weapons[1].def == my_pistol, "Swap Dart keeps the pistol")
+	_check(_player.special_weapon == 0 and _player.special_ammo == 5 and fake.special_weapon == -1,
+		"Swap Dart takes the target's airdrop weapon")
+	_player.special_weapon = -1
+
+	await _test_gambler(fake)
 
 	await _set_loadout(_code_for(&"phantom"))
 	var ability: Ability = _player.ability
@@ -203,6 +216,48 @@ func _test_new_class_abilities() -> void:
 	fake.queue_free()
 	await _set_loadout(Loadout.default_code())
 	await _frames(2)
+
+
+## Gambler's dice: every face does what it says (host + owner parts).
+func _test_gambler(fake: Player) -> void:
+	await _set_loadout(_code_for(&"gambler"))
+	var dice := _player.ability as DiceAbility
+	_check(dice != null and dice.def.dice_faces.size() == 6, "Gambler has a six-sided die")
+	if dice == null:
+		return
+	var moods: Array[int] = []
+	for face: DiceFaceDef in dice.def.dice_faces:
+		moods.append(face.mood)
+	_check(moods.count(DiceFaceDef.Mood.GOOD) == 3 and moods.count(DiceFaceDef.Mood.NEUTRAL) == 1
+		and moods.count(DiceFaceDef.Mood.BAD) == 1 and moods.count(DiceFaceDef.Mood.VERY_BAD) == 1,
+		"die: 3 good, 1 neutral, 1 bad, 1 very bad")
+	for index: int in dice.def.dice_faces.size():
+		var face: DiceFaceDef = dice.def.dice_faces[index]
+		_player.health = 50
+		_player.status.reset_host()
+		_player.status.reset_local()
+		dice.server_apply_face(index)
+		await _frames(2)
+		_check(dice.get_hud_window().size() == 4 and dice.get_hud_window()[2] == face.title, "%s shows on the HUD" % face.title)
+		match face.kind:
+			DiceFaceDef.Kind.DAMAGE:
+				_check(is_equal_approx(_player.status.get_host_damage_mult(), face.damage_mult), "%s: damage x%.1f" % [face.title, face.damage_mult])
+				fake.is_protected = false
+				fake.health = 100
+				fake.take_hit(20.0, Hitbox.Zone.BODY, _player.get_multiplayer_authority(), "Test")
+				_check(fake.health == 100 - roundi(20.0 * face.damage_mult), "%s: a 20 hit deals %d" % [face.title, 100 - fake.health])
+			DiceFaceDef.Kind.HOT_HAND:
+				_check(_player.status.has_free_ammo() and _player.status.get_host_fire_rate_mult() > 1.0, "%s: free ammo, faster fire" % face.title)
+			DiceFaceDef.Kind.LUCKY:
+				_check(_player.health == _player.class_def.max_health and _player.status.get_speed_mult() > 1.0, "%s: full health, faster" % face.title)
+			DiceFaceDef.Kind.REVEAL:
+				var body := fake.rig.get_node("Body/Skeleton3D/Body") as GeometryInstance3D
+				_check(body.material_overlay != null, "%s: the Gambler sees the others through walls" % face.title)
+			DiceFaceDef.Kind.HEALTH:
+				_check(_player.health == face.set_health, "%s: health drops to %d" % [face.title, face.set_health])
+	_player.status.reset_host()
+	_player.status.reset_local()
+	_player.health = _player.class_def.max_health
 
 
 ## Cowboy's Smoke Break: health comes back over time (host) and reloads run faster (owner).

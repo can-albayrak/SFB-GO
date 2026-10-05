@@ -16,4 +16,5 @@ extends Resource
 @export var heal_per_second: float = 0.0 ## Smoke Break: health restored per second while active (host).
 @export var projectile_radius: float = 0.0 ## Swap Dart: hit area around the dart's path (metres).
 @export var fade_time: float = 0.0 ## Cloak: seconds the body takes to fade out (and back in).
+@export var dice_faces: Array[DiceFaceDef] = [] ## Gambler's Roll: the faces, equally likely.
 @export var scene: PackedScene

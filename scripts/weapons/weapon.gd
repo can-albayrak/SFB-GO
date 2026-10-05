@@ -127,7 +127,7 @@ func _shoot_once() -> void:
 	if def.uses_ammo and ammo <= 0:
 		_burst_left = 0
 		return
-	if def.uses_ammo and not Match.rules.infinite_ammo:
+	if def.uses_ammo and not Match.rules.infinite_ammo and not player.status.has_free_ammo():
 		ammo -= 1
 	_burst_left -= 1
 	_burst_timer = def.burst_interval / player.status.get_fire_rate_mult()
