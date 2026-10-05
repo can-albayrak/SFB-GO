@@ -43,7 +43,15 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Durum:** Tek dal `main`. Aşama 7'nin kodu ve AVM blockout'u 2026-10-02'de iş bilgisayarında yazıldı (Godot 4.7.2 headless, geçici kopya). Bütün testler geçiyor ama kimse oynamadı.
 
-0. **En yeni (2026-10-05, Can test edecek), Release `v0.8.5`:**
+0. **En yeni (2026-10-05, Can test edecek), Release `v0.9.0`: 4 yeni sınıf**
+   - **Hound** (90 can): Scout / Double Barrel + Desert Eagle, Q **Sonar** (25 m içindekiler 2 sn duvar arkasından kırmızı; onlar ping duyar).
+   - **Ghost** (80, hızlı, adım sesi yok): MP5SD + USP-S (susturuculu: 12 m'den uzağa ses yok, mermi izi/alev yok), Q **Pelerin** (4 sn, 0,6 sn'de solar, ateş/hasar bozar).
+   - **Trickster** (90): SMG / Burst + Revolver, Q **Swap Dart** (12 sn; değdiği ilk oyuncuyla yer değiştirir, 0,3 m vuruş alanı).
+   - **Phantom** (85): AR / Marksman + Pistol, Q **Mark / Recall** (15 sn işaret, herkes görür; ikinci Q ile geri; taralı HUD barı).
+   - **Yer tutucular:** yeni silahların modelleri ve sesleri eskilerin kopyası; Can verecek (`docs/ASSETS.md`). Susturucu ve sonar/dart/ışınlanma/pelerin sesleri üretilmiş (`gen_sfx.py`).
+   - **Henüz yok:** Double Barrel'da sağ tıkla iki namlu birden (şimdilik iki hızlı tık), yeni sınıfların kendi görünümü (hepsi Saul).
+   - Smoke testine yeni güç testleri (sonar görünürlüğü, pelerin + ateşle bozulma, dart ile yer değiştirme, işaret + geri dönüş + bekleme). Işınlanmanın iki bilgisayarlı ağ testi yok (mantık respawn ile aynı yol).
+0. **Önceki (2026-10-05), Release `v0.8.5`:**
    - Tutuşlar: tabanca ve revolver daha ileride (kollar uzanmış, CS gibi), revolver %30 büyük, musket %35 büyük; bıçak sağ altta, ağzı öne-sola yatık (eskiden yukarı kalkık hançer gibiydi).
    - Bıçak sesleri: savurma Can'ın "knife swish"i, bıçağı çekince "knife scrape" (CS'deki gibi).
    - Ağır silahlarda görsel tekme: her atışta silah yukarı-geri sıçrar, kamera biraz (nişan değişmez). Miktar silahın `.tres`'inde `view_kick` (Heavy 9 … GL 4).
@@ -377,3 +385,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-04 | 8 | Can'ın listesi: iniş sesi patlama yerine iki ayak (`Sfx.land`, uzak oyuncularınki de), CS tarzı adım sesleri (`gen_sfx.py` `footstep`), tam panlı 3D, 32 m; hasar sarsıntısı 0,4°; `DamageOverlay` (darbe parlaması + düşük canda kalıcı kırmızı, ScreenFx'in üstünde); birinci şahıs silahlar 1,15x (`view_model_scale`). Smoke 132/0. Release v0.8.3. |
 | 2026-10-04 | 8 | Can'ın FREE FPS SFX Pack'i (`convert_sfx_pack.sh`: mono, sessizlik kesimi): adım ×8, iniş, pompalı ×4 + pompa, sniper ×4, roket ×4, patlama ×4, dürbün, grapple, uyarı; `gen_sfx.py` sadece kalan sesleri üretir. Birinci şahıs Saul (kollar vertex rengi + shader: takım kolu/manşet/ten; bacaklar takım). SMG birinci şahısta 0,7x. Smoke 132/0. Release v0.8.4. |
 | 2026-10-05 | 8 | Tabanca/revolver ileri + revolver 1,3x, musket 1,35x, bıçak açısı; bıçak sesleri (Freesound swish + scrape, çekince `Weapon.draw`); `WeaponDef.view_kick` + `CameraFeel.add_kick` (silah modeli + %30 kamera, nişan aynı). Smoke 132/0. Release v0.8.5. |
+| 2026-10-05 | 5/8 | Can'ın kararı: 4 yeni sınıf (Hound, Ghost, Trickster, Phantom), 5 silah (Scout, Double Barrel, Desert Eagle, MP5SD, USP-S; yer tutucu model/ses), 4 güç (Sonar, Cloak, Swap Dart, Mark/Recall), `WeaponDef.suppressed`, `ClassDef.silent_steps`, `Player.server_teleport` (life ile), `Player.cloaked` (StateSync), `Ability.get_hud_window` + `HudBar.striped`. GDD'ye işlendi. Smoke 189/0, ağ testi 29 + 25, 28 + 28. Release v0.9.0. |

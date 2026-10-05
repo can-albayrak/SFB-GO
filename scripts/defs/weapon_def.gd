@@ -35,6 +35,9 @@ enum ViewHands { NONE, RIGHT, BOTH }
 ## Two guns sharing the magazine: left click fires the left, right click the right,
 ## each with its own fire_interval (Dual Pistols).
 @export var dual_wield: bool = false
+## Silenced (MP5SD, USP-S): a quiet shot heard only nearby, no tracer and no muzzle flash
+## for anyone, so a hidden shooter stays hidden.
+@export var suppressed: bool = false
 
 @export_group("Airdrop")
 ## Airdrop weapon (GDD "Airdrop"): the magazine is all the ammo there is (no reload), the

@@ -11,4 +11,6 @@ extends Resource
 @export var secondary_weapon: WeaponDef
 @export var abilities: Array[AbilityDef]
 @export var quick_melee: WeaponDef ## V: swung over the weapon in hand (knife or Bear's kick).
+## Ghost: footsteps make no sound (for anyone, the owner included).
+@export var silent_steps: bool = false
 @export var knife: WeaponDef ## Weapon slot 3 (CS style): held and swung like a gun; backstabs kill.

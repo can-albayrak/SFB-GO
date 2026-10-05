@@ -17,6 +17,11 @@ const SHOT_SHOTGUN: Array[AudioStream] = [
 	preload("res://assets/audio/shot_shotgun_3.wav"), preload("res://assets/audio/shot_shotgun_4.wav"),
 ]
 const SHOT_RAIL: AudioStream = preload("res://assets/audio/shot_rail.wav")
+const SHOT_SUPPRESSED: AudioStream = preload("res://assets/audio/shot_suppressed.wav")
+const SONAR: AudioStream = preload("res://assets/audio/sonar.wav")
+const DART: AudioStream = preload("res://assets/audio/dart.wav")
+const TELEPORT: AudioStream = preload("res://assets/audio/teleport.wav")
+const CLOAK: AudioStream = preload("res://assets/audio/cloak.wav")
 const SHOT_LAUNCHER: Array[AudioStream] = [
 	preload("res://assets/audio/shot_launcher_1.wav"), preload("res://assets/audio/shot_launcher_2.wav"),
 	preload("res://assets/audio/shot_launcher_3.wav"), preload("res://assets/audio/shot_launcher_4.wav"),
@@ -46,6 +51,8 @@ const SHOT_DB: float = -4.0
 const EXPLOSION_DB: float = 2.0
 const STEP_DB: float = -8.0
 const LAND_DB: float = -5.0
+const SUPPRESSED_DB: float = -10.0
+const SUPPRESSED_MAX_DISTANCE: float = 12.0 ## A silenced shot is not heard further away.
 ## Footsteps carry like CS (heard through a wall or two, ~30 m), panned hard to their side.
 const STEP_UNIT_SIZE: float = 5.0
 const STEP_MAX_DISTANCE: float = 32.0
@@ -88,6 +95,9 @@ static func play_ui(parent: Node, stream: AudioStream, volume_db: float = UI_DB)
 
 static func shot(parent: Node, def: WeaponDef, point: Vector3) -> void:
 	if def == null:
+		return
+	if def.suppressed:
+		play_at(parent, SHOT_SUPPRESSED, point, SUPPRESSED_DB, STEP_UNIT_SIZE * 0.6, SUPPRESSED_MAX_DISTANCE)
 		return
 	play_at(parent, shot_stream(def), point, SHOT_DB, UNIT_SIZE * 2.0)
 

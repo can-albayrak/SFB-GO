@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="AbilityDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/swap_dart_ability.tscn" id="2_ability"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"swap_dart"
+display_name = "Swap Dart"
+cooldown = 12.0
+max_range = 45.0
+speed = 55.0
+projectile_radius = 0.3
+scene = ExtResource("2_ability")

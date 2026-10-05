@@ -144,7 +144,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 ## Sınıflar
 
-5 sınıf (Bear 2026-10-03'te çıkarıldı), çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy: tek ana silah, tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
+9 sınıf (Bear 2026-10-03'te çıkarıldı; Hound, Ghost, Trickster, Phantom 2026-10-05'te eklendi), çoğunda 2–3 silah ve 2 özel güç seçeneği (Cowboy ve yeni dört sınıf: tek güç). **Tüm sayılar ilk tahmin, `data/` altındaki Resource dosyalarından değiştirilecek.**
 
 | Sınıf | Can | Hız | Rol | Görünüm |
 | --- | --- | --- | --- | --- |
@@ -153,6 +153,10 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Wolf | 100 | Normal | Dengeli, başlangıç sınıfı | Askeri yelek, bere |
 | Volcano | 110 | Biraz yavaş | Patlayıcı, alan kontrolü | Kirli koruyucu tulum, madenci kafa lambası (kask yok) |
 | Cowboy | 100 | Normal | Tek atışlık uzun menzil + ağır tabanca, kendi kendini toparlar | Kovboy şapkası, uzun palto (sigara içer) |
+| Hound | 90 | Normal | İz sürücü: kampçıları bulur | (henüz yok; şimdilik herkes Saul) |
+| Ghost | 80 | Hızlı | Sinsi: sessiz adım, susturucu, pelerin | (henüz yok) |
+| Trickster | 90 | Normal+ | Şakacı: rakiple yer değiştirir | (henüz yok) |
+| Phantom | 85 | Normal+ | İşaret bırakıp geri döner (kaçış, pusu) | (henüz yok) |
 
 ### Hawk
 
@@ -208,6 +212,46 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 
 - **Güç: Smoke Break (18 sn):** Sigara yakar; 6 sn boyunca saniyede 5 can dolar (toplam 30), ateş hızı ve doldurma hızı artar.
 - **Animasyon (aşama 8):** Smoke Break sırasında birinci ve üçüncü şahısta sigara içme.
+
+### Hound (2026-10-05, Can'ın isteği)
+
+| Silah | Hasar | Not |
+| --- | --- | --- |
+| Scout | Gövde 75, kafa 150 | CS Scout: hafif sniper, koşarken de isabetli, dürbün (2,5x) hızlı açılır |
+| Double Barrel | 10 saçma × 13, yakında 130 | 2 fişek, iki namlu art arda hızlı (0,2 sn), uzakta etkisiz |
+| Desert Eagle (yedek) | 55, kafa 110 | 7 mermi, sert tepme, hareket halinde isabetsiz |
+
+- **Güç: Sonar (20 sn):** 25 m içindeki herkes 2 sn boyunca Hound'un ekranında duvar arkasından kırmızı görünür. Bulunanlar Hound'un yönünden bir "ping" duyar (kaçabilirler).
+- **İkinci namlu:** İki tetiğin aynı anda çekilmesi (sağ tık) henüz yok; iki hızlı tıkla aynı etki.
+
+### Ghost (2026-10-05)
+
+| Silah | Hasar | Not |
+| --- | --- | --- |
+| MP5SD | 11, çok hızlı | Susturuculu |
+| USP-S (yedek) | 26 | Susturuculu, 12 mermi |
+
+- **Susturucu:** Atış sesi ~12 m'den uzağa gitmez, kısık "pıf"; başkaları mermi izi ve namlu alevi görmez.
+- **Pasif:** Adım sesi yok.
+- **Güç: Pelerin (16 sn):** 4 sn neredeyse görünmez (hafif bir parıltı kalır); Q'ya basınca birden silinmez, ~0,6 sn'de solar. Ateş edince, bıçaklayınca ya da hasar alınca hemen bozulur. Nick yazısı da gizlenir. Hitbox'lar yerinde: kör atışla vurulabilir.
+
+### Trickster (2026-10-05)
+
+| Silah | Hasar | Not |
+| --- | --- | --- |
+| SMG / Burst Rifle | Cheetah / Wolf ile aynı | |
+| Revolver (yedek) | 45, kafa 90 | |
+
+- **Güç: Swap Dart (12 sn):** Q ile dart üfler (55 m/sn, 45 m, düz gider). Değdiği ilk oyuncuyla anında yer değiştirir. Dartın vuruş alanı 0,3 m yarıçap: nişan istemez ama gelişigüzel de tutmaz. Iskalamak da bekleme süresini başlatır. Yer değiştirme host'ta, ikisi için de.
+
+### Phantom (2026-10-05)
+
+| Silah | Hasar | Not |
+| --- | --- | --- |
+| Assault Rifle / Marksman Rifle | Wolf / Hawk ile aynı | |
+| Tabanca (yedek) | | |
+
+- **Güç: Mark / Recall (14 sn):** İlk Q durduğun yere 15 sn'lik bir işaret bırakır (mor ışık sütunu, **herkes görür**). 15 sn içinde tekrar Q: işarete ışınlanırsın. Basmazsan işaret kaybolur. Bekleme süresi işaret kapanınca başlar. Geri dönüş süresi HUD'da **taralı**, azalan bir barla gösterilir (normal bekleme düz bar).
 
 ## Sınıf değiştirme ve loadout)
 

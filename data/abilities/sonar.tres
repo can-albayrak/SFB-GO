@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AbilityDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="1_def"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/sonar_ability.tscn" id="2_ability"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"sonar"
+display_name = "Sonar"
+cooldown = 20.0
+duration = 2.0
+max_range = 25.0
+scene = ExtResource("2_ability")

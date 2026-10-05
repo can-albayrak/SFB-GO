@@ -78,6 +78,7 @@ func _request_fire(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 			player.status.server_return_throwable()
 		return
 	_end_protection()
+	player.server_break_cloak() # Firing or stabbing shows a Ghost.
 	var end_point: Vector3
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
 	if compensator != null:
@@ -105,6 +106,7 @@ func _request_stab(origin: Vector3, dir: Vector3, slot: int, weapon_id: StringNa
 	if not _accept_fire(knife, slot, origin, knife.def.heavy_interval):
 		return
 	_end_protection()
+	player.server_break_cloak() # Firing or stabbing shows a Ghost.
 	knife.server_heavy = true
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
 	if compensator != null:
@@ -148,6 +150,7 @@ func _request_melee(origin: Vector3, dir: Vector3) -> void:
 		return
 	_next_melee_time = maxf(_next_melee_time, now - FIRE_BURST_SLACK) + melee.def.fire_interval * FIRE_RATE_TOLERANCE
 	_end_protection()
+	player.server_break_cloak() # Firing or stabbing shows a Ghost.
 	var compensator: LagCompensator = LagCompensator.find(get_tree())
 	if compensator != null:
 		compensator.fire_rewound(player, melee, origin, dir.normalized())

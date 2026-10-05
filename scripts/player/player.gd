@@ -57,6 +57,8 @@ var is_protected: bool = false: set = _set_protected
 var scope_glint: bool = false: set = _set_scope_glint
 ## Host-owned, replicated: Bear's shield panel is up.
 var shield_up: bool = false: set = _set_shield_up
+## Ghost Cloak (host sets, StateSync replicates): nearly invisible to everyone else.
+var cloaked: bool = false: set = _set_cloaked
 ## Host-owned, replicated: weapon slot in hand, so everyone sees the right model.
 var held_slot: int = 0: set = _set_held_slot
 ## Host-owned, replicated: bit per active pickup boost (1 << PickupDef.Kind); others see a glow.
@@ -97,6 +99,7 @@ var _last_hit_zone: Hitbox.Zone = Hitbox.Zone.BODY
 var _pending_loadout: PackedInt32Array = PackedInt32Array()
 ## Host: took damage this life (a loadout swap then never refills health).
 var _hurt_since_spawn: bool = false
+var _cloak_until: float = 0.0 ## Host clock.
 var _spawned_at: float = 0.0
 ## Owner only: FOV shift, head bob, landing dip, slide tilt, damage shake (visual only).
 var _camera_feel: CameraFeel
@@ -174,6 +177,8 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
 		if is_protected and _now() >= _protected_until:
 			is_protected = false
+		if cloaked and (_now() >= _cloak_until or not is_alive):
+			cloaked = false
 		status.server_tick()
 	if not is_local or not is_alive:
 		is_scoped = false
@@ -270,7 +275,7 @@ func _update_footsteps() -> void:
 	if not is_alive or not grounded or horizontal_speed < STEP_MIN_SPEED or moved.length() > STEP_TELEPORT_DISTANCE:
 		_step_distance = 0.0
 		return
-	if is_local and movement.is_sliding:
+	if (is_local and movement.is_sliding) or (class_def != null and class_def.silent_steps):
 		return
 	_step_distance += Vector2(moved.x, moved.z).length()
 	if _step_distance >= STEP_DISTANCE:
@@ -399,6 +404,7 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 	health = maxi(health - roundi(amount), 0)
 	last_damage_dealt = before - health
 	if health < before:
+		server_break_cloak() # Getting hit shows a Ghost.
 		_hurt_since_spawn = true
 		last_hurt_time = _now()
 		_on_hurt.rpc_id(get_multiplayer_authority(), before - health)
@@ -406,6 +412,35 @@ func take_hit(amount: float, zone: Hitbox.Zone, attacker_id: int, weapon_name: S
 		return false
 	_die(attacker_id)
 	return true
+
+
+## Host only (Ghost Cloak): nearly invisible for `seconds`, until firing or being hit.
+func server_cloak(seconds: float) -> void:
+	assert(multiplayer.is_server(), "server_cloak is host-only")
+	_cloak_until = _now() + seconds
+	cloaked = true
+
+
+## Host only: firing, stabbing or taking damage ends a cloak at once.
+func server_break_cloak() -> void:
+	if cloaked:
+		cloaked = false
+
+
+## Host only (Trickster Swap Dart, Phantom Recall): moves a living player on every peer.
+## Same path as a respawn: a new life number, so the host's speed check takes the jump and
+## older movement packets from before it are ignored.
+func server_teleport(target: Vector3) -> void:
+	assert(multiplayer.is_server(), "server_teleport is host-only")
+	if not is_alive:
+		return
+	_life += 1
+	net_sync.reset_validation()
+	var compensator: LagCompensator = LagCompensator.find(get_tree())
+	if compensator != null:
+		compensator.forget(self) # No rewinding a shot across the jump.
+	Net.broadcast(self, &"_teleport_to", [target, _life])
+	Net.broadcast(effects, &"_show_teleport", [target])
 
 
 ## Host only. Restores health and moves the player on every peer.
@@ -683,6 +718,12 @@ func _set_scope_glint(value: bool) -> void:
 		effects.show_glint(value)
 
 
+func _set_cloaked(value: bool) -> void:
+	cloaked = value
+	if is_node_ready():
+		effects.show_cloak(value)
+
+
 func _set_shield_up(value: bool) -> void:
 	shield_up = value
 	if is_node_ready():
@@ -763,6 +804,21 @@ func _announce_death(killer_id: int, weapon_name: String, killer_health: int) ->
 	if not _sender_is_host():
 		return
 	Events.player_died.emit(self, killer_id, weapon_name, killer_health)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _teleport_to(target: Vector3, life: int) -> void:
+	if not _sender_is_host():
+		return
+	adopt_life(life)
+	global_position = target
+	net_sync.clear_snapshots()
+	if is_local:
+		velocity = Vector3.ZERO
+		movement.reset()
+	reset_physics_interpolation()
+	if rig != null:
+		rig.reset_motion()
 
 
 @rpc("any_peer", "call_local", "reliable")

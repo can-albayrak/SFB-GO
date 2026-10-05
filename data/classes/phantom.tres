@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ClassDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/defs/class_def.gd" id="1_class"]
+[ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="2_wdef"]
+[ext_resource type="Script" path="res://scripts/defs/ability_def.gd" id="3_adef"]
+[ext_resource type="Resource" path="res://data/movement/standard.tres" id="4_move"]
+[ext_resource type="Resource" path="res://data/weapons/knife.tres" id="5_knife"]
+[ext_resource type="Resource" path="res://data/weapons/pistol.tres" id="6_secondary"]
+[ext_resource type="Resource" path="res://data/weapons/assault_rifle.tres" id="10_assault_rifle"]
+[ext_resource type="Resource" path="res://data/weapons/marksman_rifle.tres" id="11_marksman_rifle"]
+[ext_resource type="Resource" path="res://data/abilities/recall.tres" id="12_recall"]
+
+[resource]
+script = ExtResource("1_class")
+id = &"phantom"
+display_name = "Phantom"
+max_health = 85
+move_speed = 6.8
+movement = ExtResource("4_move")
+primary_weapons = Array[ExtResource("2_wdef")]([ExtResource("10_assault_rifle"), ExtResource("11_marksman_rifle")])
+secondary_weapon = ExtResource("6_secondary")
+abilities = Array[ExtResource("3_adef")]([ExtResource("12_recall")])
+quick_melee = ExtResource("5_knife")
+knife = ExtResource("5_knife")
