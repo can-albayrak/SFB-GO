@@ -291,6 +291,12 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 | Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli, mermiler dağılır. |
 | Rocket Launcher | 6 | Fiziksel roket. Merkezde 200 hasar, merkezden uzaklaştıkça azalır; alanı Frag'den büyük. Sıkanı geri iter (recoil, rocket jump). |
 
+## Haritalar (2026-10-05)
+
+- **Oynanabilir:** Ice Yard (fy_iceworld tarzı), Test Range.
+- **Rafta:** AVM (Mall). Can beğenmedi; lobide yok, dosyaları duruyor (`scenes/maps/mall`, `movement_test` merdivenler için kullanıyor).
+- **Sıradaki aday:** CS 1.6'daki dm_trainfactory tarzı bir harita (yerleşim ondan, geometri ve dokular bizim).
+
 ## Harita tasarım kuralları
 
 Harita her sınıfa kendi güçlü olduğu bir alan sunmalı; oyuncu 5–10 sn'de bir bölge değiştirebilmeli.

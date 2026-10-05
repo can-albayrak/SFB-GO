@@ -2,10 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/defs/map_list.gd" id="1_list"]
 [ext_resource type="Script" path="res://scripts/defs/map_def.gd" id="2_def"]
-[ext_resource type="Resource" path="res://data/maps/mall.tres" id="3_mall"]
 [ext_resource type="Resource" path="res://data/maps/test_range.tres" id="4_range"]
 [ext_resource type="Resource" path="res://data/maps/ice_yard.tres" id="5_ice"]
 
 [resource]
 script = ExtResource("1_list")
-maps = Array[ExtResource("2_def")]([ExtResource("3_mall"), ExtResource("5_ice"), ExtResource("4_range")])
+maps = Array[ExtResource("2_def")]([ExtResource("5_ice"), ExtResource("4_range")])
