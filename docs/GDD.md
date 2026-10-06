@@ -88,11 +88,14 @@ Hedef: **Apex gibi akıcı, CS gibi kesin**; savaş hiç durmasın. Aşağıdaki
 
 ### Vuruş hissi (hedef)
 
-Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi vermez); ses, marker ve hasar sayısı aynı anda çalışır. Değerler ve görseller oynadıkça ayarlanır.
+Tarama (hitscan) atışlarında marker ve tık sesi, atanın kendi izi canlı bir oyuncuya değdiği anda gelir (ping beklemez); host onayı bunu kafa/öldürme olarak yükseltir ve hasar sayısını ekler. Diğer silahlarda (pompalı, bıçak, el bombası...) her şey host onayından sonra gelir. Marker çıkarken büyük başlar ve oturur (pop). Değerler ve görseller oynadıkça ayarlanır.
 
 | Konu | Karar |
 | --- | --- |
-| Hit marker | Klasik **X**. Gövde/bacak vuruşu **beyaz**, kafa vuruşu **kırmızı**. |
+| Hit marker | Klasik **X**. Gövde/bacak vuruşu **beyaz**, kafa vuruşu **kırmızı**; **öldürmede** daha büyük, kalın ve uzun kırmızı X. |
+| Vuruş sesi | Gövde: tık. Bacak: daha alçak tık. Kafa: parlak "ding". Öldürme: kill sesi (kafadan öldürmede ding de üstüne). |
+| Görüş darbesi | Kafa vuruşunda ve öldürmede kısa görsel kamera/silah darbesi (nişan değişmez). Zaman yavaşlatma (hit stop) yok: oyun ağ saatiyle çalışır. |
+| Mermi izi ve efekt | Duvarda mermi deliği + parçacık patlaması; harita malzemesine göre (Ice Yard kar, Train Factory metal sıçraması; `MapDef.impact_surface`, collider `surface` meta'sı ezer). Oyuncuya isabette kan (herkes görür). |
 | Crosshair ayarı | Ayarlar menüsünde: renk, boyut, boşluk (mevcut karar), ayrıca hit marker'ın görünürlüğü. Maç içinden de erişilir. |
 | Hasar sayıları | Maçta da gösterilir (sadece vuranın ekranında). Test range'de de var. |
 | Test mankenleri | Sadece `test_range`'de. Host'un oynattığı maç haritalarında manken olmaz. |
@@ -168,7 +171,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Marksman Rifle | Kafa 1, gövde 2, bacak 3 atış | Hızlı atış ve şarjör, belirgin geri tepme |
 
 - **Güçler (15 sn):** Grapple (yüksek noktaya çekilme) · Decoy (yerinde hologram bırakma)
-- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz çok düşük isabet ve nişangah yok (CS keskin nişancıları gibi). Dürbün sağ tıkla yavaşça açılır (~0,3 sn); tam açılana kadar isabet düşük kalır (anında quick scope yok).
+- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz çok düşük isabet ve nişangah yok (CS keskin nişancıları gibi). Dürbün sağ tıkla yavaşça açılır (~0,3 sn); tam açılana kadar isabet düşük kalır (anında quick scope yok). **Bolt-action (Heavy Rifle, Scout):** her atış dürbünü kapatır; tekrar bakmak için sağ tık bırakılıp yeniden basılır (CS AWP). Marksman kapatmaz.
 - **Namlu parlaması:** Sadece dürbün açıkken. Haritanın her yerinden görünür (mesafe sınırı yok), yeri net belli olur.
 - **Yedek:** Tabanca
 

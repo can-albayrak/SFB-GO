@@ -1,6 +1,6 @@
 class_name ShotEffects
 extends RefCounted
-## Cosmetic-only shot visuals (tracer streak, muzzle flash, impact mark). Never affects gameplay.
+## Cosmetic-only shot visuals (tracer streak, muzzle flash, explosions; impacts: ImpactEffects). Never affects gameplay.
 
 const FLASH_TIME: float = 0.045
 const FLASH_SIZE: float = 0.16
@@ -13,15 +13,12 @@ const EXPLOSION_LIGHT_ENERGY: float = 8.0
 const EXPLOSION_LIGHT_RANGE: float = 12.0
 const EXPLOSION_FRAG_COLOR: Color = Color(1.0, 0.55, 0.2, 0.9)
 const EXPLOSION_FLASH_COLOR: Color = Color(1.0, 1.0, 1.0, 0.9)
-const IMPACT_RADIUS: float = 0.025
-const IMPACT_LIFETIME: float = 8.0
 const BEAM_TIME: float = 0.5
 const BEAM_RADIUS: float = 0.03
 const BEAM_COLOR: Color = Color(0.45, 0.85, 1.0, 0.9)
 
 static var _flash_mesh: QuadMesh
 static var _glow_texture: GradientTexture2D
-static var _impact_mesh: SphereMesh
 
 
 ## `parent` must sit at the world origin (Players root); from/to are world positions.
@@ -142,19 +139,3 @@ static func spawn_explosion(parent: Node3D, point: Vector3, is_flash: bool) -> v
 	tween.tween_property(material, "albedo_color:a", 0.0, EXPLOSION_TIME)
 	tween.tween_property(light, "light_energy", 0.0, EXPLOSION_TIME)
 	tween.chain().tween_callback(ball.queue_free)
-
-
-static func spawn_impact(parent: Node3D, point: Vector3) -> void:
-	if _impact_mesh == null:
-		_impact_mesh = SphereMesh.new()
-		_impact_mesh.radius = IMPACT_RADIUS
-		_impact_mesh.height = IMPACT_RADIUS * 2.0
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color.BLACK
-		_impact_mesh.material = material
-	var instance := MeshInstance3D.new()
-	instance.mesh = _impact_mesh
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	instance.position = point # Before add_child so interpolation never starts at the origin.
-	parent.add_child(instance)
-	parent.get_tree().create_timer(IMPACT_LIFETIME).timeout.connect(instance.queue_free)

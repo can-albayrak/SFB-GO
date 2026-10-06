@@ -55,6 +55,10 @@ enum ViewHands { NONE, RIGHT, BOTH }
 ## Visual only: degrees the gun in view kicks up (and back) on every shot, the camera a bit
 ## too (CameraFeelDef kick group). For heavy single shots whose pattern starts at zero.
 @export var view_kick: float = 0.0
+## Visual only: how fast this gun's kick settles (1 = CameraFeelDef.kick_recover; heavy guns less).
+@export var kick_recover_mult: float = 1.0
+## Visual only: how hard the view rolls per shot (1 = CameraFeelDef.kick_roll; SMGs less).
+@export var kick_roll_mult: float = 1.0
 ## Index the pattern loops back to; -1 = the last entry only.
 @export var recoil_loop_start: int = -1
 ## The kick never takes the aim more than this many degrees above where it started.
@@ -118,6 +122,9 @@ enum ViewHands { NONE, RIGHT, BOTH }
 ## Seconds from right click to full zoom. The unscoped cone fades out over the same time,
 ## so a shot fired mid-zoom is still inaccurate (no instant quick scopes).
 @export var scope_in_time: float = 0.0
+## Bolt-action (AWP, Scout): every shot drops the scope; release and press right mouse again
+## to look through it. The next shot then starts with the zoom-in inaccuracy (scope_in_time).
+@export var unscope_on_fire: bool = false
 ## False: no crosshair while this gun is in hand and not scoped (snipers, CS style).
 @export var hip_crosshair: bool = true
 

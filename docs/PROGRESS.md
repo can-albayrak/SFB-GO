@@ -7,7 +7,16 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 ## Sıradaki oturum
 
-**En yeni (2026-10-06):**
+**En yeni (2026-10-06, vuruş hissi, ÇALIŞTIRILMADI):**
+- **Vuruş geri bildirimi:** kafa için ayrı "ding" (`hit_head.wav`, `tools/gen_sfx.py hit_head`), bacak alçak tık, öldürmede büyük/kalın/uzun kırmızı X, her marker "pop" ile çıkar. Kafa ve öldürmede kısa görsel görüş darbesi (`CameraFeelDef.hit_head_kick`, `kill_kick`). Zaman yavaşlatma (hit stop) yapılmadı: `Engine.time_scale` ağ saatini bozar.
+- **Tahminli marker:** `HitscanWeapon._predict_hit` + `HitFeedback`; tarama atışı canlı bir oyuncuya değince marker/ses ping beklemeden gelir, host onayı sadece yükseltir (kafa/öldürme) ve sayıyı ekler.
+- **Mermi izi ve kan:** `ImpactEffects` (delik + parçacık, yüzey `MapDef.impact_surface`: Ice Yard kar, Train Factory metal, diğerleri taş; collider `surface` meta'sı ezer), kan herkese (`Game._blood_fx`). Eski siyah nokta kaldırıldı.
+- **Silah başına his:** `WeaponDef.kick_recover_mult` / `kick_roll_mult` (ağır silah yavaş söner, SMG az yatar), otomatik silahlara küçük `view_kick`; değerler `data/weapons/*.tres`.
+- **Bolt-action (AWP):** Heavy Rifle ve Scout ateşte dürbünü kapatır (`unscope_on_fire`), sağ tık bırakılıp tekrar basılır; Marksman kapatmaz.
+- **Yapılmadı:** 6 (şarjör/atış animasyonu, reload animasyonu yok), 8 (dürbün hissi zaten vardı).
+- **Bakılacak (hiçbiri çalıştırılmadı, iş bilgisayarında Godot yok):** Godot'u açınca `hit_head.wav.import` ve yeni `.gd.uid` dosyaları oluşur, commit edilmeli. Duvar deliği/parçacık boyutu ve rengi, marker pop süresi, kamera darbesi miktarı, kan görünümü, silah tepme hissi oyunda ayarlanacak. Smoke testine drop_scope ve HitFeedback kontrolleri eklendi, koşulmadı.
+
+**Önceki (2026-10-06, lobi):**
 - **Maç sonunda lobiye dönüş:** sonuç ekranı (10 sn, "Back to lobby in N") bitince host `Net.server_return_to_lobby` der; herkes `lobby.tscn`'e geçer, kill/dakika/harita ayarı korunur, hazır işaretleri sıfırlanır, host yeniden Start der. Lobisiz oturumlarda (`--host`, offline) yerinde yeni maç eskisi gibi. **İş bilgisayarında Godot yok: kod yazıldı ama hiç çalıştırılmadı.** Denenmeli: client lobiye düşüyor mu, hazır butonu sıfırlanmış mı, host Start tekrar çalışıyor mu, maç sırasında girmiş geç katılan da lobiye geliyor mu. `net_test`'e bu akış için test eklenmedi.
 - **GDD:** "sonra bakılacak" mekanikler elendi (ölünce silah düşmesi, seri ödülleri, lider bonusu, REVENGE, maç kuralı varyantları, kill-cam); sadece Train Factory trenleri kaldı. Gun Game "Fikirler"de duruyor.
 - Yerel `main` `origin/main`'e (v0.10.0, PR #7) eşitlendi; eski yerel commit'ler (player/hud bölme, menü arka planı, Shield balonu) Can'ın kararıyla atıldı.
@@ -397,3 +406,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-05 | 7 | Train Factory: Can'ın gönderdiği CS Online dm_trainfactory BSP'si birebir çevrildi (`import_goldsrc_bsp.py`: geometri, WAD dokuları, orijinal lightmap atlası, trimesh çarpışma; `GoldSrcMap` shader). CS tarzı merdiven (`Movement`, katman 7, `MovementDef.ladder_*`). Airdrop kasası tavan altından düşer (kapalı haritalar). FFA için 16 doğma noktası. Harita testi 178/0, hareket testi 62/0. Trenler ve variller yok. |
 | 2026-10-05 | 5 | Trickster'ın dartı silah da değiştirir (`Player.primary_override` StateSync 11, `server_trade_weapons`; ana silah + airdrop silahı, tabanca kalır). Yeni sınıf Gambler: Roll the Dice (`DiceAbility`, `DiceFaceDef`; 3 iyi, 1 nötr, 1 kötü, 1 çok kötü), `PlayerStatus` hasar çarpanı + bedava mermi, zar sesleri (`gen_sfx.py dice dice_good dice_bad`). Smoke 219/0, ağ testi 29 + 25. |
 | 2026-10-06 | 5/8 | Maç sonunda lobiye dönüş (`Net.uses_lobby`, `Net.server_return_to_lobby`, `Match.returns_to_lobby`, HUD "Back to lobby in N"). GDD fikir listesi temizlendi (sadece Train Factory trenleri kaldı). `main` `origin/main`'e eşitlendi. Çalıştırılamadı: iş bilgisayarında Godot yok. |
+| 2026-10-06 | 8 | Vuruş hissi: kafa/leg/kill sesleri, kill marker + pop, görüş darbesi, tahminli marker (`HitFeedback`), mermi izi/kan (`ImpactEffects`), silah başına tekme profili, bolt-action dürbün kapanması. Smoke'a eklendi, koşulmadı: iş bilgisayarında Godot yok. |

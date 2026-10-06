@@ -41,6 +41,11 @@ extends Resource
 @export var kick_back: float = 0.007 ## Metres the gun slides back per degree of kick.
 @export var kick_roll: float = 0.25 ## Degrees of roll per degree of kick (alternating side).
 
+@export_group("Hit Feedback")
+## View punch (same units as WeaponDef.view_kick) on the shooter when the host confirms a
+## headshot / a kill. No time-scale hit stop: the game runs on the network clock.
+@export var hit_head_kick: float = 1.2
+@export var kill_kick: float = 2.4
 @export_group("View Model")
 ## Every first-person weapon is drawn this much bigger (hands follow the grips). Snipers
 ## already have their own 1.25x in their scenes.

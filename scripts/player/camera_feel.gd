@@ -27,7 +27,9 @@ var _shake_strength: float = 0.0
 var _shake_time: float = 0.0
 ## Shot kick (degrees, visual): the gun in view uses all of it, the camera kick_view_share.
 var kick: float = 0.0
+## Roll direction of the last kick (alternates); its size is the gun's WeaponDef.kick_roll_mult.
 var kick_roll_sign: float = 1.0
+var _kick_recover_mult: float = 1.0
 
 
 ## Every frame on the owning client.
@@ -58,7 +60,7 @@ func update(delta: float, movement: Movement, scoped: bool) -> void:
 	lateral = sin(_bob_phase) * DEF.bob_sway * bob_scale
 	roll = deg_to_rad(DEF.slide_tilt) * slide_scale
 
-	kick = lerpf(kick, 0.0, _smooth(DEF.kick_recover, delta))
+	kick = lerpf(kick, 0.0, _smooth(DEF.kick_recover * _kick_recover_mult, delta))
 	shake = Vector2.ZERO
 	if _shake_left > 0.0:
 		_shake_left = maxf(_shake_left - delta, 0.0)
@@ -69,9 +71,10 @@ func update(delta: float, movement: Movement, scoped: bool) -> void:
 
 
 ## Owner fired a weapon with WeaponDef.view_kick (sniper, shotgun, launchers...).
-func add_kick(degrees: float) -> void:
+func add_kick(degrees: float, recover_mult: float = 1.0, roll_mult: float = 1.0) -> void:
 	kick = maxf(kick, degrees)
-	kick_roll_sign = -kick_roll_sign
+	_kick_recover_mult = recover_mult
+	kick_roll_sign = -signf(kick_roll_sign) * roll_mult
 
 
 ## Movement.landed: a small dip that scales with the fall speed.

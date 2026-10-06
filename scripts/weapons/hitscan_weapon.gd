@@ -12,13 +12,27 @@ func _fire() -> void:
 	var dir: Vector3 = _apply_spread(-player.get_aim_basis().z)
 	var hit: Dictionary = _trace(origin, dir)
 	var end_point: Vector3 = hit["position"] if not hit.is_empty() else origin + dir * def.max_range
-	if not hit.is_empty() and not (hit["collider"] is Hitbox):
-		ShotEffects.spawn_impact(player.get_parent(), end_point)
+	if not hit.is_empty():
+		if hit["collider"] is Hitbox:
+			_predict_hit(hit["collider"] as Hitbox)
+		else:
+			ImpactEffects.spawn(player.get_parent(), end_point, hit["normal"], hit["collider"])
 	Sfx.shot(player.get_parent(), def, muzzle.global_position)
 	if not def.suppressed:
 		ShotEffects.spawn_muzzle_flash(muzzle)
 		ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
 	player.send_fire(origin, dir, player.weapons.find(self))
+
+
+## Owner: a trace that touches a living, damageable player shows the hit marker at once; the
+## host's confirmation only upgrades it (HitFeedback).
+func _predict_hit(hitbox: Hitbox) -> void:
+	var target := hitbox.get_receiver() as Player
+	if target == null or target == player or not target.is_alive or target.is_protected or target.shield_up:
+		return
+	if Match.state != Match.State.PLAYING:
+		return
+	HitFeedback.predict(hitbox.zone)
 
 
 ## Random cone (get_spread_cone) around the aim. The owner picks the direction; the host
@@ -72,3 +86,4 @@ func _apply_hit(hitbox: Hitbox, point: Vector3) -> void:
 	var dealt: float = receiver.get(&"last_damage_dealt")
 	if dealt > 0.0 or killed: # A raised shield blocked it: no marker, no number.
 		player.confirm_hit.rpc_id(shooter_id, hitbox.zone, killed, dealt, point)
+		server_show_blood(point)

@@ -334,6 +334,28 @@ func _test_scope_and_spread() -> void:
 	_check(is_equal_approx(slide_cone, _player.class_def.movement.slide_spread) and slide_cone > 0.0,
 		"sliding adds a %.1f degree cone" % slide_cone)
 
+	# Bolt action: a shot drops the scope (right mouse has to be released and pressed again).
+	_check(def.unscope_on_fire, "%s drops the scope after every shot" % def.display_name)
+	_player.is_scoped = true
+	_player.scope_blend = 1.0
+	_player.drop_scope()
+	_check(not _player.is_scoped and is_zero_approx(_player.scope_blend), "drop_scope closes the scope")
+
+	# Hit marker: a predicted plain hit shows once, an upgrade (headshot, kill) shows again.
+	var markers: Array[int] = [0]
+	var count_marker: Callable = func(_zone: Hitbox.Zone, _killed: bool, _amount: float) -> void:
+		markers[0] += 1
+	Events.hit_confirmed.connect(count_marker)
+	HitFeedback.predict(Hitbox.Zone.BODY)
+	HitFeedback.on_confirmed(_player, Hitbox.Zone.BODY, false, 20.0)
+	_check(markers[0] == 1, "a predicted body hit shows its marker once")
+	HitFeedback.predict(Hitbox.Zone.BODY)
+	HitFeedback.on_confirmed(_player, Hitbox.Zone.HEAD, false, 40.0)
+	_check(markers[0] == 3, "a body hit the host confirms as a headshot shows the upgrade")
+	HitFeedback.on_confirmed(_player, Hitbox.Zone.BODY, true, 20.0)
+	_check(markers[0] == 4, "a hit nobody predicted shows on confirmation")
+	Events.hit_confirmed.disconnect(count_marker)
+
 
 ## Knife out (slot 3): faster than with a gun in hand (WeaponDef.move_speed_mult).
 func _test_knife_speed() -> void:

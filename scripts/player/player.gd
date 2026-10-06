@@ -94,6 +94,8 @@ var rocket_guided: bool = true
 var _life: int = 0
 var _pose_crouched: bool = false
 var _fall_reported: bool = false
+## Owner: a bolt-action shot dropped the scope; right mouse must be released before it comes back.
+var _scope_locked: bool = false
 # Host-side state.
 var _protected_until: float = 0.0
 var _last_hit_weapon: String = ""
@@ -199,7 +201,9 @@ func _physics_process(delta: float) -> void:
 
 	var weapon_def: WeaponDef = current_weapon.def
 	var was_scoped: bool = is_scoped
-	is_scoped = cmd.secondary and weapon_def.scope_zoom > 0.0 and not current_weapon.is_reloading and not movement.is_sliding
+	if not cmd.secondary:
+		_scope_locked = false
+	is_scoped = cmd.secondary and not _scope_locked and weapon_def.scope_zoom > 0.0 and not current_weapon.is_reloading and not movement.is_sliding
 	if is_scoped and not was_scoped:
 		Sfx.play_ui(self, Sfx.SCOPE_IN)
 	weapon_holder.visible = not is_scoped
@@ -375,7 +379,24 @@ func get_hit_exclusions() -> Array[RID]:
 func send_fire(origin: Vector3, dir: Vector3, slot: int) -> void:
 	requests.send_fire(origin, dir, slot)
 	if _camera_feel != null and slot >= 0 and slot < weapons.size() and weapons[slot].def.view_kick > 0.0:
-		_camera_feel.add_kick(weapons[slot].def.view_kick)
+		var fired: WeaponDef = weapons[slot].def
+		_camera_feel.add_kick(fired.view_kick, fired.kick_recover_mult, fired.kick_roll_mult)
+
+
+## Owner: bolt-action guns (WeaponDef.unscope_on_fire) drop the scope after every shot. Hold
+## right mouse and nothing happens until it is released and pressed again (CS AWP).
+func drop_scope() -> void:
+	_scope_locked = true
+	is_scoped = false
+	scope_blend = 0.0
+	weapon_holder.visible = true
+	effects.report_scoped(false)
+
+
+## Owner: a short visual view punch (headshot / kill feedback). Aim is unchanged.
+func punch_view(degrees: float) -> void:
+	if _camera_feel != null:
+		_camera_feel.add_kick(degrees)
 
 
 ## Owner: choose a loadout. The host applies it now (first seconds after spawning)
@@ -859,7 +880,7 @@ func _on_hurt(amount: int, from_other: bool, source: Vector3) -> void:
 func confirm_hit(zone: Hitbox.Zone, killed: bool, amount: float, point: Vector3) -> void:
 	if not _sender_is_host():
 		return
-	Events.hit_confirmed.emit(zone, killed, amount)
+	HitFeedback.on_confirmed(self, zone, killed, amount)
 	DamageNumber.spawn(get_parent(), point, amount, zone)
 
 
