@@ -34,6 +34,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 - Lider oyuncunun üstünde taç ikonu
 - Ölüm ekranı (3 sn): öldüren, silahı ve kalan canı görünür; sınıf menüsü açık
 - Maç sonu ödülleri: en çok ölen, en çok bıçak kill'i, en uzun kafa vuruşu, en çok kendini patlatan
+- Maç sonu: sonuç ekranı (`end_screen_time`) bitince herkes **lobiye döner** (ayarlar korunur, hazır işaretleri sıfırlanır, host yeniden Start der). Lobisiz oturumlarda (komut satırı `--host`, offline Test Range) yerinde yeni maç başlar.
 - Anonslar: distopik hoparlör sesi ("Double Kill", "Killing Spree", "Airdrop Incoming"). **Anons metinleri ve sesleri Can hazırlar**; silah ve animasyon sesleri ayrı iş.
 
 **Lobi:** Host kill hedefi, süre ve haritayı seçer. Oyuncular kendi isimlerini girer.
@@ -383,7 +384,8 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 
 Can'ın onayı olmadan yapılmaz; sadece not.
 
-- **Sonra bakılacak mekanikler (2026-10-05, Can: "kalsın sonra bakarız"):** ölünce ana silahın yere düşmesi (CS gibi, alınabilir); seri ödülleri (3 kill: herkes 2 sn görünür, 5 kill: kişisel airdrop, duyurulur); lideri öldürene +1 puan ve can; intikam ("REVENGE", ekstra can); maç kuralları (sadece kafa, bıçak 2x, sadece tabanca, büyük kafalar); Train Factory trenleri (siren + geçen tren öldürür); kill-cam; anonsçu sesleri.
+- **Train Factory trenleri (sonra bakılacak):** siren + geçen tren öldürür.
+- **Elenenler (2026-10-06, Can: "discard"):** ölünce ana silahın düşmesi, seri ödülleri, lideri öldürene bonus, REVENGE, maç kuralı varyantları (sadece kafa, bıçak 2x, sadece tabanca, büyük kafalar), kill-cam.
 - **Gun Game (Arms Race):** Her kill'de sıradaki silaha geçilir, son silah bıçak; ilk bıçak kill'i alan kazanır. Sınıf gücü kapalı ya da açık olabilir. Mevcut silah listesiyle yapılabilir.
 - **Reddedilenler (2026-10-05):** Hitman, Vortex, Mirror, Ricochet, Leech, Marked, Saboteur (fizik ya da çok karmaşık; Thief'in silah çalma fikri Trickster'a eklendi). Hex (ters tuşlar) belki ileride.
 - **Daha önce reddedilenler:** Pyro (molotof) ve Engineer (taret) oyunu bozuyor; taret/konuşlandırılan yapı yok. Bulldog/tank ve Saul sınıfı da yok. Oyun içi sesli sohbet yok (Discord).

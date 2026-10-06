@@ -112,7 +112,7 @@ sfb-go/
 
 - Durum host'ta: `kills`, `deaths`, `state` (PLAYING/ENDED), `time_left`. Her değişiklik `Net.broadcast` ile; katılana `_sync_full` snapshot. Süre her peer'da yerelde geri sayar.
 - Akış: `Player._die` → `died(killer, weapon, headshot)` → `Game._on_player_died` (mesafe hesaplar) → `Match.server_register_kill` → `_on_kill` herkese → `Events.kill_registered` (kill feed) + `scores_changed` (skor tablosu, taç).
-- Bitiş: kill hedefi veya süre → `_on_match_ended(winner, awards)` → `end_screen_time` (10 sn) sonra `_on_match_started` → `Events.match_started` → host herkesi yeniden doğurur. ENDED'da hasar yok.
+- Bitiş: kill hedefi veya süre → `_on_match_ended(winner, awards)` → `end_screen_time` (10 sn) sonra: lobi oturumunda (`Net.uses_lobby`, `Match.returns_to_lobby` herkese `_on_match_ended` ve snapshot ile gider, HUD "Back to lobby in N" der) `Net.server_return_to_lobby` → `ingame_peers` boşalır, `ready_peers` sıfırlanır, clientlara `_return_to_lobby` RPC'si, host da `lobby.tscn` yükler (kill/dakika/harita ayarı `Net.lobby_*`'ta korunur; `Game._exit_tree` → `Match.end_session`). Lobisiz oturumda (`--host`, offline) eskisi gibi `_on_match_started` → `Events.match_started` → host herkesi yeniden doğurur. ENDED'da hasar yok.
 - Ödüller (host hesaplar): Most Deaths, Longest Headshot, Most Self-Kills, Most Knife Kills (sadece `WeaponDef.counts_as_knife` silahlar: V bıçağı ve fırlatma bıçakları; `take_hit`'in `is_melee` argümanı bu bayrak).
 - Doğma noktası: canlı düşmanlara en yakın mesafesi en büyük olan nokta (`Game._pick_spawn_point`).
 - Spawn koruması: `Player.is_protected` (host'ta, StateSync ile yayılır), `rules.spawn_protection` sn veya ateş edince biter; korumalıyken hasar yok, başkalarına model yanıp söner.

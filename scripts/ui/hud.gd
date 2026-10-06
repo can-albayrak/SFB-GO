@@ -149,7 +149,7 @@ func _process(delta: float) -> void:
 	var ended: bool = Match.state == Match.State.ENDED
 	scoreboard.visible = (ended or Input.is_action_pressed(&"scoreboard")) and not loadout_menu.visible
 	if ended:
-		_next_label.text = "Next match in %d" % ceili(Match.end_screen_left)
+		_next_label.text = "%s in %d" % ["Back to lobby" if Match.returns_to_lobby else "Next match", ceili(Match.end_screen_left)]
 	var dead: bool = is_instance_valid(_player) and not _player.is_alive
 	_dim.visible = loadout_menu.visible or dead
 	_death_tint.visible = dead

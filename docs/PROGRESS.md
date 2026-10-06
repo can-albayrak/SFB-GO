@@ -2,10 +2,16 @@
 
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
-**Şu anki aşama:** 7 – Harita blockout (AVM): yazıldı ve headless doğrulandı, **Can oynamadı**. Aşama 6 kapandı (2026-10-01). Modeller (aşama 8) Can'la birlikte. Görsel geçişin ilk turu (UI, atmosfer, birinci şahıs gövde) yapıldı. Aşama 5 kapandı; aşama 2'nin iki bilgisayar testi geçti (2026-10-01).
-**Son güncelleme:** 2026-10-04
+**Şu anki aşama:** 8 – Görsel/his geçişi ve içerik (v0.10.0 yayında). Aşama 7 haritaları: Ice Yard oynandı ve onaylandı, Train Factory (CS dm_trainfactory) henüz oynanmadı, AVM rafta. Sınıflar (Hound, Ghost, Trickster, Phantom, Gambler dahil) Can'ın testinden geçti, genel olarak iyi; küçük hata/iyileştirme zamanla. Steam sürümü ve iki bilgisayarlı ağ testi Can'ın denemesinde çalıştı (2026-10-06).
+**Son güncelleme:** 2026-10-06
 
 ## Sıradaki oturum
+
+**En yeni (2026-10-06):**
+- **Maç sonunda lobiye dönüş:** sonuç ekranı (10 sn, "Back to lobby in N") bitince host `Net.server_return_to_lobby` der; herkes `lobby.tscn`'e geçer, kill/dakika/harita ayarı korunur, hazır işaretleri sıfırlanır, host yeniden Start der. Lobisiz oturumlarda (`--host`, offline) yerinde yeni maç eskisi gibi. **İş bilgisayarında Godot yok: kod yazıldı ama hiç çalıştırılmadı.** Denenmeli: client lobiye düşüyor mu, hazır butonu sıfırlanmış mı, host Start tekrar çalışıyor mu, maç sırasında girmiş geç katılan da lobiye geliyor mu. `net_test`'e bu akış için test eklenmedi.
+- **GDD:** "sonra bakılacak" mekanikler elendi (ölünce silah düşmesi, seri ödülleri, lider bonusu, REVENGE, maç kuralı varyantları, kill-cam); sadece Train Factory trenleri kaldı. Gun Game "Fikirler"de duruyor.
+- Yerel `main` `origin/main`'e (v0.10.0, PR #7) eşitlendi; eski yerel commit'ler (player/hud bölme, menü arka planı, Shield balonu) Can'ın kararıyla atıldı.
+- Sıradaki: Train Factory'yi arkadaşlarla oyna; vuruş/tepme/silah tepkisi iyileştirme önerileri Can'la konuşuldu.
 
 **En yeni (2026-10-03, evde, Can test edecek, ikinci tur):**
 - **Tabanca/revolver** iki elli (CS:GO), biraz ileride. **Bıçak** sağ altta, ucu ileri; el sap etrafında kendini çeviriyor, önkol hep sağ alttan.
@@ -264,21 +270,19 @@ Her aşama sonunda: bağımsız bir agent ile kod incelemesi → düzeltmeler �
 
 - **Train Factory:** Oyuncular haritanın kendi ışığıyla değil Godot ışığıyla aydınlanıyor (karanlık köşede de aynı parlaklık). 10,5 m'deki vinç kirişi dar (~0,6 m), tepede W'ye basılı tutan karşıya düşebilir. Merdivenler `map_test` navmesh'inde yok (merdivenle çıkılan yere pickup/doğma konmadı). Kasa tavanın altından düşerken paraşüt tavana yakın başlıyor.
 
-- Bear ve Volcano ayrıntılı oynanmadı; gerçek iki bilgisayar testi henüz yok (sadece aynı PC'de iki pencere).
 - Charge'ın host'taki çarpma penceresi istek gelince başlar ve host'un çizdiği (~100 ms geriden) konumu kullanır: charge'ın son ~100–150 ms'si hedeflere karşı denenmez; duvara erken çarpan charge'da pencere bitene kadar 1,3 m'ye giren yine stunlanır.
 - Birinci şahıs kolları: el sadece yumruk pozunda (parmaklar silaha göre ayrı ayarlanmıyor), şarjör değiştirme / atış animasyonu yok; çift tabanca ve bazı silahlarda eller kısmen ekran dışında. Kollar bulutta OpenGL (Compatibility) ile görüntülendi, Mobile renderer'da ışık farklı olabilir.
-- Steam sürümü gerçek Steam'le denenmedi. Bilinmeyenler: `SteamMultiplayerPeer`'in bağlanma sinyalleri ve peer id'leri bizim akışla uyumlu mu, unreliable paketler (hareket) Steam aktarımında akıcı mı. Steam lobisi herkese açık (App 480'de `sfb_go` etiketiyle filtrelenir; başka biri listeye düşmez ama lobi kimliğini bilen girebilir). Farklı sürümdeki oyuncular aynı lobiye girerse RPC hataları olur (sürüm kontrolü yok).
+- Steam sürümü gerçek Steam'le denendi ve çalışıyor (Can, 2026-10-06). Steam lobisi herkese açık (App 480'de `sfb_go` etiketiyle filtrelenir; başka biri listeye düşmez ama lobi kimliğini bilen girebilir). Farklı sürümdeki oyuncular aynı lobiye girebilir.
 - Steam sürümünün `export_presets.cfg`'si yerel (git dışı); `build_steam.py` her çalıştığında kendi preset'ini yeniden yazar, diğerlerine dokunmaz.
 - Elde bıçakla backstab host'ta lag compensation'lı pozla hesaplanır; kurbanın yönü 30 Hz senkronla gelen bakış yönü (hızlı dönen hedefte sınırda kararlar şaşabilir).
 - PSX Weapon Pack ve PSX Revolver Pack'te lisans dosyası yok (ASSETS.md); kaynak/lisans Can'dan öğrenilecek.
 - Silah modelleri (2026-10-02): Sketchfab'den 21 model oyunda (`assets/models/weapons/real/`); 7'si aynı gün Can'ın PSX paketleriyle değişti. Kalan yer tutucular: Claws (bıçak), Sticky Bomb ve launcher mermisi (frag modeli), mayın, Grapple, kalkan. Railgun'un dokusu yok (düz koyu metal). Roketatarın ön/arka yönü modelden tam anlaşılmıyor, oyunda bakılacak. Beretta modelinde sürgü geri çekili duruyor (modelin kendisi).
-- Hız cezası ve shotgun'ın merkez yönü sahibinde seçilir, host gelen yönü izler (unscoped spread ile aynı model; hileli client sapmasız ateş edebilir).
+- Hız cezası ve shotgun'ın merkez yönü sahibinde seçilir, host gelen yönü izler. Arkadaş arası oyunda hile sorun sayılmıyor (Can, 2026-10-06): kapatılmayacak.
 - Hasar sayısı gerçekten düşen canı gösterir (kalan candan fazla vuruşta düşük sayı çıkar); kalkanın engellediği vuruşta marker/sayı yok.
 - Adrenaline sahibinde host onayından önce başlar; host reddederse (stun, maç arası) 4 sn boyunca fazladan atışlar sessizce düşer.
 - Yapışkan bomba oyuncuya yapışınca diğer client'larda kurbanın ~100 ms önünde görünebilir (host o oyuncunun anlık konumunu izliyor, client'lar oyuncuyu geriden çiziyor).
 - Hız cezası dürbündeyken de geçerli (dürbünle yürürken Heavy/Marksman artık tam isabetli değil).
 - Serbest hava kontrolü `standard.tres` ile tüm sınıflara geçerli (Wolf/Hawk/Bear da Quake tarzı air strafe yerine serbest yön değiştirme alıyor).
-- Maç bitince lobiye dönülmez; eskisi gibi 10 sn sonra yeni maç başlar.
 - Ölüm ekranındaki "öldürenin kalan canı" kill ödülünden önceki can.
 - Aşama 6 notu: airdrop silahlarının `.tres`'inde `kill_ammo_reward = false` olmalı (varsayılan true).
 - AVM blockout oynanmadı: akış, siper yoğunluğu ve görüş hatları sadece kâğıt üstünde (navmesh testi yürünebilirliği doğrular, oynanışı değil). Işık yok (ortam ışığı + güneş); iç mekân karanlık görünebilir (aşama 8: LightmapGI).
@@ -392,3 +396,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-05 | 7 | Can'ın kararı: AVM rafa kalktı (`map_list.tres`'ten çıktı, dosyalar duruyor); oynanabilir harita Ice Yard. Sıradaki aday dm_trainfactory tarzı harita. |
 | 2026-10-05 | 7 | Train Factory: Can'ın gönderdiği CS Online dm_trainfactory BSP'si birebir çevrildi (`import_goldsrc_bsp.py`: geometri, WAD dokuları, orijinal lightmap atlası, trimesh çarpışma; `GoldSrcMap` shader). CS tarzı merdiven (`Movement`, katman 7, `MovementDef.ladder_*`). Airdrop kasası tavan altından düşer (kapalı haritalar). FFA için 16 doğma noktası. Harita testi 178/0, hareket testi 62/0. Trenler ve variller yok. |
 | 2026-10-05 | 5 | Trickster'ın dartı silah da değiştirir (`Player.primary_override` StateSync 11, `server_trade_weapons`; ana silah + airdrop silahı, tabanca kalır). Yeni sınıf Gambler: Roll the Dice (`DiceAbility`, `DiceFaceDef`; 3 iyi, 1 nötr, 1 kötü, 1 çok kötü), `PlayerStatus` hasar çarpanı + bedava mermi, zar sesleri (`gen_sfx.py dice dice_good dice_bad`). Smoke 219/0, ağ testi 29 + 25. |
+| 2026-10-06 | 5/8 | Maç sonunda lobiye dönüş (`Net.uses_lobby`, `Net.server_return_to_lobby`, `Match.returns_to_lobby`, HUD "Back to lobby in N"). GDD fikir listesi temizlendi (sadece Train Factory trenleri kaldı). `main` `origin/main`'e eşitlendi. Çalıştırılamadı: iş bilgisayarında Godot yok. |

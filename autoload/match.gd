@@ -21,6 +21,8 @@ var active: bool = false
 ## Last finished match (kept for late joiners during the end screen). -1 = draw.
 var winner_id: int = -1
 var awards: Array = []
+## While ENDED: the end screen leads back to the lobby (else the next match starts at once).
+var returns_to_lobby: bool = false
 
 # Host-only stats for end-of-match awards.
 var _self_kills: Dictionary[int, int] = {}
@@ -116,6 +118,7 @@ func end_session() -> void:
 	end_screen_left = 0.0
 	winner_id = -1
 	awards = []
+	returns_to_lobby = false
 
 
 ## Adds a peer to the scoreboard and sends it the full match state.
@@ -180,6 +183,7 @@ func _snapshot() -> Dictionary:
 		"deaths": deaths,
 		"winner_id": winner_id,
 		"awards": awards,
+		"returns_to_lobby": returns_to_lobby,
 	}
 
 
@@ -198,14 +202,19 @@ func _pick_winner() -> int:
 
 func _end_match() -> void:
 	state = State.ENDED
-	Net.broadcast(self, &"_on_match_ended", [_pick_winner(), _compute_awards(), rules.end_screen_time])
+	returns_to_lobby = Net.uses_lobby
+	Net.broadcast(self, &"_on_match_ended", [_pick_winner(), _compute_awards(), rules.end_screen_time, returns_to_lobby])
 	var serial: int = _match_serial
-	get_tree().create_timer(rules.end_screen_time).timeout.connect(_restart.bind(serial))
+	get_tree().create_timer(rules.end_screen_time).timeout.connect(_after_end_screen.bind(serial))
 
 
-func _restart(serial: int) -> void:
+## End screen over: back to the lobby (lobby sessions), else the next match starts at once.
+func _after_end_screen(serial: int) -> void:
 	# The serial guards against a timer from a previous game session.
 	if not active or serial != _match_serial or not multiplayer.is_server():
+		return
+	if returns_to_lobby:
+		Net.server_return_to_lobby()
 		return
 	_reset_scores()
 	state = State.PLAYING
@@ -264,6 +273,7 @@ func _sync_full(snapshot: Dictionary) -> void:
 	deaths.assign(snapshot["deaths"])
 	winner_id = snapshot["winner_id"]
 	awards = snapshot["awards"]
+	returns_to_lobby = snapshot["returns_to_lobby"]
 	Events.scores_changed.emit()
 	if state == State.ENDED:
 		Events.match_ended.emit(winner_id, awards)
@@ -290,13 +300,14 @@ func _on_kill(killer_id: int, victim_id: int, weapon_name: String, headshot: boo
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _on_match_ended(new_winner_id: int, new_awards: Array, end_time: float) -> void:
+func _on_match_ended(new_winner_id: int, new_awards: Array, end_time: float, to_lobby: bool) -> void:
 	if not _from_host():
 		return
 	state = State.ENDED
 	winner_id = new_winner_id
 	awards = new_awards
 	end_screen_left = end_time
+	returns_to_lobby = to_lobby
 	Events.match_ended.emit(winner_id, awards)
 
 
