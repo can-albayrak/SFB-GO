@@ -3,11 +3,11 @@
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Şu anki aşama:** 8 – Görsel/his geçişi ve içerik (v0.10.0 yayında). Aşama 7 haritaları: Ice Yard oynandı ve onaylandı, Train Factory (CS dm_trainfactory) henüz oynanmadı, AVM rafta. Sınıflar (Hound, Ghost, Trickster, Phantom, Gambler dahil) Can'ın testinden geçti, genel olarak iyi; küçük hata/iyileştirme zamanla. Steam sürümü ve iki bilgisayarlı ağ testi Can'ın denemesinde çalıştı (2026-10-06).
-**Son güncelleme:** 2026-10-06
+**Son güncelleme:** 2026-10-07
 
 ## Sıradaki oturum
 
-**En yeni (2026-10-06, vuruş hissi, ÇALIŞTIRILMADI):**
+**En yeni (2026-10-06, vuruş hissi; 2026-10-07 evde doğrulandı: smoke 224/0, ağ 29 + 25, geç katılma 28 + 28):**
 - **Vuruş geri bildirimi:** kafa için ayrı "ding" (`hit_head.wav`, `tools/gen_sfx.py hit_head`), bacak alçak tık, öldürmede büyük/kalın/uzun kırmızı X, her marker "pop" ile çıkar. Kafa ve öldürmede kısa görsel görüş darbesi (`CameraFeelDef.hit_head_kick`, `kill_kick`). Zaman yavaşlatma (hit stop) yapılmadı: `Engine.time_scale` ağ saatini bozar.
 - **Tahminli marker:** `HitscanWeapon._predict_hit` + `HitFeedback`; tarama atışı canlı bir oyuncuya değince marker/ses ping beklemeden gelir, host onayı sadece yükseltir (kafa/öldürme) ve sayıyı ekler.
 - **Mermi izi ve kan:** `ImpactEffects` (delik + parçacık, yüzey `MapDef.impact_surface`: Ice Yard kar, Train Factory metal, diğerleri taş; collider `surface` meta'sı ezer), kan herkese (`Game._blood_fx`). Eski siyah nokta kaldırıldı.
@@ -420,3 +420,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-06 | 5/8 | Sonar: Test Range mankenleri (`TargetDummy.reveal`, sahibinde), reveal tüm model MeshInstance'larına (`SoldierRig.reveal`/`clear_reveal`), Decoy kırmızı kopyalamıyor, renk daha belirgin. Test Range'de sınıf değişimi canı doldurur (`loadout_swap_anytime`), `_apply_loadout` sonunda `health_changed`, sınıf değişimi pelerini bozar. `ui_preview --ability`. Smoke 219/0. |
 | 2026-10-06 | 8 | Can'ın paketleri: AK-47 (AR, 18/0,13, kendi sesi `make_ak_shot.py`, `WeaponDef.fire_sounds`), Glock 17, USP-S (USP + paketin susturucusu, `attach`), Colt SAA revolver, çift namlu, bazooka (RL), Heavy GL. `process_weapon_models.py`: mirror modifier uygulanır, FBX animasyonu silinir, `opaque`, `attach`. Sahneler elle (model kaydırma, ASSETS.md). İkonlar yeniden. Smoke 219/0. |
 | 2026-10-06 | 8 | MP5SD modeli (Can'ın fbx'i, susturuculu): AK duruşuyla, model kaydırmalı sahne, ikon. |
+| 2026-10-07 | 8 | `origin/main` (lobiye dönüş + vuruş hissi, iş bilgisayarında çalıştırılmamıştı) `claude/game-testing-fixes-218150`'e birleştirildi. Çakışma: AK-47 yeni tekme profiline geçti (`view_kick` 1,6, `kick_recover_mult` 1,0, `kick_roll_mult` 0,9; Burst 1,2 ile Deagle 5 arası). Evde doğrulandı: smoke 224/0, ağ 29 + 25, geç katılma 28 + 28. Diğer bütün dallar zaten main'in içinde. |
