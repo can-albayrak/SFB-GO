@@ -790,6 +790,7 @@ func _set_alive(value: bool) -> void:
 			status.reset_local()
 			if was_alive and not is_local: # Others see the body fall; your own view stays clean.
 				get_parent().add_child(Corpse.create(model))
+				Sfx.play_at(get_parent(), Sfx.LAND, global_position, Sfx.LAND_DB, Sfx.STEP_UNIT_SIZE, Sfx.STEP_MAX_DISTANCE) # Body hits the floor.
 		else:
 			rig.reset_motion()
 		_apply_alive_state()

@@ -168,6 +168,8 @@ func _icon_parts() -> Array[Array]:
 func _set_state(is_available: bool, respawn_left: float) -> void:
 	if multiplayer.get_remote_sender_id() > 1:
 		return
+	if available and not is_available and is_inside_tree():
+		Sfx.play_at(self, Sfx.PICKUP, global_position + Vector3.UP * 0.6, Sfx.STEP_DB + 4.0, Sfx.STEP_UNIT_SIZE, Sfx.STEP_MAX_DISTANCE)
 	available = is_available
 	_respawn_left = respawn_left
 	_show(is_available)

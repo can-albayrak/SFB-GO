@@ -195,7 +195,7 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | Bazooka = Rocket Launcher, Grenade Launcher (Heavy Weapons Pack) | `rocket_launcher.glb`, `grenade_launcher.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
 | Free Modular PSX Desert Eagle (sade: dürbünsüz, normal şarjör) | `deagle.glb` | Can'ın zip'i (2026-10-07) | Gataki | Paketin lisansı: oyunda kullanım serbest, kredi isteğe bağlı, dosyaların ayrıca dağıtımı yasak |
 | C4 = Sticky Bomb | `sticky_bomb.glb` | Can'ın glb'si (2026-10-07) | ? | ? |
-| Sesler: 9mm Para Pistol Shot (Desert Eagle), 50 cal MG (LMG, 4 tek atış), Shoot And Reload (Scout), Pistol Cock (şarjör), Small Explosion (bombaatar), Bullet Fly Buy (vızıltı) | `assets/audio/{shot_deagle,shot_lmg_*,shot_bolt,reload_click,explosion_small,whiz}.wav` (`tools/convert_mp3_sfx.py`) | Can'ın mp3'leri (2026-10-07) | ? | ? |
+| Sesler: 9mm Para Pistol Shot (Desert Eagle), 50 cal MG (LMG, 4 tek atış), Shoot And Reload (Scout), Pistol Cock (şarjör, boş tetik, silah çekme), Small Explosion (bombaatar), Bullet Fly Buy (vızıltı) | `assets/audio/{shot_deagle,shot_lmg_*,shot_bolt,reload_click,dry_fire,weapon_draw,explosion_small,whiz}.wav` (`tools/convert_mp3_sfx.py`) | Can'ın mp3'leri (2026-10-07) | ? | ? |
 | MP5 PSX (susturuculu) = MP5SD | `mp5sd.glb` | Can'ın fbx'i (2026-10-06) | ? | Lisans dosyası yok |
 | PSX Revolver (Colt Single Action) = Revolver | `revolver.glb` | Can'ın rar'ı (2026-10-06) | ? | Lisans dosyası yok |
 | AK-47 atış sesi (Sniper_Shot 1–3'ten, %12 hızlı, 0,55 sn + alçak vuruş) | `assets/audio/shot_ak_{1,2,3}.wav` (`tools/make_ak_shot.py`) | FREE FPS SFX Pack | ? | ? |

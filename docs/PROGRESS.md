@@ -11,6 +11,7 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 - **Train Factory rafa kalktı** (lobide yok). Lobide: Ice Yard, Snow Town, Test Range.
 - **Ice Yard'a derinlik:** aynı oynanış düzeni; gerçek dokular, konteynerler, donmuş çeşme, lambalar, saçaklı yuvalar, kar yolları, duvar ötesinde depo/su kulesi/çam. `tools/maps/build_iceworld.py` artık `map_kit.py` ile.
 - **Yeni harita Snow Town** (fy_snow ruhunda, birebir değil: elimizde fy_snow dosyası yok). `tools/maps/build_snowtown.py`. Harita testi 178/0.
+- **Yeni sesler:** boş şarjörde tetik tıkı (airdrop silahı boşalınca da), silah çekme (sadece sahibi duyar), pickup alınca çan (3D), kendi vurulunca boğuk darbe, ölen oyuncunun yere düşmesi (başkaları duyar). `gen_sfx.py pickup hurt`, `convert_mp3_sfx.py` dry_fire / weapon_draw.
 - **Blender:** bağlantı çalışıyor ama MCP panelinde Poly Haven / Sketchfab / Poly Pizza kutuları kapalı; dokular Poly Haven API'sinden doğrudan çekildi.
 
 **Önceki (2026-10-07 akşam):**

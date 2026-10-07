@@ -64,6 +64,7 @@ func _on_health_changed(health: int, max_health: int) -> void:
 	if _last_health >= 0 and health < _last_health and health > 0:
 		var share: float = clampf(float(_last_health - health) / maxf(def.hurt_full_damage, 1.0), def.hurt_min_share, 1.0)
 		_flash = maxf(_flash, def.hurt_flash_alpha * share)
+		Sfx.play_ui(self, Sfx.HURT, Sfx.UI_DB + 2.0 * share)
 	_last_health = health
 	var left: float = float(health) / float(maxi(max_health, 1))
 	_lasting = 0.0

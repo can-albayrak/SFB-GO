@@ -11,6 +11,7 @@ Cuts (seconds in the source; picked from its loudness envelope):
 - Pistol Cock -> reload_click (every magazine reload starts with it)
 - Small Explosion -> explosion_small (Grenade Launcher round)
 - Bullet Fly Buy -> whiz (another player's bullet passing close)
+- Pistol Cock (first click) -> dry_fire (trigger on an empty gun); (second click) -> weapon_draw
 """
 
 import array
@@ -36,6 +37,8 @@ CUTS = {
     "reload_click": ("Pistol Cock.mp3", 0.1, 0.6),
     "explosion_small": ("Small Explosion.mp3", 0.0, 1.23),
     "whiz": ("Bullet Fly Buy.mp3", 0.08, 0.6),
+    "dry_fire": ("Pistol Cock.mp3", 0.16, 0.3),
+    "weapon_draw": ("Pistol Cock.mp3", 0.33, 0.62),
 }
 
 

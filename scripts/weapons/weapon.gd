@@ -8,6 +8,7 @@ signal ammo_changed(ammo: int, magazine_size: int)
 ## Slow guns (bolt, pump, launchers) start settling the kick this soon after a shot instead of
 ## after their whole fire interval; otherwise the view drifts down long after you re-aimed.
 const RECOIL_SETTLE_WAIT_CAP: float = 0.2
+const DRY_FIRE_REPEAT: float = 0.3 ## Seconds between empty clicks while the trigger is held.
 signal reload_changed(is_reloading: bool)
 
 var def: WeaponDef
@@ -43,8 +44,12 @@ func setup(weapon_def: WeaponDef, owner_player: Player) -> void:
 func draw() -> void:
 	visible = true
 	_cooldown = def.equip_time
+	if player == null or not player.is_local:
+		return # Every peer equips (loadouts are rebuilt everywhere); only the owner hears it.
 	if def.fire_type == WeaponDef.FireType.MELEE:
 		Sfx.play_ui(self, Sfx.KNIFE_DRAW) # The blade scraping out, like CS.
+	elif def.uses_ammo:
+		Sfx.play_ui(self, Sfx.WEAPON_DRAW, Sfx.UI_DB - 4.0)
 
 
 func holster() -> void:
@@ -104,6 +109,8 @@ func tick(delta: float, cmd: PlayerCommand) -> void:
 	if not wants_fire or _cooldown > 0.0:
 		return
 	if def.uses_ammo and ammo <= 0:
+		Sfx.play_ui(self, Sfx.DRY_FIRE) # Click, then the reload starts (an airdrop gun just clicks).
+		_cooldown = DRY_FIRE_REPEAT
 		_start_reload()
 		return
 

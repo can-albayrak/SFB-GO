@@ -132,6 +132,15 @@ def main():
         return out
     write("dice_good", notes([660, 990]))
     write("dice_bad", notes([330, 220]))
+    # Pickup taken: a short bright two-note chime.
+    write("pickup", [(math.sin(2 * math.pi * (880 if i < 0.07 * RATE else 1320) * i / RATE)
+                      + 0.3 * math.sin(2 * math.pi * 2640 * i / RATE)) * math.exp(-(i % int(0.07 * RATE)) / (0.05 * RATE))
+                     for i in range(int(0.2 * RATE))])
+    # Hurt (own player hit): a dull body thump with a little grit.
+    random.seed(11)
+    thud = thump(0.25, 140, 55, 0.06, 1.0)
+    grit = [a * b for a, b in zip(lowpass(noise(0.25), 900), env(int(0.25 * RATE), 0.001, 0.03))]
+    write("hurt", mix(thud, [g * 0.5 for g in grit]))
 
 
 if __name__ == "__main__":
