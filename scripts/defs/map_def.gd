@@ -8,3 +8,6 @@ extends Resource
 @export_file("*.tscn") var scene_path: String
 ## Shown next to the name in the lobby, e.g. "4-6".
 @export var players_hint: String
+## Bullet impact look on this map's walls (ImpactEffects.PROFILES: stone, snow, ice, metal).
+## A collider with a "surface" meta overrides it.
+@export var impact_surface: StringName = &"stone"

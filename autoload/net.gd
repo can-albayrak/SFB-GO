@@ -38,6 +38,9 @@ var state_peers: Array[int] = []
 var last_message: String = ""
 ## True while the lobby is open (host: new peers go to the lobby; client: we are in it).
 var in_lobby: bool = false
+## Host: this session was opened through the lobby, so a finished match returns to it
+## (command-line --host and the offline range have no lobby and restart in place).
+var uses_lobby: bool = false
 ## Lobby "ready" flags by peer id (host-owned, mirrored to everyone).
 var ready_peers: Dictionary[int, bool] = {}
 ## Client: a late joiner picks a loadout before entering (false for command-line joins).
@@ -89,6 +92,7 @@ func host_with_peer(peer: MultiplayerPeer, player_name: String, use_lobby: bool 
 	multiplayer.multiplayer_peer = peer
 	player_names[1] = _clean_name(player_name, 1)
 	in_lobby = use_lobby
+	uses_lobby = use_lobby
 	if use_lobby:
 		lobby_kill_target = Match.DEFAULT_RULES.kill_target
 		lobby_minutes = Match.DEFAULT_RULES.time_limit / 60.0
@@ -150,6 +154,24 @@ func server_start_match(kill_target: int, minutes: float, map_index: int) -> voi
 			_welcome.rpc_id(peer_id, map_path)
 
 
+## Host: the match is over. Everyone goes back to the lobby with the settings as they were;
+## ready flags start cleared and the host presses Start again.
+func server_return_to_lobby() -> void:
+	assert(multiplayer.is_server(), "server_return_to_lobby is host-only")
+	if in_lobby or not uses_lobby:
+		return
+	in_lobby = true
+	ingame_peers.clear()
+	state_peers.clear()
+	ready_peers.clear()
+	for peer_id: int in player_names:
+		if peer_id != 1:
+			ready_peers[peer_id] = false
+			_return_to_lobby.rpc_id(peer_id)
+	_broadcast_lobby() # Reliable and ordered after the RPCs above: clients show a clean lobby.
+	get_tree().change_scene_to_file(LOBBY_PATH)
+
+
 ## Host, lobby: new rules picked in the lobby UI; everyone in the lobby sees them.
 func server_set_lobby_settings(kill_target: int, minutes: float, map_index: int) -> void:
 	assert(multiplayer.is_server(), "server_set_lobby_settings is host-only")
@@ -197,6 +219,7 @@ func _reset_state() -> void:
 	map_path = DEFAULT_MAP_PATH
 	last_message = ""
 	in_lobby = false
+	uses_lobby = false
 	pick_on_join = false
 	_session_serial += 1
 	ready_peers.clear()
@@ -298,6 +321,13 @@ func _welcome(host_map_path: String) -> void:
 @rpc("authority", "call_remote", "reliable")
 func _welcome_lobby() -> void:
 	in_lobby = true
+	get_tree().change_scene_to_file(LOBBY_PATH)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _return_to_lobby() -> void:
+	in_lobby = true
+	ready_peers.clear()
 	get_tree().change_scene_to_file(LOBBY_PATH)
 
 

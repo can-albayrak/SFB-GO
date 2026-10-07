@@ -34,6 +34,7 @@ Herkes tek başına savaşır; kill hedefine ilk ulaşan ya da süre bittiğinde
 - Lider oyuncunun üstünde taç ikonu
 - Ölüm ekranı (3 sn): öldüren, silahı ve kalan canı görünür; sınıf menüsü açık
 - Maç sonu ödülleri: en çok ölen, en çok bıçak kill'i, en uzun kafa vuruşu, en çok kendini patlatan
+- Maç sonu: sonuç ekranı (`end_screen_time`) bitince herkes **lobiye döner** (ayarlar korunur, hazır işaretleri sıfırlanır, host yeniden Start der). Lobisiz oturumlarda (komut satırı `--host`, offline Test Range) yerinde yeni maç başlar.
 - Anonslar: distopik hoparlör sesi ("Double Kill", "Killing Spree", "Airdrop Incoming"). **Anons metinleri ve sesleri Can hazırlar**; silah ve animasyon sesleri ayrı iş.
 
 **Lobi:** Host kill hedefi, süre ve haritayı seçer. Oyuncular kendi isimlerini girer.
@@ -87,11 +88,14 @@ Hedef: **Apex gibi akıcı, CS gibi kesin**; savaş hiç durmasın. Aşağıdaki
 
 ### Vuruş hissi (hedef)
 
-Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi vermez); ses, marker ve hasar sayısı aynı anda çalışır. Değerler ve görseller oynadıkça ayarlanır.
+Tarama (hitscan) atışlarında marker ve tık sesi, atanın kendi izi canlı bir oyuncuya değdiği anda gelir (ping beklemez); host onayı bunu kafa/öldürme olarak yükseltir ve hasar sayısını ekler. Diğer silahlarda (pompalı, bıçak, el bombası...) her şey host onayından sonra gelir. Marker çıkarken büyük başlar ve oturur (pop). Değerler ve görseller oynadıkça ayarlanır.
 
 | Konu | Karar |
 | --- | --- |
-| Hit marker | Klasik **X**. Gövde/bacak vuruşu **beyaz**, kafa vuruşu **kırmızı**. |
+| Hit marker | Klasik **X**. Gövde/bacak vuruşu **beyaz**, kafa vuruşu **kırmızı**; **öldürmede** daha büyük, kalın ve uzun kırmızı X. |
+| Vuruş sesi | Gövde: tık. Bacak: daha alçak tık. Kafa: parlak "ding". Öldürme: kill sesi (kafadan öldürmede ding de üstüne). |
+| Görüş darbesi | Kafa vuruşunda ve öldürmede kısa görsel kamera/silah darbesi (nişan değişmez). Zaman yavaşlatma (hit stop) yok: oyun ağ saatiyle çalışır. |
+| Mermi izi ve efekt | Duvarda mermi deliği + parçacık patlaması; harita malzemesine göre (Ice Yard kar, Train Factory metal sıçraması; `MapDef.impact_surface`, collider `surface` meta'sı ezer). Oyuncuya isabette kan (herkes görür). |
 | Crosshair ayarı | Ayarlar menüsünde: renk, boyut, boşluk (mevcut karar), ayrıca hit marker'ın görünürlüğü. Maç içinden de erişilir. |
 | Hasar sayıları | Maçta da gösterilir (sadece vuranın ekranında). Test range'de de var. |
 | Test mankenleri | Sadece `test_range`'de. Host'un oynattığı maç haritalarında manken olmaz. |
@@ -167,7 +171,7 @@ Vuruş geri bildirimi host onayından sonra gelir (yanlış "vurdum" hissi verme
 | Marksman Rifle | Kafa 1, gövde 2, bacak 3 atış | Hızlı atış ve şarjör, belirgin geri tepme |
 
 - **Güçler (15 sn):** Grapple (yüksek noktaya çekilme) · Decoy (yerinde hologram bırakma)
-- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz çok düşük isabet ve nişangah yok (CS keskin nişancıları gibi). Dürbün sağ tıkla yavaşça açılır (~0,3 sn); tam açılana kadar isabet düşük kalır (anında quick scope yok).
+- **Dengeleyiciler:** Dürbünde yavaş yürüme ve sallanma, namlu parlaması, dürbünsüz çok düşük isabet ve nişangah yok (CS keskin nişancıları gibi). Dürbün sağ tıkla yavaşça açılır (~0,3 sn); tam açılana kadar isabet düşük kalır (anında quick scope yok). **Bolt-action (Heavy Rifle, Scout):** her atış dürbünü kapatır; tekrar bakmak için sağ tık bırakılıp yeniden basılır (CS AWP). Marksman kapatmaz.
 - **Namlu parlaması:** Sadece dürbün açıkken. Haritanın her yerinden görünür (mesafe sınırı yok), yeri net belli olur.
 - **Yedek:** Tabanca
 
@@ -383,7 +387,8 @@ Distopik, 2000'lerin başı oyun estetiği: az poligon, fotoğraf tabanlı doku,
 
 Can'ın onayı olmadan yapılmaz; sadece not.
 
-- **Sonra bakılacak mekanikler (2026-10-05, Can: "kalsın sonra bakarız"):** ölünce ana silahın yere düşmesi (CS gibi, alınabilir); seri ödülleri (3 kill: herkes 2 sn görünür, 5 kill: kişisel airdrop, duyurulur); lideri öldürene +1 puan ve can; intikam ("REVENGE", ekstra can); maç kuralları (sadece kafa, bıçak 2x, sadece tabanca, büyük kafalar); Train Factory trenleri (siren + geçen tren öldürür); kill-cam; anonsçu sesleri.
+- **Train Factory trenleri (sonra bakılacak):** siren + geçen tren öldürür.
+- **Elenenler (2026-10-06, Can: "discard"):** ölünce ana silahın düşmesi, seri ödülleri, lideri öldürene bonus, REVENGE, maç kuralı varyantları (sadece kafa, bıçak 2x, sadece tabanca, büyük kafalar), kill-cam.
 - **Gun Game (Arms Race):** Her kill'de sıradaki silaha geçilir, son silah bıçak; ilk bıçak kill'i alan kazanır. Sınıf gücü kapalı ya da açık olabilir. Mevcut silah listesiyle yapılabilir.
 - **Reddedilenler (2026-10-05):** Hitman, Vortex, Mirror, Ricochet, Leech, Marked, Saboteur (fizik ya da çok karmaşık; Thief'in silah çalma fikri Trickster'a eklendi). Hex (ters tuşlar) belki ileride.
 - **Daha önce reddedilenler:** Pyro (molotof) ve Engineer (taret) oyunu bozuyor; taret/konuşlandırılan yapı yok. Bulldog/tank ve Saul sınıfı da yok. Oyun içi sesli sohbet yok (Discord).

@@ -41,6 +41,7 @@ const WARNING: AudioStream = preload("res://assets/audio/warning.wav")
 const KNIFE_DRAW: AudioStream = preload("res://assets/audio/knife_draw.wav")
 const LAND: AudioStream = preload("res://assets/audio/land.wav")
 const HIT: AudioStream = preload("res://assets/audio/hit.wav")
+const HIT_HEAD: AudioStream = preload("res://assets/audio/hit_head.wav")
 const KILL: AudioStream = preload("res://assets/audio/kill.wav")
 const SWING: AudioStream = preload("res://assets/audio/swing.wav")
 const STEPS: Array[AudioStream] = [
@@ -60,6 +61,7 @@ const SUPPRESSED_MAX_DISTANCE: float = 12.0 ## A silenced shot is not heard furt
 const STEP_UNIT_SIZE: float = 5.0
 const STEP_MAX_DISTANCE: float = 32.0
 const UI_DB: float = -8.0
+const LEG_HIT_PITCH: float = 0.7 ## A leg hit is the body tick, lower and duller.
 const PITCH_JITTER: float = 0.06
 const UNIT_SIZE: float = 8.0 ## Metres at which a sound is at its full volume.
 const MAX_DISTANCE: float = 120.0
@@ -85,15 +87,33 @@ static func play_at(parent: Node, stream: AudioStream, point: Vector3, volume_db
 
 
 ## Non-positional (hit marker, kill confirm).
-static func play_ui(parent: Node, stream: AudioStream, volume_db: float = UI_DB) -> void:
+static func play_ui(parent: Node, stream: AudioStream, volume_db: float = UI_DB, pitch: float = 1.0) -> void:
 	if parent == null or not parent.is_inside_tree() or DisplayServer.get_name() == "headless":
 		return
 	var audio := AudioStreamPlayer.new()
 	audio.stream = stream
 	audio.volume_db = volume_db + _master_db()
+	audio.pitch_scale = pitch
 	audio.finished.connect(audio.queue_free)
 	parent.add_child(audio)
 	audio.play()
+
+
+## Hit marker sound for a hit the shooter sees confirmed: body tick, duller leg tick, bright
+## head ding; a kill plays the kill chime (with the head ding on top for a headshot kill).
+static func hit_confirm(parent: Node, zone: Hitbox.Zone, killed: bool) -> void:
+	if killed:
+		play_ui(parent, KILL)
+		if zone == Hitbox.Zone.HEAD:
+			play_ui(parent, HIT_HEAD)
+		return
+	match zone:
+		Hitbox.Zone.HEAD:
+			play_ui(parent, HIT_HEAD)
+		Hitbox.Zone.LEG:
+			play_ui(parent, HIT, UI_DB, LEG_HIT_PITCH)
+		_:
+			play_ui(parent, HIT)
 
 
 static func shot(parent: Node, def: WeaponDef, point: Vector3) -> void:

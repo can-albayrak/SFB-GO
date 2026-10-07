@@ -343,6 +343,19 @@ func _has_line_of_sight(from: Vector3, to: Vector3) -> bool:
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 
+## Host: blood where a player was hit, drawn on every peer (cosmetic).
+func server_show_blood(point: Vector3, direction: Vector3) -> void:
+	assert(multiplayer.is_server(), "server_show_blood is host-only")
+	Net.broadcast(self, &"_blood_fx", [point, direction])
+
+
+@rpc("any_peer", "call_local", "unreliable")
+func _blood_fx(point: Vector3, direction: Vector3) -> void:
+	if multiplayer.get_remote_sender_id() > 1:
+		return
+	ImpactEffects.spawn_blood(players_root, point, direction)
+
+
 @rpc("any_peer", "call_local", "reliable")
 func _explosion_fx(kind: GrenadeDef.Kind, point: Vector3) -> void:
 	if multiplayer.get_remote_sender_id() > 1:

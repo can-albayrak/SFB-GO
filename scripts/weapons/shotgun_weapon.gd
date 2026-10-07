@@ -18,7 +18,7 @@ func _fire() -> void:
 		var hit: Dictionary = _trace(origin, pellet_dir)
 		var end_point: Vector3 = hit["position"] if not hit.is_empty() else origin + pellet_dir * def.max_range
 		if not hit.is_empty() and not (hit["collider"] is Hitbox):
-			ShotEffects.spawn_impact(player.get_parent(), end_point)
+			ImpactEffects.spawn(player.get_parent(), end_point, hit["normal"], hit["collider"])
 		ShotEffects.spawn_tracer(player.get_parent(), muzzle.global_position, end_point)
 	ShotEffects.spawn_muzzle_flash(muzzle)
 	Sfx.shot(player.get_parent(), def, muzzle.global_position)
@@ -65,6 +65,7 @@ func server_fire(origin: Vector3, dir: Vector3) -> Vector3:
 		var dealt: float = receiver.get(&"last_damage_dealt")
 		if dealt > 0.0 or killed: # A raised shield blocked it: no marker, no number.
 			player.confirm_hit.rpc_id(shooter_id, zone, killed, dealt, point)
+			server_show_blood(point)
 	return origin + dir * def.max_range
 
 

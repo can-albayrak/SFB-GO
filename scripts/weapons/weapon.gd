@@ -134,12 +134,21 @@ func _shoot_once() -> void:
 	_since_shot = 0.0
 	_fire() # Aim is read before the kick, so the first shot is always accurate.
 	_apply_recoil_kick()
+	if def.unscope_on_fire and player.is_scoped:
+		player.drop_scope()
 	ammo_changed.emit(ammo, def.magazine_size)
 
 
 ## Owning client: local effects and the fire request to the host.
 func _fire() -> void:
 	pass
+
+
+## Host: blood where this weapon hurt a player, drawn on every peer.
+func server_show_blood(point: Vector3) -> void:
+	var game: Game = Game.find(get_tree())
+	if game != null:
+		game.server_show_blood(point, (point - player.global_position).normalized())
 
 
 ## Host only: resolves the shot and applies damage. Returns the shot end point.

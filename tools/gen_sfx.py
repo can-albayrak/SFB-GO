@@ -1,4 +1,4 @@
-"""Generates the procedural sound effects in assets/audio (rifle, light, rail, hit, kill).
+"""Generates the procedural sound effects in assets/audio (rifle, light, rail, hit, hit_head, kill).
 Run: python tools/gen_sfx.py [name ...]  (names: only those files, e.g. dice dice_good)"""
 import math
 import os
@@ -82,6 +82,9 @@ def main():
     # "FREE FPS SFX Pack" now (tools/convert_sfx_pack.sh).
     # Hit marker tick and kill ding.
     write("hit", [math.sin(2 * math.pi * 1400 * i / RATE) * math.exp(-i / (0.03 * RATE)) for i in range(int(0.1 * RATE))])
+    # Headshot ding: a bright, metallic ping.
+    write("hit_head", [(math.sin(2 * math.pi * 2600 * i / RATE) + 0.6 * math.sin(2 * math.pi * 3900 * i / RATE)) * math.exp(-i / (0.045 * RATE))
+        + 0.5 * math.sin(2 * math.pi * 1300 * i / RATE) * math.exp(-i / (0.09 * RATE)) for i in range(int(0.22 * RATE))])
     write("kill", [(math.sin(2 * math.pi * 1046 * i / RATE) + 0.5 * math.sin(2 * math.pi * 1568 * i / RATE)) * math.exp(-i / (0.18 * RATE)) for i in range(int(0.5 * RATE))])
     # Knife swing and draw are recorded clips now (docs/ASSETS.md).
     # Silenced shot: a short muffled "pfft" (no boom), a mechanical click on top.
