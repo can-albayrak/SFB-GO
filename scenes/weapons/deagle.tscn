@@ -1,18 +1,18 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/hitscan_weapon.gd" id="1_hitscan"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/real/pistol.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/deagle.glb" id="2_model"]
 
 [node name="Deagle" type="Node3D"]
 position = Vector3(0.14, -0.2, -0.56)
 script = ExtResource("1_hitscan")
 
 [node name="Model" parent="." instance=ExtResource("2_model")]
-position = Vector3(0, 0.0026, 0.0065)
+position = Vector3(0, 0.0047, -0.0031)
 scale = Vector3(1.188, 1.188, 1.188)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0.0477, -0.1515)
+position = Vector3(0.0015, 0.0702, -0.2276)
 
 [node name="RightHand" type="Marker3D" parent="."]
 position = Vector3(0, -0.033, 0.0286)

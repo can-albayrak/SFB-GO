@@ -235,7 +235,7 @@ func _physics_process(delta: float) -> void:
 		ability.tick(delta)
 		if cmd.ability and ability.try_use(get_aim_origin(), -get_aim_basis().z):
 			requests.send_ability(get_aim_origin(), -get_aim_basis().z)
-			if ability is GrenadeAbility:
+			if ability is GrenadeAbility and (ability as GrenadeAbility).threw_last():
 				effects.report_action(SoldierRig.Action.THROW, 0.0) # Others see the throw.
 	var airdrops: AirdropManager = AirdropManager.find(get_tree())
 	if airdrops != null:
@@ -933,6 +933,6 @@ func _respawn_at(spawn_position: Vector3, yaw: float, life: int) -> void:
 		for weapon: Weapon in weapons:
 			weapon.refill()
 		if ability != null:
-			ability.cooldown_left = 0.0
+			ability.reset_for_respawn()
 	apply_pose(false)
 	reset_physics_interpolation()

@@ -3,8 +3,11 @@
 [ext_resource type="Script" path="res://scripts/defs/grenade_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/projectiles/launcher_grenade.tscn" id="2_projectile"]
 
+[ext_resource type="AudioStream" path="res://assets/audio/explosion_small.wav" id="snd_0"]
+
 [resource]
 script = ExtResource("1_def")
+explosion_sound = ExtResource("snd_0")
 id = &"grenade_launcher_round"
 display_name = "Grenade Launcher"
 kind = 0

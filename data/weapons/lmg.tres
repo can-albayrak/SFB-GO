@@ -4,8 +4,14 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/lmg.tscn" id="2_scene"]
 
 [ext_resource type="PackedScene" path="res://assets/models/weapons/real/lmg.glb" id="3_world"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_lmg_1.wav" id="snd_0"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_lmg_2.wav" id="snd_1"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_lmg_3.wav" id="snd_2"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_lmg_4.wav" id="snd_3"]
+
 [resource]
 script = ExtResource("1_def")
+fire_sounds = Array[AudioStream]([ExtResource("snd_0"), ExtResource("snd_1"), ExtResource("snd_2"), ExtResource("snd_3")])
 id = &"lmg"
 display_name = "LMG"
 damage = 14.0

@@ -125,6 +125,13 @@ func _steer(delta: float) -> void:
 	global_basis = Basis.looking_at(new_dir)
 
 
+## Host: set off now (Sticky Bomb's second Q).
+func server_detonate() -> void:
+	if is_queued_for_deletion():
+		return
+	_explode()
+
+
 func _explode() -> void:
 	set_physics_process(false)
 	var game: Game = Game.find(get_tree())

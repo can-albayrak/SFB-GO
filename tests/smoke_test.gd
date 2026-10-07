@@ -213,6 +213,21 @@ func _test_new_class_abilities() -> void:
 	_check(_player.get_parent().get_node_or_null("PhantomMark") == null, "Phantom Recall removes the mark")
 	_check(not ability.server_try_use(_player.get_aim_origin(), forward), "Phantom is on cooldown after recalling")
 
+	await _set_loadout(_code_for(&"volcano")) # Sticky Bomb: Q throws, Q again sets it off.
+	ability = _player.ability
+	_check(ability is StickyBombAbility, "Volcano's first ability is the two-press Sticky Bomb")
+	ability.host_ready_at = -INF
+	_check(ability.server_try_use(_player.get_aim_origin(), forward), "Sticky Bomb thrown")
+	await _frames(10)
+	var bombs: Array[Node] = _game.projectiles_root.get_children().filter(func(n: Node) -> bool: return n is Grenade and (n as Grenade).def.sticky)
+	_check(bombs.size() == 1, "Sticky Bomb waits for the second press (no 2 s fuse)")
+	_check(ability.server_try_use(_player.get_aim_origin(), forward), "second Q sets the Sticky Bomb off")
+	await _frames(2)
+	bombs = _game.projectiles_root.get_children().filter(func(n: Node) -> bool: return n is Grenade and (n as Grenade).def.sticky and not n.is_queued_for_deletion())
+	_check(bombs.is_empty(), "Sticky Bomb gone after the second press")
+	_check(not ability.server_try_use(_player.get_aim_origin(), forward), "Sticky Bomb on cooldown after going off")
+	_player.health = _player.class_def.max_health
+
 	fake.queue_free()
 	await _set_loadout(Loadout.default_code())
 	await _frames(2)

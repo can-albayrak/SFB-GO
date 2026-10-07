@@ -61,6 +61,12 @@ func get_hud_window() -> Array:
 	return []
 
 
+## Owner: a new life starts with the ability ready (Can, 2026-10-07); subclasses also drop any
+## window left open from the last life.
+func reset_for_respawn() -> void:
+	cooldown_left = 0.0
+
+
 func _use_local(_origin: Vector3, _dir: Vector3) -> void:
 	pass
 

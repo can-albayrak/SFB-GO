@@ -34,6 +34,8 @@ const EXPLOSION: Array[AudioStream] = [
 	preload("res://assets/audio/explosion_3.wav"), preload("res://assets/audio/explosion_4.wav"),
 ]
 const SHOTGUN_PUMP: AudioStream = preload("res://assets/audio/shotgun_pump.wav")
+const RELOAD_CLICK: AudioStream = preload("res://assets/audio/reload_click.wav")
+const WHIZ: AudioStream = preload("res://assets/audio/whiz.wav")
 const SCOPE_IN: AudioStream = preload("res://assets/audio/scope_in.wav")
 const GRAPPLE_SHOT: AudioStream = preload("res://assets/audio/grapple_shot.wav")
 const GRAPPLE_HOOK: AudioStream = preload("res://assets/audio/grapple_hook.wav")
@@ -55,6 +57,7 @@ const SHOT_DB: float = -4.0
 const EXPLOSION_DB: float = 2.0
 const STEP_DB: float = -8.0
 const LAND_DB: float = -5.0
+const WHIZ_DB: float = -6.0
 const SUPPRESSED_DB: float = -10.0
 const SUPPRESSED_MAX_DISTANCE: float = 12.0 ## A silenced shot is not heard further away.
 ## Footsteps carry like CS (heard through a wall or two, ~30 m), panned hard to their side.
@@ -142,8 +145,13 @@ static func shot_stream(def: WeaponDef) -> AudioStream:
 	return SHOT_LIGHT
 
 
-static func explosion(parent: Node, point: Vector3) -> void:
-	play_at(parent, EXPLOSION.pick_random(), point, EXPLOSION_DB, UNIT_SIZE * 3.0)
+static func explosion(parent: Node, point: Vector3, own: AudioStream = null) -> void:
+	play_at(parent, own if own != null else EXPLOSION.pick_random(), point, EXPLOSION_DB, UNIT_SIZE * 3.0)
+
+
+## Another player's bullet passing close to our head (the shot line, not a hit).
+static func whiz(parent: Node, point: Vector3) -> void:
+	play_at(parent, WHIZ, point, WHIZ_DB, STEP_UNIT_SIZE, STEP_MAX_DISTANCE)
 
 
 static func step(parent: Node, point: Vector3) -> void:
@@ -156,10 +164,14 @@ static func land(parent: Node, point: Vector3) -> void:
 
 
 ## A reload starting (owner and, through SoldierRig actions, everyone else): pump-action guns
-## rack the pump; other guns are silent for now.
+## rack the pump, every other gun a pistol-cock click.
 static func reload(parent: Node, def: WeaponDef, point: Vector3) -> void:
-	if def != null and not def.pellet_pattern.is_empty():
+	if def == null:
+		return
+	if not def.pellet_pattern.is_empty():
 		play_at(parent, SHOTGUN_PUMP, point, STEP_DB + 2.0, STEP_UNIT_SIZE, STEP_MAX_DISTANCE)
+	else:
+		play_at(parent, RELOAD_CLICK, point, STEP_DB, STEP_UNIT_SIZE, STEP_MAX_DISTANCE)
 
 
 static func _master_db() -> float:

@@ -188,11 +188,14 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | knife-scrape-4 (bıçak çekme) | `assets/audio/knife_draw.wav` | [Freesound 614073](https://freesound.org/s/614073/) | stormwaveaudio | Freesound (lisans sayfada kontrol edilmeli) |
 | knife swish mixed (bıçak savurma) | `assets/audio/swing.wav` | [Freesound 423281](https://freesound.org/s/423281/) | thepigboy | Freesound (lisans sayfada kontrol edilmeli) |
 | FREE FPS SFX Pack (adım, iniş, pompalı, sniper, roket, patlama, dürbün, grapple, uyarı) | `assets/audio/*.wav` (`tools/convert_sfx_pack.sh`) | Can'ın zip'i (2026-10-04), kaynağı/lisansı yazılı değil | ? | ? (paket adı "free"; kaynak bulununca buraya) |
-| Yer tutucu silah modelleri (Scout = Heavy Rifle'ın M700'ü, Desert Eagle = Glock 17) | `scenes/weapons/{scout,deagle}.tscn` | — | — | Can'ın modelleri gelince değişecek; HUD ikonları da kopya |
+| Yer tutucu silah modeli (Scout = Heavy Rifle'ın M700'ü; aday: [Low-Poly Barrett M82A1](https://sketchfab.com/3d-models/low-poly-barrett-m82a1-9c7027e5a64e40e9ae927adb0872b6d8), TastyTony, CC-BY, 7,3k üçgen) | `scenes/weapons/scout.tscn` | — | — | Can'ın modelleri gelince değişecek; HUD ikonları da kopya |
 | AK-47 (MachineGunPSX) = Assault Rifle | `assets/models/weapons/real/assault_rifle.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
 | Glock 17 = Pistol (+ Desert Eagle yer tutucusu); USP + aynı paketin susturucusu = USP-S (PSX Pistol Pack [FIXED]) | `pistol.glb`, `usp_s.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
 | Double Barrel Shotgun (PSX Shotgun Pack [FIXED]) | `double_barrel.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
 | Bazooka = Rocket Launcher, Grenade Launcher (Heavy Weapons Pack) | `rocket_launcher.glb`, `grenade_launcher.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
+| Free Modular PSX Desert Eagle (sade: dürbünsüz, normal şarjör) | `deagle.glb` | Can'ın zip'i (2026-10-07) | Gataki | Paketin lisansı: oyunda kullanım serbest, kredi isteğe bağlı, dosyaların ayrıca dağıtımı yasak |
+| C4 = Sticky Bomb | `sticky_bomb.glb` | Can'ın glb'si (2026-10-07) | ? | ? |
+| Sesler: 9mm Para Pistol Shot (Desert Eagle), 50 cal MG (LMG, 4 tek atış), Shoot And Reload (Scout), Pistol Cock (şarjör), Small Explosion (bombaatar), Bullet Fly Buy (vızıltı) | `assets/audio/{shot_deagle,shot_lmg_*,shot_bolt,reload_click,explosion_small,whiz}.wav` (`tools/convert_mp3_sfx.py`) | Can'ın mp3'leri (2026-10-07) | ? | ? |
 | MP5 PSX (susturuculu) = MP5SD | `mp5sd.glb` | Can'ın fbx'i (2026-10-06) | ? | Lisans dosyası yok |
 | PSX Revolver (Colt Single Action) = Revolver | `revolver.glb` | Can'ın rar'ı (2026-10-06) | ? | Lisans dosyası yok |
 | AK-47 atış sesi (Sniper_Shot 1–3'ten, %12 hızlı, 0,55 sn + alçak vuruş) | `assets/audio/shot_ak_{1,2,3}.wav` (`tools/make_ak_shot.py`) | FREE FPS SFX Pack | ? | ? |

@@ -228,6 +228,7 @@ func _show_shot(_from: Vector3, to: Vector3, beam: bool) -> void:
 		return
 	player.rig.play_fire()
 	_play_remote_shot()
+	_whiz_past([to])
 	if _held_suppressed():
 		return
 	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
@@ -244,8 +245,33 @@ func _on_pellets_fired(ends: PackedVector3Array) -> void:
 	player.rig.play_fire()
 	ShotEffects.spawn_muzzle_flash(player.remote_muzzle)
 	_play_remote_shot()
+	_whiz_past(ends)
 	for end_point: Vector3 in ends:
 		ShotEffects.spawn_tracer(player.get_parent(), player.remote_muzzle.global_position, end_point)
+
+
+## Someone else's shot (or a pellet volley) passed close to our camera: one whiz where the nearest
+## line came closest. Shots from right next to us and shots that end at us (hits) stay quiet.
+func _whiz_past(ends: Array) -> void:
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	var ear: Vector3 = camera.global_position
+	var from: Vector3 = player.remote_muzzle.global_position
+	if from.distance_to(ear) < WHIZ_MIN_SHOOTER_DISTANCE:
+		return
+	var best: float = WHIZ_RADIUS
+	var best_point: Vector3 = Vector3.ZERO
+	for end_point: Vector3 in ends:
+		var closest: Vector3 = Geometry3D.get_closest_point_to_segment(ear, from, end_point)
+		if closest.distance_to(end_point) < WHIZ_END_MARGIN:
+			continue # Hit something right by us: the impact says enough.
+		var distance: float = closest.distance_to(ear)
+		if distance < best:
+			best = distance
+			best_point = closest
+	if best < WHIZ_RADIUS:
+		Sfx.whiz(player.get_parent(), best_point)
 
 
 ## Gunshot of the weapon this remote player holds, at their gun.
@@ -307,6 +333,9 @@ const MARK_COLOR: Color = Color(0.65, 0.35, 1.0, 0.35)
 const MARK_HEIGHT: float = 2.4
 const MARK_RADIUS: float = 0.35
 const DART_LENGTH: float = 0.25
+const WHIZ_RADIUS: float = 1.6 ## A bullet passing this close to your head whizzes.
+const WHIZ_MIN_SHOOTER_DISTANCE: float = 4.0 ## Not for someone shooting right beside you.
+const WHIZ_END_MARGIN: float = 0.6 ## Not when the shot ended (hit) right next to you.
 
 static var _sonar_material: StandardMaterial3D
 

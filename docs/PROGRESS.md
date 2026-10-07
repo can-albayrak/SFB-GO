@@ -7,7 +7,14 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 ## Sıradaki oturum
 
-**En yeni (2026-10-07, Can'ın listesi, Can test edecek):**
+**En yeni (2026-10-07 akşam, Can test edecek):**
+- **Desert Eagle** kendi modelinde (Gataki'nin Free Modular PSX Desert Eagle'ı, sade) ve kendi sesinde (9mm Para Pistol Shot).
+- **Sticky Bomb:** C4 modeli. İlk Q atar, 30 sn içinde ikinci Q patlatır (taralı "DETONATE" barı, Phantom gibi); süre dolarsa kendisi patlar, atan ölürse söner, sınıf değişirse kaybolur. Bekleme süresi patlayınca başlar. `StickyBombAbility`, `Grenade.server_detonate`, `Game.server_spawn_grenade` artık bombayı döndürüyor.
+- **Sesler:** LMG'ye 50 cal MG'den 4 tek atış, Scout'a atış + sürgü, her şarjör değiştirmede "pistol cock" (eskiden sessizdi), bombaatar mermisine küçük patlama (`GrenadeDef.explosion_sound`), başkasının mermisi kafanın 1,6 m yakınından geçince vızıltı. `tools/convert_mp3_sfx.py` (pip `miniaudio`).
+- Doğunca güç pencereleri de sıfırlanıyor (`Ability.reset_for_respawn`; Phantom'un Recall'u dahil).
+- **Bekleyen:** Scout için Barrett M82 modeli (Can indirecek; aday ASSETS.md'de). "Shotgun Sounds" kaydı kullanılmadı (art arda hızlı atışlar, dinlenip karar verilecek).
+
+**Önceki (2026-10-07, Can'ın listesi):**
 - **Sprey:** tetiği bırakınca desen artık başa dönüyor (eskiden ancak tepme tamamen sıfırlanınca dönüyordu; kısa bırakıp tekrar sıkınca desen yandan yana savrulan kısımdan devam ediyordu). Süre silah başına `WeaponDef.spray_reset_time` (0,35 sn, bekleme payından sonra; toplam ~0,55 sn bırakma).
 - **AK:** yeni ses (pompalı gövdesi + sniper çatlaması, %22 hızlı, yapay bas yok) ve daha sakin sarsıntı (`view_kick` 1,2, yatma `kick_roll_mult` 0,2; her atışta sağa-sola yatma titreme gibi görünüyordu).
 - **Ölünce güç beklemesi sıfırlanıyor** (sahipte ve host'ta). Yaşarken sınıf değiştirmek hâlâ beklemeyi taşıyor.
@@ -434,3 +441,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-06 | 8 | MP5SD modeli (Can'ın fbx'i, susturuculu): AK duruşuyla, model kaydırmalı sahne, ikon. |
 | 2026-10-07 | 8 | `origin/main` (lobiye dönüş + vuruş hissi, iş bilgisayarında çalıştırılmamıştı) `claude/game-testing-fixes-218150`'e birleştirildi. Çakışma: AK-47 yeni tekme profiline geçti (`view_kick` 1,6, `kick_recover_mult` 1,0, `kick_roll_mult` 0,9; Burst 1,2 ile Deagle 5 arası). Evde doğrulandı: smoke 224/0, ağ 29 + 25, geç katılma 28 + 28. Diğer bütün dallar zaten main'in içinde. |
 | 2026-10-07 | 8 | Can'ın listesi: sprey sıfırlama (`spray_reset_time`), AK sesi 2. deneme + sakin tekme, ölünce güç beklemesi sıfır, hitbox +%15, Sonar HUD sayısı, nick görüş hattı + küçük, dart 0,75 m / 70 m/s, AUDIO bölümü (Master), lobide doğma süresi. Smoke 232/0 (sprey ve bekleme kontrolleri eklendi), ağ 30 + 27, geç katılma 28 + 28. |
+| 2026-10-07 | 8 | Desert Eagle modeli + sesi, C4 Sticky Bomb iki basışlı (30 sn pencere), LMG/Scout/şarjör/bombaatar sesleri, mermi vızıltısı, doğunca güç pencereleri sıfır. Smoke 238/0, ağ 30 + 27. |

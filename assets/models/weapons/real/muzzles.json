@@ -26,6 +26,15 @@
     "length": 0.8,
     "tris": 122
   },
+  "deagle": {
+    "muzzle": [
+      0.0013,
+      0.0551,
+      -0.189
+    ],
+    "length": 0.27,
+    "tris": 1358
+  },
   "double_barrel": {
     "muzzle": [
       -0.0,
@@ -196,6 +205,15 @@
     ],
     "length": 0.32,
     "tris": 1876
+  },
+  "sticky_bomb": {
+    "muzzle": [
+      -0.0025,
+      0.005,
+      -0.085
+    ],
+    "length": 0.17,
+    "tris": 418
   },
   "throwing_knife": {
     "muzzle": [

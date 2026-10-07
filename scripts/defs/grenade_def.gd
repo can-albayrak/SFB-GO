@@ -15,6 +15,7 @@ enum Kind { FRAG, FLASH }
 @export var damage: float = 100.0 ## Frag: damage at the centre, linear falloff to 0 at radius.
 @export var self_damage_mult: float = 1.0 ## Blast damage to the thrower is multiplied by this.
 @export var knockback: float = 0.0 ## Blast push at the centre in m/s, fading to 0 at radius (rocket jump).
+@export var explosion_sound: AudioStream ## Own blast clip; empty = the usual explosions (Sfx).
 @export var flash_duration: float = 3.0 ## Flash: seconds when looking straight at it up close.
 
 @export_group("Behaviour")

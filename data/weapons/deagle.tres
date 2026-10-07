@@ -3,9 +3,12 @@
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/deagle.tscn" id="2_scene"]
 
-[ext_resource type="PackedScene" path="res://assets/models/weapons/real/pistol.glb" id="3_world"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/deagle.glb" id="3_world"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_deagle.wav" id="snd_0"]
+
 [resource]
 script = ExtResource("1_def")
+fire_sounds = Array[AudioStream]([ExtResource("snd_0")])
 id = &"deagle"
 display_name = "Desert Eagle"
 damage = 55.0
@@ -31,4 +34,4 @@ kick_roll_mult = 1.2
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(0, 0.038, -0.133)
+world_muzzle = Vector3(0.0013, 0.0551, -0.189)

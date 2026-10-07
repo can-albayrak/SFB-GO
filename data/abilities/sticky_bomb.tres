@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="GrenadeDef" format=3]
 
 [ext_resource type="Script" path="res://scripts/defs/grenade_def.gd" id="1_def"]
-[ext_resource type="PackedScene" path="res://scenes/abilities/grenade_ability.tscn" id="2_ability"]
+[ext_resource type="PackedScene" path="res://scenes/abilities/sticky_bomb_ability.tscn" id="2_ability"]
 [ext_resource type="PackedScene" path="res://scenes/projectiles/sticky_bomb.tscn" id="3_projectile"]
 
 [resource]
@@ -14,7 +14,8 @@ kind = 0
 projectile = ExtResource("3_projectile")
 throw_speed = 15.0
 throw_lift = 3.0
-fuse_time = 2.0
+duration = 30.0
+fuse_time = 30.0
 radius = 4.5
 damage = 105.0
 self_damage_mult = 0.5

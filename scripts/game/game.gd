@@ -222,7 +222,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 # --- Grenades --------------------------------------------------------------
 
-func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, point: Vector3, velocity: Vector3) -> void:
+func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, point: Vector3, velocity: Vector3) -> Grenade:
 	assert(multiplayer.is_server(), "server_spawn_grenade is host-only")
 	if grenade_def.max_per_thrower > 0:
 		_limit_grenades(grenade_def, thrower_id, grenade_def.max_per_thrower - 1)
@@ -234,6 +234,7 @@ func server_spawn_grenade(grenade_def: GrenadeDef, thrower_id: int, point: Vecto
 	})
 	for id: int in Net.ingame_peers:
 		grenade.get_node("Sync").set_visibility_for(id, true)
+	return grenade as Grenade
 
 
 func server_spawn_knife(knife_def: WeaponDef, thrower_id: int, point: Vector3, velocity: Vector3) -> void:
@@ -291,7 +292,7 @@ func server_explode(grenade_def: GrenadeDef, thrower_id: int, point: Vector3) ->
 			_apply_frag(grenade_def, thrower_id, point)
 		GrenadeDef.Kind.FLASH:
 			_apply_flash(grenade_def, point)
-	Net.broadcast(self, &"_explosion_fx", [grenade_def.kind, point])
+	Net.broadcast(self, &"_explosion_fx", [grenade_def.resource_path, point])
 
 
 func _apply_frag(grenade_def: GrenadeDef, thrower_id: int, point: Vector3) -> void:
@@ -357,11 +358,14 @@ func _blood_fx(point: Vector3, direction: Vector3) -> void:
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _explosion_fx(kind: GrenadeDef.Kind, point: Vector3) -> void:
+func _explosion_fx(def_path: String, point: Vector3) -> void:
 	if multiplayer.get_remote_sender_id() > 1:
 		return
-	ShotEffects.spawn_explosion(self, point, kind == GrenadeDef.Kind.FLASH)
-	Sfx.explosion(self, point)
+	var grenade_def := load(def_path) as GrenadeDef
+	if grenade_def == null:
+		return
+	ShotEffects.spawn_explosion(self, point, grenade_def.kind == GrenadeDef.Kind.FLASH)
+	Sfx.explosion(self, point, grenade_def.explosion_sound)
 
 
 @rpc("any_peer", "call_remote", "reliable")

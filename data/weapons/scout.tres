@@ -4,8 +4,11 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/scout.tscn" id="2_scene"]
 
 [ext_resource type="PackedScene" path="res://assets/models/weapons/real/heavy_rifle.glb" id="3_world"]
+[ext_resource type="AudioStream" path="res://assets/audio/shot_bolt.wav" id="snd_0"]
+
 [resource]
 script = ExtResource("1_def")
+fire_sounds = Array[AudioStream]([ExtResource("snd_0")])
 id = &"scout"
 display_name = "Scout"
 damage = 75.0

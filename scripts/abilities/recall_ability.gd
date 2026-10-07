@@ -32,6 +32,11 @@ func tick(delta: float) -> void:
 			cooldown_left = get_cooldown()
 
 
+func reset_for_respawn() -> void:
+	super.reset_for_respawn()
+	_window_left = 0.0
+
+
 func get_hud_window() -> Array:
 	if _window_left <= 0.0:
 		return []
