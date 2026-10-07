@@ -4,8 +4,7 @@
 [ext_resource type="Script" path="res://scripts/defs/map_def.gd" id="2_def"]
 [ext_resource type="Resource" path="res://data/maps/test_range.tres" id="4_range"]
 [ext_resource type="Resource" path="res://data/maps/ice_yard.tres" id="5_ice"]
-[ext_resource type="Resource" path="res://data/maps/train_factory.tres" id="6_train"]
 
 [resource]
 script = ExtResource("1_list")
-maps = Array[ExtResource("2_def")]([ExtResource("5_ice"), ExtResource("6_train"), ExtResource("4_range")])
+maps = Array[ExtResource("2_def")]([ExtResource("5_ice"), ExtResource("4_range")])
