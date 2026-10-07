@@ -179,6 +179,15 @@
     "length": 1.1,
     "tris": 226
   },
+  "scout": {
+    "muzzle": [
+      -0.0211,
+      0.0066,
+      -0.832
+    ],
+    "length": 1.3,
+    "tris": 1426
+  },
   "shotgun": {
     "muzzle": [
       0.0,

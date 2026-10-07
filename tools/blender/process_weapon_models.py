@@ -62,6 +62,7 @@ MODELS = {
     "deagle": {"raw": "packs/Free Modular PSX Desert Eagle/Blend/Free Modular PSX Desert Eagle.blend", "kind": "pistol",
                "length": 0.27},  # Can, 2026-10-07: plain (the free pack has no scope or long mag).
     "sticky_bomb": {"raw": "packs/C4/c4_explosive.glb", "kind": "throwable", "length": 0.17},  # C4 (Can, 2026-10-07).
+    "scout": {"raw": "packs/Barrett M82 Stylized/Barrett M82 Stylized.blend", "kind": "rifle", "length": 1.3, "flip": True},  # Barrett M82 (Can, 2026-10-07).
     "mp5sd": {"raw": "packs/MP5/mp5_psx.fbx", "kind": "rifle", "length": 0.75, "flip": True},  # Can, 2026-10-06 (with suppressor).
     "double_barrel": {"raw": SHOTGUN_PACK + "DoubleBarrelShotgun/DoubleBarrelShotgun.obj", "kind": "rifle",
                       "length": 1.05, "drop": ("Shell",)},

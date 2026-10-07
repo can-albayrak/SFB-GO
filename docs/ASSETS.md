@@ -188,7 +188,7 @@ Oyuna giren her dış asset buraya. CC-BY olanlar Release'teki `CREDITS` dosyas�
 | knife-scrape-4 (bıçak çekme) | `assets/audio/knife_draw.wav` | [Freesound 614073](https://freesound.org/s/614073/) | stormwaveaudio | Freesound (lisans sayfada kontrol edilmeli) |
 | knife swish mixed (bıçak savurma) | `assets/audio/swing.wav` | [Freesound 423281](https://freesound.org/s/423281/) | thepigboy | Freesound (lisans sayfada kontrol edilmeli) |
 | FREE FPS SFX Pack (adım, iniş, pompalı, sniper, roket, patlama, dürbün, grapple, uyarı) | `assets/audio/*.wav` (`tools/convert_sfx_pack.sh`) | Can'ın zip'i (2026-10-04), kaynağı/lisansı yazılı değil | ? | ? (paket adı "free"; kaynak bulununca buraya) |
-| Yer tutucu silah modeli (Scout = Heavy Rifle'ın M700'ü; aday: [Low-Poly Barrett M82A1](https://sketchfab.com/3d-models/low-poly-barrett-m82a1-9c7027e5a64e40e9ae927adb0872b6d8), TastyTony, CC-BY, 7,3k üçgen) | `scenes/weapons/scout.tscn` | — | — | Can'ın modelleri gelince değişecek; HUD ikonları da kopya |
+| Barrett M82 Stylized = Scout | `scout.glb` | Can'ın zip'i (2026-10-07) | ? | Lisans dosyası yok |
 | AK-47 (MachineGunPSX) = Assault Rifle | `assets/models/weapons/real/assault_rifle.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
 | Glock 17 = Pistol (+ Desert Eagle yer tutucusu); USP + aynı paketin susturucusu = USP-S (PSX Pistol Pack [FIXED]) | `pistol.glb`, `usp_s.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |
 | Double Barrel Shotgun (PSX Shotgun Pack [FIXED]) | `double_barrel.glb` | Can'ın zip'i (2026-10-06) | ? | Lisans dosyası yok |

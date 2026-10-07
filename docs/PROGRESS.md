@@ -12,7 +12,7 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 - **Sticky Bomb:** C4 modeli. İlk Q atar, 30 sn içinde ikinci Q patlatır (taralı "DETONATE" barı, Phantom gibi); süre dolarsa kendisi patlar, atan ölürse söner, sınıf değişirse kaybolur. Bekleme süresi patlayınca başlar. `StickyBombAbility`, `Grenade.server_detonate`, `Game.server_spawn_grenade` artık bombayı döndürüyor.
 - **Sesler:** LMG'ye 50 cal MG'den 4 tek atış, Scout'a atış + sürgü, her şarjör değiştirmede "pistol cock" (eskiden sessizdi), bombaatar mermisine küçük patlama (`GrenadeDef.explosion_sound`), başkasının mermisi kafanın 1,6 m yakınından geçince vızıltı. `tools/convert_mp3_sfx.py` (pip `miniaudio`).
 - Doğunca güç pencereleri de sıfırlanıyor (`Ability.reset_for_respawn`; Phantom'un Recall'u dahil).
-- **Bekleyen:** Scout için Barrett M82 modeli (Can indirecek; aday ASSETS.md'de). "Shotgun Sounds" kaydı kullanılmadı (art arda hızlı atışlar, dinlenip karar verilecek).
+- **Scout = Barrett M82** (Can'ın "Barrett M82 Stylized"'ı). "Shotgun Sounds" kaydı kullanılmadı (art arda hızlı atışlar, dinlenip karar verilecek).
 
 **Önceki (2026-10-07, Can'ın listesi):**
 - **Sprey:** tetiği bırakınca desen artık başa dönüyor (eskiden ancak tepme tamamen sıfırlanınca dönüyordu; kısa bırakıp tekrar sıkınca desen yandan yana savrulan kısımdan devam ediyordu). Süre silah başına `WeaponDef.spray_reset_time` (0,35 sn, bekleme payından sonra; toplam ~0,55 sn bırakma).

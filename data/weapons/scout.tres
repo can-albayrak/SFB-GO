@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/defs/weapon_def.gd" id="1_def"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/scout.tscn" id="2_scene"]
 
-[ext_resource type="PackedScene" path="res://assets/models/weapons/real/heavy_rifle.glb" id="3_world"]
+[ext_resource type="PackedScene" path="res://assets/models/weapons/real/scout.glb" id="3_world"]
 [ext_resource type="AudioStream" path="res://assets/audio/shot_bolt.wav" id="snd_0"]
 
 [resource]
@@ -39,4 +39,4 @@ hip_crosshair = false
 scene = ExtResource("2_scene")
 world_model = ExtResource("3_world")
 world_model_scale = 1.0
-world_muzzle = Vector3(-0.006, 0.0376, -0.768)
+world_muzzle = Vector3(0, 0.0066, -0.832)
