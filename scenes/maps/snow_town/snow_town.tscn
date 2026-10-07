@@ -1,0 +1,3170 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/pickups/pickup.tscn" id="1_pickup"]
+
+[ext_resource type="Resource" path="res://data/pickups/health.tres" id="2_health"]
+
+[ext_resource type="Resource" path="res://data/pickups/speed.tres" id="3_speed"]
+
+[ext_resource type="Resource" path="res://data/pickups/double_jump.tres" id="4_double_jump"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/asphalt_snow.png" id="tex_asphalt_snow"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/bark_brown_02.png" id="tex_bark_brown_02"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/brick_wall_02.png" id="tex_brick_wall_02"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/brown_planks_03.png" id="tex_brown_planks_03"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/cobblestone_floor_02.png" id="tex_cobblestone_floor_02"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/concrete_wall_001.png" id="tex_concrete_wall_001"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/container_side.png" id="tex_container_side"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/corrugated_iron.png" id="tex_corrugated_iron"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/distressed_painted_planks.png" id="tex_distressed_painted_planks"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/grey_roof_tiles.png" id="tex_grey_roof_tiles"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/painted_brick.png" id="tex_painted_brick"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/rough_pine_door.png" id="tex_rough_pine_door"]
+
+[ext_resource type="Texture2D" path="res://assets/textures/env/snow_02.png" id="tex_snow_02"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+sky_top_color = Color(0.07, 0.08, 0.14, 1)
+sky_horizon_color = Color(0.3, 0.3, 0.38, 1)
+ground_bottom_color = Color(0.12, 0.12, 0.16, 1)
+ground_horizon_color = Color(0.3, 0.3, 0.38, 1)
+
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMat")
+
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_energy = 0.38
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.28, 0.29, 0.36, 1)
+fog_density = 0.013
+fog_sky_affect = 0.45
+
+
+[sub_resource type="FastNoiseLite" id="GritNoise"]
+noise_type = 5
+frequency = 0.18
+fractal_octaves = 3
+
+
+[sub_resource type="Gradient" id="GritRamp"]
+colors = PackedColorArray(0.78, 0.78, 0.78, 1, 1, 1, 1, 1)
+
+
+[sub_resource type="NoiseTexture2D" id="GritTexture"]
+width = 64
+height = 64
+seamless = true
+color_ramp = SubResource("GritRamp")
+noise = SubResource("GritNoise")
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_bark"]
+albedo_color = Color(0.8, 0.75, 0.72, 1)
+albedo_texture = ExtResource("tex_bark_brown_02")
+roughness = 1
+uv1_scale = Vector3(0.6667, 0.6667, 0.6667)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_barrel"]
+albedo_color = Color(0.62, 0.17, 0.12, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.7
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_barrel_blue"]
+albedo_color = Color(0.16, 0.26, 0.5, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.7
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_brick"]
+albedo_color = Color(0.78, 0.74, 0.74, 1)
+albedo_texture = ExtResource("tex_brick_wall_02")
+roughness = 0.95
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_brick_painted"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+albedo_texture = ExtResource("tex_painted_brick")
+roughness = 0.95
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_cobble"]
+albedo_color = Color(0.72, 0.74, 0.8, 1)
+albedo_texture = ExtResource("tex_cobblestone_floor_02")
+roughness = 0.9
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_concrete"]
+albedo_color = Color(0.62, 0.65, 0.72, 1)
+albedo_texture = ExtResource("tex_concrete_wall_001")
+roughness = 0.95
+uv1_scale = Vector3(0.3333, 0.3333, 0.3333)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_container_blue"]
+albedo_color = Color(0.32, 0.55, 1.1, 1)
+albedo_texture = ExtResource("tex_container_side")
+roughness = 0.7
+uv1_scale = Vector3(0.4, 0.4, 0.4)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_container_green"]
+albedo_color = Color(0.75, 0.9, 0.75, 1)
+albedo_texture = ExtResource("tex_container_side")
+roughness = 0.7
+uv1_scale = Vector3(0.4, 0.4, 0.4)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_container_red"]
+albedo_color = Color(1.25, 0.36, 0.3, 1)
+albedo_texture = ExtResource("tex_container_side")
+roughness = 0.7
+uv1_scale = Vector3(0.4, 0.4, 0.4)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_crate"]
+albedo_color = Color(0.95, 0.85, 0.72, 1)
+albedo_texture = ExtResource("tex_brown_planks_03")
+roughness = 0.85
+uv1_scale = Vector3(0.8333, 0.8333, 0.8333)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_door"]
+albedo_color = Color(0.9, 0.85, 0.8, 1)
+albedo_texture = ExtResource("tex_rough_pine_door")
+roughness = 0.85
+uv1_scale = Vector3(0.4545, 0.4545, 0.4545)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_lamp"]
+albedo_color = Color(1, 0.82, 0.55, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.5
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+emission_enabled = true
+emission = Color(1, 0.78, 0.45, 1)
+emission_energy_multiplier = 2.5
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal"]
+albedo_color = Color(0.7, 0.72, 0.76, 1)
+albedo_texture = ExtResource("tex_corrugated_iron")
+roughness = 0.6
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_pine"]
+albedo_color = Color(0.16, 0.3, 0.24, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 1
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_planks"]
+albedo_color = Color(0.85, 0.82, 0.78, 1)
+albedo_texture = ExtResource("tex_distressed_painted_planks")
+roughness = 0.9
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_roof"]
+albedo_color = Color(0.78, 0.8, 0.86, 1)
+albedo_texture = ExtResource("tex_grey_roof_tiles")
+roughness = 0.9
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_snow"]
+albedo_color = Color(0.86, 0.89, 0.95, 1)
+albedo_texture = ExtResource("tex_snow_02")
+roughness = 0.9
+uv1_scale = Vector3(0.3333, 0.3333, 0.3333)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_snow_path"]
+albedo_color = Color(0.8, 0.82, 0.88, 1)
+albedo_texture = ExtResource("tex_asphalt_snow")
+roughness = 0.9
+uv1_scale = Vector3(0.4, 0.4, 0.4)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_trim"]
+albedo_color = Color(0.2, 0.22, 0.26, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.9
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_window"]
+albedo_color = Color(0.14, 0.18, 0.24, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.15
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+metallic_specular = 1.0
+
+
+[sub_resource type="StandardMaterial3D" id="Mat_window_lit"]
+albedo_color = Color(0.9, 0.72, 0.42, 1)
+albedo_texture = SubResource("GritTexture")
+roughness = 0.5
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 2
+emission_enabled = true
+emission = Color(1, 0.72, 0.38, 1)
+emission_energy_multiplier = 1.4
+
+
+[sub_resource type="BoxShape3D" id="Shape_Clip0"]
+size = Vector3(66, 60, 1)
+
+
+[sub_resource type="BoxShape3D" id="Shape_Clip1"]
+size = Vector3(66, 60, 1)
+
+
+[sub_resource type="BoxShape3D" id="Shape_Clip2"]
+size = Vector3(1, 60, 44)
+
+
+[sub_resource type="BoxShape3D" id="Shape_Clip3"]
+size = Vector3(1, 60, 44)
+
+
+[node name="SnowTown" type="Node3D"]
+
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.85, -0.6, 0)
+position = Vector3(0, 30, 0)
+light_color = Color(0.72, 0.78, 1, 1)
+light_energy = 0.42
+shadow_enabled = true
+
+
+[node name="Geometry" type="Node3D" parent="."]
+
+
+[node name="Town" type="Node3D" parent="Geometry"]
+
+
+[node name="Detail" type="Node3D" parent="Geometry"]
+
+
+[node name="Backdrop" type="Node3D" parent="Geometry"]
+
+
+[node name="Ground" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(0, -0.5, 0)
+use_collision = true
+size = Vector3(124, 1, 104)
+material = SubResource("Mat_snow")
+
+
+[node name="TownWall0" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(0, 2.5, -22.5)
+use_collision = true
+size = Vector3(66, 5, 1)
+material = SubResource("Mat_brick")
+
+
+[node name="TownWallCap0" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0, 5.1, -22.5)
+size = Vector3(66.2, 0.2, 1.2)
+material = SubResource("Mat_snow")
+
+
+[node name="TownWall1" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(0, 2.5, 22.5)
+use_collision = true
+size = Vector3(66, 5, 1)
+material = SubResource("Mat_brick")
+
+
+[node name="TownWallCap1" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0, 5.1, 22.5)
+size = Vector3(66.2, 0.2, 1.2)
+material = SubResource("Mat_snow")
+
+
+[node name="TownWall2" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-32.5, 2.5, 0)
+use_collision = true
+size = Vector3(1, 5, 44)
+material = SubResource("Mat_brick")
+
+
+[node name="TownWallCap2" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-32.5, 5.1, 0)
+size = Vector3(1.2, 0.2, 44.2)
+material = SubResource("Mat_snow")
+
+
+[node name="TownWall3" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(32.5, 2.5, 0)
+use_collision = true
+size = Vector3(1, 5, 44)
+material = SubResource("Mat_brick")
+
+
+[node name="TownWallCap3" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(32.5, 5.1, 0)
+size = Vector3(1.2, 0.2, 44.2)
+material = SubResource("Mat_snow")
+
+
+[node name="Street" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0, 0.01, 0)
+size = Vector3(46, 0.02, 8)
+material = SubResource("Mat_cobble")
+
+
+[node name="Square" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0, 0.01, 0)
+size = Vector3(16, 0.02, 16)
+material = SubResource("Mat_cobble")
+
+
+[node name="PavementW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-15.5, 0.005, -7.25)
+size = Vector3(15, 0.01, 6.5)
+material = SubResource("Mat_snow_path")
+
+
+[node name="PavementE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(15.5, 0.005, 7.25)
+size = Vector3(15, 0.01, 6.5)
+material = SubResource("Mat_snow_path")
+
+
+[node name="HouseFront0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-23.2, 1.6, -6.25)
+use_collision = true
+size = Vector3(0.4, 3.2, 1.5)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(23.2, 1.6, 6.25)
+use_collision = true
+size = Vector3(0.4, 3.2, 1.5)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront1W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-23.2, 2.8, -4.5)
+use_collision = true
+size = Vector3(0.4, 0.8, 2)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront1E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(23.2, 2.8, 4.5)
+use_collision = true
+size = Vector3(0.4, 0.8, 2)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront2W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-23.2, 1.6, 0)
+use_collision = true
+size = Vector3(0.4, 3.2, 7)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront2E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(23.2, 1.6, 0)
+use_collision = true
+size = Vector3(0.4, 3.2, 7)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront3W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-23.2, 2.8, 4.5)
+use_collision = true
+size = Vector3(0.4, 0.8, 2)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront3E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(23.2, 2.8, -4.5)
+use_collision = true
+size = Vector3(0.4, 0.8, 2)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront4W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-23.2, 1.6, 6.25)
+use_collision = true
+size = Vector3(0.4, 3.2, 1.5)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseFront4E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(23.2, 1.6, -6.25)
+use_collision = true
+size = Vector3(0.4, 3.2, 1.5)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-30.25, 1.6, -6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(30.25, 1.6, 6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth1W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-27.5, 0.5, -6.8)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth1E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(27.5, 0.5, 6.8)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth2W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-27.5, 2.6, -6.8)
+use_collision = true
+size = Vector3(2, 1.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth2E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(27.5, 2.6, 6.8)
+use_collision = true
+size = Vector3(2, 1.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth3W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-24.75, 1.6, -6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseNorth3E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(24.75, 1.6, 6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-30.25, 1.6, 6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(30.25, 1.6, -6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth1W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-27.5, 0.5, 6.8)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth1E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(27.5, 0.5, -6.8)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth2W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-27.5, 2.6, 6.8)
+use_collision = true
+size = Vector3(2, 1.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth2E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(27.5, 2.6, -6.8)
+use_collision = true
+size = Vector3(2, 1.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth3W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-24.75, 1.6, 6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseSouth3E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(24.75, 1.6, -6.8)
+use_collision = true
+size = Vector3(3.5, 3.2, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseRoofW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-27.35, 3.35, 0)
+use_collision = true
+size = Vector3(9.3, 0.3, 14.6)
+material = SubResource("Mat_roof")
+
+
+[node name="HouseRoofE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(27.35, 3.35, 0)
+use_collision = true
+size = Vector3(9.3, 0.3, 14.6)
+material = SubResource("Mat_roof")
+
+
+[node name="ParapetEastW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-22.975, 3.9, 0)
+use_collision = true
+size = Vector3(0.55, 0.8, 14.6)
+material = SubResource("Mat_planks")
+
+
+[node name="ParapetEastE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(22.975, 3.9, 0)
+use_collision = true
+size = Vector3(0.55, 0.8, 14.6)
+material = SubResource("Mat_planks")
+
+
+[node name="ParapetNorthW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-26.3, 3.9, -7.15)
+use_collision = true
+size = Vector3(6.6, 0.8, 0.3)
+material = SubResource("Mat_planks")
+
+
+[node name="ParapetNorthE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(26.3, 3.9, 7.15)
+use_collision = true
+size = Vector3(6.6, 0.8, 0.3)
+material = SubResource("Mat_planks")
+
+
+[node name="ParapetSouthW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-30.8, 3.9, 7.15)
+use_collision = true
+size = Vector3(2.4, 0.8, 0.3)
+material = SubResource("Mat_planks")
+
+
+[node name="ParapetSouthE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(30.8, 3.9, -7.15)
+use_collision = true
+size = Vector3(2.4, 0.8, 0.3)
+material = SubResource("Mat_planks")
+
+
+[node name="ParapetSouthBW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-25.3, 3.9, 7.15)
+use_collision = true
+size = Vector3(4.6, 0.8, 0.3)
+material = SubResource("Mat_planks")
+
+
+[node name="ParapetSouthBE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(25.3, 3.9, -7.15)
+use_collision = true
+size = Vector3(4.6, 0.8, 0.3)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseRampW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-30.9, 1.5495, -10.9693)
+rotation = Vector3(-0.4525, 0, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 8.3056)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseRampE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(30.9, 1.5495, 10.9693)
+rotation = Vector3(0.4525, 0, 0)
+use_collision = true
+size = Vector3(2.2, 0.3, 8.3056)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseStepHighW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-28.6, 1.2, 7.8)
+use_collision = true
+size = Vector3(1.6, 2.4, 1.6)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseStepHighE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(28.6, 1.2, -7.8)
+use_collision = true
+size = Vector3(1.6, 2.4, 1.6)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseStepLowW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-28.6, 0.6, 9.4)
+use_collision = true
+size = Vector3(1.6, 1.2, 1.6)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseStepLowE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(28.6, 0.6, -9.4)
+use_collision = true
+size = Vector3(1.6, 1.2, 1.6)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseFloorW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-27.7, 0.01, 0)
+size = Vector3(8.6, 0.02, 13.2)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseFloorE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(27.7, 0.01, 0)
+size = Vector3(8.6, 0.02, 13.2)
+material = SubResource("Mat_crate")
+
+
+[node name="HouseCeilingW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-27.7, 3.19, 0)
+size = Vector3(8.6, 0.02, 13.2)
+material = SubResource("Mat_planks")
+
+
+[node name="HouseCeilingE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(27.7, 3.19, 0)
+size = Vector3(8.6, 0.02, 13.2)
+material = SubResource("Mat_planks")
+
+
+[node name="FireplaceW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-31.7, 0.7, 0)
+use_collision = true
+size = Vector3(0.6, 1.4, 2.4)
+material = SubResource("Mat_brick")
+
+
+[node name="FireplaceE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(31.7, 0.7, 0)
+use_collision = true
+size = Vector3(0.6, 1.4, 2.4)
+material = SubResource("Mat_brick")
+
+
+[node name="FireGlowW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-31.375, 0.5, 0)
+size = Vector3(0.05, 0.6, 1.2)
+material = SubResource("Mat_window_lit")
+
+
+[node name="FireGlowE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(31.375, 0.5, 0)
+size = Vector3(0.05, 0.6, 1.2)
+material = SubResource("Mat_window_lit")
+
+
+[node name="ChimneyW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-31.7, 2.3, 0)
+size = Vector3(0.6, 1.8, 1.2)
+material = SubResource("Mat_brick")
+
+
+[node name="ChimneyE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(31.7, 2.3, 0)
+size = Vector3(0.6, 1.8, 1.2)
+material = SubResource("Mat_brick")
+
+
+[node name="TableW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-28.5, 0.4, 0)
+use_collision = true
+size = Vector3(0.8, 0.8, 1.6)
+material = SubResource("Mat_door")
+
+
+[node name="TableE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(28.5, 0.4, 0)
+use_collision = true
+size = Vector3(0.8, 0.8, 1.6)
+material = SubResource("Mat_door")
+
+
+[node name="HouseLightW" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(-27.5, 2.6, 0)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.3
+omni_range = 8
+
+
+[node name="HouseLightE" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(27.5, 2.6, -0)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.3
+omni_range = 8
+
+
+[node name="ShopFront0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-19.5, 1.7, -11.2)
+use_collision = true
+size = Vector3(1, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(19.5, 1.7, 11.2)
+use_collision = true
+size = Vector3(1, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront1W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-18, 0.5, -11.2)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront1E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(18, 0.5, 11.2)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront2W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-18, 2.7, -11.2)
+use_collision = true
+size = Vector3(2, 1.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront2E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(18, 2.7, 11.2)
+use_collision = true
+size = Vector3(2, 1.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront3W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-16, 1.7, -11.2)
+use_collision = true
+size = Vector3(2, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront3E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(16, 1.7, 11.2)
+use_collision = true
+size = Vector3(2, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront4W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-14, 2.9, -11.2)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront4E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(14, 2.9, 11.2)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront5W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-12, 1.7, -11.2)
+use_collision = true
+size = Vector3(2, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront5E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(12, 1.7, 11.2)
+use_collision = true
+size = Vector3(2, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront6W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-10, 0.5, -11.2)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront6E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(10, 0.5, 11.2)
+use_collision = true
+size = Vector3(2, 1, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront7W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-10, 2.7, -11.2)
+use_collision = true
+size = Vector3(2, 1.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront7E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(10, 2.7, 11.2)
+use_collision = true
+size = Vector3(2, 1.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront8W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-8.5, 1.7, -11.2)
+use_collision = true
+size = Vector3(1, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopFront8E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(8.5, 1.7, 11.2)
+use_collision = true
+size = Vector3(1, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopBack0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-14, 1.7, -20.8)
+use_collision = true
+size = Vector3(12, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopBack0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(14, 1.7, 20.8)
+use_collision = true
+size = Vector3(12, 3.4, 0.4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-19.8, 1.7, -19)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(19.8, 1.7, 19)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest1W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-19.8, 0.5, -16)
+use_collision = true
+size = Vector3(0.4, 1, 2)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest1E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(19.8, 0.5, 16)
+use_collision = true
+size = Vector3(0.4, 1, 2)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest2W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-19.8, 2.7, -16)
+use_collision = true
+size = Vector3(0.4, 1.4, 2)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest2E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(19.8, 2.7, 16)
+use_collision = true
+size = Vector3(0.4, 1.4, 2)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest3W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-19.8, 1.7, -13)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopWest3E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(19.8, 1.7, 13)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopEast0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-8.2, 1.7, -19)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopEast0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(8.2, 1.7, 19)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopEast1W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-8.2, 2.9, -16)
+use_collision = true
+size = Vector3(0.4, 1, 2)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopEast1E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(8.2, 2.9, 16)
+use_collision = true
+size = Vector3(0.4, 1, 2)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopEast2W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-8.2, 1.7, -13)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopEast2E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(8.2, 1.7, 13)
+use_collision = true
+size = Vector3(0.4, 3.4, 4)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="ShopRoofW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-14, 3.55, -16)
+use_collision = true
+size = Vector3(12.6, 0.3, 10.6)
+material = SubResource("Mat_roof")
+
+
+[node name="ShopRoofE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(14, 3.55, 16)
+use_collision = true
+size = Vector3(12.6, 0.3, 10.6)
+material = SubResource("Mat_roof")
+
+
+[node name="ShopSignW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-14, 2.9, -10.925)
+size = Vector3(5, 0.6, 0.15)
+material = SubResource("Mat_window_lit")
+
+
+[node name="ShopSignE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(14, 2.9, 10.925)
+size = Vector3(5, 0.6, 0.15)
+material = SubResource("Mat_window_lit")
+
+
+[node name="ShopAwningW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-14, 2.55, -10.4)
+size = Vector3(3.2, 0.1, 1.2)
+material = SubResource("Mat_metal")
+
+
+[node name="ShopAwningE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(14, 2.55, 10.4)
+size = Vector3(3.2, 0.1, 1.2)
+material = SubResource("Mat_metal")
+
+
+[node name="ShopFloorW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-14, 0.01, -16)
+size = Vector3(11.2, 0.02, 9.2)
+material = SubResource("Mat_door")
+
+
+[node name="ShopFloorE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(14, 0.01, 16)
+size = Vector3(11.2, 0.02, 9.2)
+material = SubResource("Mat_door")
+
+
+[node name="ShopCeilingW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-14, 3.39, -16)
+size = Vector3(11.2, 0.02, 9.2)
+material = SubResource("Mat_planks")
+
+
+[node name="ShopCeilingE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(14, 3.39, 16)
+size = Vector3(11.2, 0.02, 9.2)
+material = SubResource("Mat_planks")
+
+
+[node name="CounterW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-17.55, 0.55, -14.25)
+use_collision = true
+size = Vector3(4.1, 1.1, 0.7)
+material = SubResource("Mat_door")
+
+
+[node name="CounterE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(17.55, 0.55, 14.25)
+use_collision = true
+size = Vector3(4.1, 1.1, 0.7)
+material = SubResource("Mat_door")
+
+
+[node name="ShelvesW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-14, 1, -20.3)
+use_collision = true
+size = Vector3(8, 2, 0.6)
+material = SubResource("Mat_crate")
+
+
+[node name="ShelvesE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(14, 1, 20.3)
+use_collision = true
+size = Vector3(8, 2, 0.6)
+material = SubResource("Mat_crate")
+
+
+[node name="ShopLightW" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(-14, 2.9, -16)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.2
+omni_range = 9
+
+
+[node name="ShopLightE" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(14, 2.9, 16)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.2
+omni_range = 9
+
+
+[node name="BarnWest0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-19.8, 2, 15.5)
+use_collision = true
+size = Vector3(0.4, 4, 11)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnWest0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(19.8, 2, -15.5)
+use_collision = true
+size = Vector3(0.4, 4, 11)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnBack0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-14.5, 2, 20.8)
+use_collision = true
+size = Vector3(11, 4, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnBack0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(14.5, 2, -20.8)
+use_collision = true
+size = Vector3(11, 4, 0.4)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnEast0W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-9.2, 2, 17.5)
+use_collision = true
+size = Vector3(0.4, 4, 7)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnEast0E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(9.2, 2, -17.5)
+use_collision = true
+size = Vector3(0.4, 4, 7)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnPost0_W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-19.8, 2, 10.2)
+use_collision = true
+size = Vector3(0.4, 4, 0.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnPost0_E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(19.8, 2, -10.2)
+use_collision = true
+size = Vector3(0.4, 4, 0.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnPost1_W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-14.5, 2, 10.2)
+use_collision = true
+size = Vector3(0.4, 4, 0.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnPost1_E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(14.5, 2, -10.2)
+use_collision = true
+size = Vector3(0.4, 4, 0.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnPost2_W" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-9.2, 2, 10.2)
+use_collision = true
+size = Vector3(0.4, 4, 0.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnPost2_E" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(9.2, 2, -10.2)
+use_collision = true
+size = Vector3(0.4, 4, 0.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnRoofW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-14.5, 4.1, 15.3)
+use_collision = true
+size = Vector3(11.8, 0.2, 12.2)
+material = SubResource("Mat_metal")
+
+
+[node name="BarnRoofE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(14.5, 4.1, -15.3)
+use_collision = true
+size = Vector3(11.8, 0.2, 12.2)
+material = SubResource("Mat_metal")
+
+
+[node name="BarnRoofSnowW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-14.5, 4.26, 15.3)
+size = Vector3(11.8, 0.12, 12.2)
+material = SubResource("Mat_snow")
+
+
+[node name="BarnRoofSnowE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(14.5, 4.26, -15.3)
+size = Vector3(11.8, 0.12, 12.2)
+material = SubResource("Mat_snow")
+
+
+[node name="BarnFloorW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-14.5, 0.01, 15.3)
+size = Vector3(10.2, 0.02, 10.6)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnFloorE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(14.5, 0.01, -15.3)
+size = Vector3(10.2, 0.02, 10.6)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnCrateLowW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-17.6, 0.6, 18.2)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnCrateLowE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(17.6, 0.6, -18.2)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnCrateHighW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-16.3, 1.2, 18.1)
+use_collision = true
+size = Vector3(1.4, 2.4, 1.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnCrateHighE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(16.3, 1.2, -18.1)
+use_collision = true
+size = Vector3(1.4, 2.4, 1.4)
+material = SubResource("Mat_crate")
+
+
+[node name="BarnBaleW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-11.4, 0.5, 17.1)
+use_collision = true
+size = Vector3(2, 1, 1.2)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnBaleE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(11.4, 0.5, -17.1)
+use_collision = true
+size = Vector3(2, 1, 1.2)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnBaleTopW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-11.4, 1.5, 17.1)
+use_collision = true
+size = Vector3(1.2, 1, 1)
+material = SubResource("Mat_planks")
+
+
+[node name="BarnBaleTopE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(11.4, 1.5, -17.1)
+use_collision = true
+size = Vector3(1.2, 1, 1)
+material = SubResource("Mat_planks")
+
+
+[node name="CourtWallAW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-5, 0.6, -10.6)
+use_collision = true
+size = Vector3(6, 1.2, 0.4)
+material = SubResource("Mat_concrete")
+
+
+[node name="CourtWallAE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(5, 0.6, 10.6)
+use_collision = true
+size = Vector3(6, 1.2, 0.4)
+material = SubResource("Mat_concrete")
+
+
+[node name="CourtWallBW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(5.5, 0.6, -10.6)
+use_collision = true
+size = Vector3(7, 1.2, 0.4)
+material = SubResource("Mat_concrete")
+
+
+[node name="CourtWallBE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-5.5, 0.6, 10.6)
+use_collision = true
+size = Vector3(7, 1.2, 0.4)
+material = SubResource("Mat_concrete")
+
+
+[node name="CourtWallSnowAW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-5, 1.25, -10.6)
+size = Vector3(6, 0.1, 0.5)
+material = SubResource("Mat_snow")
+
+
+[node name="CourtWallSnowAE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(5, 1.25, 10.6)
+size = Vector3(6, 0.1, 0.5)
+material = SubResource("Mat_snow")
+
+
+[node name="CourtWallSnowBW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(5.5, 1.25, -10.6)
+size = Vector3(7, 0.1, 0.5)
+material = SubResource("Mat_snow")
+
+
+[node name="CourtWallSnowBE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-5.5, 1.25, 10.6)
+size = Vector3(7, 0.1, 0.5)
+material = SubResource("Mat_snow")
+
+
+[node name="TruckCabW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-5.1, 1.4, -19.4)
+use_collision = true
+size = Vector3(2.2, 2, 2.4)
+material = SubResource("Mat_container_blue")
+
+
+[node name="TruckCabE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(5.1, 1.4, 19.4)
+use_collision = true
+size = Vector3(2.2, 2, 2.4)
+material = SubResource("Mat_container_blue")
+
+
+[node name="TruckWindowW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-4.025, 1.85, -19.4)
+size = Vector3(0.05, 0.7, 1.8)
+material = SubResource("Mat_window")
+
+
+[node name="TruckWindowE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(4.025, 1.85, 19.4)
+size = Vector3(0.05, 0.7, 1.8)
+material = SubResource("Mat_window")
+
+
+[node name="TruckCargoW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-0.7, 1.65, -19.4)
+use_collision = true
+size = Vector3(6.6, 2.5, 2.8)
+material = SubResource("Mat_container_red")
+
+
+[node name="TruckCargoE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(0.7, 1.65, 19.4)
+use_collision = true
+size = Vector3(6.6, 2.5, 2.8)
+material = SubResource("Mat_container_red")
+
+
+[node name="TruckChassisW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-1.8, 0.2, -19.4)
+use_collision = true
+size = Vector3(8.8, 0.4, 2)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckChassisE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(1.8, 0.2, 19.4)
+use_collision = true
+size = Vector3(8.8, 0.4, 2)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelN0_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-5.2, 0.45, -20.6)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelN0_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(5.2, 0.45, 20.6)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelS0_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-5.2, 0.45, -18.2)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelS0_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(5.2, 0.45, 18.2)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelN1_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-0.5, 0.45, -20.6)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelN1_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0.5, 0.45, 20.6)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelS1_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-0.5, 0.45, -18.2)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelS1_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0.5, 0.45, 18.2)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelN2_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(1.6, 0.45, -20.6)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelN2_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-1.6, 0.45, 20.6)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelS2_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(1.6, 0.45, -18.2)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="TruckWheelS2_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-1.6, 0.45, 18.2)
+size = Vector3(0.9, 0.9, 0.3)
+material = SubResource("Mat_trim")
+
+
+[node name="CourtBarrelW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(6.45, 0.6, -20.05)
+use_collision = true
+size = Vector3(0.9, 1.2, 0.9)
+material = SubResource("Mat_barrel")
+
+
+[node name="CourtBarrelE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-6.45, 0.6, 20.05)
+use_collision = true
+size = Vector3(0.9, 1.2, 0.9)
+material = SubResource("Mat_barrel")
+
+
+[node name="CourtBarrelBW" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(7.4, 0.6, -18.8)
+use_collision = true
+radius = 0.45
+height = 1.2
+sides = 12
+material = SubResource("Mat_barrel_blue")
+
+
+[node name="CourtBarrelBE" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(-7.4, 0.6, 18.8)
+use_collision = true
+radius = 0.45
+height = 1.2
+sides = 12
+material = SubResource("Mat_barrel_blue")
+
+
+[node name="Mound" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(0, 0.225, 0)
+use_collision = true
+radius = 3
+height = 0.45
+sides = 14
+material = SubResource("Mat_snow")
+
+
+[node name="TreeTrunk" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(0, 1.225, 0)
+use_collision = true
+radius = 0.5
+height = 1.55
+sides = 8
+material = SubResource("Mat_bark")
+
+
+[node name="TreeLeaves0" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(0, 3.1, 0)
+use_collision = true
+radius = 2.6
+height = 3
+sides = 8
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="TreeLeaves1" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(0, 5, 0)
+use_collision = true
+radius = 2
+height = 2.8
+sides = 8
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="TreeLeaves2" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(0, 6.7, 0)
+use_collision = true
+radius = 1.4
+height = 2.6
+sides = 8
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="TreeLeaves3" type="CSGCylinder3D" parent="Geometry/Town"]
+position = Vector3(0, 8.3, 0)
+use_collision = true
+radius = 0.8
+height = 2.2
+sides = 8
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Bauble0" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(1.9, 2.51, 0.6)
+size = Vector3(0.22, 0.22, 0.22)
+material = SubResource("Mat_lamp")
+
+
+[node name="Bauble1" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-1.6, 2.71, -1.1)
+size = Vector3(0.22, 0.22, 0.22)
+material = SubResource("Mat_lamp")
+
+
+[node name="Bauble2" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0.4, 4.01, 1.6)
+size = Vector3(0.22, 0.22, 0.22)
+material = SubResource("Mat_lamp")
+
+
+[node name="Bauble3" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-1.2, 4.41, 1)
+size = Vector3(0.22, 0.22, 0.22)
+material = SubResource("Mat_lamp")
+
+
+[node name="Bauble4" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(1.1, 5.51, -0.9)
+size = Vector3(0.22, 0.22, 0.22)
+material = SubResource("Mat_lamp")
+
+
+[node name="Bauble5" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-0.6, 6.71, -0.7)
+size = Vector3(0.22, 0.22, 0.22)
+material = SubResource("Mat_lamp")
+
+
+[node name="Bauble6" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0.5, 7.31, 0.6)
+size = Vector3(0.22, 0.22, 0.22)
+material = SubResource("Mat_lamp")
+
+
+[node name="TreeStar" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(0, 9.55, 0)
+size = Vector3(0.4, 0.4, 0.4)
+material = SubResource("Mat_lamp")
+
+
+[node name="BenchW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-5.75, 0.25, 0)
+use_collision = true
+size = Vector3(1.5, 0.5, 4)
+material = SubResource("Mat_door")
+
+
+[node name="BenchE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(5.75, 0.25, 0)
+use_collision = true
+size = Vector3(1.5, 0.5, 4)
+material = SubResource("Mat_door")
+
+
+[node name="CarBodyW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-13.35, 0.5, 1.95)
+use_collision = true
+size = Vector3(4.3, 1, 1.9)
+material = SubResource("Mat_container_green")
+
+
+[node name="CarBodyE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(13.35, 0.5, -1.95)
+use_collision = true
+size = Vector3(4.3, 1, 1.9)
+material = SubResource("Mat_container_green")
+
+
+[node name="CarCabinW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-13.4, 1.325, 1.95)
+use_collision = true
+size = Vector3(2.4, 0.65, 1.7)
+material = SubResource("Mat_window")
+
+
+[node name="CarCabinE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(13.4, 1.325, -1.95)
+use_collision = true
+size = Vector3(2.4, 0.65, 1.7)
+material = SubResource("Mat_window")
+
+
+[node name="CarSnowW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-13.4, 1.7, 1.95)
+size = Vector3(2.4, 0.1, 1.7)
+material = SubResource("Mat_snow")
+
+
+[node name="CarSnowE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(13.4, 1.7, -1.95)
+size = Vector3(2.4, 0.1, 1.7)
+material = SubResource("Mat_snow")
+
+
+[node name="StreetCrateLowW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-17.4, 0.6, -2.8)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = SubResource("Mat_crate")
+
+
+[node name="StreetCrateLowE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(17.4, 0.6, 2.8)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = SubResource("Mat_crate")
+
+
+[node name="StreetCrateHighW" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(-18.65, 1.2, -2.9)
+use_collision = true
+size = Vector3(1.3, 2.4, 1.4)
+material = SubResource("Mat_crate")
+
+
+[node name="StreetCrateHighE" type="CSGBox3D" parent="Geometry/Town"]
+position = Vector3(18.65, 1.2, 2.9)
+use_collision = true
+size = Vector3(1.3, 2.4, 1.4)
+material = SubResource("Mat_crate")
+
+
+[node name="LampPost0_W" type="CSGCylinder3D" parent="Geometry/Detail"]
+position = Vector3(-10, 1.8, -4.6)
+radius = 0.1
+height = 3.6
+sides = 6
+material = SubResource("Mat_trim")
+
+
+[node name="LampPost0_E" type="CSGCylinder3D" parent="Geometry/Detail"]
+position = Vector3(10, 1.8, 4.6)
+radius = 0.1
+height = 3.6
+sides = 6
+material = SubResource("Mat_trim")
+
+
+[node name="LampHead0_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-10, 3.775, -4.6)
+size = Vector3(0.44, 0.35, 0.44)
+material = SubResource("Mat_lamp")
+
+
+[node name="LampHead0_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(10, 3.775, 4.6)
+size = Vector3(0.44, 0.35, 0.44)
+material = SubResource("Mat_lamp")
+
+
+[node name="StreetLight0_W" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(-10, 3.5, -4.6)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.5
+omni_range = 12
+
+
+[node name="StreetLight0_E" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(10, 3.5, 4.6)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.5
+omni_range = 12
+
+
+[node name="LampPost1_W" type="CSGCylinder3D" parent="Geometry/Detail"]
+position = Vector3(3, 1.8, -6.6)
+radius = 0.1
+height = 3.6
+sides = 6
+material = SubResource("Mat_trim")
+
+
+[node name="LampPost1_E" type="CSGCylinder3D" parent="Geometry/Detail"]
+position = Vector3(-3, 1.8, 6.6)
+radius = 0.1
+height = 3.6
+sides = 6
+material = SubResource("Mat_trim")
+
+
+[node name="LampHead1_W" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(3, 3.775, -6.6)
+size = Vector3(0.44, 0.35, 0.44)
+material = SubResource("Mat_lamp")
+
+
+[node name="LampHead1_E" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-3, 3.775, 6.6)
+size = Vector3(0.44, 0.35, 0.44)
+material = SubResource("Mat_lamp")
+
+
+[node name="StreetLight1_W" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(3, 3.5, -6.6)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.5
+omni_range = 12
+
+
+[node name="StreetLight1_E" type="OmniLight3D" parent="Geometry/Detail"]
+position = Vector3(-3, 3.5, 6.6)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 1.5
+omni_range = 12
+
+
+[node name="DriftW" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(-21.9, 0.125, -6.5)
+size = Vector3(1.4, 0.25, 1)
+material = SubResource("Mat_snow")
+
+
+[node name="DriftE" type="CSGBox3D" parent="Geometry/Detail"]
+position = Vector3(21.9, 0.125, 6.5)
+size = Vector3(1.4, 0.25, 1)
+material = SubResource("Mat_snow")
+
+
+[node name="House0W" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-22, 3.25, -30)
+size = Vector3(10, 6.5, 8)
+material = SubResource("Mat_brick")
+
+
+[node name="House0WRoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-22, 8.0405, -32.2)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House0WRoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-22, 8.0405, -27.8)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House0WWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-22, 3.05, -26)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House0E" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(22, 3.25, 30)
+size = Vector3(10, 6.5, 8)
+material = SubResource("Mat_brick")
+
+
+[node name="House0ERoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(22, 8.0405, 27.8)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House0ERoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(22, 8.0405, 32.2)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House0EWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(22, 3.05, 26)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House1W" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-6, 3.75, -31)
+size = Vector3(12, 7.5, 9)
+material = SubResource("Mat_planks")
+
+
+[node name="House1WRoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-6, 9.2155, -33.45)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(12.6, 0.25, 5.9818)
+material = SubResource("Mat_roof")
+
+
+[node name="House1WRoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-6, 9.2155, -28.55)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(12.6, 0.25, 5.9818)
+material = SubResource("Mat_roof")
+
+
+[node name="House1WWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-6, 3.05, -26.5)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House1E" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(6, 3.75, 31)
+size = Vector3(12, 7.5, 9)
+material = SubResource("Mat_planks")
+
+
+[node name="House1ERoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(6, 9.2155, 28.55)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(12.6, 0.25, 5.9818)
+material = SubResource("Mat_roof")
+
+
+[node name="House1ERoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(6, 9.2155, 33.45)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(12.6, 0.25, 5.9818)
+material = SubResource("Mat_roof")
+
+
+[node name="House1EWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(6, 3.05, 26.5)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House2W" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(14, 3, -29)
+size = Vector3(9, 6, 7)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="House2WRoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(14, 7.3654, -30.95)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(9.6, 0.25, 4.761)
+material = SubResource("Mat_roof")
+
+
+[node name="House2WRoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(14, 7.3654, -27.05)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(9.6, 0.25, 4.761)
+material = SubResource("Mat_roof")
+
+
+[node name="House2WWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(14, 3.05, -25.5)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House2E" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-14, 3, 29)
+size = Vector3(9, 6, 7)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="House2ERoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-14, 7.3654, 27.05)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(9.6, 0.25, 4.761)
+material = SubResource("Mat_roof")
+
+
+[node name="House2ERoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-14, 7.3654, 30.95)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(9.6, 0.25, 4.761)
+material = SubResource("Mat_roof")
+
+
+[node name="House2EWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-14, 3.05, 25.5)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House3W" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(30, 3.5, -32)
+size = Vector3(10, 7, 8)
+material = SubResource("Mat_brick")
+
+
+[node name="House3WRoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(30, 8.5405, -34.2)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House3WRoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(30, 8.5405, -29.8)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House3WWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(30, 3.05, -28)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House3E" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-30, 3.5, 32)
+size = Vector3(10, 7, 8)
+material = SubResource("Mat_brick")
+
+
+[node name="House3ERoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-30, 8.5405, 29.8)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House3ERoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-30, 8.5405, 34.2)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(10.6, 0.25, 5.3714)
+material = SubResource("Mat_roof")
+
+
+[node name="House3EWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-30, 3.05, 28)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House4W" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-42, 3.25, -12)
+size = Vector3(8, 6.5, 10)
+material = SubResource("Mat_planks")
+
+
+[node name="House4WRoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-42, 8.3906, -14.7)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 6.5922)
+material = SubResource("Mat_roof")
+
+
+[node name="House4WRoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-42, 8.3906, -9.3)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 6.5922)
+material = SubResource("Mat_roof")
+
+
+[node name="House4WWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-42, 3.05, -7)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House4E" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(42, 3.25, 12)
+size = Vector3(8, 6.5, 10)
+material = SubResource("Mat_planks")
+
+
+[node name="House4ERoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(42, 8.3906, 9.3)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 6.5922)
+material = SubResource("Mat_roof")
+
+
+[node name="House4ERoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(42, 8.3906, 14.7)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 6.5922)
+material = SubResource("Mat_roof")
+
+
+[node name="House4EWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(42, 3.05, 7)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House5W" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-43, 3.5, 10)
+size = Vector3(8, 7, 12)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="House5WRoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-43, 9.2407, 6.8)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 7.813)
+material = SubResource("Mat_roof")
+
+
+[node name="House5WRoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-43, 9.2407, 13.2)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 7.813)
+material = SubResource("Mat_roof")
+
+
+[node name="House5WWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(-43, 3.05, 4)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="House5E" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(43, 3.5, -10)
+size = Vector3(8, 7, 12)
+material = SubResource("Mat_brick_painted")
+
+
+[node name="House5ERoofA" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(43, 9.2407, -13.2)
+rotation = Vector3(-0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 7.813)
+material = SubResource("Mat_roof")
+
+
+[node name="House5ERoofB" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(43, 9.2407, -6.8)
+rotation = Vector3(0.6109, 0, 0)
+size = Vector3(8.6, 0.25, 7.813)
+material = SubResource("Mat_roof")
+
+
+[node name="House5EWindow" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(43, 3.05, -4)
+size = Vector3(2, 1.1, 0.06)
+material = SubResource("Mat_window_lit")
+
+
+[node name="Church" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(23, 4.5, -42)
+size = Vector3(10, 9, 12)
+material = SubResource("Mat_concrete")
+
+
+[node name="ChurchTower" type="CSGBox3D" parent="Geometry/Backdrop"]
+position = Vector3(23, 8.5, -36)
+size = Vector3(5, 17, 5)
+material = SubResource("Mat_concrete")
+
+
+[node name="ChurchSpire" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(23, 21, -36)
+radius = 3.2
+height = 8
+sides = 4
+cone = true
+material = SubResource("Mat_roof")
+
+
+[node name="Pine0Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-36, 0.9, -31)
+radius = 0.25
+height = 1.8
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine0Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-36, 2.46, -31)
+radius = 1.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine0Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-36, 3.84, -31)
+radius = 1.4
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine0Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-36, 5.1, -31)
+radius = 0.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine1Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(36, 1.35, 33)
+radius = 0.25
+height = 2.7
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine1Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(36, 3.69, 33)
+radius = 1.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine1Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(36, 5.76, 33)
+radius = 1.4
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine1Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(36, 7.65, 33)
+radius = 0.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine2Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-29.8, 1.05, -35)
+radius = 0.25
+height = 2.1
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine2Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-29.8, 2.87, -35)
+radius = 1.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine2Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-29.8, 4.48, -35)
+radius = 1.4
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine2Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-29.8, 5.95, -35)
+radius = 0.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine3Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(29.8, 1.5, 32)
+radius = 0.25
+height = 3
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine3Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(29.8, 4.1, 32)
+radius = 1.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine3Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(29.8, 6.4, 32)
+radius = 1.4
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine3Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(29.8, 8.5, 32)
+radius = 0.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine4Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-23.6, 1.2, -34)
+radius = 0.25
+height = 2.4
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine4Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-23.6, 3.28, -34)
+radius = 1.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine4Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-23.6, 5.12, -34)
+radius = 1.4
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine4Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-23.6, 6.8, -34)
+radius = 0.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine5Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(23.6, 0.9, 31)
+radius = 0.25
+height = 1.8
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine5Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(23.6, 2.46, 31)
+radius = 1.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine5Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(23.6, 3.84, 31)
+radius = 1.4
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine5Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(23.6, 5.1, 31)
+radius = 0.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine6Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-17.4, 1.35, -33)
+radius = 0.25
+height = 2.7
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine6Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-17.4, 3.69, -33)
+radius = 1.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine6Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-17.4, 5.76, -33)
+radius = 1.4
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine6Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-17.4, 7.65, -33)
+radius = 0.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine7Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(17.4, 1.05, 35)
+radius = 0.25
+height = 2.1
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine7Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(17.4, 2.87, 35)
+radius = 1.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine7Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(17.4, 4.48, 35)
+radius = 1.4
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine7Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(17.4, 5.95, 35)
+radius = 0.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine8Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-11.2, 1.5, -32)
+radius = 0.25
+height = 3
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine8Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-11.2, 4.1, -32)
+radius = 1.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine8Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-11.2, 6.4, -32)
+radius = 1.4
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine8Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-11.2, 8.5, -32)
+radius = 0.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine9Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(11.2, 1.2, 34)
+radius = 0.25
+height = 2.4
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine9Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(11.2, 3.28, 34)
+radius = 1.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine9Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(11.2, 5.12, 34)
+radius = 1.4
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine9Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(11.2, 6.8, 34)
+radius = 0.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine10Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-5, 0.9, -31)
+radius = 0.25
+height = 1.8
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine10Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-5, 2.46, -31)
+radius = 1.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine10Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-5, 3.84, -31)
+radius = 1.4
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine10Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-5, 5.1, -31)
+radius = 0.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine11Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(5, 1.35, 33)
+radius = 0.25
+height = 2.7
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine11Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(5, 3.69, 33)
+radius = 1.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine11Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(5, 5.76, 33)
+radius = 1.4
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine11Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(5, 7.65, 33)
+radius = 0.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine12Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(1.2, 1.05, -35)
+radius = 0.25
+height = 2.1
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine12Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(1.2, 2.87, -35)
+radius = 1.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine12Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(1.2, 4.48, -35)
+radius = 1.4
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine12Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(1.2, 5.95, -35)
+radius = 0.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine13Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-1.2, 1.5, 32)
+radius = 0.25
+height = 3
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine13Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-1.2, 4.1, 32)
+radius = 1.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine13Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-1.2, 6.4, 32)
+radius = 1.4
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine13Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-1.2, 8.5, 32)
+radius = 0.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine14Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(7.4, 1.2, -34)
+radius = 0.25
+height = 2.4
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine14Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(7.4, 3.28, -34)
+radius = 1.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine14Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(7.4, 5.12, -34)
+radius = 1.4
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine14Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(7.4, 6.8, -34)
+radius = 0.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine15Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-7.4, 0.9, 31)
+radius = 0.25
+height = 1.8
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine15Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-7.4, 2.46, 31)
+radius = 1.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine15Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-7.4, 3.84, 31)
+radius = 1.4
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine15Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-7.4, 5.1, 31)
+radius = 0.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine16Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(13.6, 1.35, -33)
+radius = 0.25
+height = 2.7
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine16Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(13.6, 3.69, -33)
+radius = 1.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine16Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(13.6, 5.76, -33)
+radius = 1.4
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine16Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(13.6, 7.65, -33)
+radius = 0.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine17Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-13.6, 1.05, 35)
+radius = 0.25
+height = 2.1
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine17Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-13.6, 2.87, 35)
+radius = 1.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine17Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-13.6, 4.48, 35)
+radius = 1.4
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine17Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-13.6, 5.95, 35)
+radius = 0.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine18Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(19.8, 1.5, -32)
+radius = 0.25
+height = 3
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine18Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(19.8, 4.1, -32)
+radius = 1.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine18Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(19.8, 6.4, -32)
+radius = 1.4
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine18Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(19.8, 8.5, -32)
+radius = 0.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine19Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-19.8, 1.2, 34)
+radius = 0.25
+height = 2.4
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine19Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-19.8, 3.28, 34)
+radius = 1.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine19Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-19.8, 5.12, 34)
+radius = 1.4
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine19Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-19.8, 6.8, 34)
+radius = 0.9
+height = 3.04
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine20Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(26, 0.9, -31)
+radius = 0.25
+height = 1.8
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine20Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(26, 2.46, -31)
+radius = 1.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine20Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(26, 3.84, -31)
+radius = 1.4
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine20Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(26, 5.1, -31)
+radius = 0.9
+height = 2.28
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine21Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-26, 1.35, 33)
+radius = 0.25
+height = 2.7
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine21Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-26, 3.69, 33)
+radius = 1.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine21Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-26, 5.76, 33)
+radius = 1.4
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine21Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-26, 7.65, 33)
+radius = 0.9
+height = 3.42
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine22Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(32.2, 1.05, -35)
+radius = 0.25
+height = 2.1
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine22Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(32.2, 2.87, -35)
+radius = 1.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine22Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(32.2, 4.48, -35)
+radius = 1.4
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine22Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(32.2, 5.95, -35)
+radius = 0.9
+height = 2.66
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine23Trunk" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-32.2, 1.5, 32)
+radius = 0.25
+height = 3
+sides = 6
+material = SubResource("Mat_bark")
+
+
+[node name="Pine23Leaves0" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-32.2, 4.1, 32)
+radius = 1.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine23Leaves1" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-32.2, 6.4, 32)
+radius = 1.4
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Pine23Leaves2" type="CSGCylinder3D" parent="Geometry/Backdrop"]
+position = Vector3(-32.2, 8.5, 32)
+radius = 0.9
+height = 3.8
+sides = 7
+cone = true
+material = SubResource("Mat_pine")
+
+
+[node name="Clips" type="Node3D" parent="Geometry"]
+
+
+[node name="Clip0" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(0, 35, -22.5)
+
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/Clip0"]
+shape = SubResource("Shape_Clip0")
+
+
+[node name="Clip1" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(0, 35, 22.5)
+
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/Clip1"]
+shape = SubResource("Shape_Clip1")
+
+
+[node name="Clip2" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(-32.5, 35, 0)
+
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/Clip2"]
+shape = SubResource("Shape_Clip2")
+
+
+[node name="Clip3" type="StaticBody3D" parent="Geometry/Clips"]
+position = Vector3(32.5, 35, 0)
+
+
+[node name="Shape" type="CollisionShape3D" parent="Geometry/Clips/Clip3"]
+shape = SubResource("Shape_Clip3")
+
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+
+[node name="Spawn1" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-29, 0.1, -3.5)
+rotation = Vector3(0, -1.6909, 0)
+
+
+[node name="Spawn9" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(29, 0.1, 3.5)
+rotation = Vector3(0, 1.4507, 0)
+
+
+[node name="Spawn2" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-29, 0.1, 3.5)
+rotation = Vector3(0, -1.4507, 0)
+
+
+[node name="Spawn10" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(29, 0.1, -3.5)
+rotation = Vector3(0, 1.6909, 0)
+
+
+[node name="Spawn3" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-25.5, 0.1, 0)
+rotation = Vector3(0, -1.5708, 0)
+
+
+[node name="Spawn11" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(25.5, 0.1, -0)
+rotation = Vector3(0, 1.5708, 0)
+
+
+[node name="Spawn4" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-16.5, 0.1, -17.5)
+rotation = Vector3(0, -2.9997, 0)
+
+
+[node name="Spawn12" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(16.5, 0.1, 17.5)
+rotation = Vector3(0, 0.1419, 0)
+
+
+[node name="Spawn5" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-11, 0.1, -16)
+rotation = Vector3(0, 2.9562, 0)
+
+
+[node name="Spawn13" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(11, 0.1, 16)
+rotation = Vector3(0, -0.1853, 0)
+
+
+[node name="Spawn6" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-14.5, 0.1, 13.5)
+rotation = Vector3(0, -0.037, 0)
+
+
+[node name="Spawn14" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(14.5, 0.1, -13.5)
+rotation = Vector3(0, 3.1046, 0)
+
+
+[node name="Spawn7" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-25, 0.1, -17)
+rotation = Vector3(0, -2.168, 0)
+
+
+[node name="Spawn15" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(25, 0.1, 17)
+rotation = Vector3(0, 0.9736, 0)
+
+
+[node name="Spawn8" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-25, 0.1, 16)
+rotation = Vector3(0, -1.0015, 0)
+
+
+[node name="Spawn16" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(25, 0.1, -16)
+rotation = Vector3(0, 2.1401, 0)
+
+
+[node name="Pickups" type="Node3D" parent="."]
+
+
+[node name="Pickup1" parent="Pickups" instance=ExtResource("1_pickup")]
+position = Vector3(-19.5, 0, 2)
+def = ExtResource("2_health")
+
+
+[node name="Pickup2" parent="Pickups" instance=ExtResource("1_pickup")]
+position = Vector3(19.5, 0, -2)
+def = ExtResource("2_health")
+
+
+[node name="Pickup3" parent="Pickups" instance=ExtResource("1_pickup")]
+position = Vector3(0, 0, -12.8)
+def = ExtResource("3_speed")
+
+
+[node name="Pickup4" parent="Pickups" instance=ExtResource("1_pickup")]
+position = Vector3(-0, 0, 12.8)
+def = ExtResource("3_speed")
+
+
+[node name="Pickup5" parent="Pickups" instance=ExtResource("1_pickup")]
+position = Vector3(-27.5, 3.5, 0)
+def = ExtResource("4_double_jump")
+
+
+[node name="Pickup6" parent="Pickups" instance=ExtResource("1_pickup")]
+position = Vector3(27.5, 3.5, -0)
+def = ExtResource("4_double_jump")
+
+
+[node name="AirdropPoints" type="Node3D" parent="."]
+
+
+[node name="Drop1" type="Marker3D" parent="AirdropPoints"]
+position = Vector3(-6, 0, 6)
+
+
+[node name="Drop2" type="Marker3D" parent="AirdropPoints"]
+position = Vector3(6, 0, -6)
+
+
+[node name="Drop3" type="Marker3D" parent="AirdropPoints"]
+position = Vector3(5, 0, -14.5)
+
+
+[node name="Drop4" type="Marker3D" parent="AirdropPoints"]
+position = Vector3(-5, 0, 14.5)

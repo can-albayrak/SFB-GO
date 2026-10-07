@@ -3,11 +3,17 @@
 Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 **Şu anki aşama:** 8 – Görsel/his geçişi ve içerik (v0.10.0 yayında). Aşama 7 haritaları: Ice Yard oynandı ve onaylandı, Train Factory (CS dm_trainfactory) henüz oynanmadı, AVM rafta. Sınıflar (Hound, Ghost, Trickster, Phantom, Gambler dahil) Can'ın testinden geçti, genel olarak iyi; küçük hata/iyileştirme zamanla. Steam sürümü ve iki bilgisayarlı ağ testi Can'ın denemesinde çalıştı (2026-10-06).
-**Son güncelleme:** 2026-10-07
+**Son güncelleme:** 2026-10-08
 
 ## Sıradaki oturum
 
-**En yeni (2026-10-07 akşam, Can test edecek):**
+**En yeni (2026-10-08, Can test edecek): haritalar**
+- **Train Factory rafa kalktı** (lobide yok). Lobide: Ice Yard, Snow Town, Test Range.
+- **Ice Yard'a derinlik:** aynı oynanış düzeni; gerçek dokular, konteynerler, donmuş çeşme, lambalar, saçaklı yuvalar, kar yolları, duvar ötesinde depo/su kulesi/çam. `tools/maps/build_iceworld.py` artık `map_kit.py` ile.
+- **Yeni harita Snow Town** (fy_snow ruhunda, birebir değil: elimizde fy_snow dosyası yok). `tools/maps/build_snowtown.py`. Harita testi 178/0.
+- **Blender:** bağlantı çalışıyor ama MCP panelinde Poly Haven / Sketchfab / Poly Pizza kutuları kapalı; dokular Poly Haven API'sinden doğrudan çekildi.
+
+**Önceki (2026-10-07 akşam):**
 - **Desert Eagle** kendi modelinde (Gataki'nin Free Modular PSX Desert Eagle'ı, sade) ve kendi sesinde (9mm Para Pistol Shot).
 - **Sticky Bomb:** C4 modeli. İlk Q atar, 30 sn içinde ikinci Q patlatır (taralı "DETONATE" barı, Phantom gibi); süre dolarsa kendisi patlar, atan ölürse söner, sınıf değişirse kaybolur. Bekleme süresi patlayınca başlar. `StickyBombAbility`, `Grenade.server_detonate`, `Game.server_spawn_grenade` artık bombayı döndürüyor.
 - **Sesler:** LMG'ye 50 cal MG'den 4 tek atış, Scout'a atış + sürgü, her şarjör değiştirmede "pistol cock" (eskiden sessizdi), bombaatar mermisine küçük patlama (`GrenadeDef.explosion_sound`), başkasının mermisi kafanın 1,6 m yakınından geçince vızıltı. `tools/convert_mp3_sfx.py` (pip `miniaudio`).
@@ -442,3 +448,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-07 | 8 | `origin/main` (lobiye dönüş + vuruş hissi, iş bilgisayarında çalıştırılmamıştı) `claude/game-testing-fixes-218150`'e birleştirildi. Çakışma: AK-47 yeni tekme profiline geçti (`view_kick` 1,6, `kick_recover_mult` 1,0, `kick_roll_mult` 0,9; Burst 1,2 ile Deagle 5 arası). Evde doğrulandı: smoke 224/0, ağ 29 + 25, geç katılma 28 + 28. Diğer bütün dallar zaten main'in içinde. |
 | 2026-10-07 | 8 | Can'ın listesi: sprey sıfırlama (`spray_reset_time`), AK sesi 2. deneme + sakin tekme, ölünce güç beklemesi sıfır, hitbox +%15, Sonar HUD sayısı, nick görüş hattı + küçük, dart 0,75 m / 70 m/s, AUDIO bölümü (Master), lobide doğma süresi. Smoke 232/0 (sprey ve bekleme kontrolleri eklendi), ağ 30 + 27, geç katılma 28 + 28. |
 | 2026-10-07 | 8 | Desert Eagle modeli + sesi, C4 Sticky Bomb iki basışlı (30 sn pencere), LMG/Scout/şarjör/bombaatar sesleri, mermi vızıltısı, doğunca güç pencereleri sıfır. Smoke 238/0, ağ 30 + 27. |
+| 2026-10-08 | 7/8 | Train Factory rafta; Ice Yard derinlik turu ve yeni Snow Town (`map_kit.py`, Poly Haven dokuları `fetch_polyhaven_textures.py`); Scout = Barrett M82. Harita testi 178/0. |

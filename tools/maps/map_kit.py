@@ -95,6 +95,13 @@ class MapBuilder:
             "center": (x * self.scale, y + sy / 2, z * self.scale), "size": (sx, sy, sz), "mat": mat,
             "rot": (0.0, math.radians(yaw_deg), 0.0), "collide": collide})
 
+    def tilted_box(self, parent, name, cx, cy, cz, sx, sy, sz, rot_deg, mat, collide=True):
+        """A box centred at (cx, cy, cz) (x, z scaled) of size (sx, sy, sz) metres, rotated by Euler
+        degrees (x, y, z) (gable roofs; the size is not scaled)."""
+        self._add("box", name, parent, {
+            "center": (cx * self.scale, cy, cz * self.scale), "size": (sx, sy, sz), "mat": mat,
+            "rot": tuple(math.radians(a) for a in rot_deg), "collide": collide})
+
     def cyl(self, parent, name, x, z, radius, y0, y1, mat, collide=True, sides=12, cone=False):
         """Upright cylinder (or a cone, point up)."""
         self._add("cyl", name, parent, {

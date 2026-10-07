@@ -311,10 +311,12 @@ Menü üç adımlı: **sınıf → silah → güç**. Son seçim kaydedilir, tek
 | Minigun | 200 | Mermi başına 15 hasar, çok hızlı tarar ("pata küte"), ısınma süreli, mermiler dağılır. |
 | Rocket Launcher | 6 | Fiziksel roket. Merkezde 200 hasar, merkezden uzaklaştıkça azalır; alanı Frag'den büyük. Sıkanı geri iter (recoil, rocket jump). |
 
-## Haritalar (2026-10-05)
+## Haritalar (2026-10-08)
 
-- **Oynanabilir:** Ice Yard (fy_iceworld tarzı), Train Factory (CS Online'ın dm_trainfactory'si, birebir: Nexon'un geometrisi, dokuları ve ışığı), Test Range.
-- **Rafta:** AVM (Mall). Can beğenmedi; lobide yok, dosyaları duruyor (`scenes/maps/mall`, `movement_test` merdivenler için kullanıyor).
+- **Oynanabilir:** Ice Yard (fy_iceworld tarzı), Snow Town (fy_snow ruhunda karlı köy), Test Range.
+- **Rafta:** AVM (Mall) ve Train Factory (Can: "çok abartı"). Lobide yoklar, dosyaları duruyor (`movement_test` merdiven/basamak için ikisini de kullanıyor).
+- **Ice Yard (2026-10-08 derinlik turu):** düzen aynı; gerçek dokular (Poly Haven), her çeyrekte konteyner + variller, ortada donmuş çeşme (eski sütunun yerinde, aynı boyda siper), meydanın köşelerinde lambalar, köşe yuvalarına sac saçak, spawn'lardan meydana çiğnenmiş kar yolları, duvar payandaları ve lambaları; duvarların ötesinde depolar, su kulesi, çamlar.
+- **Snow Town:** 64 × 44 m, 180° nokta simetrisi (her batı parçasının doğuda ters ikizi). Uçlarda girilen spawn evleri (damı seyir yeri: rampa + iki sandıkla iki yol), kuzeybatı/güneydoğuda dükkân (tezgâh, raflar, iki kapı), güneybatı/kuzeydoğuda önü açık ambar, ortada süslü çam (siper), kuzey/güney avlularda alçak duvar arkasında kamyon, caddede araba ve sandıklar. 16 doğma noktası, 6 pickup (damda double jump), 4 airdrop. Akşam, sıcak pencereler, 8 ışık.
 - **Train Factory:** Tren deposu salonu; raylar arasında çukurlar, yükseltilmiş yollar, 10,5 m'de vinç kirişi (merdivenle). Herkese karşı: 16 doğma noktası salona yayılı. Orijinaldeki geçen trenler (çarpanı öldürür) ve patlayan variller henüz yok. Ticari oyun içeriği: sadece arkadaş arası.
 - **Merdivenler (2026-10-05):** CS gibi: ileri basıp yukarı bakınca tırmanır, aşağı bakınca iner, zıplayınca bırakır.
 
