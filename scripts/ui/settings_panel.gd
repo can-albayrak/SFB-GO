@@ -74,13 +74,17 @@ func _rebuild() -> void:
 		_rows.remove_child(child)
 		child.queue_free()
 
+	_add_section("AUDIO")
+	_add_percent("Master volume", Settings.master_volume,
+		func(v: float) -> void: Settings.master_volume = v)
+	_add_percent("Effects volume", Settings.sfx_volume,
+		func(v: float) -> void: Settings.sfx_volume = v)
+
 	_add_section("VIEW")
 	_add_slider("Field of view", 80.0, 110.0, 1.0, Settings.fov, "%.0f",
 		func(v: float) -> void: Settings.fov = v)
 	_add_slider("Mouse sensitivity", 0.1, 8.0, 0.05, Settings.mouse_sensitivity, "%.2f",
 		func(v: float) -> void: Settings.mouse_sensitivity = v)
-	_add_percent("Sound volume", Settings.sfx_volume,
-		func(v: float) -> void: Settings.sfx_volume = v)
 
 	_add_section("CROSSHAIR")
 	_add_color("Color", Settings.crosshair_color,

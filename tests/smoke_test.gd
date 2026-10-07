@@ -417,9 +417,23 @@ func _test_spray() -> void:
 				offset += gun_def.recoil_pattern[gun.recoil_index(shot)]
 				offset.y = minf(offset.y, gun_def.recoil_max_up)
 				widest = maxf(widest, absf(offset.x))
+			# Let go after 10 shots: once the settle wait and spray_reset_time have passed, the
+			# next spray starts from the pattern's first shot again.
+			gun._reset_recoil()
+			for shot: int in 10:
+				gun._apply_recoil_kick()
+			gun._since_shot = 0.0
+			var pause: float = minf(gun_def.fire_interval, Weapon.RECOIL_SETTLE_WAIT_CAP) + gun_def.recoil_recovery_delay + gun_def.spray_reset_time + 0.05
+			var waited: float = 0.0
+			while waited < pause:
+				gun._since_shot += 1.0 / 60.0
+				gun._update_recoil(1.0 / 60.0)
+				waited += 1.0 / 60.0
+			var restarted: bool = gun._shot_index == 0
 			gun.free()
 			_check(offset.y <= gun_def.recoil_max_up and widest < 4.0,
 				"%s: 300-shot spray stays bounded (up %.1f, widest %.1f)" % [gun_def.display_name, offset.y, widest])
+			_check(restarted, "%s: a %.2f s pause restarts the spray pattern" % [gun_def.display_name, pause])
 
 
 ## Held knife swing (or right click stab) from `direction` (flat, from the dummy) at melee
@@ -644,9 +658,15 @@ func _test_held_weapon() -> void:
 
 
 func _test_respawn() -> void:
+	if _player.ability != null:
+		_player.ability.cooldown_left = 10.0
+		_player.ability.host_ready_at = Time.get_ticks_msec() / 1000.0 + 10.0
 	_game.test_respawn(_player)
 	await _frames(3)
 	_check(_player.is_alive and _player.health == _player.class_def.max_health, "test respawn restores the player")
+	if _player.ability != null:
+		_check(_player.ability.cooldown_left == 0.0 and _player.ability.host_ready_at == -INF,
+			"respawn resets the ability cooldown (owner and host)")
 
 
 func _test_ui() -> void:

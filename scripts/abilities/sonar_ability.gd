@@ -5,13 +5,18 @@ extends Ability
 ## The host picks the targets (positions are the host's); only the owner sees them.
 
 
+var dummies_found: int = 0 ## Test Range dummies the last use marked (owner; HUD count).
+
+
 func _use_local(_origin: Vector3, _dir: Vector3) -> void:
 	Sfx.play_ui(player, Sfx.SONAR)
+	dummies_found = 0
 	# Test Range dummies never move or fight back, so the owner marks them itself (visual).
 	for node: Node in get_tree().get_nodes_in_group(TargetDummy.GROUP):
 		var dummy := node as TargetDummy
 		if dummy.global_position.distance_to(player.global_position) <= def.max_range:
 			dummy.reveal(PlayerEffects.get_sonar_material(), def.duration)
+			dummies_found += 1
 
 
 func server_use(_origin: Vector3, _dir: Vector3) -> void:

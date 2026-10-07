@@ -32,10 +32,13 @@ var _match_serial: int = 0
 
 
 ## Host menu: set rules for the next hosted game. 0 disables a limit (offline test range).
-func configure(kill_target: int, time_limit_minutes: float) -> void:
+## `respawn_seconds` < 0 keeps the default (data/match/default.tres).
+func configure(kill_target: int, time_limit_minutes: float, respawn_seconds: float = -1.0) -> void:
 	rules = DEFAULT_RULES.duplicate()
 	rules.kill_target = kill_target
 	rules.time_limit = time_limit_minutes * 60.0
+	if respawn_seconds >= 0.0:
+		rules.respawn_delay = respawn_seconds
 
 
 ## Offline Test Range: no limits, endless magazines, any-time class swaps; abilities without
@@ -179,6 +182,7 @@ func _snapshot() -> Dictionary:
 		"end_screen_left": end_screen_left,
 		"kill_target": rules.kill_target,
 		"time_limit": rules.time_limit,
+		"respawn_delay": rules.respawn_delay,
 		"kills": kills,
 		"deaths": deaths,
 		"winner_id": winner_id,
@@ -269,6 +273,7 @@ func _sync_full(snapshot: Dictionary) -> void:
 	rules = DEFAULT_RULES.duplicate()
 	rules.kill_target = snapshot["kill_target"]
 	rules.time_limit = snapshot["time_limit"]
+	rules.respawn_delay = snapshot.get("respawn_delay", rules.respawn_delay) # Death screen countdown.
 	kills.assign(snapshot["kills"])
 	deaths.assign(snapshot["deaths"])
 	winner_id = snapshot["winner_id"]

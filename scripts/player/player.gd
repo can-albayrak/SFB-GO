@@ -490,6 +490,8 @@ func server_respawn(spawn_position: Vector3, yaw: float) -> void:
 	_spawned_at = _now()
 	_hurt_since_spawn = false
 	status.reset_host()
+	if ability != null:
+		ability.host_ready_at = -INF # A new life starts with the ability ready (Can, 2026-10-07).
 	health = class_def.max_health
 	is_alive = true
 	_grant_protection()
@@ -930,5 +932,7 @@ func _respawn_at(spawn_position: Vector3, yaw: float, life: int) -> void:
 		status.reset_local()
 		for weapon: Weapon in weapons:
 			weapon.refill()
+		if ability != null:
+			ability.cooldown_left = 0.0
 	apply_pose(false)
 	reset_physics_interpolation()

@@ -7,7 +7,19 @@ Her oturumun sonunda güncellenir. Yeni oturum buradan devam eder.
 
 ## Sıradaki oturum
 
-**En yeni (2026-10-06, vuruş hissi; 2026-10-07 evde doğrulandı: smoke 224/0, ağ 29 + 25, geç katılma 28 + 28):**
+**En yeni (2026-10-07, Can'ın listesi, Can test edecek):**
+- **Sprey:** tetiği bırakınca desen artık başa dönüyor (eskiden ancak tepme tamamen sıfırlanınca dönüyordu; kısa bırakıp tekrar sıkınca desen yandan yana savrulan kısımdan devam ediyordu). Süre silah başına `WeaponDef.spray_reset_time` (0,35 sn, bekleme payından sonra; toplam ~0,55 sn bırakma).
+- **AK:** yeni ses (pompalı gövdesi + sniper çatlaması, %22 hızlı, yapay bas yok) ve daha sakin sarsıntı (`view_kick` 1,2, yatma `kick_roll_mult` 0,2; her atışta sağa-sola yatma titreme gibi görünüyordu).
+- **Ölünce güç beklemesi sıfırlanıyor** (sahipte ve host'ta). Yaşarken sınıf değiştirmek hâlâ beklemeyi taşıyor.
+- **Hitbox'lar ~%15 büyük** (kafa 0,16 → 0,18 m, gövde 0,58 × 0,38, bacak 0,52 × 0,35).
+- **Sonar:** HUD'da "SONAR: N FOUND" / "NOBODY IN 25 M" (`Events.local_notice`).
+- **Nick'ler** küçük ve sadece oyuncunun bir yeri görüş hattındayken görünüyor (kafa/göğüs/bacak ışını, 0,1 sn'de bir); airdrop taşıyanınki duvar arkasından görünmeye devam.
+- **Swap Dart** vuruş alanı 0,3 → 0,75 m, hız 55 → 70 m/s.
+- **Ayarlar:** en üstte AUDIO: Master volume (bütün ses, `Master` bus) + Effects volume.
+- **Lobi:** host doğma süresini seçiyor (RESPAWN S, 1–15 sn, 0,5 adım; `Net.lobby_respawn`, `Match.configure(..., respawn_seconds)`, client'a maç bilgisinde).
+- **Mauser takılmadı:** Heavy pack'teki "Mauser" tüfek değil, uzun şarjörlü C96 makineli tabanca; Scout'a uymuyor (Can'a soruldu).
+
+**Önceki (2026-10-06, vuruş hissi; 2026-10-07 evde doğrulandı: smoke 224/0, ağ 29 + 25, geç katılma 28 + 28):**
 - **Vuruş geri bildirimi:** kafa için ayrı "ding" (`hit_head.wav`, `tools/gen_sfx.py hit_head`), bacak alçak tık, öldürmede büyük/kalın/uzun kırmızı X, her marker "pop" ile çıkar. Kafa ve öldürmede kısa görsel görüş darbesi (`CameraFeelDef.hit_head_kick`, `kill_kick`). Zaman yavaşlatma (hit stop) yapılmadı: `Engine.time_scale` ağ saatini bozar.
 - **Tahminli marker:** `HitscanWeapon._predict_hit` + `HitFeedback`; tarama atışı canlı bir oyuncuya değince marker/ses ping beklemeden gelir, host onayı sadece yükseltir (kafa/öldürme) ve sayıyı ekler.
 - **Mermi izi ve kan:** `ImpactEffects` (delik + parçacık, yüzey `MapDef.impact_surface`: Ice Yard kar, Train Factory metal, diğerleri taş; collider `surface` meta'sı ezer), kan herkese (`Game._blood_fx`). Eski siyah nokta kaldırıldı.
@@ -421,3 +433,4 @@ Oynanış testlerinden çıkan "şu çok güçlü / çok zayıf" notları buraya
 | 2026-10-06 | 8 | Can'ın paketleri: AK-47 (AR, 18/0,13, kendi sesi `make_ak_shot.py`, `WeaponDef.fire_sounds`), Glock 17, USP-S (USP + paketin susturucusu, `attach`), Colt SAA revolver, çift namlu, bazooka (RL), Heavy GL. `process_weapon_models.py`: mirror modifier uygulanır, FBX animasyonu silinir, `opaque`, `attach`. Sahneler elle (model kaydırma, ASSETS.md). İkonlar yeniden. Smoke 219/0. |
 | 2026-10-06 | 8 | MP5SD modeli (Can'ın fbx'i, susturuculu): AK duruşuyla, model kaydırmalı sahne, ikon. |
 | 2026-10-07 | 8 | `origin/main` (lobiye dönüş + vuruş hissi, iş bilgisayarında çalıştırılmamıştı) `claude/game-testing-fixes-218150`'e birleştirildi. Çakışma: AK-47 yeni tekme profiline geçti (`view_kick` 1,6, `kick_recover_mult` 1,0, `kick_roll_mult` 0,9; Burst 1,2 ile Deagle 5 arası). Evde doğrulandı: smoke 224/0, ağ 29 + 25, geç katılma 28 + 28. Diğer bütün dallar zaten main'in içinde. |
+| 2026-10-07 | 8 | Can'ın listesi: sprey sıfırlama (`spray_reset_time`), AK sesi 2. deneme + sakin tekme, ölünce güç beklemesi sıfır, hitbox +%15, Sonar HUD sayısı, nick görüş hattı + küçük, dart 0,75 m / 70 m/s, AUDIO bölümü (Master), lobide doğma süresi. Smoke 232/0 (sprey ve bekleme kontrolleri eklendi), ağ 30 + 27, geç katılma 28 + 28. |

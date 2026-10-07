@@ -27,6 +27,8 @@ var fov: float = 90.0
 var mouse_sensitivity: float = 2.0
 ## Sound effects volume, 0 (mute) .. 1.
 var sfx_volume: float = 0.8
+## Everything the game plays (the Master bus), 0 (mute) .. 1.
+var master_volume: float = 1.0: set = _set_master_volume
 
 var crosshair_color: Color = Color(0.3, 1.0, 0.45)
 var crosshair_length: float = 8.0
@@ -106,6 +108,7 @@ func load_settings() -> void:
 	crosshair_dot = _read(config, "crosshair", "dot", crosshair_dot)
 	hit_marker_enabled = _read(config, "crosshair", "hit_marker", hit_marker_enabled)
 	sfx_volume = _read(config, "audio", "sfx_volume", sfx_volume)
+	master_volume = clampf(_read(config, "audio", "master_volume", master_volume), 0.0, 1.0)
 	camera_fov_shift = _read(config, "camera", "fov_shift", camera_fov_shift)
 	camera_head_bob = _read(config, "camera", "head_bob", camera_head_bob)
 	camera_landing = _read(config, "camera", "landing", camera_landing)
@@ -114,6 +117,13 @@ func load_settings() -> void:
 	post_process = _read(config, "graphics", "post_process", post_process)
 	render_scale = clampf(_read(config, "graphics", "render_scale", render_scale), 0.5, 1.0)
 	fullscreen = _read(config, "graphics", "fullscreen", fullscreen)
+
+
+func _set_master_volume(value: float) -> void:
+	master_volume = value
+	var bus: int = AudioServer.get_bus_index(&"Master")
+	AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(value, 0.0001)))
+	AudioServer.set_bus_mute(bus, value <= 0.001)
 
 
 ## A hand-edited file with a wrong type falls back to the current value instead of erroring.
@@ -143,6 +153,7 @@ func save_settings() -> void:
 	config.set_value("crosshair", "dot", crosshair_dot)
 	config.set_value("crosshair", "hit_marker", hit_marker_enabled)
 	config.set_value("audio", "sfx_volume", sfx_volume)
+	config.set_value("audio", "master_volume", master_volume)
 	config.set_value("camera", "fov_shift", camera_fov_shift)
 	config.set_value("camera", "head_bob", camera_head_bob)
 	config.set_value("camera", "landing", camera_landing)

@@ -17,6 +17,7 @@ const CONNECT_TIMEOUT: float = 20.0
 const STEP_TIMEOUT: float = 8.0
 const TOTAL_TIMEOUT: float = 150.0
 const MATCH_KILLS: int = 25
+const LOBBY_RESPAWN: float = 2.5 ## Not the default (3), so the lobby value is really used.
 const TEST_DAMAGE: int = 30
 const KILL_DAMAGE: float = 1000.0
 const HOST_HEALTH_BEFORE_KILL: int = 50
@@ -80,9 +81,10 @@ func _run_host() -> void:
 		_check(Net.host_game("NetHost") == OK, "host started (lobby)")
 		_check(await _wait_until(func() -> bool: return _other_peer() != 0, CONNECT_TIMEOUT), "client registered in the lobby")
 		_peer = _other_peer()
-		Net.server_set_lobby_settings(MATCH_KILLS, 0.0, 0)
+		Net.server_set_lobby_settings(MATCH_KILLS, 0.0, 0, LOBBY_RESPAWN)
 		_check(await _wait_until(func() -> bool: return Net.ready_peers.get(_peer, false)), "client's ready flag reached the host")
-		Net.server_start_match(MATCH_KILLS, 0.0, 0)
+		Net.server_start_match(MATCH_KILLS, 0.0, 0, LOBBY_RESPAWN)
+		_check(is_equal_approx(Match.rules.respawn_delay, LOBBY_RESPAWN), "lobby respawn time used by the match")
 	if _peer == 0:
 		return
 
@@ -200,8 +202,10 @@ func _run_client() -> void:
 	else:
 		_check(await _wait_until(func() -> bool: return Net.in_lobby, CONNECT_TIMEOUT), "joined the host's lobby")
 		_check(await _wait_until(func() -> bool: return Net.lobby_kill_target == MATCH_KILLS), "lobby settings reached the client")
+		_check(is_equal_approx(Net.lobby_respawn, LOBBY_RESPAWN), "lobby respawn time reached the client")
 		Net.request_lobby_ready(true)
 		_check(await _wait_until(func() -> bool: return Game.find(get_tree()) != null, CONNECT_TIMEOUT), "followed the host into the match")
+		_check(await _wait_until(func() -> bool: return is_equal_approx(Match.rules.respawn_delay, LOBBY_RESPAWN)), "match respawn time reached the client")
 
 	var my_id: int = multiplayer.get_unique_id()
 	_check(await _wait_until(func() -> bool: return _find_player(my_id) != null and _find_player(1) != null, CONNECT_TIMEOUT),

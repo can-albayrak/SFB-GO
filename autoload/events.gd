@@ -44,6 +44,10 @@ signal airdrop_incoming(point: Vector3)
 @warning_ignore("unused_signal")
 signal airdrop_opened(peer_id: int, weapon_name: String)
 
+## Local player: a short line under the crosshair (e.g. how many the Sonar found).
+@warning_ignore("unused_signal")
+signal local_notice(text: String)
+
 ## Local player stunned (Bear's Charge) for `seconds`.
 @warning_ignore("unused_signal")
 signal local_stunned(seconds: float)

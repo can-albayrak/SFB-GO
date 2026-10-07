@@ -51,6 +51,7 @@ var pick_on_join: bool = false
 var lobby_kill_target: int = 0
 var lobby_minutes: float = 0.0
 var lobby_map_index: int = 0
+var lobby_respawn: float = 0.0 ## Seconds from death to respawn.
 
 var _local_name: String = ""
 var _join_address: String = ""
@@ -96,6 +97,7 @@ func host_with_peer(peer: MultiplayerPeer, player_name: String, use_lobby: bool 
 	if use_lobby:
 		lobby_kill_target = Match.DEFAULT_RULES.kill_target
 		lobby_minutes = Match.DEFAULT_RULES.time_limit / 60.0
+		lobby_respawn = Match.DEFAULT_RULES.respawn_delay
 		get_tree().change_scene_to_file(LOBBY_PATH)
 	else:
 		get_tree().change_scene_to_file(GAME_PATH)
@@ -129,7 +131,7 @@ func leave(message: String = "") -> void:
 
 
 ## Host, lobby: start the match with these rules. Lobby peers follow once our match is loaded.
-func server_start_match(kill_target: int, minutes: float, map_index: int) -> void:
+func server_start_match(kill_target: int, minutes: float, map_index: int, respawn_seconds: float = -1.0) -> void:
 	assert(multiplayer.is_server(), "server_start_match is host-only")
 	if not in_lobby:
 		return
@@ -140,7 +142,7 @@ func server_start_match(kill_target: int, minutes: float, map_index: int) -> voi
 	for peer_id: int in player_names:
 		if peer_id != 1:
 			lobby_peers.append(peer_id)
-	Match.configure(kill_target, minutes)
+	Match.configure(kill_target, minutes, respawn_seconds)
 	map_path = MAP_LIST.get_map(map_index).scene_path
 	get_tree().change_scene_to_file(GAME_PATH)
 	for i: int in GAME_WAIT_FRAMES:
@@ -173,11 +175,13 @@ func server_return_to_lobby() -> void:
 
 
 ## Host, lobby: new rules picked in the lobby UI; everyone in the lobby sees them.
-func server_set_lobby_settings(kill_target: int, minutes: float, map_index: int) -> void:
+func server_set_lobby_settings(kill_target: int, minutes: float, map_index: int, respawn_seconds: float = -1.0) -> void:
 	assert(multiplayer.is_server(), "server_set_lobby_settings is host-only")
 	lobby_kill_target = kill_target
 	lobby_minutes = minutes
 	lobby_map_index = map_index
+	if respawn_seconds >= 0.0:
+		lobby_respawn = respawn_seconds
 	_broadcast_lobby()
 
 
@@ -226,6 +230,7 @@ func _reset_state() -> void:
 	lobby_kill_target = 0
 	lobby_minutes = 0.0
 	lobby_map_index = 0
+	lobby_respawn = 0.0
 	_join_address = ""
 	_rtt.clear()
 	_ping_left = 0.0
@@ -343,15 +348,16 @@ func _request_ready(is_ready: bool) -> void:
 
 
 func _broadcast_lobby() -> void:
-	_on_lobby_synced.rpc(ready_peers, lobby_kill_target, lobby_minutes, lobby_map_index)
+	_on_lobby_synced.rpc(ready_peers, lobby_kill_target, lobby_minutes, lobby_map_index, lobby_respawn)
 
 
 @rpc("authority", "call_local", "reliable")
-func _on_lobby_synced(new_ready: Dictionary, kill_target: int, minutes: float, map_index: int) -> void:
+func _on_lobby_synced(new_ready: Dictionary, kill_target: int, minutes: float, map_index: int, respawn_seconds: float) -> void:
 	ready_peers.assign(new_ready)
 	lobby_kill_target = kill_target
 	lobby_minutes = minutes
 	lobby_map_index = map_index
+	lobby_respawn = respawn_seconds
 	lobby_changed.emit()
 
 

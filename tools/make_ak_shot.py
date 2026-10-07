@@ -1,13 +1,13 @@
-"""Makes the AK-47 (Assault Rifle) gunshots assets/audio/shot_ak_1..3.wav from the sniper shots of
-Can's "FREE FPS SFX Pack" (no ffmpeg needed, standard library only): mono, played 12 % faster
-(a shorter, higher crack than the sniper), cut to 0.55 s with a fade, a short low punch added
-under the attack so it lands "tok".
+"""Makes the AK-47 (Assault Rifle) gunshots assets/audio/shot_ak_1..3.wav from Can's "FREE FPS SFX
+Pack" (no ffmpeg needed, standard library only): the body of a shotgun shot with the first crack of
+a sniper shot on top, mono, played 22 % faster (higher, tighter, less boom than either), cut to
+0.42 s with a fade. Second try (2026-10-07): the first one (sniper only + a synthetic low sine)
+sounded wrong to Can.
 
     python tools/make_ak_shot.py "PATH/TO/FREE FPS SFX Pack.zip"
 """
 
 import io
-import math
 import os
 import struct
 import sys
@@ -16,13 +16,13 @@ import zipfile
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "assets", "audio")
 RATE = 44100
-SPEED = 1.12  # Faster playback: higher pitch, shorter tail.
-LENGTH = 0.55  # Seconds kept.
-FADE = 0.25  # Seconds of fade-out at the end.
-PUNCH_FREQ = 72.0  # Hz of the low punch.
-PUNCH_DECAY = 0.045  # Seconds.
-PUNCH_AMP = 0.45  # Relative to the clip's peak.
-SOURCES = ["Sniper_Shot-001.wav", "Sniper_Shot-002.wav", "Sniper_Shot-003.wav"]
+SPEED = 1.22  # Faster playback: higher pitch, shorter tail.
+LENGTH = 0.42  # Seconds kept.
+FADE = 0.2  # Seconds of fade-out at the end.
+CRACK_TIME = 0.05  # Seconds of the sniper's attack laid on top.
+CRACK_GAIN = 0.7  # Relative to the body's peak.
+SOURCES = [("Shotgun_Shot-001.wav", "Sniper_Shot-001.wav"), ("Shotgun_Shot-002.wav", "Sniper_Shot-002.wav"),
+           ("Shotgun_Shot-003.wav", "Sniper_Shot-003.wav")]
 
 
 def read_mono(data: bytes) -> list:
@@ -62,21 +62,22 @@ def speed_up(samples: list, factor: float) -> list:
     return out
 
 
+def layer(body: list, crack: list) -> list:
+    """Body with the crack's first CRACK_TIME seconds on top (faded out), both from their attack."""
+    body_peak = max(1e-6, max(abs(x) for x in body))
+    crack_peak = max(1e-6, max(abs(x) for x in crack))
+    n = int(CRACK_TIME * RATE)
+    out = list(body)
+    for i in range(min(n, len(crack), len(out))):
+        out[i] += crack[i] / crack_peak * body_peak * CRACK_GAIN * (1.0 - i / n)
+    return out
+
+
 def shape(samples: list) -> list:
     n = min(len(samples), int(LENGTH * RATE))
     samples = samples[:n]
     fade_from = n - int(FADE * RATE)
-    peak = max(1e-6, max(abs(s) for s in samples))
-    out = []
-    phase = 0.0
-    for i, s in enumerate(samples):
-        t = i / RATE
-        phase += 2.0 * math.pi * (PUNCH_FREQ * (1.0 + 2.0 * math.exp(-t * 40.0))) / RATE
-        s += math.sin(phase) * math.exp(-t / PUNCH_DECAY) * PUNCH_AMP * peak
-        if i >= fade_from:
-            s *= 1.0 - (i - fade_from) / max(1, n - fade_from)
-        out.append(s)
-    return out
+    return [s * (1.0 - (i - fade_from) / max(1, n - fade_from)) if i >= fade_from else s for i, s in enumerate(samples)]
 
 
 def write(name: str, samples: list) -> None:
@@ -91,7 +92,8 @@ def write(name: str, samples: list) -> None:
 
 if __name__ == "__main__":
     pack = zipfile.ZipFile(sys.argv[1])
-    for index, source in enumerate(SOURCES, 1):
-        clip = shape(speed_up(trim_start(read_mono(pack.read(source))), SPEED))
+    for index, (body, crack) in enumerate(SOURCES, 1):
+        mixed = layer(trim_start(read_mono(pack.read(body))), trim_start(read_mono(pack.read(crack))))
+        clip = shape(speed_up(mixed, SPEED))
         write(f"shot_ak_{index}", clip)
-        print(f"shot_ak_{index}: {len(clip) / RATE:.2f} s from {source}")
+        print(f"shot_ak_{index}: {len(clip) / RATE:.2f} s from {body} + {crack}")

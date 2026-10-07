@@ -13,8 +13,11 @@ const GLINT_OFFSET: Vector3 = Vector3(0.15, 1.5, -0.45)
 const GLINT_SIZE: float = 0.04
 ## Name over every other player's head; an airdrop carrier's shows through walls (GDD).
 const NAME_HEIGHT: float = 2.05
-const NAME_PIXEL_SIZE: float = 0.0011
-const NAME_FONT_SIZE: int = 20
+const NAME_PIXEL_SIZE: float = 0.0008
+const NAME_FONT_SIZE: int = 18
+const NAME_SIGHT_INTERVAL: float = 0.1 ## Seconds between line-of-sight checks for a nick.
+const NAME_SIGHT_POINTS: Array[float] = [1.6, 1.1, 0.4] ## Heights checked: head, chest, legs.
+const SIGHT_MASK: int = 1 ## World only.
 const NAME_COLOR: Color = Color(0.92, 0.94, 0.96)
 const CARRIER_COLOR: Color = Color(1.0, 0.45, 0.35)
 ## Pickup glow (GDD: a player under a boost glows in its colour).
@@ -309,9 +312,12 @@ static var _sonar_material: StandardMaterial3D
 
 var _cloak_value: float = 0.0 ## 0 = visible, 1 = fully cloaked (eased on every peer).
 var _mark_node: Node3D
+var _name_in_sight: bool = false
+var _name_check_left: float = 0.0
 
 
 func _process(delta: float) -> void:
+	_update_name_visibility(delta)
 	var target: float = 1.0 if player.cloaked and player.is_alive else 0.0
 	if is_equal_approx(_cloak_value, target):
 		return
@@ -337,8 +343,31 @@ func _apply_cloak() -> void:
 	var root: Node = player.weapon_holder if player.is_local else player.model
 	var hide: float = _cloak_value * (CLOAK_OWN if player.is_local else CLOAK_HIDE)
 	_fade_meshes(root, 1.0 - hide)
-	if not player.is_local and _name_label != null:
-		_name_label.visible = _cloak_value < 0.5
+
+
+## Others' nicks show only while some part of the body is in plain sight (a nick over a low wall
+## gave hidden players away); an airdrop carrier's shows through walls (GDD). Never when cloaked.
+func _update_name_visibility(delta: float) -> void:
+	if player.is_local or _name_label == null:
+		return
+	_name_check_left -= delta
+	if _name_check_left <= 0.0:
+		_name_check_left = NAME_SIGHT_INTERVAL
+		_name_in_sight = _in_sight()
+	_name_label.visible = (_carrying or _name_in_sight) and _cloak_value < 0.5
+
+
+func _in_sight() -> bool:
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera == null or not player.is_inside_tree():
+		return false
+	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	var from: Vector3 = camera.global_position
+	for height: float in NAME_SIGHT_POINTS:
+		var query := PhysicsRayQueryParameters3D.create(from, player.global_position + Vector3.UP * height, SIGHT_MASK)
+		if space.intersect_ray(query).is_empty():
+			return true
+	return false
 
 
 ## Fades every mesh under `root` to `alpha` with see-through copies of its materials (works on
@@ -382,6 +411,10 @@ func _show_sonar(peer_ids: PackedInt32Array, seconds: float) -> void:
 		var other := node as Player
 		if other != null and other.get_multiplayer_authority() in peer_ids and other.rig != null:
 			other.rig.reveal(get_sonar_material(), seconds)
+	var sonar := player.ability as SonarAbility
+	if sonar != null: # Not the Gambler's All In: that one has its own dice banner.
+		var count: int = peer_ids.size() + sonar.dummies_found
+		Events.local_notice.emit("SONAR: %d FOUND" % count if count > 0 else "SONAR: NOBODY IN %d M" % roundi(sonar.def.max_range))
 
 
 ## Shared see-through red of Sonar reveals (players and Test Range dummies).

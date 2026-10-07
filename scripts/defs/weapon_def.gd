@@ -69,6 +69,9 @@ enum ViewHands { NONE, RIGHT, BOTH }
 @export var recoil_recovery: float = 12.0
 ## Recovery starts this long after the next shot would have been ready.
 @export var recoil_recovery_delay: float = 0.08
+## Seconds after letting go (past recoil_recovery_delay) until the next spray starts again from
+## the pattern's first shot; a shorter pause winds it back part of the way.
+@export var spray_reset_time: float = 0.35
 
 @export_group("Movement Spread")
 ## Degrees of random cone when firing at move_spread_ref_speed. No threshold: the cone

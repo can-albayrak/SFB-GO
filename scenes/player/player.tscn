@@ -15,15 +15,15 @@ radius = 0.35
 height = 1.8
 
 [sub_resource type="SphereShape3D" id="Sphere_head"]
-radius = 0.16
+radius = 0.18
 
 [sub_resource type="BoxShape3D" id="Box_body"]
 resource_local_to_scene = true
-size = Vector3(0.5, 0.75, 0.32)
+size = Vector3(0.58, 0.75, 0.38)
 
 [sub_resource type="BoxShape3D" id="Box_legs"]
 resource_local_to_scene = true
-size = Vector3(0.45, 0.74, 0.3)
+size = Vector3(0.52, 0.74, 0.35)
 
 [sub_resource type="CylinderMesh" id="Mesh_crown"]
 top_radius = 0.14

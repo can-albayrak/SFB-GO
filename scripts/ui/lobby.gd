@@ -8,6 +8,8 @@ const MIN_KILLS: float = 5.0
 const MAX_KILLS: float = 100.0
 const MIN_MINUTES: float = 1.0
 const MAX_MINUTES: float = 60.0
+const MIN_RESPAWN: float = 1.0
+const MAX_RESPAWN: float = 15.0
 const MARGIN: float = 64.0
 const SIDE_WIDTH: float = 470.0
 const COLUMN_GAP: float = 40.0 ## Between the player table and the right column.
@@ -24,11 +26,13 @@ var _secondary_label: Label
 var _ability_label: Label
 var _kills_value: Label
 var _minutes_value: Label
+var _respawn_value: Label
 var _map_value: Label
 var _ready_button: Button
 var _start_button: Button
 var _kills_spin: SpinBox
 var _minutes_spin: SpinBox
+var _respawn_spin: SpinBox
 var _map_option: OptionButton
 var _loadout_overlay: Control
 var _loadout_menu: LoadoutMenu
@@ -209,22 +213,31 @@ func _build_settings_panel() -> Control:
 		_minutes_spin.min_value = MIN_MINUTES
 		_minutes_spin.max_value = MAX_MINUTES
 		_minutes_spin.value = Net.lobby_minutes
+		_respawn_spin = SpinBox.new()
+		_respawn_spin.min_value = MIN_RESPAWN
+		_respawn_spin.max_value = MAX_RESPAWN
+		_respawn_spin.step = 0.5
+		_respawn_spin.value = Net.lobby_respawn
 		_map_option = OptionButton.new()
 		for map_def: MapDef in Net.MAP_LIST.maps:
 			_map_option.add_item(_map_label(map_def))
 		_map_option.selected = clampi(Net.lobby_map_index, 0, Net.MAP_LIST.maps.size() - 1)
 		row.add_child(_field("KILLS", _kills_spin))
 		row.add_child(_field("MINUTES", _minutes_spin))
+		row.add_child(_field("RESPAWN S", _respawn_spin))
 		row.add_child(_field("MAP", _map_option))
 		_kills_spin.value_changed.connect(_on_rules_changed.unbind(1))
 		_minutes_spin.value_changed.connect(_on_rules_changed.unbind(1))
+		_respawn_spin.value_changed.connect(_on_rules_changed.unbind(1))
 		_map_option.item_selected.connect(_on_rules_changed.unbind(1))
 	else:
 		_kills_value = _value_label()
 		_minutes_value = _value_label()
+		_respawn_value = _value_label()
 		_map_value = _value_label()
 		row.add_child(_field("KILLS", _kills_value))
 		row.add_child(_field("MINUTES", _minutes_value))
+		row.add_child(_field("RESPAWN S", _respawn_value))
 		row.add_child(_field("MAP", _map_value))
 	return panel
 
@@ -253,6 +266,7 @@ func _refresh() -> void:
 	if _kills_value != null:
 		_kills_value.text = str(Net.lobby_kill_target)
 		_minutes_value.text = str(roundi(Net.lobby_minutes))
+		_respawn_value.text = "%g" % Net.lobby_respawn
 		_map_value.text = _map_label(Net.MAP_LIST.get_map(Net.lobby_map_index))
 
 
@@ -352,7 +366,7 @@ func _on_loadout_confirmed(code: PackedInt32Array) -> void:
 
 
 func _on_rules_changed() -> void:
-	Net.server_set_lobby_settings(int(_kills_spin.value), _minutes_spin.value, _map_option.selected)
+	Net.server_set_lobby_settings(int(_kills_spin.value), _minutes_spin.value, _map_option.selected, _respawn_spin.value)
 
 
 func _on_ready_toggled(on: bool) -> void:
@@ -361,7 +375,7 @@ func _on_ready_toggled(on: bool) -> void:
 
 func _on_start_pressed() -> void:
 	_start_button.disabled = true
-	Net.server_start_match(int(_kills_spin.value), _minutes_spin.value, _map_option.selected)
+	Net.server_start_match(int(_kills_spin.value), _minutes_spin.value, _map_option.selected, _respawn_spin.value)
 
 
 ## IPv4 addresses friends can type (Tailscale's 100.x first); loopback and link-local skipped.

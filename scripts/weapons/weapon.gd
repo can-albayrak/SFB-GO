@@ -22,6 +22,11 @@ var _cooldown: float = 0.0
 var _reload_left: float = 0.0
 var _since_shot: float = INF
 var _shot_index: int = 0
+## Where the settling started (shot count) and for how long it has run: the pattern winds back
+## over WeaponDef.spray_reset_time, so a short pause starts the next spray near its first shots,
+## not where the last one stopped (the view kick itself still settles at recoil_recovery).
+var _settle_index: int = -1
+var _settle_time: float = 0.0
 var _burst_left: int = 0
 var _burst_timer: float = 0.0
 var _spin: float = 0.0 ## Minigun: seconds of spin built up by holding fire.
@@ -176,6 +181,7 @@ func _reset_recoil() -> void:
 	recoil_offset = Vector2.ZERO
 	_prev_recoil = Vector2.ZERO
 	_shot_index = 0
+	_settle_index = -1
 
 
 func _apply_recoil_kick() -> void:
@@ -184,6 +190,7 @@ func _apply_recoil_kick() -> void:
 	recoil_offset += def.recoil_pattern[recoil_index(_shot_index)]
 	recoil_offset.y = minf(recoil_offset.y, def.recoil_max_up)
 	_shot_index += 1
+	_settle_index = -1
 
 
 ## Pattern entry for the `shot`th shot of a spray: past the end it loops from recoil_loop_start.
@@ -198,6 +205,10 @@ func recoil_index(shot: int) -> int:
 func _update_recoil(delta: float) -> void:
 	if _since_shot < minf(def.fire_interval, RECOIL_SETTLE_WAIT_CAP) + def.recoil_recovery_delay:
 		return
+	if _settle_index < 0:
+		_settle_index = _shot_index
+		_settle_time = 0.0
+	_settle_time += delta
 	recoil_offset = recoil_offset.move_toward(Vector2.ZERO, def.recoil_recovery * delta)
-	if recoil_offset == Vector2.ZERO:
-		_shot_index = 0
+	var left: float = 1.0 - _settle_time / maxf(def.spray_reset_time, 0.01)
+	_shot_index = 0 if recoil_offset == Vector2.ZERO else mini(_shot_index, maxi(floori(_settle_index * left), 0))

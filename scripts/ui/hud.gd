@@ -27,6 +27,7 @@ const PAUSE_DIM: Color = Color(0.0, 0.0, 0.0, 0.55)
 const DEATH_TINT: Color = Color(0.43, 0.08, 0.06, 0.35)
 const WEAPON_ROWS: int = 4 ## One fixed row per weapon slot: primary, secondary, knife, airdrop.
 const BANNER_TIME: float = 3.0
+const NOTICE_TIME: float = 1.8
 const OPEN_BAR_SIZE: Vector2 = Vector2(220.0, 16.0)
 const BOOST_DEFS: Array[PickupDef] = [preload("res://data/pickups/speed.tres"), preload("res://data/pickups/double_jump.tres")]
 
@@ -56,6 +57,8 @@ var _open_box: VBoxContainer
 var _open_bar: HudBar
 var _banner: Label
 var _banner_left: float = 0.0
+var _notice: Label
+var _notice_left: float = 0.0
 var _top_bar: HBoxContainer
 var _time_label: Label
 var _time_divider: Label
@@ -99,6 +102,10 @@ func _ready() -> void:
 	add_child(_settings_panel) # Last child: drawn over the pause panel.
 
 	Events.local_stunned.connect(_on_local_stunned)
+	Events.local_notice.connect(func(text: String) -> void:
+		_notice.text = text
+		_notice.visible = true
+		_notice_left = NOTICE_TIME)
 	Events.local_player_spawned.connect(_on_local_player_spawned)
 	Events.hit_confirmed.connect(crosshair.show_hit)
 	Events.hit_confirmed.connect(func(zone: Hitbox.Zone, killed: bool, _amount: float) -> void:
@@ -146,6 +153,9 @@ func _process(delta: float) -> void:
 	if _banner_left > 0.0:
 		_banner_left -= delta
 		_banner.visible = _banner_left > 0.0
+	if _notice_left > 0.0:
+		_notice_left -= delta
+		_notice.visible = _notice_left > 0.0
 	var ended: bool = Match.state == Match.State.ENDED
 	scoreboard.visible = (ended or Input.is_action_pressed(&"scoreboard")) and not loadout_menu.visible
 	if ended:
@@ -316,6 +326,9 @@ func _build_hud() -> Control:
 	_banner = _center_label("", &"TitleLabel", 34, -250.0)
 	_banner.visible = false
 	root.add_child(_banner)
+	_notice = _center_label("", &"HudSmallLabel", 15, 120.0)
+	_notice.visible = false
+	root.add_child(_notice)
 
 	_protected_label.visible = false
 	_stun_label.visible = false

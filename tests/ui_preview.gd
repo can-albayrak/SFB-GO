@@ -35,6 +35,7 @@ func _open(screen: String) -> void:
 			Net.ready_peers.assign({2: true, 3: false})
 			Net.lobby_kill_target = 20
 			Net.lobby_minutes = 10.0
+			Net.lobby_respawn = 3.0
 			get_tree().change_scene_to_file(Net.LOBBY_PATH)
 		"loadout":
 			var menu := LoadoutMenu.new()
